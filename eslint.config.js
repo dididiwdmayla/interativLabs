@@ -38,6 +38,10 @@ export default defineConfig([
     },
   },
   {
+    files: ["**/*.test.ts", "tests/**"],
+    rules: { "@typescript-eslint/no-non-null-assertion": "off" },
+  },
+  {
     files: ["*.config.ts", "tests/**", "scripts/**"],
     languageOptions: { globals: { ...globals.node } },
   },

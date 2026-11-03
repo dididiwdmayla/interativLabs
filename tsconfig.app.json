@@ -20,7 +20,10 @@
     "exactOptionalPropertyTypes": false,
     "noImplicitOverride": true,
     "erasableSyntaxOnly": true,
-    "paths": { "@/*": ["./src/*"] }
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.bench.ts"]
 }
