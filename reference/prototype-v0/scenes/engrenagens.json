@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "nextId": 15,
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Placa",
+      "visible": true
+    },
+    {
+      "id": "L2",
+      "name": "Engrenagens",
+      "visible": true
+    },
+    {
+      "id": "L3",
+      "name": "Catraca",
+      "visible": true
+    }
+  ],
+  "parts": [
+    {
+      "id": "p4",
+      "name": "Placa",
+      "layer": "L1",
+      "x": 350,
+      "y": 260,
+      "angle": 0,
+      "fixed": true,
+      "material": "aluminio",
+      "bullet": false,
+      "shape": {
+        "type": "poly",
+        "pts": [
+          [
+            -290,
+            -170
+          ],
+          [
+            290,
+            -170
+          ],
+          [
+            290,
+            170
+          ],
+          [
+            -290,
+            170
+          ]
+        ]
+      }
+    },
+    {
+      "id": "p5",
+      "name": "Motora",
+      "layer": "L2",
+      "x": 170,
+      "y": 260,
+      "angle": 0,
+      "fixed": false,
+      "material": "latao",
+      "bullet": false,
+      "shape": {
+        "type": "gear",
+        "r": 61.11549814728781,
+        "teeth": 24,
+        "depth": 8,
+        "style": "reto"
+      }
+    },
+    {
+      "id": "p6",
+      "name": "Intermediária",
+      "layer": "L2",
+      "x": 271.859163578813,
+      "y": 260,
+      "angle": 0.19634954084936207,
+      "fixed": false,
+      "material": "aco",
+      "bullet": false,
+      "shape": {
+        "type": "gear",
+        "r": 40.74366543152521,
+        "teeth": 16,
+        "depth": 8,
+        "style": "reto"
+      }
+    },
+    {
+      "id": "p7",
+      "name": "Pinhão",
+      "layer": "L2",
+      "x": 343.1605780839821,
+      "y": 260,
+      "angle": 0,
+      "fixed": false,
+      "material": "aco",
+      "bullet": false,
+      "shape": {
+        "type": "gear",
+        "r": 30.557749073643905,
+        "teeth": 12,
+        "depth": 8,
+        "style": "reto"
+      }
+    },
+    {
+      "id": "p8",
+      "name": "Roda da catraca",
+      "layer": "L3",
+      "x": 343.1605780839821,
+      "y": 260,
+      "angle": 0,
+      "fixed": false,
+      "material": "aco",
+      "bullet": false,
+      "shape": {
+        "type": "gear",
+        "r": 52,
+        "teeth": 14,
+        "depth": 11.668772713333519,
+        "style": "serra"
+      }
+    },
+    {
+      "id": "p9",
+      "name": "Lingueta",
+      "layer": "L3",
+      "x": 364.05020280804416,
+      "y": 180.36203090507746,
+      "angle": 0,
+      "fixed": false,
+      "material": "aco",
+      "bullet": false,
+      "shape": {
+        "type": "poly",
+        "pts": [
+          [
+            1.1103752759379404,
+            -20.36203090507746
+          ],
+          [
+            17.11037527593794,
+            -20.36203090507746
+          ],
+          [
+            15.11037527593794,
+            -2.362030905077461
+          ],
+          [
+            -24.88962472406206,
+            27.63796909492254
+          ],
+          [
+            -22.88962472406206,
+            17.63796909492254
+          ],
+          [
+            1.1103752759379404,
+            -4.362030905077461
+          ]
+        ]
+      }
+    }
+  ],
+  "links": [
+    {
+      "type": "axle",
+      "a": "p4",
+      "b": "p5",
+      "p": [
+        0,
+        0
+      ],
+      "motorOn": true,
+      "rpm": -12,
+      "torque": 400,
+      "limitOn": false,
+      "lower": 0,
+      "upper": 0,
+      "tk": 0,
+      "trest": 0,
+      "td": 0,
+      "id": "k10"
+    },
+    {
+      "type": "axle",
+      "a": "p4",
+      "b": "p6",
+      "p": [
+        0,
+        0
+      ],
+      "motorOn": false,
+      "rpm": 0,
+      "torque": 0,
+      "limitOn": false,
+      "lower": 0,
+      "upper": 0,
+      "tk": 0,
+      "trest": 0,
+      "td": 0.02,
+      "id": "k11"
+    },
+    {
+      "type": "screw",
+      "a": "p7",
+      "b": "p8",
+      "p": [
+        0,
+        0
+      ],
+      "id": "k12"
+    },
+    {
+      "type": "axle",
+      "a": "p4",
+      "b": "p8",
+      "p": [
+        0,
+        0
+      ],
+      "motorOn": false,
+      "rpm": 0,
+      "torque": 0,
+      "limitOn": false,
+      "lower": 0,
+      "upper": 0,
+      "tk": 0,
+      "trest": 0,
+      "td": 0.02,
+      "id": "k13"
+    },
+    {
+      "type": "axle",
+      "a": "p4",
+      "b": "p9",
+      "p": [
+        9.11037527593794,
+        -12.36203090507746
+      ],
+      "motorOn": false,
+      "rpm": 0,
+      "torque": 0,
+      "limitOn": true,
+      "lower": -25,
+      "upper": 25,
+      "tk": 3,
+      "trest": 0,
+      "td": 0.02,
+      "id": "k14"
+    }
+  ],
+  "settings": {
+    "gravity": false,
+    "g": 10,
+    "snap": true
+  },
+  "title": "Engrenagens e catraca"
+}

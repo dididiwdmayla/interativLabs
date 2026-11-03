@@ -1,0 +1,2035 @@
+<title>Bancada de Mecanismos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: prancheta técnica — ferramentas à esquerda (desktop) ou embaixo (celular), canvas SVG ao centro, painel de camadas/propriedades à direita ou como folha inferior. */
+:root {
+  --paper: #EDEFEC; --paper-2: #E2E6E2; --panel: #F6F7F5; --ink: #1C2321; --ink-2: #56625E; --ink-3: #8A9591;
+  --rule: #C9CFCA; --grid-minor: #D9DEDA; --grid-major: #C3CAC5;
+  --accent: #2747B5; --accent-soft: rgba(39,71,181,.12); --on-accent: #FFFFFF;
+  --hot: #E0662A; --hot-soft: rgba(224,102,42,.18); --ok: #2F7D4F; --danger: #B3261E;
+  --pin: #F6F7F5; --shadow: rgba(20,26,24,.18);
+  --m-aco: #A4ADB2; --m-aluminio: #CDD3D6; --m-latao: #CCAA5C; --m-polimero: #4A5153; --m-borracha: #8A4A40; --m-madeira: #B48A5C;
+  --L0: #C2410C; --L1: #1D4ED8; --L2: #15803D; --L3: #9333EA; --L4: #0E7490; --L5: #B91C1C; --L6: #A16207; --L7: #DB2777;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --foot: 112px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #141817; --paper-2: #1A1F1E; --panel: #1E2423; --ink: #DCE3E0; --ink-2: #A0ACA8; --ink-3: #6C7774;
+  --rule: #2F3735; --grid-minor: #1D2322; --grid-major: #283130;
+  --accent: #849CF2; --accent-soft: rgba(132,156,242,.16); --on-accent: #0E1220;
+  --hot: #FF8A4C; --hot-soft: rgba(255,138,76,.22); --ok: #5FBF86; --danger: #F2827A;
+  --pin: #2A3130; --shadow: rgba(0,0,0,.4);
+  --m-aco: #6E7A80; --m-aluminio: #96A1A6; --m-latao: #A88B45; --m-polimero: #39403F; --m-borracha: #8E4C42; --m-madeira: #8E6A44;
+  --L0: #FB923C; --L1: #7FA2FF; --L2: #4ADE80; --L3: #C084FC; --L4: #22D3EE; --L5: #F87171; --L6: #FACC15; --L7: #F472B6;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #141817; --paper-2: #1A1F1E; --panel: #1E2423; --ink: #DCE3E0; --ink-2: #A0ACA8; --ink-3: #6C7774;
+  --rule: #2F3735; --grid-minor: #1D2322; --grid-major: #283130;
+  --accent: #849CF2; --accent-soft: rgba(132,156,242,.16); --on-accent: #0E1220;
+  --hot: #FF8A4C; --hot-soft: rgba(255,138,76,.22); --ok: #5FBF86; --danger: #F2827A;
+  --pin: #2A3130; --shadow: rgba(0,0,0,.4);
+  --m-aco: #6E7A80; --m-aluminio: #96A1A6; --m-latao: #A88B45; --m-polimero: #39403F; --m-borracha: #8E4C42; --m-madeira: #8E6A44;
+  --L0: #FB923C; --L1: #7FA2FF; --L2: #4ADE80; --L3: #C084FC; --L4: #22D3EE; --L5: #F87171; --L6: #FACC15; --L7: #F472B6;
+  color-scheme: dark; }
+
+html, body { height: 100%; }
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 14px; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#app { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto auto;
+  grid-template-areas: "top" "stage" "layers" "tools"; position: relative; }
+
+/* topo */
+.top { grid-area: top; display: flex; align-items: center; gap: 6px; min-height: 52px; border-bottom: 1px solid var(--rule); background: var(--panel);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 6px; }
+.brand { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; overflow: hidden; }
+.brand svg { flex: none; color: var(--accent); }
+.brand .name { font-family: var(--f-display); font-weight: 700; font-size: 18px; letter-spacing: .06em; text-transform: uppercase; }
+.brand .proj { font-family: var(--f-display); font-weight: 500; font-size: 15px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.brand .sep { color: var(--ink-3); }
+.iconbtn { width: 38px; height: 38px; display: inline-grid; place-items: center; border: 1px solid transparent; border-radius: 8px; background: none; color: var(--ink); flex: none; }
+.iconbtn:hover { background: var(--paper-2); }
+.iconbtn:disabled { opacity: .35; cursor: default; background: none; }
+.play { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent);
+  font-family: var(--f-display); font-weight: 600; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; flex: none; }
+.mode-sim .play { background: var(--panel); color: var(--accent); }
+
+/* palco */
+.stage { grid-area: stage; position: relative; overflow: hidden; min-height: 0; background: var(--paper); }
+#cv { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; display: block; }
+.hint { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: max-content; max-width: min(560px, calc(100% - 24px)); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 7px 12px; font-size: 13px; color: var(--ink-2); box-shadow: 0 2px 10px var(--shadow); pointer-events: auto; text-align: center; }
+.hint:empty { display: none; }
+.hint button { border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 4px 10px; font-size: 13px; }
+.hint button.pri { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.titleblock { position: absolute; left: calc(10px + env(safe-area-inset-left, 0px)); bottom: 10px; display: grid; grid-template-columns: auto auto; border: 1px solid var(--ink-3); background: var(--panel);
+  font-size: 11px; pointer-events: none; opacity: .92; }
+.titleblock div { padding: 3px 7px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.titleblock .k { font-family: var(--f-display); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.titleblock .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.zoombox { position: absolute; right: calc(10px + env(safe-area-inset-right, 0px)); bottom: 10px; display: flex; flex-direction: column; gap: 4px; }
+.zoombox button { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--rule); background: var(--panel); display: grid; place-items: center; }
+.toast { position: absolute; left: 50%; bottom: 60px; transform: translateX(-50%); width: max-content; background: var(--ink); color: var(--paper); padding: 8px 14px; border-radius: 8px; font-size: 13px;
+  max-width: calc(100% - 32px); text-align: center; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 5; }
+.toast.on { opacity: 1; }
+
+/* ferramentas */
+.tools { grid-area: tools; min-width: 0; display: flex; gap: 2px; overflow-x: auto; background: var(--panel); border-top: 1px solid var(--rule); scrollbar-width: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 4px; }
+.tools::-webkit-scrollbar { display: none; }
+.tgroup { display: flex; gap: 2px; padding-right: 6px; margin-right: 4px; border-right: 1px solid var(--rule); }
+.tgroup:last-child { border-right: 0; }
+.tool { flex: none; min-width: 62px; padding: 0 5px; height: 56px; white-space: nowrap; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 1px solid transparent; border-radius: 9px;
+  background: none; color: var(--ink-2); font-family: var(--f-display); font-size: 12px; font-weight: 600; letter-spacing: .04em; }
+.tool:hover { background: var(--paper-2); color: var(--ink); }
+.tool[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+/* faixa de camadas (celular) */
+.layerstrip { grid-area: layers; min-width: 0; display: flex; align-items: center; gap: 6px; overflow-x: auto; background: var(--paper-2); border-top: 1px solid var(--rule); scrollbar-width: none;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 6px; }
+.layerstrip::-webkit-scrollbar { display: none; }
+.lchip { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 15px; border: 1px solid var(--rule); background: var(--panel);
+  font-family: var(--f-display); font-weight: 600; font-size: 14px; color: var(--ink-2); }
+.lchip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--lc); }
+.lchip[aria-pressed="true"] { border-color: var(--lc); color: var(--ink); box-shadow: inset 0 0 0 1px var(--lc); }
+.lchip.off { opacity: .5; }
+.lchip.ghost { border-style: dashed; }
+.striplabel { flex: none; font-family: var(--f-display); font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+
+/* painel / folha */
+.panel { position: fixed; left: 0; right: 0; bottom: var(--foot); max-height: 56%; display: flex; flex-direction: column; background: var(--panel); border-top: 1px solid var(--rule);
+  border-radius: 14px 14px 0 0; box-shadow: 0 -6px 24px var(--shadow); z-index: 4; }
+.panel[hidden] { display: none !important; }
+.sheethead { display: flex; align-items: center; gap: 8px; padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--rule); }
+.sheethead .ttl { flex: 1; min-width: 0; font-family: var(--f-display); font-weight: 700; font-size: 16px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheethead .sub { font-family: var(--f-body); font-weight: 500; font-size: 12px; letter-spacing: 0; text-transform: none; color: var(--ink-3); margin-left: 6px; }
+.panelbody { overflow-y: auto; min-height: 0; padding-block: 0 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.panel.collapsed .panelbody { display: none; }
+.sec { padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.sec + .sec { border-top: 1px solid var(--rule); margin-top: 12px; }
+.sech { font-family: var(--f-display); font-weight: 600; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); display: flex; align-items: center; gap: 8px; }
+.sech .grow { flex: 1; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px; align-items: center; }
+.row label { font-size: 13px; color: var(--ink-2); }
+.row input[type=number], .row input[type=text], .row select { width: 100%; height: 34px; border: 1px solid var(--rule); border-radius: 7px; background: var(--paper); padding: 0 8px; min-width: 0; }
+.row input[type=number] { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 13px; }
+.unit { position: relative; }
+.unit span { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--ink-3); pointer-events: none; font-family: var(--f-mono); }
+.unit input { padding-right: 34px !important; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.grid3 .cell label { display: block; font-size: 11px; color: var(--ink-3); margin-bottom: 3px; font-family: var(--f-display); letter-spacing: .08em; text-transform: uppercase; }
+.grid3 input { width: 100%; height: 34px; border: 1px solid var(--rule); border-radius: 7px; background: var(--paper); padding: 0 6px; font-family: var(--f-mono); font-size: 13px; min-width: 0; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 34px; font-size: 13px; color: var(--ink-2); }
+.switch input { appearance: none; -webkit-appearance: none; width: 40px; height: 22px; border-radius: 11px; background: var(--rule); position: relative; flex: none; cursor: pointer; transition: background .15s; }
+.switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--panel); transition: transform .15s; }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(18px); }
+.note { font-size: 12px; color: var(--ink-3); line-height: 1.45; }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { height: 34px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--rule); background: var(--paper); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.pri { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.danger { color: var(--danger); }
+.readout { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink); }
+
+.layerlist { display: flex; flex-direction: column; gap: 4px; }
+.lrow { display: grid; grid-template-columns: 14px 16px minmax(0, 1fr) auto; gap: 6px; align-items: center; padding: 3px 2px 3px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); }
+.lrow.active { border-color: var(--lc); box-shadow: inset 3px 0 0 var(--lc); }
+.lrow .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--lc); }
+.lrow .num { font-family: var(--f-mono); font-size: 12px; color: var(--ink-3); }
+.lrow input { border: 0; background: none; height: 30px; min-width: 0; width: 100%; font-weight: 500; padding: 0 4px; border-radius: 5px; }
+.lrow input:focus { background: var(--panel); }
+.lrow .acts { display: flex; gap: 0; }
+.lrow .acts button { width: 28px; height: 30px; border: 0; background: none; border-radius: 6px; display: grid; place-items: center; color: var(--ink-2); }
+.lrow .acts button:hover { background: var(--paper-2); color: var(--ink); }
+.lrow .meta { display: flex; flex-direction: column; min-width: 0; }
+.lrow .cnt { font-size: 11px; color: var(--ink-3); padding-left: 4px; margin-top: -4px; }
+
+/* simulação */
+.simbar { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); width: max-content; display: none; align-items: center; gap: 6px; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 6px;
+  box-shadow: 0 4px 18px var(--shadow); max-width: calc(100% - 24px); flex-wrap: wrap; justify-content: center; z-index: 3; }
+.mode-sim .simbar { display: flex; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: none; height: 34px; padding: 0 9px; font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+.fire { height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--hot); background: var(--hot-soft); color: var(--ink); font-family: var(--f-display); font-weight: 600; letter-spacing: .05em; font-size: 14px; text-transform: uppercase; }
+.fire:disabled { opacity: .45; cursor: default; }
+.mode-sim .tools, .mode-sim .layerstrip { display: none; }
+.mode-sim .zoombox { bottom: 70px; }
+.mode-sim .toast { bottom: 130px; }
+@media (max-width: 560px) { .brand .name, .brand .sep { display: none; } .hint { font-size: 12px; padding: 6px 10px; } .titleblock { font-size: 10px; } }
+.mode-sim .titleblock { display: none; }
+
+/* menu e modal */
+.menu { position: absolute; top: 54px; right: calc(10px + env(safe-area-inset-right, 0px)); width: min(300px, calc(100% - 20px)); background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 10px 30px var(--shadow); z-index: 10; padding: 6px; max-height: calc(100% - 70px); overflow-y: auto; }
+.menu .mh { font-family: var(--f-display); font-weight: 600; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); padding: 10px 10px 4px; }
+.menu button.mi { display: flex; width: 100%; text-align: left; align-items: center; gap: 10px; padding: 9px 10px; border: 0; background: none; border-radius: 8px; font-size: 14px; }
+.menu button.mi:hover { background: var(--paper-2); }
+.menu .mi small { color: var(--ink-3); font-size: 12px; margin-left: auto; }
+.menu .switch { padding: 2px 10px; font-size: 14px; color: var(--ink); }
+.menu hr { border: 0; border-top: 1px solid var(--rule); margin: 6px 4px; }
+.modal { position: fixed; inset: 0; background: rgba(10,14,13,.45); display: grid; place-items: center; z-index: 20; padding: 16px; }
+.modal .box { width: min(520px, 100%); background: var(--panel); border-radius: 14px; border: 1px solid var(--rule); padding: 18px; display: flex; flex-direction: column; gap: 12px; max-height: 90%; }
+.modal h2 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 20px; letter-spacing: .03em; text-wrap: balance; }
+.modal p { margin: 0; color: var(--ink-2); line-height: 1.5; }
+.modal textarea { width: 100%; min-height: 200px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); padding: 10px; font-family: var(--f-mono); font-size: 12px; resize: vertical; }
+.modal .btnrow { justify-content: flex-end; }
+
+/* svg */
+.part path.body { vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.ly0 { stroke: var(--L0); } .ly1 { stroke: var(--L1); } .ly2 { stroke: var(--L2); } .ly3 { stroke: var(--L3); }
+.ly4 { stroke: var(--L4); } .ly5 { stroke: var(--L5); } .ly6 { stroke: var(--L6); } .ly7 { stroke: var(--L7); }
+.m-aco { fill: var(--m-aco); } .m-aluminio { fill: var(--m-aluminio); } .m-latao { fill: var(--m-latao); }
+.m-polimero { fill: var(--m-polimero); } .m-borracha { fill: var(--m-borracha); } .m-madeira { fill: var(--m-madeira); }
+.halo { fill: none; stroke: var(--accent); stroke-opacity: .45; vector-effect: non-scaling-stroke; }
+.mark { fill: none; stroke: var(--ink); stroke-opacity: .55; vector-effect: non-scaling-stroke; }
+.lk { vector-effect: non-scaling-stroke; }
+.lk-ink { stroke: var(--ink); fill: var(--pin); }
+.lk-acc { stroke: var(--accent); fill: var(--pin); }
+.lk-line { stroke: var(--ink-2); fill: none; }
+.lk-spring { stroke: var(--ink); fill: none; stroke-linejoin: round; }
+.lk-hot { stroke: var(--hot); fill: none; }
+.lk-hotfill { fill: var(--hot); stroke: none; }
+.lk-sel { stroke: var(--accent); }
+.lk-ground { stroke: var(--ink-2); fill: none; }
+.lk-text { fill: var(--ink-2); font-family: var(--f-mono); }
+.tmp { fill: var(--accent-soft); stroke: var(--accent); vector-effect: non-scaling-stroke; }
+.tmpline { fill: none; stroke: var(--accent); vector-effect: non-scaling-stroke; }
+.hnd { fill: var(--panel); stroke: var(--accent); stroke-width: 2; }
+.hnd-line { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.fx-flash { fill: var(--hot); }
+.fx-smoke { fill: var(--ink-3); }
+
+@media (min-width: 900px) {
+  #app { grid-template-columns: calc(86px + env(safe-area-inset-left, 0px)) minmax(0, 1fr) 330px; grid-template-rows: auto 1fr; grid-template-areas: "top top top" "tools stage panel"; }
+  #app.mode-sim { grid-template-columns: 0 minmax(0, 1fr) 330px; }
+  .tools { flex-direction: column; overflow-x: hidden; overflow-y: auto; border-top: 0; border-right: 1px solid var(--rule); padding: 8px 6px; padding-left: max(6px, env(safe-area-inset-left, 0px)); align-items: center; }
+  .tgroup { flex-direction: column; border-right: 0; padding-right: 0; margin-right: 0; padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--rule); }
+  .tgroup:last-child { border-bottom: 0; }
+  .tool { width: 70px; min-width: 0; height: 49px; font-size: 11.5px; }
+  .layerstrip { display: none !important; }
+  .panel { grid-area: panel; position: static; max-height: none; border-radius: 0; border-top: 0; border-left: 1px solid var(--rule); box-shadow: none; z-index: auto; min-height: 0; }
+  .panel[hidden] { display: flex !important; }
+  .panel.collapsed .panelbody { display: block; }
+  .sheethead .close, .sheethead .collapse { display: none; }
+  .toast { bottom: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="app" class="mode-edit">
+  <header class="top">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 2v4M13 20v4M2 13h4M20 13h4M5.2 5.2l2.8 2.8M18 18l2.8 2.8M5.2 20.8L8 18M18 8l2.8-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="name">Bancada</span><span class="sep">/</span><span class="proj" id="projName"></span>
+    </div>
+    <button class="iconbtn" id="btnUndo" aria-label="Desfazer" title="Desfazer"></button>
+    <button class="iconbtn" id="btnRedo" aria-label="Refazer" title="Refazer"></button>
+    <button class="iconbtn" id="btnMenu" aria-label="Menu" title="Menu"></button>
+    <button class="play" id="btnPlay"></button>
+  </header>
+
+  <nav class="tools" id="tools" aria-label="Ferramentas"></nav>
+
+  <section class="stage" id="stage">
+    <svg id="cv" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="hint" id="hint" role="status"></div>
+    <div class="titleblock" id="tb"></div>
+    <div class="zoombox">
+      <button id="zIn" aria-label="Aproximar"></button>
+      <button id="zOut" aria-label="Afastar"></button>
+      <button id="zFit" aria-label="Enquadrar tudo"></button>
+    </div>
+    <div class="simbar" id="simBar"></div>
+    <div class="toast" id="toast"></div>
+  </section>
+
+  <div class="layerstrip" id="layerStrip"></div>
+
+  <aside class="panel" id="panel" hidden>
+    <div class="sheethead">
+      <div class="ttl" id="sheetTitle"></div>
+      <button class="iconbtn collapse" id="sheetCollapse" aria-label="Recolher painel"></button>
+      <button class="iconbtn close" id="sheetClose" aria-label="Fechar painel"></button>
+    </div>
+    <div class="panelbody" id="panelBody"></div>
+  </aside>
+
+  <div class="menu" id="menu" hidden></div>
+  <div class="modal" id="modal" hidden></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/planck@1.5.0/dist/planck.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/poly-decomp@0.3.0/build/decomp.min.js"></script>
+<script>
+/* Bancada de Mecanismos — motor (geometria, física em camadas, exemplos) */
+(function (root) {
+  'use strict';
+  var PL = root.planck || (typeof require === 'function' ? require('planck') : null);
+  var DECOMP = root.decomp || (typeof require === 'function' ? require('poly-decomp') : null);
+
+  var S = 50; // px por unidade de física
+  var PI = Math.PI;
+
+  var MATERIALS = {
+    aco:       { name: 'Aço',       density: 7.8, friction: 0.25, restitution: 0.05 },
+    aluminio:  { name: 'Alumínio',  density: 2.7, friction: 0.3,  restitution: 0.05 },
+    latao:     { name: 'Latão',     density: 8.5, friction: 0.2,  restitution: 0.05 },
+    polimero:  { name: 'Polímero',  density: 1.2, friction: 0.4,  restitution: 0.1 },
+    borracha:  { name: 'Borracha',  density: 1.1, friction: 0.9,  restitution: 0.5 },
+    madeira:   { name: 'Madeira',   density: 0.7, friction: 0.5,  restitution: 0.1 }
+  };
+
+  /* ---------- vetores ---------- */
+  function rot(p, a) { var c = Math.cos(a), s = Math.sin(a); return [p[0] * c - p[1] * s, p[0] * s + p[1] * c]; }
+  function toWorld(pose, p) { var r = rot(p, pose.a); return [pose.x + r[0], pose.y + r[1]]; }
+  function toLocal(pose, p) { return rot([p[0] - pose.x, p[1] - pose.y], -pose.a); }
+  function partPose(part) { return { x: part.x, y: part.y, a: part.angle || 0 }; }
+  function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+  function polar(r, a) { return [r * Math.cos(a), r * Math.sin(a)]; }
+
+  function signedArea(pts) {
+    var s = 0;
+    for (var i = 0; i < pts.length; i++) { var p = pts[i], q = pts[(i + 1) % pts.length]; s += p[0] * q[1] - q[0] * p[1]; }
+    return s / 2;
+  }
+  function centroid(pts) {
+    var A = signedArea(pts), cx = 0, cy = 0;
+    if (Math.abs(A) < 1e-6) {
+      pts.forEach(function (p) { cx += p[0]; cy += p[1]; });
+      return [cx / pts.length, cy / pts.length];
+    }
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i], q = pts[(i + 1) % pts.length], f = p[0] * q[1] - q[0] * p[1];
+      cx += (p[0] + q[0]) * f; cy += (p[1] + q[1]) * f;
+    }
+    return [cx / (6 * A), cy / (6 * A)];
+  }
+  function pointInPoly(pt, pts) {
+    var x = pt[0], y = pt[1], inside = false;
+    for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      var xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+    }
+    return inside;
+  }
+  function convexHull(pts) {
+    var p = pts.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    if (p.length < 3) return p;
+    function cross(o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+    var lo = [], up = [];
+    p.forEach(function (q) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); });
+    for (var i = p.length - 1; i >= 0; i--) { var q = p[i]; while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+    lo.pop(); up.pop();
+    return lo.concat(up);
+  }
+  // Ramer–Douglas–Peucker
+  function simplify(pts, tol) {
+    if (pts.length < 3) return pts.slice();
+    function segDist(p, a, b) {
+      var dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy;
+      if (L === 0) return dist(p, a);
+      var t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L));
+      return dist(p, [a[0] + t * dx, a[1] + t * dy]);
+    }
+    function rdp(s, e, out) {
+      var md = 0, mi = -1;
+      for (var i = s + 1; i < e; i++) { var d = segDist(pts[i], pts[s], pts[e]); if (d > md) { md = d; mi = i; } }
+      if (md > tol) { rdp(s, mi, out); out.pop(); rdp(mi, e, out); } else { out.push(pts[s], pts[e]); }
+      return out;
+    }
+    return rdp(0, pts.length - 1, []);
+  }
+
+  /* ---------- formas ---------- */
+  function gearProfile(sh) {
+    var n = Math.max(4, Math.round(sh.teeth)), step = 2 * PI / n, d = sh.depth;
+    var rr = sh.r - d * 0.6, rt = sh.r + d * 0.4;
+    var outline = [], teeth = [];
+    for (var i = 0; i < n; i++) {
+      var a = i * step;
+      if (sh.style === 'serra') {
+        var A = polar(rr, a), T = polar(rt, a + step * 0.78), B = polar(rr, a + step * 0.82);
+        outline.push(A, T, B);
+        teeth.push([polar(rr - 1.5, a), T, polar(rr - 1.5, a + step * 0.82)]);
+      } else {
+        var c = a + step / 2;
+        var rl = polar(rr, c - 0.3 * step), tl = polar(rt, c - 0.15 * step), tr = polar(rt, c + 0.15 * step), rrt = polar(rr, c + 0.3 * step);
+        outline.push(rl, tl, tr, rrt);
+        teeth.push([polar(rr - 1.5, c - 0.3 * step), tl, tr, polar(rr - 1.5, c + 0.3 * step)]);
+      }
+    }
+    return { outline: outline, teeth: teeth, rr: rr, rt: rt };
+  }
+  function shapeOutline(sh) {
+    if (sh.type === 'poly') return sh.pts;
+    if (sh.type === 'circle') { var o = []; for (var i = 0; i < 40; i++) o.push(polar(sh.r, i / 40 * 2 * PI)); return o; }
+    if (sh.type === 'gear') return gearProfile(sh).outline;
+    return [];
+  }
+  function shapeRadius(sh) {
+    if (sh.type === 'circle') return sh.r;
+    if (sh.type === 'gear') return sh.r + sh.depth * 0.4;
+    var m = 0; sh.pts.forEach(function (p) { m = Math.max(m, Math.hypot(p[0], p[1])); }); return m;
+  }
+  function hitShape(sh, lp) {
+    if (sh.type === 'circle') return Math.hypot(lp[0], lp[1]) <= sh.r;
+    if (sh.type === 'gear') return Math.hypot(lp[0], lp[1]) <= sh.r + sh.depth * 0.2;
+    return pointInPoly(lp, sh.pts);
+  }
+  function splitBig(poly, maxV) {
+    if (poly.length <= maxV) return [poly];
+    var out = [], i = 1;
+    while (i < poly.length - 1) {
+      var piece = [poly[0]];
+      for (var k = 0; k < maxV - 1 && i + k < poly.length; k++) piece.push(poly[i + k]);
+      out.push(piece);
+      i += maxV - 2;
+    }
+    return out;
+  }
+  function polyPieces(pts) {
+    var poly = pts.map(function (p) { return [p[0], p[1]]; });
+    if (poly.length < 3) return [];
+    var res = null;
+    try {
+      if (DECOMP) {
+        DECOMP.makeCCW(poly);
+        DECOMP.removeCollinearPoints(poly, 0.002);
+        DECOMP.removeDuplicatePoints(poly, 0.01);
+        if (poly.length >= 3 && DECOMP.isSimple(poly)) res = DECOMP.quickDecomp(poly);
+      }
+    } catch (e) { res = null; }
+    if (!res || !res.length) res = [convexHull(poly)];
+    var out = [];
+    res.forEach(function (p) { splitBig(p, 10).forEach(function (q) { if (q.length >= 3 && Math.abs(signedArea(q)) > 0.6) out.push(q); }); });
+    if (!out.length) { var h = convexHull(poly); if (Math.abs(signedArea(h)) > 0.6) out.push(h); }
+    return out;
+  }
+  function shapePieces(sh) {
+    if (sh.type === 'circle') return [{ type: 'circle', c: [0, 0], r: sh.r }];
+    if (sh.type === 'gear') {
+      var g = gearProfile(sh), out = [{ type: 'circle', c: [0, 0], r: g.rr }];
+      g.teeth.forEach(function (t) { out.push({ type: 'poly', pts: t }); });
+      return out;
+    }
+    return polyPieces(sh.pts).map(function (p) { return { type: 'poly', pts: p }; });
+  }
+
+  /* ---------- cena ---------- */
+  function layerOrder(scene) { var m = {}; scene.layers.forEach(function (L, i) { m[L.id] = i; }); return m; }
+  function findPart(scene, id) { for (var i = 0; i < scene.parts.length; i++) if (scene.parts[i].id === id) return scene.parts[i]; return null; }
+  function findLink(scene, id) { for (var i = 0; i < scene.links.length; i++) if (scene.links[i].id === id) return scene.links[i]; return null; }
+  function bitsSpan(order, from, to) {
+    var a = order[from], b = order[to];
+    if (a === undefined) a = 0; if (b === undefined) b = a;
+    var lo = Math.min(a, b), hi = Math.max(a, b), m = 0;
+    for (var i = lo; i <= hi; i++) m |= (1 << i);
+    return m;
+  }
+
+  // pontos de referência de cada ligação no mundo, dado um provedor de pose
+  function linkGeom(scene, L, poseOf) {
+    function W(partId, p) { if (!partId) return [p[0], p[1]]; var pose = poseOf(partId); return pose ? toWorld(pose, p) : [p[0], p[1]]; }
+    function ang(partId, a) { if (!partId) return a; var pose = poseOf(partId); return (pose ? pose.a : 0) + a; }
+    switch (L.type) {
+      case 'screw': case 'axle': return { p: W(L.b, L.p) };
+      case 'pin': case 'sensor': return { p: W(L.host, L.p) };
+      case 'slider': {
+        var p = W(L.b, L.p), a = ang(L.b, L.dir);
+        return { p: p, a: a };
+      }
+      case 'spring': return { pa: W(L.a, L.pa), pb: W(L.b, L.pb) };
+      case 'chamber': return { p: W(L.a, L.p), a: ang(L.a, L.dir) };
+    }
+    return {};
+  }
+
+  /* ---------- simulação ---------- */
+  function build(scene) {
+    var V = PL.Vec2;
+    var st = scene.settings || {};
+    var world = new PL.World({ gravity: V(0, st.gravity === false ? 0 : (st.g || 10)) });
+    var ground = world.createBody();
+    var order = layerOrder(scene);
+    var parts = scene.parts.filter(function (p) { return order[p.layer] !== undefined; });
+    var byId = {}; parts.forEach(function (p) { byId[p.id] = p; });
+    var warnings = [];
+
+    // grupos rígidos (parafusos)
+    var parent = {}; parts.forEach(function (p) { parent[p.id] = p.id; });
+    function find(x) { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; }
+    var fixedRoot = {};
+    scene.links.forEach(function (L) {
+      if (L.type !== 'screw' || !byId[L.b]) return;
+      if (L.a && byId[L.a]) { parent[find(L.a)] = find(L.b); }
+      else if (!L.a) { fixedRoot[L.b] = true; }
+    });
+    var groups = {};
+    parts.forEach(function (p) { var r = find(p.id); (groups[r] = groups[r] || []).push(p); });
+    var bodyOf = {}, rel = {}, groupFixed = {};
+    Object.keys(groups).forEach(function (r) {
+      var g = groups[r], fixed = g.some(function (p) { return p.fixed || fixedRoot[p.id]; });
+      var o = partPose(g[0]);
+      var body = world.createBody({
+        type: fixed ? 'static' : 'dynamic',
+        position: V(o.x / S, o.y / S), angle: o.a,
+        bullet: g.some(function (p) { return p.bullet; }),
+        allowSleep: false, angularDamping: 0.02, linearDamping: 0.0
+      });
+      g.forEach(function (p) {
+        var pose = partPose(p), mat = MATERIALS[p.material] || MATERIALS.aco;
+        var bit = 1 << order[p.layer];
+        var lp = toLocal(o, [pose.x, pose.y]);
+        rel[p.id] = { x: lp[0], y: lp[1], a: pose.a - o.a };
+        bodyOf[p.id] = body;
+        shapePieces(p.shape).forEach(function (pc) {
+          var shape;
+          if (pc.type === 'circle') {
+            var c = toLocal(o, toWorld(pose, pc.c));
+            shape = new PL.Circle(V(c[0] / S, c[1] / S), pc.r / S);
+          } else {
+            shape = new PL.Polygon(pc.pts.map(function (q) { var w = toLocal(o, toWorld(pose, q)); return V(w[0] / S, w[1] / S); }));
+          }
+          var fx = body.createFixture(shape, { density: mat.density, friction: mat.friction, restitution: mat.restitution, filterCategoryBits: bit, filterMaskBits: bit });
+          fx.setUserData({ part: p.id });
+        });
+      });
+      if (!fixed && body.getMass() <= 0) body.setMassData({ mass: 1, center: V(0, 0), I: 1 });
+      groupFixed[r] = fixed;
+    });
+
+    function poseOf(id) {
+      var b = bodyOf[id], r = rel[id]; if (!b) return null;
+      var p = b.getWorldPoint(V(r.x / S, r.y / S));
+      return { x: p.x * S, y: p.y * S, a: b.getAngle() + r.a };
+    }
+    function designPose(id) { var p = byId[id]; return p ? partPose(p) : null; }
+    function bodyFor(id) { return id && bodyOf[id] ? bodyOf[id] : ground; }
+
+    var torsions = [], sliders = [], springs = [], chambers = [], sensors = {}, joints = {};
+
+    scene.links.forEach(function (L) {
+      var g = linkGeom(scene, L, designPose);
+      if (L.type === 'axle') {
+        if (!byId[L.b]) return;
+        var A = bodyFor(L.a), B = bodyFor(L.b);
+        if (A === B) { warnings.push('Eixo ligando peças já parafusadas entre si foi ignorado.'); return; }
+        var j = world.createJoint(new PL.RevoluteJoint({
+          enableLimit: !!L.limitOn, lowerAngle: (L.lower || 0) * PI / 180, upperAngle: (L.upper || 0) * PI / 180,
+          enableMotor: !!L.motorOn, motorSpeed: (L.rpm || 0) * 2 * PI / 60, maxMotorTorque: L.torque || 0,
+          collideConnected: false
+        }, A, B, V(g.p[0] / S, g.p[1] / S)));
+        joints[L.id] = j;
+        if ((L.tk || 0) > 0 || (L.td || 0) > 0) torsions.push({ j: j, A: A, B: B, k: L.tk || 0, rest: (L.trest || 0) * PI / 180, c: L.td || 0 });
+      } else if (L.type === 'slider') {
+        if (!byId[L.b]) return;
+        var A2 = bodyFor(L.a), B2 = bodyFor(L.b);
+        if (A2 === B2) { warnings.push('Trilho entre peças parafusadas foi ignorado.'); return; }
+        var ax = [Math.cos(g.a), Math.sin(g.a)];
+        var j2 = world.createJoint(new PL.PrismaticJoint({
+          enableLimit: true, lowerTranslation: -(L.back || 0) / S, upperTranslation: (L.travel || 0) / S, collideConnected: false
+        }, A2, B2, V(g.p[0] / S, g.p[1] / S), V(ax[0], ax[1])));
+        joints[L.id] = j2;
+        if ((L.k || 0) > 0 || (L.damp || 0) > 0) sliders.push({ j: j2, A: A2, B: B2, axisA: A2.getLocalVector(V(ax[0], ax[1])), k: L.k || 0, rest: (L.rest || 0) / S, c: L.damp || 0 });
+      } else if (L.type === 'spring') {
+        var Aa = bodyFor(L.a), Bb = bodyFor(L.b);
+        if (Aa === Bb) { warnings.push('Mola com as duas pontas na mesma peça foi ignorada.'); return; }
+        var la = Aa.getLocalPoint(V(g.pa[0] / S, g.pa[1] / S)), lb = Bb.getLocalPoint(V(g.pb[0] / S, g.pb[1] / S));
+        springs.push({ id: L.id, A: Aa, B: Bb, la: la, lb: lb, k: L.k || 0, c: L.damp || 0, L0: dist(g.pa, g.pb) / S * (L.free || 100) / 100 });
+      } else if (L.type === 'chamber') {
+        var Ac = bodyFor(L.a), Bc = L.b && bodyOf[L.b] ? bodyOf[L.b] : null;
+        var axc = [Math.cos(g.a), Math.sin(g.a)];
+        var ch = { id: L.id, A: Ac, B: Bc, base: Ac.getLocalPoint(V(g.p[0] / S, g.p[1] / S)), axis: Ac.getLocalVector(V(axc[0], axc[1])),
+          vent: (L.vent || 200) / S, width: (L.width || 20) / S, charge: L.charge || 0, burn: (L.burn || 0) / 1000,
+          gas: 0, t: 0, burning: false, fired: false, vented: false, P: 0, s: 0, rB: 0, exitSpeed: null, peakP: 0 };
+        if (Bc) {
+          // distância do centro do projétil até sua face traseira, ao longo do eixo
+          var c0 = Bc.getWorldCenter(), mn = Infinity;
+          for (var f = Bc.getFixtureList(); f; f = f.getNext()) {
+            var sh = f.getShape();
+            if (sh.getType() === 'circle') {
+              var cc = Bc.getWorldPoint(sh.getCenter()), pr = (cc.x - c0.x) * axc[0] + (cc.y - c0.y) * axc[1] - sh.getRadius();
+              mn = Math.min(mn, pr);
+            } else {
+              var vs = sh.m_vertices;
+              for (var vi = 0; vi < sh.m_count; vi++) { var wv = Bc.getWorldPoint(vs[vi]); mn = Math.min(mn, (wv.x - c0.x) * axc[0] + (wv.y - c0.y) * axc[1]); }
+            }
+          }
+          ch.rB = isFinite(mn) ? -mn : 0;
+        }
+        chambers.push(ch);
+      }
+    });
+    // pinos e sensores (fixtures extras)
+    scene.links.forEach(function (L) {
+      if ((L.type !== 'pin' && L.type !== 'sensor') || !byId[L.host]) return;
+      var host = byId[L.host], b = bodyOf[L.host], r = rel[L.host];
+      var lp = rot(L.p, r.a); var c = [r.x + lp[0], r.y + lp[1]];
+      var bits = bitsSpan(order, L.from || host.layer, L.to || host.layer);
+      var fx = b.createFixture(new PL.Circle(V(c[0] / S, c[1] / S), (L.r || 5) / S), {
+        density: L.type === 'pin' ? 7.8 : 0, friction: 0.2, restitution: 0.05,
+        isSensor: L.type === 'sensor', filterCategoryBits: bits, filterMaskBits: bits
+      });
+      fx.setUserData(L.type === 'sensor' ? { sensor: L.id, part: L.host } : { pin: L.id, part: L.host });
+      if (L.type === 'sensor') sensors[L.id] = { id: L.id, host: b, c: V(c[0] / S, c[1] / S), target: L.target || '', minSpeed: (L.minSpeed || 0) / S, lit: 0, count: 0 };
+    });
+
+    var fx = []; // efeitos visuais
+    var pending = [];
+    world.on('begin-contact', function (contact) {
+      var fa = contact.getFixtureA(), fb = contact.getFixtureB();
+      [[fa, fb], [fb, fa]].forEach(function (pair) {
+        var u = pair[0].getUserData();
+        if (!u || !u.sensor) return;
+        var other = pair[1], ou = other.getUserData();
+        if (ou && ou.sensor) return;
+        var s = sensors[u.sensor]; if (!s) return;
+        var wc = s.host.getWorldPoint(s.c);
+        var v1 = other.getBody().getLinearVelocityFromWorldPoint(wc), v0 = s.host.getLinearVelocityFromWorldPoint(wc);
+        var sp = Math.hypot(v1.x - v0.x, v1.y - v0.y);
+        if (sp + 1e-6 >= s.minSpeed) pending.push(s.id);
+      });
+    });
+
+    function ignite(ch) {
+      if (!ch || ch.fired || !ch.B) return false;
+      ch.fired = true; ch.burning = true; ch.t = 0;
+      if (ch.burn <= 0) { ch.gas = ch.charge; ch.burning = false; }
+      var base = ch.A.getWorldPoint(ch.base);
+      fx.push({ type: 'ignite', x: base.x * S, y: base.y * S, t: 0 });
+      return true;
+    }
+
+    var time = 0, mouse = null;
+
+    function applyForces(h) {
+      torsions.forEach(function (t) {
+        var tau = -t.k * (t.j.getJointAngle() - t.rest) - t.c * t.j.getJointSpeed();
+        if (t.B.isDynamic()) t.B.applyTorque(tau, true);
+        if (t.A.isDynamic()) t.A.applyTorque(-tau, true);
+      });
+      sliders.forEach(function (s) {
+        var F = -s.k * (s.j.getJointTranslation() - s.rest) - s.c * s.j.getJointSpeed();
+        var ax = s.A.getWorldVector(s.axisA), f = V(ax.x * F, ax.y * F);
+        if (s.B.isDynamic()) s.B.applyForce(f, s.B.getWorldCenter(), true);
+        if (s.A.isDynamic()) s.A.applyForce(V(-f.x, -f.y), s.A.getWorldCenter(), true);
+      });
+      springs.forEach(function (s) {
+        var pa = s.A.getWorldPoint(s.la), pb = s.B.getWorldPoint(s.lb);
+        var dx = pb.x - pa.x, dy = pb.y - pa.y, L = Math.hypot(dx, dy) || 1e-6, nx = dx / L, ny = dy / L;
+        var va = s.A.getLinearVelocityFromWorldPoint(pa), vb = s.B.getLinearVelocityFromWorldPoint(pb);
+        var vr = (vb.x - va.x) * nx + (vb.y - va.y) * ny;
+        var F = s.k * (L - s.L0) + s.c * vr;
+        if (s.A.isDynamic()) s.A.applyForce(V(nx * F, ny * F), pa, true);
+        if (s.B.isDynamic()) s.B.applyForce(V(-nx * F, -ny * F), pb, true);
+        s.len = L;
+      });
+      chambers.forEach(function (ch) {
+        if (!ch.B) return;
+        var base = ch.A.getWorldPoint(ch.base), u = ch.A.getWorldVector(ch.axis);
+        var c = ch.B.getWorldCenter(), rx = c.x - base.x, ry = c.y - base.y;
+        var s = rx * u.x + ry * u.y - ch.rB, perp = Math.abs(rx * u.y - ry * u.x);
+        ch.s = s;
+        if (ch.burning) {
+          var dtb = Math.min(h, ch.burn - ch.t);
+          if (dtb > 0) ch.gas += ch.charge * dtb / ch.burn;
+          ch.t += h; if (ch.t >= ch.burn) ch.burning = false;
+        }
+        var inBore = perp < ch.width / 2 + 0.15 && s > -0.3 && s < ch.vent;
+        if (ch.fired && !ch.vented && !inBore) {
+          ch.vented = true;
+          var vB = ch.B.getLinearVelocity(); ch.exitSpeed = Math.hypot(vB.x, vB.y) * S;
+          if (ch.gas > ch.charge * 0.03) {
+            var m = V(base.x + u.x * ch.vent, base.y + u.y * ch.vent);
+            fx.push({ type: 'flash', x: m.x * S, y: m.y * S, a: Math.atan2(u.y, u.x), t: 0, k: Math.min(1, ch.gas / Math.max(1, ch.charge)) });
+          }
+        }
+        if (ch.vented) ch.gas *= Math.exp(-h / 0.004);
+        ch.gas *= Math.exp(-h / 1.5);
+        var Lc = Math.max(s, 0.05);
+        ch.P = ch.gas / (Lc * ch.width);
+        ch.peakP = Math.max(ch.peakP, ch.P);
+        if (!ch.vented && ch.gas > 1e-4) {
+          var F = ch.gas / Lc;
+          ch.B.applyForce(V(u.x * F, u.y * F), c, true);
+          if (ch.A.isDynamic()) ch.A.applyForce(V(-u.x * F, -u.y * F), base, true);
+        }
+      });
+    }
+
+    function step(dt) {
+      var n = Math.max(2, Math.ceil(dt / (1 / 240) - 1e-6)), h = dt / n;
+      for (var i = 0; i < n; i++) {
+        applyForces(h);
+        world.step(h, 10, 4);
+        time += h;
+        while (pending.length) {
+          var sid = pending.shift(), s = sensors[sid];
+          s.lit = 0.35; s.count++;
+          if (s.target) { var ch = chambers.filter(function (c) { return c.id === s.target; })[0]; ignite(ch); }
+        }
+      }
+      Object.keys(sensors).forEach(function (k) { sensors[k].lit = Math.max(0, sensors[k].lit - dt); });
+      fx.forEach(function (e) { e.t += dt; });
+      for (var k = fx.length - 1; k >= 0; k--) if (fx[k].t > 0.6) fx.splice(k, 1);
+    }
+
+    function grab(pt, allow) {
+      var P = V(pt[0] / S, pt[1] / S), best = null, bestLayer = -1;
+      for (var b = world.getBodyList(); b; b = b.getNext()) {
+        if (!b.isDynamic()) continue;
+        for (var f = b.getFixtureList(); f; f = f.getNext()) {
+          var u = f.getUserData(); if (!u || u.sensor) continue;
+          var part = byId[u.part]; if (!part || (allow && !allow(part.id))) continue;
+          var lyr = order[part.layer];
+          if (f.testPoint(P) && lyr > bestLayer) { best = { body: b, part: part.id }; bestLayer = lyr; }
+        }
+      }
+      if (!best) return null;
+      var m = best.body.getMass();
+      mouse = world.createJoint(new PL.MouseJoint({ maxForce: 600 * m + 400, frequencyHz: 6, dampingRatio: 0.9 }, ground, best.body, P));
+      return best.part;
+    }
+    function drag(pt) { if (mouse) mouse.setTarget(V(pt[0] / S, pt[1] / S)); }
+    function release() { if (mouse) { world.destroyJoint(mouse); mouse = null; } }
+
+    return {
+      world: world, poseOf: poseOf, step: step, grab: grab, drag: drag, release: release, warnings: warnings,
+      chambers: chambers, sensors: sensors, springs: springs, joints: joints, fx: fx,
+      ignite: function (id) { return ignite(chambers.filter(function (c) { return c.id === id; })[0]); },
+      time: function () { return time; },
+      mouseTarget: function () { if (!mouse) return null; var t = mouse.getTarget(), a = mouse.getAnchorB(); return { t: [t.x * S, t.y * S], a: [a.x * S, a.y * S] }; },
+      chamberState: function (id) { return chambers.filter(function (c) { return c.id === id; })[0] || null; },
+      bodyOf: bodyOf
+    };
+  }
+
+  /* ---------- exemplos ---------- */
+  function Maker() {
+    var sc = { version: 1, nextId: 1, layers: [], parts: [], links: [], settings: { gravity: true, g: 10, snap: true } };
+    function id(pfx) { return pfx + (sc.nextId++); }
+    return {
+      scene: sc,
+      layer: function (name) { var L = { id: id('L'), name: name, visible: true }; sc.layers.push(L); return L.id; },
+      poly: function (name, layer, pts, o) {
+        var c = centroid(pts);
+        var p = Object.assign({ id: id('p'), name: name, layer: layer, x: c[0], y: c[1], angle: 0, fixed: false, material: 'aco', bullet: false,
+          shape: { type: 'poly', pts: pts.map(function (q) { return [q[0] - c[0], q[1] - c[1]]; }) } }, o || {});
+        sc.parts.push(p); return p;
+      },
+      rect: function (name, layer, x1, y1, x2, y2, o) { return this.poly(name, layer, [[x1, y1], [x2, y1], [x2, y2], [x1, y2]], o); },
+      circle: function (name, layer, cx, cy, r, o) {
+        var p = Object.assign({ id: id('p'), name: name, layer: layer, x: cx, y: cy, angle: 0, fixed: false, material: 'aco', bullet: false, shape: { type: 'circle', r: r } }, o || {});
+        sc.parts.push(p); return p;
+      },
+      gear: function (name, layer, cx, cy, r, teeth, o, style) {
+        var p = Object.assign({ id: id('p'), name: name, layer: layer, x: cx, y: cy, angle: 0, fixed: false, material: 'aco', bullet: false,
+          shape: { type: 'gear', r: r, teeth: teeth, depth: 2 * PI * r / teeth * 0.5, style: style || 'reto' } }, o || {});
+        sc.parts.push(p); return p;
+      },
+      link: function (L) { L.id = id('k'); sc.links.push(L); return L; },
+      local: function (part, w) { return part ? toLocal(partPose(part), w) : [w[0], w[1]]; }
+    };
+  }
+
+  function exampleLauncher() {
+    var m = Maker();
+    var L1 = m.layer('Corpo'), L2 = m.layer('Cano e percussor'), L3 = m.layer('Retém'), L4 = m.layer('Gatilho');
+    var frame = m.poly('Corpo', L1, [[70, 192], [720, 192], [720, 268], [296, 268], [292, 300], [272, 300], [282, 440], [206, 440], [192, 268], [70, 268]], { fixed: true, material: 'aluminio' });
+    m.poly('Guarda', L1, [[296, 300], [384, 300], [392, 312], [390, 372], [376, 386], [300, 386], [300, 372], [372, 372], [378, 362], [378, 314], [296, 314]], { fixed: true, material: 'aluminio' });
+    m.rect('Parede superior', L2, 300, 208, 712, 218, { fixed: true });
+    m.rect('Parede inferior', L2, 300, 242, 712, 252, { fixed: true });
+    var breech = m.rect('Culatra', L2, 288, 208, 300, 252, { fixed: true });
+    var ball = m.circle('Esfera', L2, 313, 231, 10, { bullet: true });
+    var striker = m.rect('Percussor', L2, 132, 224, 232, 236, { material: 'aco' });
+    var sear = m.poly('Retém', L3, [[229, 233], [241, 233], [241, 250], [318, 250], [318, 270], [229, 270]], { material: 'aco' });
+    var trig = m.poly('Gatilho', L4, [[299, 270], [312, 268], [346, 280], [350, 294], [344, 324], [352, 354], [342, 362], [330, 330], [328, 298], [299, 282]], { material: 'polimero' });
+
+    var ch = m.link({ type: 'chamber', a: breech.id, b: ball.id, p: m.local(breech, [300, 230]), dir: 0, vent: 412, width: 24, charge: 150, burn: 2 });
+    m.link({ type: 'sensor', host: breech.id, p: m.local(breech, [284, 230]), r: 5, from: L2, to: L2, target: ch.id, minSpeed: 100 });
+    m.link({ type: 'slider', a: frame.id, b: striker.id, p: m.local(striker, [182, 230]), dir: 0, travel: 54, back: 2, k: 0, rest: 0, damp: 0 });
+    m.link({ type: 'spring', a: frame.id, b: striker.id, pa: m.local(frame, [84, 230]), pb: m.local(striker, [132, 230]), k: 260, damp: 2, free: 260 });
+    m.link({ type: 'pin', host: striker.id, p: m.local(striker, [222, 238]), r: 5, from: L2, to: L3 });
+    m.link({ type: 'axle', a: frame.id, b: sear.id, p: m.local(sear, [276, 262]), limitOn: true, lower: -24, upper: 0, motorOn: false, rpm: 0, torque: 0, tk: 6, trest: 8, td: 0.05 });
+    m.link({ type: 'axle', a: frame.id, b: trig.id, p: m.local(trig, [330, 290]), limitOn: true, lower: -2, upper: 26, motorOn: false, rpm: 0, torque: 0, tk: 5, trest: -8, td: 0.05 });
+    m.link({ type: 'pin', host: trig.id, p: m.local(trig, [306, 276]), r: 5, from: L3, to: L4 });
+    var sc = m.scene; sc.title = 'Lançador de esfera';
+    return sc;
+  }
+
+  function exampleLatch() {
+    var m = Maker();
+    var L1 = m.layer('Porta'), L2 = m.layer('Lingueta e batente'), L3 = m.layer('Maçaneta');
+    var door = m.rect('Porta', L1, 90, 150, 470, 350, { fixed: true, material: 'madeira' });
+    m.rect('Batente superior', L2, 470, 150, 530, 230, { fixed: true, material: 'madeira' });
+    m.rect('Batente inferior', L2, 470, 270, 530, 350, { fixed: true, material: 'madeira' });
+    m.rect('Fundo do batente', L2, 512, 230, 530, 270, { fixed: true, material: 'madeira' });
+    var bolt = m.poly('Lingueta', L2, [[372, 236], [486, 236], [500, 252], [500, 264], [372, 264]], { material: 'latao' });
+    var handle = m.poly('Maçaneta', L3, [[393, 232], [403, 232], [406, 322], [398, 332], [230, 342], [226, 326], [390, 312]], { material: 'polimero' });
+    m.link({ type: 'slider', a: door.id, b: bolt.id, p: m.local(bolt, [430, 250]), dir: PI, travel: 70, back: 0, k: 120, rest: -12, damp: 1 });
+    m.link({ type: 'pin', host: bolt.id, p: m.local(bolt, [385, 252]), r: 4, from: L2, to: L3 });
+    m.link({ type: 'axle', a: door.id, b: handle.id, p: m.local(handle, [398, 318]), limitOn: true, lower: -30, upper: 0, motorOn: false, rpm: 0, torque: 0, tk: 120, trest: 20, td: 0.5 });
+    var sc = m.scene; sc.title = 'Trava de porta';
+    return sc;
+  }
+
+  function exampleGears() {
+    var m = Maker();
+    var L1 = m.layer('Placa'), L2 = m.layer('Engrenagens'), L3 = m.layer('Catraca');
+    var plate = m.rect('Placa', L1, 60, 90, 640, 430, { fixed: true, material: 'aluminio' });
+    var pitch = 16;
+    var r1 = 24 * pitch / (2 * PI), r2 = 16 * pitch / (2 * PI), r3 = 12 * pitch / (2 * PI);
+    var c1 = [170, 260], c2 = [170 + r1 + r2, 260], c3 = [c2[0] + r2 + r3, 260];
+    var g1 = m.gear('Motora', L2, c1[0], c1[1], r1, 24, { material: 'latao' });
+    var g2 = m.gear('Intermediária', L2, c2[0], c2[1], r2, 16, { material: 'aco' });
+    var g3 = m.gear('Pinhão', L2, c3[0], c3[1], r3, 12, { material: 'aco' });
+    // alinhar fase: dente de uma no vão da outra
+    g2.angle = PI / 16; g3.angle = 0;
+    var rat = m.gear('Roda da catraca', L3, c3[0], c3[1], 52, 14, { material: 'aco' }, 'serra');
+    var pawlPivot = [c3[0] + 30, c3[1] - 92];
+    var pawl = m.poly('Lingueta', L3, [[pawlPivot[0] - 8, pawlPivot[1] - 8], [pawlPivot[0] + 8, pawlPivot[1] - 8], [pawlPivot[0] + 6, pawlPivot[1] + 10], [c3[0] - 4, c3[1] - 52], [c3[0] - 2, c3[1] - 62], [pawlPivot[0] - 8, pawlPivot[1] + 8]], { material: 'aco' });
+    m.link({ type: 'axle', a: plate.id, b: g1.id, p: [0, 0], motorOn: true, rpm: -12, torque: 400, limitOn: false, lower: 0, upper: 0, tk: 0, trest: 0, td: 0 });
+    m.link({ type: 'axle', a: plate.id, b: g2.id, p: [0, 0], motorOn: false, rpm: 0, torque: 0, limitOn: false, lower: 0, upper: 0, tk: 0, trest: 0, td: 0.02 });
+    m.link({ type: 'screw', a: g3.id, b: rat.id, p: [0, 0] });
+    m.link({ type: 'axle', a: plate.id, b: rat.id, p: [0, 0], motorOn: false, rpm: 0, torque: 0, limitOn: false, lower: 0, upper: 0, tk: 0, trest: 0, td: 0.02 });
+    m.link({ type: 'axle', a: plate.id, b: pawl.id, p: m.local(pawl, pawlPivot), motorOn: false, rpm: 0, torque: 0, limitOn: true, lower: -25, upper: 25, tk: 3, trest: 0, td: 0.02 });
+    var sc = m.scene; sc.title = 'Engrenagens e catraca'; sc.settings.gravity = false;
+    return sc;
+  }
+
+  var Engine = {
+    S: S, MATERIALS: MATERIALS, build: build, linkGeom: linkGeom, shapeOutline: shapeOutline, shapeRadius: shapeRadius, hitShape: hitShape,
+    gearProfile: gearProfile, toWorld: toWorld, toLocal: toLocal, partPose: partPose, centroid: centroid, signedArea: signedArea, simplify: simplify,
+    pointInPoly: pointInPoly, convexHull: convexHull, layerOrder: layerOrder, findPart: findPart, findLink: findLink, dist: dist, rot: rot,
+    examples: { lancador: exampleLauncher, trava: exampleLatch, engrenagens: exampleGears }, polyPieces: polyPieces
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = Engine; else root.Engine = Engine;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function () {
+'use strict';
+var E = window.Engine;
+var $ = function (s) { return document.querySelector(s); };
+var NS = 'http://www.w3.org/2000/svg';
+var STORE = 'bancada-mecanismos-v1';
+
+/* ---------- ícones ---------- */
+function ic(body, size) { size = size || 22; return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + '</svg>'; }
+var gearIcon = (function () { var s = '<circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="1.6"/>'; for (var i = 0; i < 8; i++) { var a = i * Math.PI / 4, c = Math.cos(a), d = Math.sin(a); s += '<path d="M' + (12 + c * 5.5).toFixed(2) + ' ' + (12 + d * 5.5).toFixed(2) + 'L' + (12 + c * 9).toFixed(2) + ' ' + (12 + d * 9).toFixed(2) + '" stroke-width="2.6"/>'; } return s; })();
+var IC = {
+  select: '<path d="M6 3.5l12 7.2-5.4 1.4-2.7 5.4z"/><path d="M12.6 12.1l4.6 5.6"/>',
+  rect: '<rect x="4" y="6.5" width="16" height="11" rx="1"/>',
+  circle: '<circle cx="12" cy="12" r="7.5"/><path d="M12 12h7.5" stroke-dasharray="2 2"/>',
+  poly: '<path d="M12 4l7.5 5.5-3 9h-9l-3-9z"/><circle cx="12" cy="4" r="1.3" fill="currentColor"/><circle cx="19.5" cy="9.5" r="1.3" fill="currentColor"/><circle cx="4.5" cy="9.5" r="1.3" fill="currentColor"/>',
+  free: '<path d="M4 16c1.5-7 5-10 8-7s2.5 8 6 5 2-7 2-7"/>',
+  gear: gearIcon,
+  screw: '<circle cx="12" cy="12" r="7"/><path d="M8.5 15.5l7-7"/>',
+  axle: '<circle cx="12" cy="12" r="2.6"/><path d="M19.4 9.5A8 8 0 1 1 15 4.6"/><path d="M15.5 2.5l.2 2.6-2.6.6"/>',
+  pin: '<circle cx="12" cy="12" r="3.2" fill="currentColor"/><circle cx="12" cy="12" r="8" stroke-dasharray="2.2 2.2"/>',
+  slider: '<path d="M3 12h18"/><rect x="8.5" y="8" width="7" height="8" rx="1"/><path d="M5.5 9.5L3 12l2.5 2.5M18.5 9.5L21 12l-2.5 2.5"/>',
+  spring: '<path d="M2.5 12h3l1.6-5 2.8 10 2.8-10 2.8 10 1.6-5h4.4"/>',
+  chamber: '<rect x="2.5" y="8" width="11" height="8" rx="1"/><path d="M13.5 10h8M13.5 14h8"/><circle cx="17" cy="12" r="1.6" fill="currentColor"/><path d="M6.5 14.5c-1-1.6.6-2.4.8-4 1 .9 1.8 1.8 1.2 4"/>',
+  sensor: '<circle cx="12" cy="12" r="5.5" stroke-dasharray="2.4 2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/>',
+  undo: '<path d="M9 5L4 10l5 5"/><path d="M4 10h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  redo: '<path d="M15 5l5 5-5 5"/><path d="M20 10H9.5a5.5 5.5 0 0 0 0 11H13"/>',
+  menu: '<circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/>',
+  play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  pause: '<path d="M8 5v14M16 5v14" stroke-width="2.6"/>',
+  step: '<path d="M6 5l9 7-9 7z" fill="currentColor" stroke="none"/><path d="M18 5v14" stroke-width="2.4"/>',
+  reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff: '<path d="M3 3l18 18"/><path d="M10.6 5.6A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16 16 0 0 1-3 3.7M6.2 6.9C3.9 8.6 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1.1"/>',
+  up: '<path d="M6 14l6-6 6 6"/>',
+  down: '<path d="M6 10l6 6 6-6"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="1.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>',
+  layers: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>'
+};
+
+var TOOLS = [
+  { group: 'Desenho', items: [
+    { id: 'select', label: 'Selecionar' }, { id: 'rect', label: 'Retângulo' }, { id: 'circle', label: 'Círculo' },
+    { id: 'poly', label: 'Polígono' }, { id: 'free', label: 'Livre' }, { id: 'gear', label: 'Engrenagem' } ] },
+  { group: 'Ligações', items: [
+    { id: 'screw', label: 'Parafuso' }, { id: 'axle', label: 'Eixo' }, { id: 'pin', label: 'Pino' },
+    { id: 'slider', label: 'Trilho' }, { id: 'spring', label: 'Mola' } ] },
+  { group: 'Energia', items: [ { id: 'chamber', label: 'Câmara' }, { id: 'sensor', label: 'Sensor' } ] }
+];
+var HINTS = {
+  select: 'Toque numa peça ou ligação para editar. Arraste o fundo para mover; pinça para zoom.',
+  rect: 'Arraste para desenhar um retângulo na camada ativa.',
+  circle: 'Arraste do centro para fora.',
+  poly: 'Toque para marcar os pontos. Toque no primeiro ponto para fechar.',
+  free: 'Desenhe o contorno com o dedo; a forma fecha sozinha.',
+  gear: 'Arraste do centro para fora. Engrenagens com o mesmo passo engrenam.',
+  screw: 'Toque onde duas peças se sobrepõem para prendê-las. Numa peça só, prende ao fundo.',
+  axle: 'Toque onde a peça deve girar. Ela gira sobre a peça de baixo, ou sobre o fundo.',
+  pin: 'Toque numa peça para pôr um pino. Ele atravessa camadas e empurra peças de outra camada.',
+  slider: 'Arraste sobre a peça na direção em que ela desliza. O comprimento do traço é o curso.',
+  spring: 'Arraste de um ponto a outro. Cada ponta prende na peça que estiver ali, ou no fundo.',
+  chamber: 'Arraste do fundo da câmara até a saída, passando pelo projétil.',
+  sensor: 'Toque numa peça para pôr um sensor de impacto, que pode acionar uma câmara.'
+};
+var LINK_NAMES = { screw: 'Parafuso', axle: 'Eixo', pin: 'Pino', slider: 'Trilho', spring: 'Mola', chamber: 'Câmara', sensor: 'Sensor' };
+
+/* ---------- estado ---------- */
+var scene = null, sel = null, tool = 'select', activeLayer = null, mode = 'edit';
+var view = { x: 0, y: 0, z: 1 };
+var hist = [], hi = -1;
+var sim = null, paused = false, timeScale = 1, lastT = 0;
+var opts = { xray: false, focus: true, showLinks: true };
+var sheetMode = null, sheetCollapsed = false; // celular
+var act = null, pointers = new Map(), pinch = null, polyPts = null, hoverW = null;
+var stage = $('#stage'), svg = $('#cv');
+
+/* ---------- utilidades ---------- */
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function round(v, d) { var m = Math.pow(10, d || 0); return Math.round(v * m) / m; }
+function fmt(v, d) { return (round(v, d === undefined ? 1 : d)).toLocaleString('pt-BR'); }
+function isWide() { return window.matchMedia('(min-width: 900px)').matches; }
+function newId(pfx) { scene.nextId = (scene.nextId || 1) + 1; return pfx + scene.nextId; }
+function layerIdx(id) { for (var i = 0; i < scene.layers.length; i++) if (scene.layers[i].id === id) return i; return -1; }
+function layerOf(id) { return scene.layers[layerIdx(id)]; }
+function layerVisible(id) { var L = layerOf(id); return !!(L && L.visible !== false); }
+function part(id) { return E.findPart(scene, id); }
+function link(id) { return E.findLink(scene, id); }
+function pose(p) { return E.partPose(p); }
+function designPoseById(id) { var p = part(id); return p ? pose(p) : null; }
+function curPoseById(id) { if (mode === 'sim' && sim) return sim.poseOf(id); return designPoseById(id); }
+function snapV(v) { return scene.settings.snap ? Math.round(v / 5) * 5 : v; }
+function snapP(p) { return [snapV(p[0]), snapV(p[1])]; }
+var toastT = 0;
+function toast(msg) { var t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 2600); }
+
+function s2w(sx, sy) { return [sx / view.z + view.x, sy / view.z + view.y]; }
+function w2s(p) { return [(p[0] - view.x) * view.z, (p[1] - view.y) * view.z]; }
+function evW(e) { var r = svg.getBoundingClientRect(); return s2w(e.clientX - r.left, e.clientY - r.top); }
+function evS(e) { var r = svg.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+
+/* ---------- histórico / persistência ---------- */
+function save() { try { localStorage.setItem(STORE, JSON.stringify(scene)); } catch (e) {} }
+function commit() {
+  hist = hist.slice(0, hi + 1); hist.push(JSON.stringify(scene)); if (hist.length > 80) hist.shift(); hi = hist.length - 1;
+  save(); updateUndo();
+}
+function restore(json) {
+  scene = JSON.parse(json);
+  if (!layerOf(activeLayer)) activeLayer = scene.layers.length ? scene.layers[scene.layers.length - 1].id : null;
+  if (sel && !(sel.kind === 'part' ? part(sel.id) : link(sel.id))) sel = null;
+  save(); renderAll(); updateUndo();
+}
+function undo() { if (mode !== 'edit' || hi <= 0) return; hi--; restore(hist[hi]); }
+function redo() { if (mode !== 'edit' || hi >= hist.length - 1) return; hi++; restore(hist[hi]); }
+function updateUndo() { $('#btnUndo').disabled = hi <= 0 || mode !== 'edit'; $('#btnRedo').disabled = hi >= hist.length - 1 || mode !== 'edit'; }
+
+function loadScene(sc, fit) {
+  scene = sc; scene.settings = Object.assign({ gravity: true, g: 10, snap: true }, scene.settings || {});
+  scene.links = scene.links || []; scene.parts = scene.parts || [];
+  if (!scene.layers || !scene.layers.length) scene.layers = [{ id: 'L1', name: 'Camada 1', visible: true }];
+  activeLayer = scene.layers[Math.min(1, scene.layers.length - 1)].id;
+  sel = null; polyPts = null; act = null;
+  hist = []; hi = -1; commit();
+  if (fit !== false) fitView();
+  renderAll();
+}
+
+/* ---------- consultas de geometria ---------- */
+function partsAt(w) {
+  return scene.parts.filter(function (p) { return layerVisible(p.layer) && E.hitShape(p.shape, E.toLocal(pose(p), w)); })
+    .sort(function (a, b) { return layerIdx(b.layer) - layerIdx(a.layer) || scene.parts.indexOf(b) - scene.parts.indexOf(a); });
+}
+function topPart(w) { var u = partsAt(w), a = u.filter(function (p) { return p.layer === activeLayer; }); return a[0] || u[0] || null; }
+function partBelow(w, b) {
+  var u = partsAt(w).filter(function (p) { return p !== b; });
+  var lower = u.filter(function (p) { return layerIdx(p.layer) < layerIdx(b.layer); });
+  return lower[0] || u.filter(function (p) { return layerIdx(p.layer) === layerIdx(b.layer); })[0] || null;
+}
+function snapCenter(w) {
+  var best = null, bd = 12 / view.z;
+  scene.parts.forEach(function (p) {
+    if (!layerVisible(p.layer) || (p.shape.type !== 'circle' && p.shape.type !== 'gear')) return;
+    var d = E.dist(w, [p.x, p.y]); if (d < bd) { bd = d; best = [p.x, p.y]; }
+  });
+  return best || snapP(w);
+}
+function rearExtent(p, ang) {
+  var u = [Math.cos(ang), Math.sin(ang)], ps = pose(p), mn = Infinity;
+  E.shapeOutline(p.shape).forEach(function (q) { var w = E.toWorld(ps, q); mn = Math.min(mn, (w[0] - ps.x) * u[0] + (w[1] - ps.y) * u[1]); });
+  return isFinite(mn) ? -mn : 0;
+}
+function partArea(p) {
+  if (p.shape.type === 'circle') return Math.PI * p.shape.r * p.shape.r;
+  return Math.abs(E.signedArea(E.shapeOutline(p.shape)));
+}
+
+/* ---------- desenho SVG ---------- */
+svg.innerHTML =
+  '<defs><pattern id="gMin" width="10" height="10" patternUnits="userSpaceOnUse"><path id="gMinP" d="M10 0H0V10" fill="none" style="stroke:var(--grid-minor)"/></pattern>' +
+  '<pattern id="gMaj" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="url(#gMin)"/><path id="gMajP" d="M50 0H0V50" fill="none" style="stroke:var(--grid-major)"/></pattern></defs>' +
+  '<g id="gWorld"><rect id="gridRect" fill="url(#gMaj)"/><g id="gParts"></g><g id="gLinks"></g><g id="gFx"></g><g id="gTemp"></g></g><g id="gHnd"></g>';
+var gWorld = $('#gWorld'), gParts = $('#gParts'), gLinks = $('#gLinks'), gFx = $('#gFx'), gTemp = $('#gTemp'), gHnd = $('#gHnd');
+var partEls = {};
+
+function pathD(pts) { if (!pts.length) return ''; var s = 'M' + pts[0][0].toFixed(2) + ' ' + pts[0][1].toFixed(2); for (var i = 1; i < pts.length; i++) s += 'L' + pts[i][0].toFixed(2) + ' ' + pts[i][1].toFixed(2); return s + 'Z'; }
+function tf(ps) { return 'translate(' + ps.x.toFixed(2) + ' ' + ps.y.toFixed(2) + ') rotate(' + (ps.a * 180 / Math.PI).toFixed(3) + ')'; }
+
+function applyView() {
+  var W = stage.clientWidth, H = stage.clientHeight;
+  gWorld.setAttribute('transform', 'translate(' + (-view.x * view.z) + ' ' + (-view.y * view.z) + ') scale(' + view.z + ')');
+  var gr = $('#gridRect'); gr.setAttribute('x', Math.floor(view.x / 50) * 50 - 50); gr.setAttribute('y', Math.floor(view.y / 50) * 50 - 50);
+  gr.setAttribute('width', W / view.z + 150); gr.setAttribute('height', H / view.z + 150);
+  $('#gMinP').setAttribute('stroke-width', 1 / view.z); $('#gMajP').setAttribute('stroke-width', 1 / view.z);
+  $('#gMinP').style.opacity = view.z < 0.45 ? 0 : 1;
+}
+
+function renderParts() {
+  gParts.textContent = ''; partEls = {};
+  var list = scene.parts.slice().sort(function (a, b) { return layerIdx(a.layer) - layerIdx(b.layer); });
+  list.forEach(function (p) {
+    if (!layerVisible(p.layer)) return;
+    var li = layerIdx(p.layer);
+    var g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'part');
+    var dim = mode === 'edit' && opts.focus && p.layer !== activeLayer;
+    var fo = opts.xray ? 0.14 : 0.9;
+    var outline = E.shapeOutline(p.shape), d = pathD(outline);
+    var isSel = sel && sel.kind === 'part' && sel.id === p.id;
+    var h = '';
+    if (isSel) h += '<path class="halo" d="' + d + '" stroke-width="6"/>';
+    h += '<path class="body m-' + (p.material || 'aco') + ' ly' + (li % 8) + '" d="' + d + '" fill-opacity="' + fo + '" stroke-width="' + (opts.xray ? 1.6 : 1.3) + '"/>';
+    if (p.shape.type === 'circle' || p.shape.type === 'gear') {
+      var r = p.shape.type === 'circle' ? p.shape.r : p.shape.r - p.shape.depth * 0.6;
+      h += '<path class="mark" d="M0 0L' + (r * 0.8).toFixed(1) + ' 0" stroke-width="1"/><circle class="mark" r="' + Math.min(3, r * 0.15).toFixed(1) + '" stroke-width="1"/>';
+      if (p.shape.type === 'gear') h += '<circle class="mark" r="' + p.shape.r.toFixed(1) + '" stroke-width=".8" stroke-dasharray="3 3" stroke-opacity=".35"/>';
+    }
+    g.innerHTML = h;
+    g.setAttribute('opacity', dim ? 0.32 : 1);
+    var ps = curPoseById(p.id) || pose(p);
+    g.setAttribute('transform', tf(ps));
+    gParts.appendChild(g); partEls[p.id] = g;
+  });
+}
+function updatePartTransforms() {
+  Object.keys(partEls).forEach(function (id) { var ps = curPoseById(id); if (ps) partEls[id].setAttribute('transform', tf(ps)); });
+}
+
+function zigzag(a, b, amp) {
+  var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+  var n = Math.max(4, Math.min(18, Math.round(L / 7))), lead = Math.min(6, L * 0.15);
+  var s = 'M' + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + 'L' + (a[0] + ux * lead).toFixed(1) + ' ' + (a[1] + uy * lead).toFixed(1);
+  var span = L - 2 * lead;
+  for (var i = 0; i < n; i++) {
+    var t = lead + span * (i + 0.5) / n, sg = i % 2 ? -1 : 1;
+    s += 'L' + (a[0] + ux * t + nx * amp * sg).toFixed(1) + ' ' + (a[1] + uy * t + ny * amp * sg).toFixed(1);
+  }
+  s += 'L' + (b[0] - ux * lead).toFixed(1) + ' ' + (b[1] - uy * lead).toFixed(1) + 'L' + b[0].toFixed(1) + ' ' + b[1].toFixed(1);
+  return s;
+}
+function groundMark(p, u) {
+  var s = 7 * u;
+  return '<path class="lk lk-ground" d="M' + (p[0] - s) + ' ' + (p[1] + s) + 'H' + (p[0] + s) + 'M' + (p[0] - s) + ' ' + (p[1] + s) + 'l' + (-s * 0.5) + ' ' + (s * 0.6) + 'M' + p[0] + ' ' + (p[1] + s) + 'l' + (-s * 0.5) + ' ' + (s * 0.6) + 'M' + (p[0] + s) + ' ' + (p[1] + s) + 'l' + (-s * 0.5) + ' ' + (s * 0.6) + 'M' + p[0] + ' ' + p[1] + 'V' + (p[1] + s) + '" stroke-width="1.2"/>';
+}
+
+function linkSVG(L) {
+  var u = 1 / view.z, g = E.linkGeom(scene, L, curPoseById), isSel = sel && sel.kind === 'link' && sel.id === L.id, h = '';
+  var selCls = isSel ? ' lk-sel' : '';
+  if (L.type === 'screw') {
+    var r = 5.5 * u, p = g.p;
+    h += '<circle class="lk lk-ink' + selCls + '" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" stroke-width="' + (isSel ? 2.4 : 1.4) + '"/>';
+    h += '<path class="lk lk-line" d="M' + (p[0] - r * 0.6) + ' ' + (p[1] + r * 0.6) + 'L' + (p[0] + r * 0.6) + ' ' + (p[1] - r * 0.6) + '" stroke-width="1.4" style="stroke:var(--ink)"/>';
+    if (!L.a) h += groundMark([p[0], p[1] + r], u);
+  } else if (L.type === 'axle') {
+    var r2 = 6.5 * u, p2 = g.p;
+    h += '<circle class="lk lk-acc' + selCls + '" cx="' + p2[0] + '" cy="' + p2[1] + '" r="' + r2 + '" stroke-width="' + (isSel ? 2.6 : 1.6) + '"/>';
+    h += '<path class="lk" style="stroke:var(--accent)" d="M' + (p2[0] - r2 * .55) + ' ' + p2[1] + 'H' + (p2[0] + r2 * .55) + 'M' + p2[0] + ' ' + (p2[1] - r2 * .55) + 'V' + (p2[1] + r2 * .55) + '" stroke-width="1.3"/>';
+    if (L.motorOn) { var R = r2 * 1.9; h += '<path class="lk" style="stroke:var(--accent)" fill="none" stroke-width="1.4" d="M' + (p2[0] + R) + ' ' + p2[1] + 'A' + R + ' ' + R + ' 0 1 1 ' + p2[0] + ' ' + (p2[1] - R) + '"/>'; }
+    if ((L.tk || 0) > 0) { var R3 = r2 * 1.45; h += '<path class="lk" style="stroke:var(--ink-2)" fill="none" stroke-width="1" d="M' + (p2[0] - R3) + ' ' + p2[1] + 'A' + R3 + ' ' + R3 + ' 0 0 1 ' + p2[0] + ' ' + (p2[1] - R3) + '"/>'; }
+    if (!L.a) h += groundMark([p2[0], p2[1] + r2], u);
+  } else if (L.type === 'pin') {
+    var p3 = g.p, rr = Math.max(L.r || 5, 3 * u);
+    h += '<circle class="lk lk-ink' + selCls + '" cx="' + p3[0] + '" cy="' + p3[1] + '" r="' + rr + '" stroke-width="' + (isSel ? 2.4 : 1.3) + '"/>';
+    h += '<circle cx="' + p3[0] + '" cy="' + p3[1] + '" r="' + rr * 0.38 + '" style="fill:var(--ink)"/>';
+    if (isSel) h += '<text class="lk-text" x="' + (p3[0] + rr + 4 * u) + '" y="' + (p3[1] - rr) + '" font-size="' + 11 * u + '">C' + (layerIdx(L.from) + 1) + '–' + (layerIdx(L.to) + 1) + '</text>';
+  } else if (L.type === 'sensor') {
+    var p4 = g.p, rs = Math.max(L.r || 5, 3 * u), lit = mode === 'sim' && sim && sim.sensors[L.id] && sim.sensors[L.id].lit > 0;
+    if (lit) h += '<circle class="lk-hotfill" cx="' + p4[0] + '" cy="' + p4[1] + '" r="' + rs * 1.8 + '" opacity=".55"/>';
+    h += '<circle class="lk lk-hot' + selCls + '" cx="' + p4[0] + '" cy="' + p4[1] + '" r="' + rs + '" stroke-width="' + (isSel ? 2.4 : 1.5) + '" stroke-dasharray="' + 3 * u + ' ' + 2 * u + '"/>';
+    h += '<circle class="lk-hotfill" cx="' + p4[0] + '" cy="' + p4[1] + '" r="' + rs * 0.3 + '"/>';
+  } else if (L.type === 'slider') {
+    var p5 = g.p, ux = Math.cos(g.a), uy = Math.sin(g.a);
+    if (mode === 'sim' && sim && sim.joints[L.id]) { var tr = sim.joints[L.id].getJointTranslation() * E.S; p5 = [p5[0] - ux * tr, p5[1] - uy * tr]; }
+    var b0 = [p5[0] - ux * (L.back || 0), p5[1] - uy * (L.back || 0)], b1 = [p5[0] + ux * (L.travel || 0), p5[1] + uy * (L.travel || 0)];
+    var nx = -uy * 5 * u, ny = ux * 5 * u;
+    h += '<path class="lk lk-line' + selCls + '" d="M' + b0[0] + ' ' + b0[1] + 'L' + b1[0] + ' ' + b1[1] + '" stroke-width="' + (isSel ? 2.4 : 1.4) + '" stroke-dasharray="' + 5 * u + ' ' + 3 * u + '"/>';
+    h += '<path class="lk lk-line' + selCls + '" d="M' + (b0[0] + nx) + ' ' + (b0[1] + ny) + 'L' + (b0[0] - nx) + ' ' + (b0[1] - ny) + 'M' + (b1[0] + nx) + ' ' + (b1[1] + ny) + 'L' + (b1[0] - nx) + ' ' + (b1[1] - ny) + '" stroke-width="1.6"/>';
+    var cur = mode === 'sim' ? E.linkGeom(scene, L, curPoseById).p : p5;
+    h += '<rect class="lk lk-acc" x="' + (cur[0] - 3.5 * u) + '" y="' + (cur[1] - 3.5 * u) + '" width="' + 7 * u + '" height="' + 7 * u + '" stroke-width="1.4" transform="rotate(' + (g.a * 180 / Math.PI) + ' ' + cur[0] + ' ' + cur[1] + ')"/>';
+    if ((L.k || 0) > 0) h += '<text class="lk-text" x="' + (b1[0] + 6 * u) + '" y="' + (b1[1] - 4 * u) + '" font-size="' + 10 * u + '">mola</text>';
+  } else if (L.type === 'spring') {
+    var a = g.pa, b = g.pb;
+    h += '<path class="lk lk-spring' + selCls + '" d="' + zigzag(a, b, 5) + '" stroke-width="' + (isSel ? 2.6 : 1.5) + '"/>';
+    h += '<circle class="lk lk-ink" cx="' + a[0] + '" cy="' + a[1] + '" r="' + 3 * u + '" stroke-width="1.2"/><circle class="lk lk-ink" cx="' + b[0] + '" cy="' + b[1] + '" r="' + 3 * u + '" stroke-width="1.2"/>';
+    if (!L.a) h += groundMark([a[0], a[1] + 3 * u], u);
+    if (!L.b) h += groundMark([b[0], b[1] + 3 * u], u);
+  } else if (L.type === 'chamber') {
+    var base = g.p, ux2 = Math.cos(g.a), uy2 = Math.sin(g.a), w = L.width || 20, vent = L.vent || 200, nx2 = -uy2 * w / 2, ny2 = ux2 * w / 2;
+    var s = 0, gasK = 0;
+    if (mode === 'sim' && sim) { var st = sim.chamberState(L.id); if (st) { s = Math.max(0, st.s * E.S); gasK = Math.min(1, st.gas / Math.max(1, st.charge)); if (st.vented) s = 0; } }
+    else if (L.b && part(L.b)) { var bp = part(L.b); s = Math.max(0, (bp.x - base[0]) * ux2 + (bp.y - base[1]) * uy2 - rearExtent(bp, g.a)); }
+    var e = [base[0] + ux2 * vent, base[1] + uy2 * vent];
+    h += '<path class="lk lk-hot' + selCls + '" d="M' + (base[0] + nx2) + ' ' + (base[1] + ny2) + 'L' + (e[0] + nx2) + ' ' + (e[1] + ny2) + 'M' + (base[0] - nx2) + ' ' + (base[1] - ny2) + 'L' + (e[0] - nx2) + ' ' + (e[1] - ny2) + '" stroke-width="' + (isSel ? 2 : 1) + '" stroke-dasharray="' + 4 * u + ' ' + 4 * u + '" stroke-opacity=".7"/>';
+    var c1 = [base[0] + ux2 * s, base[1] + uy2 * s];
+    h += '<path class="lk-hotfill" opacity="' + (0.18 + gasK * 0.62).toFixed(2) + '" d="M' + (base[0] + nx2) + ' ' + (base[1] + ny2) + 'L' + (c1[0] + nx2) + ' ' + (c1[1] + ny2) + 'L' + (c1[0] - nx2) + ' ' + (c1[1] - ny2) + 'L' + (base[0] - nx2) + ' ' + (base[1] - ny2) + 'Z"/>';
+    h += '<path class="lk lk-hot" d="M' + (base[0] + nx2 * 1.25) + ' ' + (base[1] + ny2 * 1.25) + 'L' + (base[0] - nx2 * 1.25) + ' ' + (base[1] - ny2 * 1.25) + '" stroke-width="2.4"/>';
+    h += '<path class="lk lk-hot" d="M' + (e[0] + nx2 * 1.25) + ' ' + (e[1] + ny2 * 1.25) + 'L' + (e[0] - nx2 * 1.25) + ' ' + (e[1] - ny2 * 1.25) + '" stroke-width="1.4"/>';
+  }
+  return h;
+}
+function renderLinks() {
+  if (!opts.showLinks && !(sel && sel.kind === 'link')) { gLinks.innerHTML = ''; return; }
+  var h = '';
+  var order = { chamber: 0, slider: 1, spring: 2, sensor: 3, pin: 4, screw: 5, axle: 6 };
+  scene.links.slice().sort(function (a, b) { return order[a.type] - order[b.type]; }).forEach(function (L) {
+    if (!opts.showLinks && !(sel && sel.id === L.id)) return;
+    try { h += linkSVG(L); } catch (e) {}
+  });
+  if (mode === 'sim' && sim) { var mt = sim.mouseTarget(); if (mt) { var u = 1 / view.z; h += '<path class="lk tmpline" d="M' + mt.a[0] + ' ' + mt.a[1] + 'L' + mt.t[0] + ' ' + mt.t[1] + '" stroke-width="1.5" stroke-dasharray="4 3"/><circle class="tmp" cx="' + mt.t[0] + '" cy="' + mt.t[1] + '" r="' + 6 * u + '" stroke-width="1.5"/>'; } }
+  gLinks.innerHTML = h;
+}
+function renderFx() {
+  if (mode !== 'sim' || !sim) { gFx.innerHTML = ''; return; }
+  var h = '';
+  sim.fx.forEach(function (e) {
+    var k = 1 - e.t / 0.6;
+    if (e.type === 'ignite') {
+      var r = 6 + e.t * 90;
+      if (e.t < 0.3) h += '<circle class="fx-flash" cx="' + e.x + '" cy="' + e.y + '" r="' + r + '" opacity="' + (0.7 * (1 - e.t / 0.3)) + '"/>';
+    } else if (e.type === 'flash') {
+      var ca = Math.cos(e.a), sa = Math.sin(e.a), L = 26 + 50 * e.k, W = 12 + 10 * e.k;
+      if (e.t < 0.12) {
+        var tip = [e.x + ca * L, e.y + sa * L], l = [e.x - sa * W, e.y + ca * W], r2 = [e.x + sa * W, e.y - ca * W], m1 = [e.x + ca * L * 0.45 - sa * W * 1.3, e.y + sa * L * 0.45 + ca * W * 1.3], m2 = [e.x + ca * L * 0.45 + sa * W * 1.3, e.y + sa * L * 0.45 - ca * W * 1.3];
+        h += '<path class="fx-flash" opacity="' + (1 - e.t / 0.12) + '" d="M' + l.join(' ') + 'L' + m1.join(' ') + 'L' + tip.join(' ') + 'L' + m2.join(' ') + 'L' + r2.join(' ') + 'Z"/>';
+      }
+      for (var i = 0; i < 5; i++) {
+        var d = (12 + i * 14) * (0.4 + e.t * 2.2), rr = (6 + i * 3) * (0.6 + e.t * 2.5);
+        h += '<circle class="fx-smoke" cx="' + (e.x + ca * d + (i % 2 ? -1 : 1) * sa * 4) + '" cy="' + (e.y + sa * d) + '" r="' + rr + '" opacity="' + (0.28 * k) + '"/>';
+      }
+    }
+  });
+  gFx.innerHTML = h;
+}
+
+function hnd(p, r, extra) { return '<circle class="hnd" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '"' + (extra || '') + '/>'; }
+function handlesFor() {
+  var hs = [];
+  if (mode !== 'edit' || !sel) return hs;
+  if (sel.kind === 'part') {
+    var p = part(sel.id); if (!p) return hs;
+    var ps = pose(p), R = E.shapeRadius(p.shape);
+    var rh = E.toWorld(ps, [0, -(R + 30 / view.z)]);
+    hs.push({ kind: 'rotate', w: rh, from: [ps.x, ps.y] });
+    if (p.shape.type === 'poly') p.shape.pts.forEach(function (q, i) { hs.push({ kind: 'vertex', i: i, w: E.toWorld(ps, q) }); });
+    if (p.shape.type === 'circle') hs.push({ kind: 'radius', w: E.toWorld(ps, [p.shape.r, 0]) });
+    if (p.shape.type === 'gear') hs.push({ kind: 'radius', w: E.toWorld(ps, [p.shape.r, 0]) });
+  } else {
+    var L = link(sel.id); if (!L) return hs;
+    var g = E.linkGeom(scene, L, designPoseById);
+    if (L.type === 'spring') { hs.push({ kind: 'sa', w: g.pa }); hs.push({ kind: 'sb', w: g.pb }); }
+    else if (L.type === 'slider') { hs.push({ kind: 'lp', w: g.p }); hs.push({ kind: 'send', w: [g.p[0] + Math.cos(g.a) * L.travel, g.p[1] + Math.sin(g.a) * L.travel] }); }
+    else if (L.type === 'chamber') { hs.push({ kind: 'lp', w: g.p }); hs.push({ kind: 'cend', w: [g.p[0] + Math.cos(g.a) * L.vent, g.p[1] + Math.sin(g.a) * L.vent] }); }
+    else hs.push({ kind: 'lp', w: g.p });
+  }
+  return hs;
+}
+function renderHandles() {
+  var h = '';
+  handlesFor().forEach(function (k) {
+    var s = w2s(k.w);
+    if (k.kind === 'rotate') { var f = w2s(k.from); h += '<path class="hnd-line" d="M' + f[0] + ' ' + f[1] + 'L' + s[0] + ' ' + s[1] + '"/>' + hnd(s, 9) + '<path d="M' + (s[0] - 4) + ' ' + (s[1] + 1) + 'a4 4 0 1 1 4 4" fill="none" style="stroke:var(--accent)" stroke-width="1.5"/>'; }
+    else if (k.kind === 'vertex') h += hnd(s, 6);
+    else h += hnd(s, 7.5, ' style="fill:var(--accent-soft)"');
+  });
+  gHnd.innerHTML = h;
+}
+
+function renderTemp() {
+  var h = '', u = 1 / view.z;
+  if (act && act.type === 'draw') {
+    var a = act.p0, b = act.p1, t = act.tool;
+    if (t === 'rect') h = '<rect class="tmp" x="' + Math.min(a[0], b[0]) + '" y="' + Math.min(a[1], b[1]) + '" width="' + Math.abs(b[0] - a[0]) + '" height="' + Math.abs(b[1] - a[1]) + '" stroke-width="1.5"/>';
+    else if (t === 'circle') h = '<circle class="tmp" cx="' + a[0] + '" cy="' + a[1] + '" r="' + E.dist(a, b) + '" stroke-width="1.5"/>';
+    else if (t === 'gear') { var r = E.dist(a, b), n = Math.max(6, Math.round(2 * Math.PI * r / 16)); if (r > 6) h = '<path class="tmp" d="' + pathD(E.gearProfile({ r: r, teeth: n, depth: Math.PI * r / n, style: 'reto' }).outline.map(function (q) { return [q[0] + a[0], q[1] + a[1]]; })) + '" stroke-width="1.5"/><text class="lk-text" x="' + (a[0] + r + 10 * u) + '" y="' + a[1] + '" font-size="' + 12 * u + '">' + n + ' dentes</text>'; }
+    else if (t === 'free') h = '<path class="tmpline" d="M' + act.pts.map(function (q) { return q[0] + ' ' + q[1]; }).join('L') + '" stroke-width="1.8"/>';
+    else if (t === 'spring') h = '<path class="tmpline" d="' + zigzag(a, b, 5) + '" stroke-width="1.6"/>';
+    else if (t === 'slider' || t === 'chamber') h = '<path class="tmpline" d="M' + a[0] + ' ' + a[1] + 'L' + b[0] + ' ' + b[1] + '" stroke-width="1.8" stroke-dasharray="6 4"/><circle class="tmp" cx="' + a[0] + '" cy="' + a[1] + '" r="' + 4 * u + '"/><text class="lk-text" x="' + (b[0] + 8 * u) + '" y="' + (b[1] - 6 * u) + '" font-size="' + 12 * u + '">' + fmt(E.dist(a, b), 0) + ' px</text>';
+  }
+  if (tool === 'poly' && polyPts && polyPts.length) {
+    var pts = polyPts.slice(); if (hoverW) pts.push(hoverW);
+    h += '<path class="tmpline" d="M' + pts.map(function (q) { return q[0] + ' ' + q[1]; }).join('L') + '" stroke-width="1.8"/>';
+    polyPts.forEach(function (q, i) { h += '<circle class="tmp" cx="' + q[0] + '" cy="' + q[1] + '" r="' + (i === 0 ? 7 : 4) * u + '" stroke-width="1.5"/>'; });
+  }
+  gTemp.innerHTML = h;
+}
+
+function renderTitleBlock() {
+  var L = layerOf(activeLayer), i = layerIdx(activeLayer) + 1;
+  $('#tb').innerHTML = '<div class="k">Camada</div><div class="v">' + i + '/' + scene.layers.length + ' · ' + (L ? esc(L.name) : '') + '</div>' +
+    '<div class="k">Escala</div><div class="v">' + Math.round(view.z * 100) + '% · grade 10 px</div>' +
+    '<div class="k">Gravidade</div><div class="v">' + (scene.settings.gravity ? 'ligada' : 'desligada') + '</div>';
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+function renderAll() {
+  applyView(); renderParts(); renderLinks(); renderFx(); renderHandles(); renderTemp();
+  renderTools(); renderLayerStrip(); renderPanel(); renderHint(); renderTitleBlock();
+  $('#projName').textContent = scene.title || 'Projeto sem nome';
+}
+function renderView() { applyView(); renderParts(); renderLinks(); renderHandles(); renderTemp(); renderTitleBlock(); }
+
+/* ---------- barra de ferramentas ---------- */
+function renderTools() {
+  var el = $('#tools'), h = '';
+  TOOLS.forEach(function (g) {
+    h += '<div class="tgroup" role="group" aria-label="' + g.group + '">';
+    g.items.forEach(function (t) { h += '<button class="tool" data-tool="' + t.id + '" aria-pressed="' + (tool === t.id) + '" title="' + t.label + '">' + ic(IC[t.id]) + '<span>' + t.label + '</span></button>'; });
+    h += '</div>';
+  });
+  el.innerHTML = h;
+}
+$('#tools').addEventListener('click', function (e) { var b = e.target.closest('[data-tool]'); if (b) setTool(b.dataset.tool); });
+function setTool(t) {
+  tool = t; polyPts = null; act = null;
+  if (t !== 'select') { sel = null; if (!isWide()) sheetMode = null; }
+  renderAll();
+}
+
+function renderHint() {
+  var el = $('#hint');
+  if (mode === 'sim') { el.innerHTML = 'Arraste as peças com o dedo para operar o mecanismo.'; return; }
+  var t = HINTS[tool] || '';
+  if (tool === 'poly' && polyPts && polyPts.length) {
+    el.innerHTML = '<span>' + polyPts.length + ' pontos</span>' + (polyPts.length >= 3 ? '<button class="pri" data-h="close">Fechar forma</button>' : '') + '<button data-h="back">Desfazer ponto</button><button data-h="cancel">Cancelar</button>';
+    return;
+  }
+  if (tool === 'select' && sel) { el.innerHTML = ''; return; }
+  el.textContent = t;
+}
+$('#hint').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-h]'); if (!b) return;
+  if (b.dataset.h === 'close') finishPoly();
+  else if (b.dataset.h === 'back') { polyPts.pop(); if (!polyPts.length) polyPts = null; renderTemp(); renderHint(); }
+  else { polyPts = null; renderTemp(); renderHint(); }
+});
+
+/* ---------- camadas ---------- */
+function renderLayerStrip() {
+  var h = '<span class="striplabel">Camadas</span>';
+  scene.layers.forEach(function (L, i) {
+    h += '<button class="lchip' + (L.visible === false ? ' off' : '') + '" data-layer="' + L.id + '" aria-pressed="' + (L.id === activeLayer) + '" style="--lc:var(--L' + (i % 8) + ')"><span class="dot"></span>' + (i + 1) + ' ' + esc(L.name) + '</button>';
+  });
+  h += '<button class="lchip ghost" data-layer="__add" aria-label="Nova camada">' + ic(IC.plus, 16) + '</button>';
+  h += '<button class="lchip ghost" data-layer="__all" aria-label="Gerenciar camadas">' + ic(IC.layers, 16) + '</button>';
+  $('#layerStrip').innerHTML = h;
+}
+$('#layerStrip').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-layer]'); if (!b) return;
+  var id = b.dataset.layer;
+  if (id === '__add') { addLayer(); return; }
+  if (id === '__all' || id === activeLayer) { sheetMode = 'layers'; sel = null; sheetCollapsed = false; renderAll(); return; }
+  activeLayer = id; renderAll();
+});
+function addLayer() {
+  if (scene.layers.length >= 12) { toast('O limite é de 12 camadas.'); return; }
+  var L = { id: newId('L'), name: 'Camada ' + (scene.layers.length + 1), visible: true };
+  scene.layers.push(L); activeLayer = L.id; commit(); renderAll(); toast('Camada ' + scene.layers.length + ' criada e ativa.');
+}
+function layersSection() {
+  var sec = document.createElement('div'); sec.className = 'sec';
+  sec.innerHTML = '<div class="sech"><span class="grow">Camadas · mais alta = mais perto de você</span></div>';
+  var list = document.createElement('div'); list.className = 'layerlist';
+  for (var i = scene.layers.length - 1; i >= 0; i--) (function (L, i) {
+    var n = scene.parts.filter(function (p) { return p.layer === L.id; }).length;
+    var row = document.createElement('div'); row.className = 'lrow' + (L.id === activeLayer ? ' active' : ''); row.style.setProperty('--lc', 'var(--L' + (i % 8) + ')');
+    row.innerHTML = '<span class="dot"></span><span class="num">' + (i + 1) + '</span><span class="meta"><input id="lname-' + L.id + '" type="text" aria-label="Nome da camada ' + (i + 1) + '" value="' + esc(L.name) + '"><span class="cnt">' + (n === 1 ? '1 peça' : n + ' peças') + '</span></span>' +
+      '<span class="acts">' +
+      '<button data-a="vis" aria-label="' + (L.visible === false ? 'Mostrar' : 'Ocultar') + ' camada" title="' + (L.visible === false ? 'Mostrar' : 'Ocultar') + '">' + ic(L.visible === false ? IC.eyeoff : IC.eye, 18) + '</button>' +
+      '<button data-a="up" aria-label="Subir camada" title="Subir"' + (i === scene.layers.length - 1 ? ' disabled' : '') + '>' + ic(IC.up, 18) + '</button>' +
+      '<button data-a="down" aria-label="Descer camada" title="Descer"' + (i === 0 ? ' disabled' : '') + '>' + ic(IC.down, 18) + '</button>' +
+      '<button data-a="del" aria-label="Excluir camada" title="Excluir">' + ic(IC.trash, 18) + '</button></span>';
+    row.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-a]');
+      if (!b) { if (e.target.tagName !== 'INPUT') { activeLayer = L.id; renderAll(); } else if (activeLayer !== L.id) { activeLayer = L.id; renderView(); renderLayerStrip(); row.parentNode.querySelectorAll('.lrow').forEach(function (r) { r.classList.remove('active'); }); row.classList.add('active'); } return; }
+      var a = b.dataset.a, idx = layerIdx(L.id);
+      if (a === 'vis') { L.visible = L.visible === false; commit(); renderAll(); }
+      else if (a === 'up' && idx < scene.layers.length - 1) { scene.layers.splice(idx, 1); scene.layers.splice(idx + 1, 0, L); commit(); renderAll(); }
+      else if (a === 'down' && idx > 0) { scene.layers.splice(idx, 1); scene.layers.splice(idx - 1, 0, L); commit(); renderAll(); }
+      else if (a === 'del') {
+        if (scene.layers.length === 1) { toast('O projeto precisa de ao menos uma camada.'); return; }
+        var doDel = function () {
+          scene.parts.filter(function (p) { return p.layer === L.id; }).forEach(function (p) { removePartRefs(p.id); });
+          scene.parts = scene.parts.filter(function (p) { return p.layer !== L.id; });
+          scene.links.forEach(function (k) { if (k.from === L.id) k.from = k.to; if (k.to === L.id) k.to = k.from; });
+          scene.links = scene.links.filter(function (k) { return !(k.from === L.id && k.to === L.id); });
+          scene.layers.splice(layerIdx(L.id), 1);
+          if (activeLayer === L.id) activeLayer = scene.layers[Math.max(0, idx - 1)].id;
+          sel = null; commit(); renderAll();
+        };
+        if (n) confirmModal('Excluir a camada “' + L.name + '”?', 'As ' + n + ' peças dela e as ligações presas a elas também serão apagadas.', 'Excluir camada', doDel); else doDel();
+      }
+    });
+    row.querySelector('input').addEventListener('change', function (e) { L.name = e.target.value.trim() || ('Camada ' + (layerIdx(L.id) + 1)); commit(); renderLayerStrip(); renderTitleBlock(); });
+    list.appendChild(row);
+  })(scene.layers[i], i);
+  sec.appendChild(list);
+  var br = document.createElement('div'); br.className = 'btnrow';
+  br.innerHTML = '<button class="btn" id="btnAddLayer">' + ic(IC.plus, 16) + 'Nova camada</button>';
+  br.querySelector('button').addEventListener('click', addLayer);
+  sec.appendChild(br);
+  sec.appendChild(toggleRow('opt-focus', 'Apagar as outras camadas ao editar', opts.focus, function (v) { opts.focus = v; renderParts(); }));
+  sec.appendChild(toggleRow('opt-xray', 'Raio-x (ver através das peças)', opts.xray, function (v) { opts.xray = v; renderParts(); }));
+  var nt = document.createElement('p'); nt.className = 'note';
+  nt.textContent = 'Peças só se tocam dentro da mesma camada. Para passar força de uma camada a outra, use um pino (atravessa camadas), um eixo ou um parafuso.';
+  sec.appendChild(nt);
+  return sec;
+}
+
+/* ---------- campos do painel ---------- */
+function rowEl(label, control, forId) { var r = document.createElement('div'); r.className = 'row'; var l = document.createElement('label'); l.textContent = label; if (forId) l.htmlFor = forId; r.appendChild(l); r.appendChild(control); return r; }
+function numField(id, label, val, onSet, o) {
+  o = o || {};
+  var wrap = document.createElement('div'); wrap.className = o.unit ? 'unit' : '';
+  var inp = document.createElement('input'); inp.type = 'number'; inp.id = id; inp.inputMode = 'decimal'; inp.step = o.step || 'any';
+  if (o.min !== undefined) inp.min = o.min; if (o.max !== undefined) inp.max = o.max;
+  inp.value = round(val, o.dec === undefined ? 2 : o.dec);
+  inp.addEventListener('change', function () { var v = parseFloat(inp.value); if (!isFinite(v)) return; if (o.min !== undefined) v = Math.max(o.min, v); if (o.max !== undefined) v = Math.min(o.max, v); onSet(v); commit(); renderAll(); });
+  wrap.appendChild(inp);
+  if (o.unit) { var s = document.createElement('span'); s.textContent = o.unit; wrap.appendChild(s); }
+  return rowEl(label, wrap, id);
+}
+function selField(id, label, val, options, onSet) {
+  var s = document.createElement('select'); s.id = id;
+  options.forEach(function (op) { var o = document.createElement('option'); o.value = op[0]; o.textContent = op[1]; if (op[0] === val) o.selected = true; s.appendChild(o); });
+  s.addEventListener('change', function () { onSet(s.value); commit(); renderAll(); });
+  return rowEl(label, s, id);
+}
+function textField(id, label, val, onSet) {
+  var i = document.createElement('input'); i.type = 'text'; i.id = id; i.value = val;
+  i.addEventListener('change', function () { onSet(i.value); commit(); renderAll(); });
+  return rowEl(label, i, id);
+}
+function toggleRow(id, label, val, onSet, noCommit) {
+  var l = document.createElement('label'); l.className = 'switch'; l.htmlFor = id;
+  var sp = document.createElement('span'); sp.textContent = label;
+  var i = document.createElement('input'); i.type = 'checkbox'; i.id = id; i.checked = !!val; i.setAttribute('role', 'switch');
+  i.addEventListener('change', function () { onSet(i.checked); });
+  l.appendChild(sp); l.appendChild(i); return l;
+}
+function toggleField(id, label, val, onSet) { return toggleRow(id, label, val, function (v) { onSet(v); commit(); renderAll(); }); }
+function section(title) { var s = document.createElement('div'); s.className = 'sec'; var h = document.createElement('div'); h.className = 'sech'; h.textContent = title; s.appendChild(h); return s; }
+function note(text) { var p = document.createElement('p'); p.className = 'note'; p.textContent = text; return p; }
+function partOptions(includeWorld, filter) {
+  var o = includeWorld ? [['', 'Fundo (fixo)']] : [];
+  scene.parts.forEach(function (p) { if (!filter || filter(p)) o.push([p.id, p.name + ' · C' + (layerIdx(p.layer) + 1)]); });
+  return o;
+}
+function layerOptions() { return scene.layers.map(function (L, i) { return [L.id, (i + 1) + ' · ' + L.name]; }); }
+
+/* ---------- painel ---------- */
+function renderPanel() {
+  var panel = $('#panel'), body = $('#panelBody'), title = $('#sheetTitle');
+  body.textContent = '';
+  var wide = isWide();
+  if (!wide) { var ls = $('#layerStrip').getBoundingClientRect(); panel.style.bottom = Math.max(0, window.innerHeight - ls.top) + 'px'; } else panel.style.bottom = '';
+  if (mode === 'sim') {
+    if (!wide) { panel.hidden = true; return; }
+    panel.hidden = false; title.innerHTML = 'Simulação';
+    body.appendChild(simSection());
+    return;
+  }
+  var showLayers = wide || sheetMode === 'layers';
+  if (sel) {
+    var p = sel.kind === 'part' ? part(sel.id) : null, L = sel.kind === 'link' ? link(sel.id) : null;
+    if (!p && !L) { sel = null; }
+    else {
+      panel.hidden = false;
+      title.innerHTML = p ? esc(p.name) + '<span class="sub">peça · camada ' + (layerIdx(p.layer) + 1) + '</span>' : esc(LINK_NAMES[L.type]) + '<span class="sub">ligação</span>';
+      panel.classList.toggle('collapsed', !wide && sheetCollapsed);
+      $('#sheetCollapse').innerHTML = ic(IC.chev, 20); $('#sheetCollapse').style.transform = sheetCollapsed ? 'rotate(180deg)' : '';
+      $('#sheetCollapse').setAttribute('aria-label', sheetCollapsed ? 'Expandir painel' : 'Recolher painel');
+      body.appendChild(p ? partProps(p) : linkProps(L));
+      if (wide) body.appendChild(layersSection());
+      return;
+    }
+  }
+  if (showLayers) {
+    panel.hidden = false; panel.classList.remove('collapsed');
+    title.innerHTML = wide ? 'Projeto' : 'Camadas';
+    $('#sheetCollapse').innerHTML = '';
+    body.appendChild(layersSection());
+    if (wide) {
+      var s = section('Dica');
+      s.appendChild(note('Toque numa peça ou ligação para editar. Desenhe as peças em camadas: a 1 é a do fundo (por exemplo, o corpo), e as de cima ficam mais perto de você.'));
+      body.appendChild(s);
+    }
+    return;
+  }
+  panel.hidden = true;
+}
+$('#sheetClose').innerHTML = ic(IC.close, 20);
+$('#sheetClose').addEventListener('click', function () { sel = null; sheetMode = null; renderAll(); });
+$('#sheetCollapse').addEventListener('click', function () { sheetCollapsed = !sheetCollapsed; renderPanel(); });
+
+function partProps(p) {
+  var wrap = document.createElement('div');
+  var s1 = section('Peça');
+  s1.appendChild(textField('pp-name', 'Nome', p.name, function (v) { p.name = v.trim() || p.name; }));
+  s1.appendChild(selField('pp-layer', 'Camada', p.layer, layerOptions(), function (v) { p.layer = v; }));
+  s1.appendChild(selField('pp-mat', 'Material', p.material || 'aco', Object.keys(E.MATERIALS).map(function (k) { return [k, E.MATERIALS[k].name]; }), function (v) { p.material = v; }));
+  s1.appendChild(toggleField('pp-fixed', 'Peça fixa (não se move)', p.fixed, function (v) { p.fixed = v; }));
+  s1.appendChild(toggleField('pp-bullet', 'Peça rápida (não atravessa paredes)', p.bullet, function (v) { p.bullet = v; }));
+  var mat = E.MATERIALS[p.material || 'aco'];
+  s1.appendChild(note('Massa ≈ ' + fmt(partArea(p) / (E.S * E.S) * mat.density, 2) + ' · atrito ' + fmt(mat.friction, 2) + (p.fixed ? ' · fixa' : '')));
+  wrap.appendChild(s1);
+
+  var s2 = section('Posição');
+  var g3 = document.createElement('div'); g3.className = 'grid3';
+  [['X', 'x', 1], ['Y', 'y', 1], ['Ângulo °', 'a', 1]].forEach(function (f) {
+    var c = document.createElement('div'); c.className = 'cell';
+    var id = 'pp-pos-' + f[1];
+    c.innerHTML = '<label for="' + id + '">' + f[0] + '</label>';
+    var i = document.createElement('input'); i.type = 'number'; i.id = id; i.step = 'any'; i.inputMode = 'decimal';
+    i.value = f[1] === 'a' ? round((p.angle || 0) * 180 / Math.PI, 1) : round(p[f[1]], 1);
+    i.addEventListener('change', function () { var v = parseFloat(i.value); if (!isFinite(v)) return; if (f[1] === 'a') p.angle = v * Math.PI / 180; else p[f[1]] = v; commit(); renderAll(); });
+    c.appendChild(i); g3.appendChild(c);
+  });
+  s2.appendChild(g3);
+  wrap.appendChild(s2);
+
+  var sh = p.shape, s3 = section('Forma');
+  if (sh.type === 'circle') s3.appendChild(numField('pp-r', 'Raio', sh.r, function (v) { sh.r = v; }, { unit: 'px', min: 2 }));
+  else if (sh.type === 'gear') {
+    s3.appendChild(numField('pp-gr', 'Raio primitivo', sh.r, function (v) { sh.r = v; }, { unit: 'px', min: 8 }));
+    s3.appendChild(numField('pp-gt', 'Dentes', sh.teeth, function (v) { sh.teeth = Math.round(v); }, { min: 4, max: 120, step: 1, dec: 0 }));
+    s3.appendChild(numField('pp-gd', 'Altura do dente', sh.depth, function (v) { sh.depth = v; }, { unit: 'px', min: 2 }));
+    s3.appendChild(selField('pp-gs', 'Perfil', sh.style || 'reto', [['reto', 'Dente reto'], ['serra', 'Dente de serra (catraca)']], function (v) { sh.style = v; }));
+    s3.appendChild(note('Passo atual: ' + fmt(2 * Math.PI * sh.r / sh.teeth, 1) + ' px. Duas engrenagens engrenam quando têm o mesmo passo e a distância entre centros é a soma dos raios primitivos.'));
+    var bf = document.createElement('div'); bf.className = 'btnrow';
+    var b = document.createElement('button'); b.className = 'btn'; b.textContent = 'Ajustar passo para 16 px';
+    b.addEventListener('click', function () { sh.teeth = Math.max(4, Math.round(2 * Math.PI * sh.r / 16)); sh.r = sh.teeth * 16 / (2 * Math.PI); sh.depth = 8; commit(); renderAll(); });
+    bf.appendChild(b); s3.appendChild(bf);
+  } else s3.appendChild(note('Arraste os pontos azuis no desenho para mudar a forma. A alça acima da peça gira.'));
+  wrap.appendChild(s3);
+
+  var s4 = section('Ações'); var br = document.createElement('div'); br.className = 'btnrow';
+  br.innerHTML = '<button class="btn" data-a="dup">' + ic(IC.copy, 16) + 'Duplicar</button><button class="btn danger" data-a="del">' + ic(IC.trash, 16) + 'Excluir</button>';
+  br.addEventListener('click', function (e) { var b = e.target.closest('[data-a]'); if (!b) return; if (b.dataset.a === 'dup') duplicateSel(); else deleteSel(); });
+  s4.appendChild(br); wrap.appendChild(s4);
+  return wrap;
+}
+
+function linkProps(L) {
+  var w = document.createElement('div'), s = section(LINK_NAMES[L.type]);
+  if (L.type === 'screw') {
+    s.appendChild(selField('lp-b', 'Peça', L.b, partOptions(false), function (v) { moveRef(L, 'b', v); }));
+    s.appendChild(selField('lp-a', 'Presa a', L.a || '', partOptions(true, function (p) { return p.id !== L.b; }), function (v) { L.a = v || null; }));
+    s.appendChild(note('Peças parafusadas viram um bloco rígido único, mesmo em camadas diferentes.'));
+  } else if (L.type === 'axle') {
+    s.appendChild(selField('lp-b', 'Peça que gira', L.b, partOptions(false), function (v) { moveRef(L, 'b', v); }));
+    s.appendChild(selField('lp-a', 'Gira sobre', L.a || '', partOptions(true, function (p) { return p.id !== L.b; }), function (v) { L.a = v || null; }));
+    w.appendChild(s);
+    var m = section('Motor');
+    m.appendChild(toggleField('lp-mot', 'Motor ligado', L.motorOn, function (v) { L.motorOn = v; if (v && !L.torque) L.torque = 200; if (v && !L.rpm) L.rpm = 20; }));
+    if (L.motorOn) {
+      m.appendChild(numField('lp-rpm', 'Velocidade', L.rpm || 0, function (v) { L.rpm = v; }, { unit: 'rpm' }));
+      m.appendChild(numField('lp-tq', 'Torque máximo', L.torque || 0, function (v) { L.torque = v; }, { min: 0 }));
+      m.appendChild(note('Rotação positiva = sentido horário.'));
+    }
+    w.appendChild(m);
+    var l = section('Limite de giro');
+    l.appendChild(toggleField('lp-lim', 'Limitar o ângulo', L.limitOn, function (v) { L.limitOn = v; if (v && !L.lower && !L.upper) { L.lower = -30; L.upper = 30; } }));
+    if (L.limitOn) {
+      l.appendChild(numField('lp-lo', 'Mínimo', L.lower || 0, function (v) { L.lower = Math.min(v, L.upper || 0); }, { unit: '°' }));
+      l.appendChild(numField('lp-hi', 'Máximo', L.upper || 0, function (v) { L.upper = Math.max(v, L.lower || 0); }, { unit: '°' }));
+      l.appendChild(note('0° é a posição desenhada. Positivo = horário. O batente segura a peça como um limitador real.'));
+    }
+    w.appendChild(l);
+    var t = section('Mola de torção');
+    t.appendChild(numField('lp-tk', 'Rigidez', L.tk || 0, function (v) { L.tk = v; }, { min: 0 }));
+    t.appendChild(numField('lp-tr', 'Ângulo de repouso', L.trest || 0, function (v) { L.trest = v; }, { unit: '°' }));
+    t.appendChild(numField('lp-td', 'Amortecimento', L.td || 0, function (v) { L.td = v; }, { min: 0, step: 0.05 }));
+    t.appendChild(note('Com repouso além do batente, a mola fica pré-carregada e segura a peça encostada.'));
+    w.appendChild(t);
+    return finishLink(w, L);
+  } else if (L.type === 'pin' || L.type === 'sensor') {
+    s.appendChild(selField('lp-host', 'Na peça', L.host, partOptions(false), function (v) { moveRef(L, 'host', v); }));
+    s.appendChild(numField('lp-r', 'Raio', L.r || 5, function (v) { L.r = v; }, { unit: 'px', min: 1 }));
+    s.appendChild(selField('lp-from', 'Da camada', L.from, layerOptions(), function (v) { L.from = v; }));
+    s.appendChild(selField('lp-to', 'Até a camada', L.to, layerOptions(), function (v) { L.to = v; }));
+    if (L.type === 'pin') s.appendChild(note('O pino toca peças de todas as camadas entre “da” e “até”. É assim que um gatilho numa camada empurra uma peça em outra.'));
+    else {
+      var ch = scene.links.filter(function (k) { return k.type === 'chamber'; }).map(function (k, i) { return [k.id, 'Câmara ' + (i + 1)]; });
+      s.appendChild(selField('lp-tg', 'Ao ser tocado', L.target || '', [['', 'Só acender']].concat(ch), function (v) { L.target = v; }));
+      s.appendChild(numField('lp-ms', 'Impacto mínimo', L.minSpeed || 0, function (v) { L.minSpeed = v; }, { unit: 'px/s', min: 0 }));
+      s.appendChild(note('Dispara quando uma peça chega com velocidade igual ou maior que o impacto mínimo.'));
+    }
+  } else if (L.type === 'slider') {
+    s.appendChild(selField('lp-b', 'Peça que desliza', L.b, partOptions(false), function (v) { moveRef(L, 'b', v); }));
+    s.appendChild(selField('lp-a', 'Desliza sobre', L.a || '', partOptions(true, function (p) { return p.id !== L.b; }), function (v) { L.a = v || null; }));
+    s.appendChild(numField('lp-tv', 'Curso à frente', L.travel || 0, function (v) { L.travel = v; }, { unit: 'px', min: 0 }));
+    s.appendChild(numField('lp-bk', 'Curso para trás', L.back || 0, function (v) { L.back = v; }, { unit: 'px', min: 0 }));
+    s.appendChild(numField('lp-dir', 'Direção', (L.dir || 0) * 180 / Math.PI, function (v) { L.dir = v * Math.PI / 180; }, { unit: '°' }));
+    w.appendChild(s);
+    var sp = section('Mola de retorno');
+    sp.appendChild(numField('lp-k', 'Rigidez', L.k || 0, function (v) { L.k = v; }, { min: 0 }));
+    sp.appendChild(numField('lp-rest', 'Posição de repouso', L.rest || 0, function (v) { L.rest = v; }, { unit: 'px' }));
+    sp.appendChild(numField('lp-dmp', 'Amortecimento', L.damp || 0, function (v) { L.damp = v; }, { min: 0, step: 0.1 }));
+    sp.appendChild(note('0 px é a posição desenhada. Um repouso negativo pré-carrega a mola contra o batente de trás.'));
+    w.appendChild(sp);
+    return finishLink(w, L);
+  } else if (L.type === 'spring') {
+    s.appendChild(selField('lp-a', 'Ponta A presa em', L.a || '', partOptions(true), function (v) { reanchor(L, 'a', v); }));
+    s.appendChild(selField('lp-b', 'Ponta B presa em', L.b || '', partOptions(true), function (v) { reanchor(L, 'b', v); }));
+    s.appendChild(numField('lp-k', 'Rigidez', L.k || 0, function (v) { L.k = v; }, { min: 0 }));
+    s.appendChild(numField('lp-dmp', 'Amortecimento', L.damp || 0, function (v) { L.damp = v; }, { min: 0, step: 0.1 }));
+    s.appendChild(numField('lp-free', 'Comprimento livre', L.free || 100, function (v) { L.free = v; }, { unit: '%', min: 1 }));
+    var g = E.linkGeom(scene, L, designPoseById);
+    s.appendChild(note('Desenhada com ' + fmt(E.dist(g.pa, g.pb), 0) + ' px. Livre acima de 100% empurra (mola comprimida); abaixo de 100% puxa (mola esticada).'));
+  } else if (L.type === 'chamber') {
+    s.appendChild(selField('lp-a', 'Fundo preso em', L.a || '', partOptions(true), function (v) { reanchor(L, 'a', v); }));
+    s.appendChild(selField('lp-b', 'Projétil ou pistão', L.b || '', [['', 'Nenhum']].concat(partOptions(false, function (p) { return !p.fixed && p.id !== L.a; })), function (v) { L.b = v || null; }));
+    s.appendChild(numField('lp-w', 'Largura', L.width || 20, function (v) { L.width = v; }, { unit: 'px', min: 2 }));
+    s.appendChild(numField('lp-v', 'Distância até a saída', L.vent || 200, function (v) { L.vent = v; }, { unit: 'px', min: 4 }));
+    s.appendChild(numField('lp-c', 'Carga de gás', L.charge || 0, function (v) { L.charge = v; }, { min: 0 }));
+    s.appendChild(numField('lp-bt', 'Tempo de queima', L.burn || 0, function (v) { L.burn = v; }, { unit: 'ms', min: 0 }));
+    s.appendChild(note('Modelo simplificado: a pressão é a quantidade de gás dividida pelo volume atrás do projétil. Ela empurra o projétil e devolve a mesma força ao fundo (recuo). Quando o projétil passa da saída, o gás escapa.'));
+  }
+  w.appendChild(s);
+  return finishLink(w, L);
+}
+function finishLink(w, L) {
+  var s = section('Ações'), br = document.createElement('div'); br.className = 'btnrow';
+  br.innerHTML = '<button class="btn danger" data-a="del">' + ic(IC.trash, 16) + 'Excluir ligação</button>';
+  br.addEventListener('click', function () { deleteSel(); });
+  s.appendChild(br); w.appendChild(s); return w;
+}
+// troca a peça de referência mantendo o ponto no mesmo lugar do mundo
+function moveRef(L, key, v) {
+  var g = E.linkGeom(scene, L, designPoseById), np = part(v); if (!np) return;
+  var oldAng = L.dir !== undefined && L[key] && part(L[key]) ? part(L[key]).angle || 0 : 0;
+  L[key] = v; L.p = E.toLocal(pose(np), g.p);
+  if (L.dir !== undefined) L.dir = (L.dir || 0) + oldAng - (np.angle || 0);
+  if (L.type === 'pin' || L.type === 'sensor') { if (layerIdx(L.from) < 0) L.from = np.layer; if (layerIdx(L.to) < 0) L.to = np.layer; }
+}
+function reanchor(L, key, v) {
+  var g = E.linkGeom(scene, L, designPoseById);
+  if (L.type === 'spring') { var w = key === 'a' ? g.pa : g.pb; L[key] = v || null; L['p' + key] = v ? E.toLocal(pose(part(v)), w) : w; }
+  else if (L.type === 'chamber') {
+    var oldA = L.a && part(L.a) ? part(L.a).angle || 0 : 0, np = v ? part(v) : null;
+    L.a = v || null; L.p = np ? E.toLocal(pose(np), g.p) : g.p; L.dir = (L.dir || 0) + oldA - (np ? np.angle || 0 : 0);
+  }
+}
+
+/* ---------- simulação: painel e barra ---------- */
+function chambersList() { return scene.links.filter(function (k) { return k.type === 'chamber'; }); }
+function simSection() {
+  var w = document.createElement('div');
+  var s = section('Controle');
+  s.appendChild(note('Arraste qualquer peça móvel. Câmara em laranja: quanto mais forte a cor, maior a pressão.'));
+  var t = document.createElement('div'); t.className = 'readout'; t.id = 'simTime'; s.appendChild(t);
+  w.appendChild(s);
+  var chs = chambersList();
+  if (chs.length) {
+    var c = section('Câmaras');
+    chs.forEach(function (k, i) {
+      var r = document.createElement('div'); r.className = 'row';
+      r.innerHTML = '<div class="readout" id="chr-' + k.id + '">Câmara ' + (i + 1) + '</div>';
+      var b = document.createElement('button'); b.className = 'fire'; b.textContent = 'Acionar ' + (i + 1); b.id = 'fire-' + k.id;
+      b.addEventListener('click', function () { if (sim && !sim.ignite(k.id)) toast('Essa câmara já foi acionada ou não tem projétil. Reinicie para repetir.'); });
+      r.appendChild(b); c.appendChild(r);
+    });
+    w.appendChild(c);
+  }
+  if (sim && sim.warnings.length) { var wn = section('Avisos'); sim.warnings.forEach(function (x) { wn.appendChild(note(x)); }); w.appendChild(wn); }
+  return w;
+}
+function renderSimBar() {
+  var chs = chambersList();
+  var h = '<button class="iconbtn" data-s="pause" aria-label="' + (paused ? 'Continuar' : 'Pausar') + '" title="' + (paused ? 'Continuar' : 'Pausar') + '">' + ic(paused ? IC.play : IC.pause, 20) + '</button>' +
+    '<button class="iconbtn" data-s="step" aria-label="Avançar um quadro" title="Avançar um quadro">' + ic(IC.step, 20) + '</button>' +
+    '<span class="seg" role="group" aria-label="Velocidade">' + [[0.05, '0,05×'], [0.25, '0,25×'], [1, '1×']].map(function (v) { return '<button data-speed="' + v[0] + '" aria-pressed="' + (timeScale === v[0]) + '">' + v[1] + '</button>'; }).join('') + '</span>' +
+    '<button class="iconbtn" data-s="reset" aria-label="Reiniciar" title="Reiniciar">' + ic(IC.reset, 20) + '</button>';
+  chs.forEach(function (k, i) { h += '<button class="fire" data-fire="' + k.id + '">Acionar' + (chs.length > 1 ? ' ' + (i + 1) : '') + '</button>'; });
+  $('#simBar').innerHTML = h;
+}
+$('#simBar').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.speed) { timeScale = parseFloat(b.dataset.speed); renderSimBar(); return; }
+  if (b.dataset.fire) { if (sim && !sim.ignite(b.dataset.fire)) toast('Essa câmara já foi acionada ou não tem projétil. Reinicie para repetir.'); return; }
+  var s = b.dataset.s;
+  if (s === 'pause') { paused = !paused; renderSimBar(); }
+  else if (s === 'step') { if (sim) { paused = true; sim.step(1 / 60 * timeScale); drawSim(); renderSimBar(); } }
+  else if (s === 'reset') startSim();
+});
+function startSim() {
+  try { sim = E.build(scene); } catch (err) { sim = null; toast('Não foi possível simular: ' + err.message); setMode('edit'); return; }
+  paused = false; lastT = performance.now(); announced = {};
+  renderAll(); renderSimBar();
+  if (sim.warnings.length) toast(sim.warnings[0]);
+}
+function setMode(m) {
+  if (m === mode) return;
+  mode = m; act = null; polyPts = null; pinch = null;
+  var app = $('#app'); app.classList.toggle('mode-sim', m === 'sim'); app.classList.toggle('mode-edit', m === 'edit');
+  $('#btnPlay').innerHTML = m === 'sim' ? ic(IC.edit, 18) + '<span>Editar</span>' : ic(IC.play, 18) + '<span>Simular</span>';
+  if (m === 'sim') { if (typeof planck === 'undefined') { toast('O motor de física não carregou. Verifique a conexão e recarregue a página.'); mode = 'edit'; app.classList.remove('mode-sim'); app.classList.add('mode-edit'); $('#btnPlay').innerHTML = ic(IC.play, 18) + '<span>Simular</span>'; return; } startSim(); }
+  else { if (sim) sim.release(); sim = null; renderAll(); }
+  updateUndo();
+}
+$('#btnPlay').addEventListener('click', function () { setMode(mode === 'sim' ? 'edit' : 'sim'); });
+
+var announced = {};
+function drawSim() {
+  updatePartTransforms(); renderLinks(); renderFx();
+  if (sim) chambersList().forEach(function (k, i) { var st = sim.chamberState(k.id); if (st && st.vented && st.exitSpeed !== null && !announced[k.id]) { announced[k.id] = 1; toast('Câmara ' + (i + 1) + ': saída a ' + fmt(st.exitSpeed, 0) + ' px/s.'); } });
+  var t = $('#simTime'); if (t && sim) t.textContent = 't = ' + sim.time().toFixed(3) + ' s · ' + (paused ? 'pausado' : timeScale + '×');
+  if (sim) chambersList().forEach(function (k, i) {
+    var el = document.getElementById('chr-' + k.id), st = sim.chamberState(k.id); if (!el || !st) return;
+    var txt = 'Câmara ' + (i + 1) + ': ';
+    if (!st.fired) txt += 'pronta'; else if (!st.vented) txt += 'pressão ' + fmt(st.P, 0); else txt += 'saída ' + (st.exitSpeed !== null ? fmt(st.exitSpeed, 0) + ' px/s' : '—') + ' · pico ' + fmt(st.peakP, 0);
+    el.textContent = txt;
+  });
+}
+function loop(now) {
+  if (mode === 'sim' && sim) {
+    var dt = Math.min(1 / 30, (now - lastT) / 1000); lastT = now;
+    if (!paused && dt > 0) { try { sim.step(dt * timeScale); } catch (err) { paused = true; toast('A simulação travou: ' + err.message); } }
+    drawSim();
+  } else lastT = now;
+  requestAnimationFrame(loop);
+}
+
+/* ---------- criação ---------- */
+function newPart(shape, center, nameBase) {
+  var count = scene.parts.filter(function (p) { return p.name.indexOf(nameBase) === 0; }).length + 1;
+  var base = layerIdx(activeLayer) === 0;
+  var p = { id: newId('p'), name: nameBase + ' ' + count, layer: activeLayer, x: center[0], y: center[1], angle: 0, fixed: base, material: base ? 'aluminio' : 'aco', bullet: false, shape: shape };
+  scene.parts.push(p); sel = { kind: 'part', id: p.id }; tool = 'select'; sheetCollapsed = !isWide(); commit(); renderAll();
+  if (base) toast('Peças da camada 1 começam fixas, como um corpo. Mude em “Peça fixa”.');
+  return p;
+}
+function polyFromWorld(pts, nameBase) {
+  var c = E.centroid(pts);
+  return newPart({ type: 'poly', pts: pts.map(function (q) { return [round(q[0] - c[0], 2), round(q[1] - c[1], 2)]; }) }, c, nameBase);
+}
+function finishPoly() {
+  if (!polyPts || polyPts.length < 3) return;
+  var pts = polyPts.slice(); polyPts = null;
+  if (Math.abs(E.signedArea(pts)) < 20) { toast('Forma pequena demais.'); renderTemp(); renderHint(); return; }
+  polyFromWorld(pts, 'Peça');
+}
+function newLink(L) {
+  L.id = newId('k'); scene.links.push(L); sel = { kind: 'link', id: L.id }; tool = 'select'; sheetCollapsed = !isWide(); commit(); renderAll();
+  return L;
+}
+function finishDraw(a) {
+  var p0 = a.p0, p1 = a.p1, d = E.dist(p0, p1);
+  switch (a.tool) {
+    case 'rect': {
+      var w = Math.abs(p1[0] - p0[0]), h = Math.abs(p1[1] - p0[1]);
+      if (w < 3 || h < 3) { toast('Arraste para definir largura e altura.'); return; }
+      var x1 = Math.min(p0[0], p1[0]), y1 = Math.min(p0[1], p1[1]);
+      polyFromWorld([[x1, y1], [x1 + w, y1], [x1 + w, y1 + h], [x1, y1 + h]], 'Peça'); return;
+    }
+    case 'circle': if (d < 3) { toast('Arraste do centro para fora.'); return; } newPart({ type: 'circle', r: round(d, 1) }, p0, 'Círculo'); return;
+    case 'gear': {
+      if (d < 10) { toast('Arraste do centro para fora.'); return; }
+      var n = Math.max(6, Math.round(2 * Math.PI * d / 16)), r = n * 16 / (2 * Math.PI);
+      newPart({ type: 'gear', r: round(r, 2), teeth: n, depth: 8, style: 'reto' }, p0, 'Engrenagem'); return;
+    }
+    case 'free': {
+      var pts = E.simplify(a.pts, Math.max(1.2, 2 / view.z));
+      if (pts.length > 3 && E.dist(pts[0], pts[pts.length - 1]) < 3 / view.z) pts.pop();
+      if (pts.length < 3 || Math.abs(E.signedArea(pts)) < 30) { toast('Desenhe um contorno fechado maior.'); return; }
+      polyFromWorld(pts, 'Peça'); return;
+    }
+    case 'slider': {
+      if (d < 6) { toast('Arraste na direção do movimento.'); return; }
+      var b = topPart(p0); if (!b) { toast('Comece o traço sobre a peça que vai deslizar.'); return; }
+      var base = partBelow(p0, b);
+      newLink({ type: 'slider', a: base ? base.id : null, b: b.id, p: E.toLocal(pose(b), p0), dir: Math.atan2(p1[1] - p0[1], p1[0] - p0[0]) - (b.angle || 0), travel: round(d, 1), back: 0, k: 0, rest: 0, damp: 0 });
+      if (b.fixed) toast('Essa peça está fixa; desmarque “Peça fixa” para ela deslizar.');
+      return;
+    }
+    case 'spring': {
+      if (d < 6) { toast('Arraste de uma ponta à outra.'); return; }
+      var A = topPart(p0), B = topPart(p1);
+      if (!A && !B) { toast('Pelo menos uma ponta precisa estar sobre uma peça.'); return; }
+      if (A && B && A.id === B.id) { toast('As duas pontas caíram na mesma peça.'); return; }
+      newLink({ type: 'spring', a: A ? A.id : null, b: B ? B.id : null, pa: A ? E.toLocal(pose(A), p0) : p0, pb: B ? E.toLocal(pose(B), p1) : p1, k: 150, damp: 1, free: 100 });
+      return;
+    }
+    case 'chamber': {
+      if (d < 10) { toast('Arraste do fundo da câmara até a saída.'); return; }
+      var A2 = topPart(p0), ang = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]), proj = null;
+      for (var t = 2; t <= d; t += 2) {
+        var q = [p0[0] + Math.cos(ang) * t, p0[1] + Math.sin(ang) * t];
+        var hit = partsAt(q).filter(function (p) { return !p.fixed && (!A2 || p.id !== A2.id); })[0];
+        if (hit) { proj = hit; break; }
+      }
+      var width = proj && proj.shape.type === 'circle' ? round(proj.shape.r * 2 + 4, 1) : 20;
+      newLink({ type: 'chamber', a: A2 ? A2.id : null, b: proj ? proj.id : null, p: A2 ? E.toLocal(pose(A2), p0) : p0, dir: ang - (A2 ? A2.angle || 0 : 0), vent: round(d, 1), width: width, charge: 150, burn: 2 });
+      if (!proj) toast('Nenhuma peça móvel na linha. Escolha o projétil nas propriedades.');
+      return;
+    }
+  }
+}
+function tapLink(t, w) {
+  var p = snapCenter(w), b = topPart(p);
+  if (!b) { toast('Toque sobre uma peça.'); return; }
+  if (t === 'screw' || t === 'axle') {
+    var a = partBelow(p, b);
+    var L = { type: t, a: a ? a.id : null, b: b.id, p: E.toLocal(pose(b), p) };
+    if (t === 'axle') Object.assign(L, { motorOn: false, rpm: 0, torque: 0, limitOn: false, lower: 0, upper: 0, tk: 0, trest: 0, td: 0.02 });
+    newLink(L);
+    if (t === 'axle' && b.fixed) toast('Essa peça está fixa; desmarque “Peça fixa” para ela girar.');
+    else toast(LINK_NAMES[t] + ': “' + b.name + '” ' + (t === 'axle' ? 'gira sobre ' : 'presa a ') + (a ? '“' + a.name + '”' : 'o fundo') + '.');
+  } else if (t === 'pin') {
+    var i = layerIdx(b.layer), to = scene.layers[i + 1] || scene.layers[i - 1] || scene.layers[i];
+    newLink({ type: 'pin', host: b.id, p: E.toLocal(pose(b), p), r: 5, from: b.layer, to: to.id });
+    toast('Pino da camada ' + (i + 1) + ' até a ' + (layerIdx(to.id) + 1) + '.');
+  } else if (t === 'sensor') {
+    var chs = chambersList(), best = '', bd = Infinity;
+    chs.forEach(function (k) { var g = E.linkGeom(scene, k, designPoseById), dd = E.dist(g.p, p); if (dd < bd) { bd = dd; best = k.id; } });
+    newLink({ type: 'sensor', host: b.id, p: E.toLocal(pose(b), p), r: 5, from: b.layer, to: b.layer, target: best, minSpeed: 80 });
+  }
+}
+
+/* ---------- edição ---------- */
+function removePartRefs(id) {
+  scene.links = scene.links.filter(function (k) { return k.b !== id && k.host !== id && !(k.type !== 'chamber' && k.a === id) && !(k.type === 'spring' && k.b === id); });
+  scene.links.forEach(function (k) { if (k.type === 'chamber') { if (k.a === id) k.a = null; if (k.b === id) k.b = null; } });
+}
+function deleteSel() {
+  if (!sel) return;
+  if (sel.kind === 'part') { removePartRefs(sel.id); scene.parts = scene.parts.filter(function (p) { return p.id !== sel.id; }); }
+  else { var id = sel.id; scene.links = scene.links.filter(function (k) { return k.id !== id; }); scene.links.forEach(function (k) { if (k.target === id) k.target = ''; }); }
+  sel = null; commit(); renderAll();
+}
+function duplicateSel() {
+  if (!sel || sel.kind !== 'part') return;
+  var p = clone(part(sel.id)); p.id = newId('p'); p.x += 20; p.y += 20; p.name = p.name + ' (cópia)';
+  scene.parts.push(p); sel = { kind: 'part', id: p.id }; commit(); renderAll();
+}
+
+/* ---------- testes de toque ---------- */
+function hitHandle(sp) {
+  var hs = handlesFor();
+  for (var i = hs.length - 1; i >= 0; i--) { var s = w2s(hs[i].w); if (Math.hypot(s[0] - sp[0], s[1] - sp[1]) <= 15) return hs[i]; }
+  return null;
+}
+function segDist(p, a, b) { var dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy; var t = L ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L)) : 0; return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy); }
+function hitLink(w, lines) {
+  if (!opts.showLinks) return null;
+  var tol = 12 / view.z, best = null, bd = Infinity;
+  scene.links.forEach(function (L) {
+    var g = E.linkGeom(scene, L, designPoseById), d = Infinity, ux = Math.cos(g.a || 0), uy = Math.sin(g.a || 0);
+    if (!lines) {
+      if (L.type === 'screw' || L.type === 'axle') d = E.dist(w, g.p) - 2 / view.z;
+      else if (L.type === 'pin' || L.type === 'sensor') d = E.dist(w, g.p) - Math.max(0, (L.r || 5) - 4 / view.z);
+      else if (L.type === 'spring') d = Math.min(E.dist(w, g.pa), E.dist(w, g.pb)) + 1 / view.z;
+      else if (L.type === 'slider') d = Math.min(E.dist(w, [g.p[0] + ux * L.travel, g.p[1] + uy * L.travel]), E.dist(w, [g.p[0] - ux * (L.back || 0), g.p[1] - uy * (L.back || 0)])) + 2 / view.z;
+      else if (L.type === 'chamber') d = Math.min(E.dist(w, g.p), E.dist(w, [g.p[0] + ux * L.vent, g.p[1] + uy * L.vent])) + 2 / view.z;
+    } else {
+      if (L.type === 'spring') d = segDist(w, g.pa, g.pb);
+      else if (L.type === 'slider') d = segDist(w, [g.p[0] - ux * (L.back || 0), g.p[1] - uy * (L.back || 0)], [g.p[0] + ux * L.travel, g.p[1] + uy * L.travel]) + 2 / view.z;
+      else if (L.type === 'chamber') { d = segDist(w, g.p, [g.p[0] + ux * L.vent, g.p[1] + uy * L.vent]) - (L.width || 20) / 2; if (d < 0) d = 0; }
+    }
+    if (d < tol && d < bd) { bd = d; best = L; }
+  });
+  return best;
+}
+function pickPart(w) { var u = partsAt(w); if (opts.focus) { var a = u.filter(function (p) { return p.layer === activeLayer; }); if (a.length) return a[0]; } return u[0] || null; }
+
+/* ---------- ponteiro ---------- */
+svg.addEventListener('pointerdown', function (e) {
+  if (e.button !== undefined && e.button > 1 && e.pointerType === 'mouse') return;
+  closeMenu();
+  svg.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, evS(e));
+  if (pointers.size === 2) { cancelAct(); var pts = Array.from(pointers.values()); pinch = { d: Math.hypot(pts[0][0] - pts[1][0], pts[0][1] - pts[1][1]) || 1, z: view.z, mid: [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2], w: s2w((pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2) }; return; }
+  if (pointers.size > 2) return;
+  var sp = evS(e), w = evW(e);
+  if (e.button === 1) { act = { type: 'pan', s0: sp, v0: { x: view.x, y: view.y } }; return; }
+  if (mode === 'sim') {
+    var g = sim ? sim.grab(w, function (id) { var pp = part(id); return pp && layerVisible(pp.layer); }) : null;
+    act = g ? { type: 'grab', s0: sp } : { type: 'pan', s0: sp, v0: { x: view.x, y: view.y } };
+    return;
+  }
+  if (tool === 'select') {
+    var hh = hitHandle(sp);
+    if (hh) { act = { type: 'handle', h: hh, s0: sp, before: JSON.stringify(scene), moved: false }; return; }
+    var L = hitLink(w, false), p = L ? null : pickPart(w);
+    if (!L && !p) L = hitLink(w, true);
+    if (L) { if (!sel || sel.id !== L.id) { sel = { kind: 'link', id: L.id }; sheetCollapsed = !isWide(); renderAll(); } act = { type: 'movelink', id: L.id, w0: w, s0: sp, g0: E.linkGeom(scene, L, designPoseById), before: JSON.stringify(scene), moved: false }; return; }
+    if (p) { if (!sel || sel.id !== p.id) { sel = { kind: 'part', id: p.id }; sheetCollapsed = !isWide(); renderAll(); } act = { type: 'move', id: p.id, w0: w, s0: sp, x0: p.x, y0: p.y, moved: false }; return; }
+    var had = !!sel; sel = null; act = { type: 'pan', s0: sp, v0: { x: view.x, y: view.y }, deselect: had };
+    if (had) renderAll();
+    return;
+  }
+  if (tool === 'poly') { act = { type: 'tap', s0: sp, w0: w, v0: { x: view.x, y: view.y } }; return; }
+  if (tool === 'screw' || tool === 'axle' || tool === 'pin' || tool === 'sensor') { act = { type: 'tap', s0: sp, w0: w, v0: { x: view.x, y: view.y } }; return; }
+  var p0 = tool === 'circle' || tool === 'gear' ? snapCenter(w) : snapP(w);
+  act = { type: 'draw', tool: tool, p0: p0, p1: p0, pts: [w], s0: sp };
+  renderTemp();
+});
+svg.addEventListener('pointermove', function (e) {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, evS(e));
+  if (pinch && pointers.size >= 2) {
+    var pts = Array.from(pointers.values()), d = Math.hypot(pts[0][0] - pts[1][0], pts[0][1] - pts[1][1]) || 1, mid = [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2];
+    view.z = Math.max(0.15, Math.min(8, pinch.z * d / pinch.d));
+    view.x = pinch.w[0] - mid[0] / view.z; view.y = pinch.w[1] - mid[1] / view.z;
+    renderView(); return;
+  }
+  var sp = evS(e), w = evW(e);
+  if (!act) { if (tool === 'poly' && polyPts && mode === 'edit') { hoverW = snapP(w); renderTemp(); } return; }
+  var moved = Math.hypot(sp[0] - act.s0[0], sp[1] - act.s0[1]) > 6;
+  switch (act.type) {
+    case 'pan': view.x = act.v0.x - (sp[0] - act.s0[0]) / view.z; view.y = act.v0.y - (sp[1] - act.s0[1]) / view.z; renderView(); break;
+    case 'tap': if (moved) act = { type: 'pan', s0: act.s0, v0: act.v0 }; break;
+    case 'grab': if (sim) sim.drag(w); break;
+    case 'move': {
+      if (!moved && !act.moved) break; act.moved = true;
+      var p = part(act.id); if (!p) break;
+      p.x = snapV(act.x0 + w[0] - act.w0[0]); p.y = snapV(act.y0 + w[1] - act.w0[1]);
+      if (!scene.settings.snap) { p.x = round(p.x, 1); p.y = round(p.y, 1); }
+      updatePartTransforms(); renderLinks(); renderHandles(); break;
+    }
+    case 'movelink': {
+      if (!moved && !act.moved) break; act.moved = true;
+      var L = link(act.id); if (!L) break;
+      var dw = [w[0] - act.w0[0], w[1] - act.w0[1]], g0 = act.g0;
+      if (L.type === 'spring') { setLinkPoint(L, 'pa', [g0.pa[0] + dw[0], g0.pa[1] + dw[1]]); setLinkPoint(L, 'pb', [g0.pb[0] + dw[0], g0.pb[1] + dw[1]]); }
+      else setLinkPoint(L, 'p', snapP([g0.p[0] + dw[0], g0.p[1] + dw[1]]));
+      renderLinks(); renderHandles(); break;
+    }
+    case 'handle': {
+      act.moved = act.moved || moved; if (!act.moved) break;
+      dragHandle(act.h, w, e); renderParts(); renderLinks(); renderHandles(); break;
+    }
+    case 'draw': {
+      act.p1 = act.tool === 'free' ? w : snapP(w);
+      if (act.tool === 'free') { var last = act.pts[act.pts.length - 1]; if (E.dist(last, w) > 2 / view.z) act.pts.push(w); }
+      renderTemp(); break;
+    }
+  }
+});
+function endPointer(e) {
+  var wasPinch = !!pinch;
+  pointers.delete(e.pointerId);
+  if (pinch) { if (pointers.size < 2) pinch = null; return; }
+  if (wasPinch || !act) return;
+  var a = act; act = null;
+  var sp = evS(e), w = evW(e);
+  if (e.type === 'pointercancel') { if (a.before) restore(a.before); if (a.type === 'grab' && sim) sim.release(); renderTemp(); return; }
+  switch (a.type) {
+    case 'grab': if (sim) sim.release(); break;
+    case 'pan': break;
+    case 'move': if (a.moved) { commit(); renderAll(); } break;
+    case 'movelink': case 'handle': if (a.moved) { commit(); renderAll(); } else if (a.type === 'handle') renderAll(); break;
+    case 'draw': finishDraw(a); renderTemp(); break;
+    case 'tap':
+      if (tool === 'poly') {
+        var q = snapP(a.w0);
+        var f0 = polyPts && polyPts.length >= 3 ? w2s(polyPts[0]) : null;
+        if (f0 && Math.hypot(f0[0] - sp[0], f0[1] - sp[1]) < 14) { finishPoly(); break; }
+        (polyPts = polyPts || []).push(q); hoverW = null; renderTemp(); renderHint(); break;
+      }
+      tapLink(tool, a.w0); break;
+  }
+}
+svg.addEventListener('pointerup', endPointer);
+svg.addEventListener('pointercancel', endPointer);
+svg.addEventListener('pointerleave', function () { if (hoverW) { hoverW = null; renderTemp(); } });
+function cancelAct() {
+  if (!act) return;
+  if (act.type === 'move' && act.moved) { var p = part(act.id); if (p) { p.x = act.x0; p.y = act.y0; } }
+  if ((act.type === 'movelink' || act.type === 'handle') && act.moved && act.before) { scene = JSON.parse(act.before); }
+  if (act.type === 'grab' && sim) sim.release();
+  act = null; renderAll();
+}
+svg.addEventListener('wheel', function (e) {
+  e.preventDefault();
+  var sp = evS(e), w = s2w(sp[0], sp[1]), f = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015));
+  view.z = Math.max(0.15, Math.min(8, view.z * f)); view.x = w[0] - sp[0] / view.z; view.y = w[1] - sp[1] / view.z; renderView();
+}, { passive: false });
+
+function setLinkPoint(L, key, w) {
+  var ref = key === 'pa' ? L.a : key === 'pb' ? L.b : (L.type === 'pin' || L.type === 'sensor') ? L.host : (L.type === 'chamber' ? L.a : L.b);
+  var rp = ref ? part(ref) : null;
+  L[key] = rp ? E.toLocal(pose(rp), w) : [w[0], w[1]];
+}
+function dragHandle(h, w, e) {
+  if (sel.kind === 'part') {
+    var p = part(sel.id); if (!p) return;
+    if (h.kind === 'rotate') {
+      var a = Math.atan2(w[1] - p.y, w[0] - p.x) + Math.PI / 2;
+      if (scene.settings.snap) a = Math.round(a / (Math.PI / 36)) * (Math.PI / 36);
+      p.angle = a;
+    } else if (h.kind === 'vertex') {
+      var q = scene.settings.snap ? snapP(w) : w;
+      p.shape.pts[h.i] = E.toLocal(pose(p), q).map(function (v) { return round(v, 2); });
+    } else if (h.kind === 'radius') {
+      var r = Math.max(4, E.dist(w, [p.x, p.y]));
+      if (p.shape.type === 'circle') p.shape.r = round(scene.settings.snap ? Math.round(r) : r, 1);
+      else { var n = Math.max(6, Math.round(2 * Math.PI * r / (2 * Math.PI * p.shape.r / p.shape.teeth))); var pitch = 2 * Math.PI * p.shape.r / p.shape.teeth; p.shape.teeth = n; p.shape.r = round(n * pitch / (2 * Math.PI), 2); }
+    }
+  } else {
+    var L = link(sel.id); if (!L) return;
+    var q2 = snapP(w);
+    if (h.kind === 'sa') setLinkPoint(L, 'pa', q2);
+    else if (h.kind === 'sb') setLinkPoint(L, 'pb', q2);
+    else if (h.kind === 'lp') setLinkPoint(L, 'p', L.type === 'axle' || L.type === 'screw' || L.type === 'pin' ? snapCenterOr(w) : q2);
+    else if (h.kind === 'send' || h.kind === 'cend') {
+      var g = E.linkGeom(scene, L, designPoseById), ref = h.kind === 'send' ? (L.b && part(L.b)) : (L.a && part(L.a));
+      var ang = Math.atan2(q2[1] - g.p[1], q2[0] - g.p[0]), len = Math.max(4, E.dist(q2, g.p));
+      L.dir = ang - (ref ? ref.angle || 0 : 0);
+      if (h.kind === 'send') L.travel = round(len, 1); else L.vent = round(len, 1);
+    }
+  }
+}
+function snapCenterOr(w) { return snapCenter(w); }
+
+/* ---------- vista ---------- */
+function fitView() {
+  var W = stage.clientWidth || 360, H = stage.clientHeight || 500;
+  var mnx = Infinity, mny = Infinity, mxx = -Infinity, mxy = -Infinity;
+  scene.parts.forEach(function (p) { E.shapeOutline(p.shape).forEach(function (q) { var w = E.toWorld(pose(p), q); mnx = Math.min(mnx, w[0]); mny = Math.min(mny, w[1]); mxx = Math.max(mxx, w[0]); mxy = Math.max(mxy, w[1]); }); });
+  if (!isFinite(mnx)) { mnx = 0; mny = 0; mxx = 600; mxy = 400; }
+  var pad = isWide() ? 40 : 18, topPad = isWide() ? 56 : 70, botPad = isWide() ? 60 : 90;
+  var z = Math.min((W - 2 * pad) / Math.max(1, mxx - mnx), (H - topPad - botPad) / Math.max(1, mxy - mny));
+  view.z = Math.max(0.15, Math.min(3, z));
+  view.x = (mnx + mxx) / 2 - W / 2 / view.z;
+  view.y = (mny + mxy) / 2 - (topPad + (H - topPad - botPad) / 2) / view.z;
+}
+function zoomBy(f) { var W = stage.clientWidth, H = stage.clientHeight, c = s2w(W / 2, H / 2); view.z = Math.max(0.15, Math.min(8, view.z * f)); view.x = c[0] - W / 2 / view.z; view.y = c[1] - H / 2 / view.z; renderView(); }
+$('#zIn').innerHTML = ic(IC.plus, 18); $('#zOut').innerHTML = ic(IC.minus, 18); $('#zFit').innerHTML = ic(IC.fit, 18);
+$('#zIn').addEventListener('click', function () { zoomBy(1.25); });
+$('#zOut').addEventListener('click', function () { zoomBy(0.8); });
+$('#zFit').addEventListener('click', function () { fitView(); renderView(); });
+window.addEventListener('resize', function () { renderAll(); });
+
+/* ---------- menu e modais ---------- */
+function closeMenu() { $('#menu').hidden = true; }
+function openMenu() {
+  var m = $('#menu');
+  m.innerHTML = '<div class="mh">Exemplos</div>' +
+    '<button class="mi" data-m="ex:lancador">Lançador de esfera<small>gatilho, retém, câmara</small></button>' +
+    '<button class="mi" data-m="ex:trava">Trava de porta<small>trilho e alavanca</small></button>' +
+    '<button class="mi" data-m="ex:engrenagens">Engrenagens e catraca<small>motor e lingueta</small></button>' +
+    '<hr><div class="mh">Projeto</div>' +
+    '<button class="mi" data-m="rename">Renomear projeto</button>' +
+    '<button class="mi" data-m="new">Projeto em branco</button>' +
+    '<button class="mi" data-m="export">Exportar (texto JSON)</button>' +
+    '<button class="mi" data-m="import">Importar de texto JSON</button>' +
+    '<hr><div class="mh">Mundo e vista</div>';
+  m.appendChild(toggleRow('m-grav', 'Gravidade', scene.settings.gravity, function (v) { scene.settings.gravity = v; commit(); renderTitleBlock(); }));
+  m.appendChild(toggleRow('m-snap', 'Encaixar na grade', scene.settings.snap, function (v) { scene.settings.snap = v; commit(); }));
+  m.appendChild(toggleRow('m-links', 'Mostrar ligações', opts.showLinks, function (v) { opts.showLinks = v; renderLinks(); }));
+  m.appendChild(toggleRow('m-xray', 'Raio-x', opts.xray, function (v) { opts.xray = v; renderParts(); }));
+  m.appendChild(toggleRow('m-focus', 'Apagar outras camadas ao editar', opts.focus, function (v) { opts.focus = v; renderParts(); }));
+  m.hidden = false;
+}
+$('#btnMenu').addEventListener('click', function (e) { e.stopPropagation(); if ($('#menu').hidden) openMenu(); else closeMenu(); });
+document.addEventListener('click', function (e) { if (!$('#menu').hidden && !e.target.closest('#menu') && !e.target.closest('#btnMenu')) closeMenu(); });
+$('#menu').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-m]'); if (!b) return;
+  var k = b.dataset.m; closeMenu();
+  if (k.indexOf('ex:') === 0) { var name = k.slice(3); confirmModal('Abrir o exemplo?', 'O projeto atual será substituído. Exporte antes se quiser guardá-lo.', 'Abrir exemplo', function () { setMode('edit'); loadScene(E.examples[name]()); }); }
+  else if (k === 'new') confirmModal('Começar um projeto em branco?', 'O projeto atual será substituído. Exporte antes se quiser guardá-lo.', 'Começar do zero', function () {
+    setMode('edit');
+    loadScene({ version: 1, nextId: 10, title: 'Projeto sem nome', layers: [{ id: 'L1', name: 'Corpo', visible: true }, { id: 'L2', name: 'Mecanismo', visible: true }, { id: 'L3', name: 'Acionamento', visible: true }], parts: [], links: [], settings: { gravity: true, g: 10, snap: true } });
+    view = { x: -40, y: -60, z: 1 }; renderAll();
+  });
+  else if (k === 'rename') promptModal('Nome do projeto', scene.title || '', function (v) { scene.title = v.trim() || scene.title; commit(); renderAll(); });
+  else if (k === 'export') exportModal();
+  else if (k === 'import') importModal();
+});
+function modal(html, wire) { var m = $('#modal'); m.innerHTML = '<div class="box" role="dialog" aria-modal="true">' + html + '</div>'; m.hidden = false; wire(m); var f = m.querySelector('textarea, input, .btn.pri'); if (f) f.focus(); }
+function closeModal() { $('#modal').hidden = true; $('#modal').innerHTML = ''; }
+$('#modal').addEventListener('click', function (e) { if (e.target.id === 'modal') closeModal(); });
+function confirmModal(title, text, okLabel, onOk) {
+  modal('<h2>' + esc(title) + '</h2><p>' + esc(text) + '</p><div class="btnrow"><button class="btn" data-x="no">Cancelar</button><button class="btn pri" data-x="ok">' + esc(okLabel) + '</button></div>', function (m) {
+    m.querySelector('[data-x=no]').onclick = closeModal; m.querySelector('[data-x=ok]').onclick = function () { closeModal(); onOk(); };
+  });
+}
+function promptModal(title, val, onOk) {
+  modal('<h2>' + esc(title) + '</h2><input id="pm-in" type="text" class="btn" style="width:100%;height:40px" value="' + esc(val) + '"><div class="btnrow"><button class="btn" data-x="no">Cancelar</button><button class="btn pri" data-x="ok">Salvar</button></div>', function (m) {
+    m.querySelector('[data-x=no]').onclick = closeModal; m.querySelector('[data-x=ok]').onclick = function () { var v = m.querySelector('#pm-in').value; closeModal(); onOk(v); };
+  });
+}
+function exportModal() {
+  var json = JSON.stringify(scene);
+  modal('<h2>Exportar projeto</h2><p>Copie este texto e guarde onde quiser. Para abrir de novo, use “Importar”.</p><textarea id="ex-ta" readonly></textarea><div class="btnrow"><button class="btn" data-x="no">Fechar</button><button class="btn pri" data-x="copy">Copiar</button></div>', function (m) {
+    var ta = m.querySelector('#ex-ta'); ta.value = json;
+    m.querySelector('[data-x=no]').onclick = closeModal;
+    m.querySelector('[data-x=copy]').onclick = function () {
+      var done = function () { toast('Projeto copiado.'); };
+      try { navigator.clipboard.writeText(json).then(done, function () { ta.select(); toast('Selecionei o texto; copie com o menu do sistema.'); }); } catch (e) { ta.select(); toast('Selecionei o texto; copie com o menu do sistema.'); }
+    };
+  });
+}
+function importModal() {
+  modal('<h2>Importar projeto</h2><p>Cole o texto exportado. O projeto atual será substituído.</p><textarea id="im-ta" placeholder="{&quot;version&quot;:1, ...}"></textarea><div class="btnrow"><button class="btn" data-x="no">Cancelar</button><button class="btn pri" data-x="ok">Importar</button></div>', function (m) {
+    m.querySelector('[data-x=no]').onclick = closeModal;
+    m.querySelector('[data-x=ok]').onclick = function () {
+      try { var sc = JSON.parse(m.querySelector('#im-ta').value); if (!sc.parts || !sc.layers) throw new Error('faltam peças ou camadas'); closeModal(); setMode('edit'); loadScene(sc); toast('Projeto importado.'); }
+      catch (err) { toast('Texto inválido: ' + err.message + '.'); }
+    };
+  });
+}
+
+/* ---------- teclado ---------- */
+document.addEventListener('keydown', function (e) {
+  var tag = (e.target.tagName || '').toLowerCase(); if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+  var mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); }
+  else if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
+  else if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicateSel(); }
+  else if ((e.key === 'Delete' || e.key === 'Backspace') && mode === 'edit' && sel) { e.preventDefault(); deleteSel(); }
+  else if (e.key === 'Escape') { if (!$('#modal').hidden) closeModal(); else if (polyPts) { polyPts = null; renderTemp(); renderHint(); } else { sel = null; tool = 'select'; renderAll(); } }
+  else if (e.key === ' ') { e.preventDefault(); setMode(mode === 'sim' ? 'edit' : 'sim'); }
+  else if (e.key === 'Enter' && polyPts) finishPoly();
+});
+
+/* ---------- início ---------- */
+$('#btnUndo').innerHTML = ic(IC.undo, 20); $('#btnRedo').innerHTML = ic(IC.redo, 20); $('#btnMenu').innerHTML = ic(IC.menu, 20);
+$('#btnUndo').addEventListener('click', undo); $('#btnRedo').addEventListener('click', redo);
+$('#btnPlay').innerHTML = ic(IC.play, 18) + '<span>Simular</span>';
+
+function start(data) {
+  var sc = null;
+  if (data && data.scene) sc = data.scene;
+  if (!sc) { try { var raw = localStorage.getItem(STORE); if (raw) sc = JSON.parse(raw); } catch (e) { sc = null; } }
+  if (!sc || !sc.parts) sc = E.examples.lancador();
+  loadScene(sc);
+  requestAnimationFrame(function (t) { lastT = t; fitView(); renderAll(); requestAnimationFrame(loop); });
+}
+if (window.claude && window.claude.hot && window.claude.hot.snapshot) { try { window.claude.hot.snapshot(function () { return { scene: scene }; }); } catch (e) {} }
+if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start); else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
