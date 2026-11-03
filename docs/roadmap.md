@@ -5,7 +5,7 @@ Cada fase tem um documento próprio em `docs/fases/` com itens numerados e crit�
 ## Fase 0 — Direção (coordenação, sem código)
 
 0.1 Documentos de coordenação: regras, arquitetura, roadmap, papéis. **Feito.**
-0.2 Escolha da identidade entre os três frames de `docs/identidade/frames.md`. O Will gera as imagens dos frames no ChatGPT e escolhe.
+0.2 Referência de imagem: comparar referências reais de cada frame, escolher a direção, gerar as imagens do frame no ChatGPT e fechar a identidade. Os assets são feitos a partir dessa referência.
 0.3 O coordenador visual escreve o manifesto do lote 01 a partir do frame escolhido.
 0.4 O Will gera o lote 01 e sobe em `art/source/lote-01/` com o manifesto.
 

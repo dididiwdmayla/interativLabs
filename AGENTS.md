@@ -14,7 +14,7 @@ Identidade: **a definir na Fase 0**. As três direções candidatas estão em `d
 
 - **Coordenador geral**: o Claude do projeto interativLabs. Escreve as fases, os itens e os critérios de aceite, revisa os PRs contra as capturas e mantém estes documentos. Não escreve código do app.
 - **Coordenador visual** e **coordenador sonoro**: subordinados ao coordenador geral, ativados quando a fase pede. Escrevem frames, manifestos de lote e prompts. A arte e o som são gerados fora do repositório.
-- **Executor**: o Will, rodando o Claude Code. Implementa os itens da fase, um por vez.
+- **Executor**: um agente disparado pelo coordenador geral dentro do projeto, trabalhando direto no repositório. Implementa os itens da fase, um por vez, e para nos pontos de revisão. O Will acompanha pelo chat e faz o merge.
 
 O executor nunca gera nem substitui assets ou sons. Se um asset não servir, registre no documento de verificação da fase e devolva ao coordenador visual.
 
