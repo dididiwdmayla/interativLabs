@@ -8,7 +8,7 @@ O interativLabs é uma bancada de mecanismos em 2D, de uso pessoal, vertente da 
 
 A ideia central é a **camada**. A camada 1 é o fundo (por exemplo, o corpo de um mecanismo); quanto mais alta, mais perto de quem olha. Peças só se tocam dentro da mesma camada. Uma camada só age sobre outra por uma ligação explícita. Entender um mecanismo aqui é ver como a força atravessa as camadas.
 
-Identidade: **a definir na Fase 0**. As três direções candidatas estão em `docs/identidade/frames.md`. Quando o Will escolher, esta seção passa a descrever a identidade escolhida, e ela vale para tudo. Até lá, use os tokens provisórios e não invente estética.
+Identidade: **Prancha índigo**. Um desenho de patente impresso em traço branco sobre papel índigo: gravura com hachura e contra-hachura, material indicado pela hachura (não pela cor), molas espira por espira, números de chamada com linhas finas apontando cada ligação. Cor é estado, não material: ouro velho para a mão da pessoa (seleção, foco, arrasto) e brasa para energia e alerta (câmara, sensor, faísca). A especificação completa, com tokens, traço, hachuras e tipografia, está em `docs/identidade/identidade.md` e vale para tudo. O frame oficial (imagens de referência aprovadas) fica em `docs/identidade/frame-oficial/`.
 
 ## Papéis
 
@@ -95,7 +95,7 @@ docs/                    arquitetura, fases, decisões, identidade, verificaçõ
 
 ## Desempenho
 
-- 60 quadros por segundo com 150 peças e 100 ligações num celular intermediário, tema escuro e claro. Isso é medido no item da fase que mexe na renderização, não suposto.
+- 60 quadros por segundo com 150 peças e 100 ligações num celular intermediário, em cada tema que existir. Isso é medido no item da fase que mexe na renderização, não suposto.
 - Durante a simulação, só mude atributos de `transform` das peças e o desenho das ligações. Não recrie elementos a cada quadro.
 
 ## Pipeline de assets
@@ -111,7 +111,7 @@ docs/                    arquitetura, fases, decisões, identidade, verificaçõ
 
 ## Padrão de qualidade
 
-Bonito o bastante para apresentar. Nada genérico, nada com cara de template. A peça desenhada à mão precisa parecer usinada, não um polígono cinza. Animações com detalhe, mecânicas que dão vontade de mexer, sensação física no toque. Confira com captura de tela (Playwright em 390×844 e 1440×900, tema claro e escuro quando houver os dois) antes de dar algo por pronto.
+Bonito o bastante para apresentar. Nada genérico, nada com cara de template. A peça desenhada à mão precisa parecer usinada, não um polígono cinza. Animações com detalhe, mecânicas que dão vontade de mexer, sensação física no toque. Confira com captura de tela (Playwright em 390×844 e 1440×900, em cada tema que existir) antes de dar algo por pronto.
 
 ## Commits
 

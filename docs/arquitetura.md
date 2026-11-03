@@ -49,7 +49,7 @@ interface Scene {
 interface Layer { id: Id; name: string; visible: boolean; locked: boolean }
 
 interface Part {
-  id: Id; name: string; layer: Id;
+  id: Id; ref: number; name: string; layer: Id;
   x: number; y: number; angle: number;      // pose desenhada
   shape: Shape;
   material: MaterialId;                     // define densidade, atrito, elasticidade e aparência
@@ -63,6 +63,7 @@ type Shape =
   | { kind: "circle"; r: number; holes: Vec2[][] }
   | { kind: "gear"; module: number; teeth: number; pressureAngle: number; profile: "involute" | "ratchet"; bore: number };
 
+// toda ligação também tem ref: number (omitido abaixo)
 type Link =
   | { id: Id; kind: "screw";   a: Id | null; b: Id; at: Vec2 /* local de b */ }
   | { id: Id; kind: "axle";    a: Id | null; b: Id; at: Vec2; motor?: Motor; limit?: AngleLimit; torsion?: Torsion }
@@ -74,6 +75,8 @@ type Link =
 ```
 
 Regras do formato:
+
+- Peças e ligações têm `ref: number`, o número de chamada da prancha. É único na cena, atribuído na criação (o maior existente + 1), editável e nunca renumerado sozinho. É ele que aparece nas linhas de chamada da identidade.
 
 - `a: null` significa "preso ao fundo" (o mundo fixo).
 - Pontos de ligação são guardados no espaço local da peça de referência. Mover a peça leva a ligação junto.

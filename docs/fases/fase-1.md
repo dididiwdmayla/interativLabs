@@ -2,7 +2,7 @@
 
 Branch: `fase-1`. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
 
-Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual é provisório: tokens neutros, tipografia do sistema, sem textura. Provisório não é desleixado: alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 troca a pele, não a estrutura.
+Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual já usa os tokens, a paleta e as fontes da Prancha índigo (`docs/identidade/identidade.md`), mas sem hachuras, texturas nem ferragens: isso é da Fase 2. Alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 completa a pele, não refaz a estrutura.
 
 O protótipo é referência de comportamento, não código para copiar. As coordenadas das três cenas de exemplo foram ajustadas na mão e testadas; os valores físicos delas servem de ponto de partida.
 
@@ -13,7 +13,7 @@ O protótipo é referência de comportamento, não código para copiar. As coord
 - Vite + React + TypeScript estrito, alias `@/` para `src/`.
 - ESLint, Prettier, Vitest, Playwright.
 - Scripts: `dev`, `build`, `preview`, `lint`, `typecheck`, `test`, `capture` (capturas Playwright em 390×844 e 1440×900, salvas em `docs/capturas/fase-1/`), `check:overflow` (360, 390 e 412 px; reprova rolagem lateral).
-- `src/styles/tokens.css` com tokens provisórios (cores neutras com tema claro e escuro, espaço, raio, tipografia do sistema, curvas de movimento).
+- `src/styles/tokens.css` com os tokens de cor, tipografia e movimento de `docs/identidade/identidade.md`, mais espaço e raio. Fontes servidas localmente (pacotes `@fontsource`), sem depender do Google Fonts em produção.
 - Casca do app: barra superior, palco SVG ocupando o resto, barra de ferramentas embaixo no celular e à esquerda no computador, painel à direita no computador.
 - Projeto ligado à Vercel com preview por branch.
 

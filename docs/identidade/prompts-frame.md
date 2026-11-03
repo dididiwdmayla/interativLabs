@@ -152,4 +152,4 @@ Para uma imagem virar referência oficial, ela precisa segurar todos os itens ab
 10. **Coerência.** As imagens têm o mesmo papel, a mesma tinta e a mesma espessura de traço.
 11. **Limpeza.** Sem marca d'água, assinatura, logotipo, carimbo ou texto inventado além do pedido. Nada que lembre arma de fogo; o cilindro da (b) lê como peça pneumática industrial.
 
-Imagem que falhar em 1, 2, 3, 7 ou 11 é refeita. Falhas de texto e de detalhe pequeno (um número trocado, um ícone estranho) não reprovam, desde que o resto segure. Devolva as imagens ao coordenador visual com a lista marcada; as aprovadas entram no repositório como frame oficial, no caminho que o coordenador geral indicar.
+Imagem que falhar em 1, 2, 3, 7 ou 11 é refeita. Falhas de texto e de detalhe pequeno (um número trocado, um ícone estranho) não reprovam, desde que o resto segure. Devolva as imagens ao coordenador visual com a lista marcada; as aprovadas entram no repositório como frame oficial em `docs/identidade/frame-oficial/`, com o nome da letra do prompt (`a-editor-celular.png`, `b-simulacao-celular.png`, `c-editor-computador.png`, `d-materiais.png`, `e-ferragens.png`, `f-entrada.png`).
