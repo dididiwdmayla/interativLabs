@@ -288,3 +288,9 @@ Se um dia houver tema claro, o caminho histórico é a cópia Pellet: traço ín
 - Elástico e mola nas transições da interface.
 - Emojis, ícones de biblioteca genérica, logotipo, assinatura, marca d'água, nomes de inventor.
 - Qualquer coisa que lembre arma de fogo, nos exemplos, nos frames ou nos assets.
+
+## Decisões do Will (03/11/2026)
+
+- Tema único, escuro (índigo).
+- Pinyon Script fica, só no "Fig. N".
+- Mecanismos do frame oficial como nos prompts: catraca, engrenagens e cilindro pneumático no celular; trinco de porta no computador.
