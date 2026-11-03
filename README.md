@@ -19,3 +19,20 @@ Uso pessoal. Roda no navegador, no celular e no computador.
 ## Estado
 
 Fase 0 (direção) em andamento. A Fase 1 (fundação) pode começar em paralelo.
+
+## Rodar
+
+```
+npm ci
+npm run dev          # servidor local
+npm run build        # build estático em dist/
+npm run lint && npm run typecheck && npm test
+npm run capture      # capturas Playwright (390×844 e 1440×900) em docs/capturas/fase-1/
+npm run check:overflow  # reprova rolagem lateral em 360, 390 e 412 px
+```
+
+Playwright usa o Chromium indicado por `PLAYWRIGHT_BROWSERS_PATH`; para outro binário, defina `PW_CHROMIUM=/caminho/do/chrome`.
+
+## Deploy
+
+Build estático (Vite) pronto para a Vercel: `vercel.json` define `npm ci`, `npm run build` e a saída `dist/`. A ligação do projeto da Vercel ao repositório (com preview por branch) é feita pelo Will na conta dele.
