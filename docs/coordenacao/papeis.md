@@ -29,6 +29,19 @@ Se a sessão do executor cair no meio de um item, o Will abre outra com a mesma 
 5. O coordenador visual fecha com um briefing ao coordenador geral: o que entrou, o que ficou de fora e o que conferir nas folhas de contato.
 6. O coordenador geral entrega ao Will a instrução do executor para rodar `npm run assets`. As folhas de contato voltam ao coordenador visual para a conferência final.
 
+## Escolha de agente, modelo e esforço
+
+Toda instrução do coordenador diz onde rodar, com qual modelo e com qual esforço. A regra:
+
+| Tipo de trabalho | Modelo | Esforço |
+| --- | --- | --- |
+| Estrutura e decisão: arquitetura, motor de física, geometria, formato da cena, comparativos, desempenho | Opus | alto |
+| Visual e interação que exigem criatividade: renderizador da Prancha índigo, editor, toque, movimento, telas novas | Opus | alto |
+| Implementação guiada por especificação fechada: telas que seguem um padrão já pronto, painéis de propriedades, persistência, testes a mais | Sonnet | médio |
+| Mecânico: pipeline de assets com manifesto pronto, `npm run assets`, ajustes pequenos, correções apontadas na revisão | Sonnet | médio ou baixo |
+
+Na dúvida entre os dois, o coordenador recomenda Opus e diz por quê. Claude Code é o padrão; Codex só quando o Will preferir.
+
 ## Instrução padrão do executor
 
 O Will cola no Claude Code ou no Codex, aberto no repositório. O coordenador ajusta o número da fase e o ponto de parada.
