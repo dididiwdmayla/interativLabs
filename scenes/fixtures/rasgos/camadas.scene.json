@@ -1,0 +1,142 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Pino e camadas",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Fundo",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Meio",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L3",
+      "name": "Frente",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Prateleira (camada 1)",
+      "layer": "L1",
+      "x": 0,
+      "y": 50,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-30, -5],
+          [30, -5],
+          [30, 5],
+          [-30, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Caixa solta (camada 1)",
+      "layer": "L1",
+      "x": 0,
+      "y": 40,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-20, -5],
+          [20, -5],
+          [20, 5],
+          [-20, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Piso (camada 3)",
+      "layer": "L3",
+      "x": 0,
+      "y": 100,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-30, -5],
+          [30, -5],
+          [30, 5],
+          [-30, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Peça com pino (camada 2)",
+      "layer": "L2",
+      "x": 0,
+      "y": -300,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-8, -4],
+          [8, -4],
+          [8, 4],
+          [-8, 4]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k5",
+      "ref": 5,
+      "kind": "pin",
+      "host": "p4",
+      "at": [0, 0],
+      "r": 3,
+      "layers": ["L2", "L3"]
+    }
+  ]
+}

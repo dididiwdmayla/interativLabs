@@ -75,8 +75,10 @@ export function createPlanckAdapter(): EngineAdapter {
       Settings.maxTranslation = (SPEED_LIMIT * FIXED_STEP) / L;
       const plan = buildPlan(scene);
       const warnings = [...plan.warnings];
-      if (plan.distances.length || plan.mounts.length)
-        warnings.push("Planck: haste, cabo e suporte elástico só existem no Box2D; ficaram de fora");
+      if (plan.distances.length || plan.mounts.length || plan.slots.length)
+        warnings.push(
+          "Planck: haste, cabo, suporte elástico e rasgo em junta só existem no Box2D; ficaram de fora",
+        );
       const w = new World({ gravity: PVec2(plan.gravity[0] / L, plan.gravity[1] / L) });
       world = w;
       let fixtures = 0;

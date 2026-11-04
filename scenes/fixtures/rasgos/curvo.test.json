@@ -1,0 +1,75 @@
+{
+  "id": "rasgos/curvo",
+  "group": "rasgos",
+  "title": "Rasgo curvo (contato)",
+  "notes": "Placa fixa na camada 1 com um rasgo em arco de 90° (raio 30 mm, 4,4 mm de largura); peça na camada 2 com um pino de Ø 4 mm que ocupa as camadas 1 e 2. O roteiro arrasta a peça ao longo do arco, até 5° além das pontas, e volta.",
+  "view": [-15, -15, 65, 65],
+  "runs": [
+    {
+      "name": "arrasto",
+      "duration": 3.2,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p2",
+          "path": [
+            [30, 0],
+            [29.8858, -2.6147],
+            [29.8858, 2.6147],
+            [28.9778, 7.7646],
+            [27.1892, 12.6785],
+            [24.5746, 17.2073],
+            [21.2132, 21.2132],
+            [17.2073, 24.5746],
+            [12.6785, 27.1892],
+            [7.7646, 28.9778],
+            [2.6147, 29.8858],
+            [-2.6147, 29.8858],
+            [2.6147, 29.8858],
+            [7.7646, 28.9778],
+            [12.6785, 27.1892],
+            [17.2073, 24.5746],
+            [21.2132, 21.2132],
+            [24.5746, 17.2073],
+            [27.1892, 12.6785],
+            [28.9778, 7.7646],
+            [29.8858, 2.6147],
+            [29.8858, -2.6147]
+          ],
+          "t0": 0.1,
+          "t1": 3,
+          "release": 3
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "span",
+          "label": "o pino percorre o arco de ponta a ponta (≥ 88°)",
+          "q": {
+            "around": {
+              "part": "p2",
+              "at": [0, 0],
+              "center": [0, 0]
+            }
+          },
+          "min": 1.5359
+        },
+        {
+          "kind": "maxPenetration",
+          "label": "penetração < 0,1 mm",
+          "max": 0.1
+        },
+        {
+          "kind": "range",
+          "label": "nunca escapa do rasgo (folga até a parede ≥ −0,1 mm)",
+          "q": {
+            "link": "k4",
+            "field": "clearance"
+          },
+          "min": -0.1
+        }
+      ]
+    }
+  ],
+  "scene": "curvo.scene.json"
+}

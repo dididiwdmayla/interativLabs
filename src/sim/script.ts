@@ -39,6 +39,8 @@ export type Quantity =
   | { pv: Id; gamma: number }
   /** força do gás na parede (N) dividida por (P − p0)·A da câmara: 1 quando bate */
   | { gasForce: Id; wall: number; p0: number }
+  /** ângulo (rad) de um ponto local da peça em torno de um centro no mundo */
+  | { around: { part: Id; at: Vec2; center: Vec2 } }
   /** razão entre duas grandezas */
   | { div: [Quantity, Quantity] }
   /** valor absoluto */

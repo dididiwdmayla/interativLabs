@@ -6,11 +6,13 @@
 import { generateCalibracao } from "./calibracao";
 import { generateFixacoes } from "./fixacoes";
 import { generateMolas } from "./molas";
+import { generateRasgos } from "./rasgos";
 
 const GROUPS: Record<string, () => void> = {
   calibracao: generateCalibracao,
   fixacoes: generateFixacoes,
   molas: generateMolas,
+  rasgos: generateRasgos,
 };
 
 export async function main(args: string[]) {

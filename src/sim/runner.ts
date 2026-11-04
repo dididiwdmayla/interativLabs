@@ -1,6 +1,6 @@
 import { FIXED_STEP } from "@/engine/common";
 import type { EngineAdapter, LinkState, Snapshot } from "@/engine/types";
-import { dcos, dhypot, dpow, dsin } from "@/geometry/dmath";
+import { datan2, dcos, dhypot, dpow, dsin } from "@/geometry/dmath";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Link, Scene } from "@/model/types";
 import type { FixtureScript, Quantity, ScriptAssertion, ScriptInput, ScriptRun } from "./script";
@@ -99,6 +99,10 @@ function field(st: LinkState | undefined, path: string): number {
 export function measure(q: Quantity, s: Snapshot, ctx: QCtx): number {
   if ("div" in q) return measure(q.div[0], s, ctx) / measure(q.div[1], s, ctx);
   if ("abs" in q) return Math.abs(measure(q.abs, s, ctx));
+  if ("around" in q) {
+    const p = localToWorld(s, q.around.part, q.around.at);
+    return p ? datan2(p[1] - q.around.center[1], p[0] - q.around.center[0]) : NaN;
+  }
   if ("pv" in q) {
     const st = s.links[q.pv];
     return (st?.pressure ?? NaN) * dpow(st?.volume ?? NaN, q.gamma);

@@ -66,9 +66,11 @@ export interface LinkState {
   slack?: number;
   /** suporte elástico: deslocamento do ponto (mm) e giro (rad) */
   offset?: number;
-  /** rasgo: posição do pino ao longo do rasgo (mm, a partir do meio) e desvio transversal (mm) */
+  /** rasgo reto (junta): posição do pino ao longo do rasgo (mm, a partir do meio) e desvio transversal (mm) */
   position?: number;
   deviation?: number;
+  /** rasgo por contato: folga entre o pino e a parede do furo (mm; negativa = penetrando ou fora) */
+  clearance?: number;
   /** câmara: pressão absoluta (kPa), volume (mm³), gás (mmol), acesa, queimando */
   pressure?: number;
   volume?: number;

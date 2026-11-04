@@ -3,7 +3,7 @@ import type { Vec2 } from "@/geometry/vec";
 import type { Plan, PlanChamber, PlanSensor, PlanSpring } from "./plan";
 import { N } from "@/model/units";
 import type { EngineEvent, LinkState, PartPose, Snapshot } from "./types";
-import { dcos, dexp, dhypot, dsin } from "@/geometry/dmath";
+import { PI, dcos, dexp, dhypot, dsin } from "@/geometry/dmath";
 
 /**
  * Parte comum da simulação, igual em todos os motores e em unidades da cena
@@ -43,10 +43,17 @@ export interface BodyIO {
   applyImpulse(body: number, jx: number, jy: number, px: number, py: number): void;
 }
 
-/** Arrasto: mola amortecida resolvida como restrição suave (como a junta de mouse). */
+/**
+ * Arrasto: mola amortecida resolvida como restrição suave (como a junta de
+ * mouse). No protótipo (gravidade de 100 mm/s²): 6 Hz e força máxima de
+ * (600·m + 400) g·(10 mm)/s². Aqui a frequência e a força escalam com a
+ * gravidade da cena (√g e g), para que com gravidade real o dedo ainda
+ * levante a peça sem que ela fique pendurada vários mm abaixo do dedo.
+ */
 const DRAG_HZ = 6;
+const DRAG_HZ_MAX = 30;
 const DRAG_DAMPING = 0.9;
-/** Força máxima do arrasto: (600·m + 400) em g·(10 mm)/s² no protótipo → mm. */
+const DRAG_G_REF = 100;
 const DRAG_FORCE_PER_GRAM = 6000;
 const DRAG_FORCE_BASE = 4000;
 
@@ -72,6 +79,40 @@ interface ChamberState {
 interface SensorState {
   p: PlanSensor;
   count: number;
+}
+
+/** Distância com sinal de p ao contorno (positiva dentro). Só operações exatas. */
+export function ringSignedDistance(ring: Vec2[], p: Vec2): number {
+  let inside = false;
+  let best = Infinity;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[j]!;
+    const b = ring[i]!;
+    if (a[1] > p[1] !== b[1] > p[1] && p[0] < ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0])
+      inside = !inside;
+    const ex = b[0] - a[0];
+    const ey = b[1] - a[1];
+    const l2 = ex * ex + ey * ey;
+    const t = l2 > 0 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * ex + (p[1] - a[1]) * ey) / l2)) : 0;
+    const qx = a[0] + t * ex - p[0];
+    const qy = a[1] + t * ey - p[1];
+    best = Math.min(best, qx * qx + qy * qy);
+  }
+  const d = Math.sqrt(best);
+  return inside ? d : -d;
+}
+
+/**
+ * Mola do arrasto (o dedo): frequência e força máxima, escaladas pela
+ * gravidade da cena a partir das do protótipo (6 Hz e (600·m + 400) g·(10 mm)/s²
+ * com 100 mm/s²).
+ */
+export function dragParams(mass: number, gravity: Vec2): { hertz: number; maxForce: number } {
+  const gs = Math.max(1, dhypot(gravity[0], gravity[1]) / DRAG_G_REF);
+  return {
+    hertz: Math.min(DRAG_HZ_MAX, DRAG_HZ * Math.sqrt(gs)),
+    maxForce: (DRAG_FORCE_PER_GRAM * mass + DRAG_FORCE_BASE) * gs,
+  };
 }
 
 export class Runtime {
@@ -354,7 +395,8 @@ export class Runtime {
     const p = this.world(d.body, d.local);
     const rx = p[0] - s.x;
     const ry = p[1] - s.y;
-    const omega = 2 * Math.PI * DRAG_HZ;
+    const dp = dragParams(m, this.plan.gravity);
+    const omega = 2 * PI * dp.hertz;
     const k = m * omega * omega;
     const c = 2 * m * DRAG_DAMPING * omega;
     const gamma = 1 / (h * (c + h * k));
@@ -370,7 +412,7 @@ export class Runtime {
     const by = -(vy + beta * (p[1] - d.target[1]));
     let jx = (k22 * bx - k12 * by) / det;
     let jy = (k11 * by - k12 * bx) / det;
-    const maxJ = (DRAG_FORCE_PER_GRAM * m + DRAG_FORCE_BASE) * h;
+    const maxJ = dp.maxForce * h;
     const jl = dhypot(jx, jy);
     if (jl > maxJ) {
       jx *= maxJ / jl;
@@ -438,6 +480,24 @@ export class Runtime {
       const f = this.jointForce(d.id);
       if (f && L > 1e-9) st.force = -(f[0] * (pb[0] - pa[0]) + f[1] * (pb[1] - pa[1])) / L / N;
       links[d.id] = st;
+    }
+    for (const sl of this.plan.slots) {
+      const A = this.body(sl.a);
+      const c = dcos(A.angle);
+      const n = dsin(A.angle);
+      const ux = sl.axis[0] * c - sl.axis[1] * n;
+      const uy = sl.axis[0] * n + sl.axis[1] * c;
+      const pa = this.world(sl.a, this.localOf(sl.a, sl.anchor));
+      const pb = this.world(sl.b, this.localOf(sl.b, sl.anchor));
+      const dx = pb[0] - pa[0];
+      const dy = pb[1] - pa[1];
+      links[sl.id] = { kind: "slot", position: dx * ux + dy * uy - sl.mid, deviation: dx * uy - dy * ux };
+    }
+    for (const sc of this.plan.slotContacts) {
+      // folga do pino até a parede do furo (positiva = livre; negativa = penetrando ou fora)
+      const p = this.world(sc.pinBody, sc.pinLocal);
+      const ring = sc.hole.map((q) => this.world(sc.guideBody, q));
+      links[sc.id] = { kind: "slot", clearance: ringSignedDistance(ring, p) - sc.r };
     }
     for (const m of this.plan.mounts) {
       const pa = this.world(m.a, this.localOf(m.a, m.anchor));

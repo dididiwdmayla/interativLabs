@@ -82,8 +82,10 @@ export function createRapierAdapter(RAPIER: R, variant: { id: string; name: stri
       L = options.unitMm;
       const plan = buildPlan(scene);
       const warnings = [...plan.warnings];
-      if (plan.distances.length || plan.mounts.length)
-        warnings.push("Rapier: haste, cabo e suporte elástico só existem no Box2D; ficaram de fora");
+      if (plan.distances.length || plan.mounts.length || plan.slots.length)
+        warnings.push(
+          "Rapier: haste, cabo, suporte elástico e rasgo em junta só existem no Box2D; ficaram de fora",
+        );
       const w = new RAPIER.World({ x: plan.gravity[0] / L, y: plan.gravity[1] / L });
       world = w;
       events = new RAPIER.EventQueue(true);

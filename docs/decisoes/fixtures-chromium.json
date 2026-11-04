@@ -4,20 +4,20 @@
     "fixacoes/biela": {
       "hash": "04c4dd6669ae4005",
       "pass": true,
-      "stepMedian": 0.06000000000931323,
-      "stepP95": 0.21999999997206032
+      "stepMedian": 0.059999999962747096,
+      "stepP95": 0.17999999993480742
     },
     "fixacoes/cabo": {
       "hash": "be117b5930a8450c",
       "pass": true,
       "stepMedian": 0.03999999999068678,
-      "stepP95": 0.059999999962747096
+      "stepP95": 0.06000000000931323
     },
     "fixacoes/parafuso-suporte": {
       "hash": "5caf1dfca5a5b187",
       "pass": true,
-      "stepMedian": 0.03999999999068678,
-      "stepP95": 0.059999999962747096
+      "stepMedian": 0.07000000001862645,
+      "stepP95": 0.08999999999068678
     },
     "fixacoes/pendulo": {
       "hash": "d891a728a66ded89",
@@ -28,26 +28,26 @@
     "molas/apoiada": {
       "hash": "d5fc8fd0daabea53",
       "pass": true,
-      "stepMedian": 0.06000000000931323,
-      "stepP95": 0.10999999996274709
+      "stepMedian": 0.07000000001862645,
+      "stepP95": 0.18999999999068679
     },
     "molas/guia": {
       "hash": "cd3ff889ff5ebae2",
       "pass": true,
       "stepMedian": 0.05,
-      "stepP95": 0.09999999995343387
+      "stepP95": 0.10999999996274709
     },
     "molas/pre-carga": {
       "hash": "8f16d7c59e297704",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.07000000001862645
+      "stepMedian": 0.07999999998137355,
+      "stepP95": 0.1
     },
     "molas/rigida": {
       "hash": "73e67c05ca70fe24",
       "pass": true,
       "stepMedian": 0.03999999999068678,
-      "stepP95": 0.05
+      "stepP95": 0.07000000001862645
     },
     "molas/solido": {
       "hash": "67192bf5236e8f72",
@@ -55,29 +55,53 @@
       "stepMedian": 0.06000000000931323,
       "stepP95": 0.08000000002793968
     },
+    "rasgos/camadas": {
+      "hash": "2715fe333fb90818",
+      "pass": true,
+      "stepMedian": 0.05,
+      "stepP95": 0.0900000000372529
+    },
+    "rasgos/curvo": {
+      "hash": "7e7d8b164cc16b3b",
+      "pass": true,
+      "stepMedian": 0.10999999996274709,
+      "stepP95": 0.2
+    },
+    "rasgos/mancal": {
+      "hash": "ae41078adbd76643",
+      "pass": true,
+      "stepMedian": 0.13000000002793968,
+      "stepP95": 0.18000000002793967
+    },
+    "rasgos/reto": {
+      "hash": "1c9829bdd9af6f5e",
+      "pass": true,
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.07000000006519258
+    },
     "calibracao/bala": {
       "hash": "20103ec8b4211e99",
       "pass": true,
-      "stepMedian": 0.1900000000372529,
-      "stepP95": 0.1900000000372529
+      "stepMedian": 0.11000000005587936,
+      "stepP95": 0.11000000005587936
     },
     "calibracao/corrente": {
       "hash": "007c1ccfc0ee15e4",
       "pass": true,
-      "stepMedian": 0.15,
-      "stepP95": 0.22000000015832483
+      "stepMedian": 0.16999999997206033,
+      "stepP95": 0.3500000000465661
     },
     "calibracao/pilha": {
       "hash": "7801499766c01642",
       "pass": true,
-      "stepMedian": 0.4,
-      "stepP95": 0.6699999999720603
+      "stepMedian": 0.4100000001490116,
+      "stepP95": 0.6600000000093132
     },
     "calibracao/pinhao": {
       "hash": "753fcbe7b0464bd4",
       "pass": true,
       "stepMedian": 0.08999999999068678,
-      "stepP95": 0.12000000001862646
+      "stepP95": 0.15000000004656613
     }
   }
 }

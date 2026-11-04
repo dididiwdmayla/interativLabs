@@ -1,6 +1,6 @@
 import { type Piece } from "@/geometry/decompose";
 import { shapeGeometry } from "@/geometry/shape";
-import { principalAxis } from "@/geometry/slot";
+import { principalAxis, straightSlot } from "@/geometry/slot";
 import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
@@ -146,6 +146,35 @@ export interface PlanChamber {
   rearOffset: number;
 }
 
+/** Pino num rasgo reto em modo junta: ponto sobre a linha de centro, com batentes. */
+export interface PlanSlot {
+  id: Id;
+  /** corpo da peça-guia (com o rasgo) e corpo do pino */
+  a: number;
+  b: number;
+  /** centro do pino no mundo, na pose desenhada (origem da junta) */
+  anchor: Vec2;
+  /** direção do rasgo no mundo, na pose desenhada */
+  axis: Vec2;
+  /** curso ao longo do eixo a partir da pose desenhada, descontado o raio do pino */
+  lower: number;
+  upper: number;
+  /** meio do rasgo, em relação à origem (mm ao longo do eixo) */
+  mid: number;
+}
+
+/** Pino num furo em modo contato: só para o snapshot (a colisão é da geometria). */
+export interface PlanSlotContact {
+  id: Id;
+  /** corpo e ponto (no espaço do corpo) do centro do pino */
+  pinBody: number;
+  pinLocal: Vec2;
+  /** corpo da guia e contorno do furo no espaço do corpo */
+  guideBody: number;
+  hole: Vec2[];
+  r: number;
+}
+
 export interface PlanSensor {
   id: Id;
   body: number;
@@ -165,6 +194,8 @@ export interface Plan {
   distances: PlanDistance[];
   mounts: PlanMount[];
   sliders: PlanSlider[];
+  slots: PlanSlot[];
+  slotContacts: PlanSlotContact[];
   springs: PlanSpring[];
   chambers: PlanChamber[];
   sensors: PlanSensor[];
@@ -370,6 +401,8 @@ export function buildPlan(scene: Scene): Plan {
     distances: [],
     mounts: [],
     sliders: [],
+    slots: [],
+    slotContacts: [],
     springs: [],
     chambers: [],
     sensors: [],
@@ -563,6 +596,61 @@ export function buildPlan(scene: Scene): Plan {
           charge: (l.gas.charge?.amount ?? 0) * GAS_RT * KPA_MM2,
           burn: (l.gas.charge?.burnMs ?? 0) / 1000,
           rearOffset: rear,
+        });
+        break;
+      }
+      case "slot": {
+        const pin = scene.links.find((x) => x.id === l.pin);
+        const guide = byId.get(l.guide);
+        if (!pin || pin.kind !== "pin" || !guide || guide.shape.kind === "gear") break;
+        const hole = guide.shape.holes[l.hole];
+        const a = bodyIdx(l.guide);
+        const b = bodyIdx(pin.host);
+        if (!hole || a < 0 || b < 0) break;
+        if (a === b) {
+          warnings.push(`Rasgo ${l.ref}: o pino e a guia estão no mesmo corpo; foi ignorado`);
+          break;
+        }
+        const center = worldOf(pin.host, pin.at);
+        if (l.mode === "contact") {
+          plan.slotContacts.push({
+            id: l.id,
+            pinBody: b,
+            pinLocal: toLocal(b, center),
+            guideBody: a,
+            hole: hole.map((q) => toLocal(a, worldOf(l.guide, q))),
+            r: pin.r,
+          });
+          break;
+        }
+        const st = straightSlot(hole);
+        if (!st) {
+          warnings.push(`Rasgo ${l.ref}: o furo não é um rasgo reto; use o modo contato`);
+          break;
+        }
+        const p1 = worldOf(l.guide, st.p1);
+        const p2 = worldOf(l.guide, st.p2);
+        const ux = (p2[0] - p1[0]) / st.length;
+        const uy = (p2[1] - p1[1]) / st.length;
+        const t1 = (p1[0] - center[0]) * ux + (p1[1] - center[1]) * uy;
+        const t2 = (p2[0] - center[0]) * ux + (p2[1] - center[1]) * uy;
+        const play = Math.max(0, st.r - pin.r);
+        // origem da junta: o centro do pino projetado na linha de centro do rasgo
+        const off = -(center[0] - p1[0]) * uy + (center[1] - p1[1]) * ux;
+        if (Math.abs(off) > 1e-6)
+          warnings.push(
+            `Rasgo ${l.ref}: o pino está ${off.toFixed(3)} mm fora da linha de centro; foi encostado nela`,
+          );
+        const anchor: Vec2 = [center[0] + uy * off, center[1] - ux * off];
+        plan.slots.push({
+          id: l.id,
+          a,
+          b,
+          anchor,
+          axis: [ux, uy],
+          lower: t1 - play,
+          upper: t2 + play,
+          mid: (t1 + t2) / 2,
         });
         break;
       }

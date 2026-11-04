@@ -4,6 +4,7 @@ import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
 import { ANGULAR_DAMPING, FIXED_STEP, SPEED_LIMIT, trackedBodies, unwrapAngle } from "../common";
 import { buildPlan, type Plan } from "../plan";
+import { dragParams } from "../runtime";
 import { Runtime, type BodyIO, type BodyState } from "../runtime";
 import type { CompileOptions, CompileReport, EngineAdapter, EngineEvent, PartPose, Snapshot } from "../types";
 
@@ -104,6 +105,15 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
   const v1: b2Vec2 = new B.b2Vec2(0, 0);
   const v2: b2Vec2 = new B.b2Vec2(0, 0);
   let impacts: EngineEvent[] = [];
+  /** arrasto: corpo cinemático no dedo + junta de motor com mola (resolvida junto com os contatos) */
+  let drag: { body: b2BodyId; joint: b2JointId } | null = null;
+
+  const endDrag = () => {
+    if (!drag) return;
+    B.b2DestroyJoint(drag.joint);
+    B.b2DestroyBody(drag.body);
+    drag = null;
+  };
 
   const angleOf = (i: number): number => {
     const r = B.b2Body_GetRotation(bodies[i]!);
@@ -364,6 +374,25 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         joints.set(d.id, B.b2CreateDistanceJoint(w, jd));
         jd.delete();
       }
+      for (const sl of p.slots) {
+        // Rasgo reto: junta de roda sem mola (ponto sobre reta, rotação livre), batentes nas pontas.
+        const jd = B.b2DefaultWheelJointDef();
+        jd.base.bodyIdA = bodies[sl.a]!;
+        jd.base.bodyIdB = bodies[sl.b]!;
+        jd.base.localFrameA.p = local(sl.a, sl.anchor);
+        jd.base.localFrameB.p = local(sl.b, sl.anchor);
+        const q = datan2(sl.axis[1], sl.axis[0]);
+        jd.base.localFrameA.q = rot(q);
+        jd.base.localFrameB.q = rot(q);
+        jd.base.collideConnected = false;
+        base(jd);
+        jd.enableSpring = false;
+        jd.enableLimit = true;
+        jd.lowerTranslation = sl.lower / L;
+        jd.upperTranslation = sl.upper / L;
+        joints.set(sl.id, B.b2CreateWheelJoint(w, jd));
+        jd.delete();
+      }
       for (const sp of p.springs) {
         // Toda mola ganha uma junta de distância: batente das espiras encostadas
         // (mínimo = comprimento sólido) e, se for rígida demais para o passo
@@ -470,13 +499,47 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
 
     dragStart(partId: Id, pointMm: Vec2) {
       const r = rt?.plan.partRel.get(partId);
-      return !!(rt && r && rt.dragStart(r.body, pointMm));
+      if (!worldId || !rt || !r || rt.plan.bodies[r.body]!.static) return false;
+      endDrag();
+      const pb = rt.plan.bodies[r.body]!;
+      const bd = B.b2DefaultBodyDef();
+      bd.type = B.b2BodyType.b2_kinematicBody;
+      bd.position = new B.b2Vec2(pointMm[0] / L, pointMm[1] / L);
+      bd.enableSleep = false;
+      const body = B.b2CreateBody(worldId, bd);
+      bd.delete();
+      const s = rt.body(r.body);
+      const c = dcos(-s.angle);
+      const n = dsin(-s.angle);
+      const dx = pointMm[0] - s.x;
+      const dy = pointMm[1] - s.y;
+      const jd = B.b2DefaultMotorJointDef();
+      jd.base.bodyIdA = body;
+      jd.base.bodyIdB = bodies[r.body]!;
+      jd.base.localFrameB.p = new B.b2Vec2((dx * c - dy * n) / L, (dx * n + dy * c) / L);
+      jd.base.collideConnected = true;
+      const d = dragParams(pb.mass, rt.plan.gravity);
+      jd.linearHertz = d.hertz;
+      jd.linearDampingRatio = 1;
+      jd.maxSpringForce = d.maxForce / L;
+      jd.angularHertz = 0;
+      jd.maxSpringTorque = 0;
+      jd.maxVelocityForce = 0;
+      jd.maxVelocityTorque = 0;
+      drag = { body, joint: B.b2CreateMotorJoint(worldId, jd) };
+      jd.delete();
+      return true;
     },
     dragMove(q: Vec2) {
-      rt?.dragMove(q);
+      if (!drag) return;
+      const t = new B.b2Transform();
+      t.p = new B.b2Vec2(q[0] / L, q[1] / L);
+      t.q = rot(0);
+      B.b2Body_SetTargetTransform(drag.body, t, FIXED_STEP, true);
+      t.delete();
     },
     dragEnd() {
-      rt?.dragEnd();
+      endDrag();
     },
 
     contactsDepthMax() {
@@ -531,6 +594,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
     },
 
     dispose() {
+      drag = null;
       if (worldId) B.b2DestroyWorld(worldId);
       worldId = null;
       rt = null;

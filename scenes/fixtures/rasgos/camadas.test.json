@@ -1,0 +1,36 @@
+{
+  "id": "rasgos/camadas",
+  "group": "rasgos",
+  "title": "Pino e camadas",
+  "notes": "Uma peça na camada 2 com um pino de faixa 2–3 cai sobre uma caixa solta e uma prateleira da camada 1 e depois sobre um piso da camada 3. O pino atravessa a camada 1 sem tocar e para na camada 3.",
+  "view": [-45, -310, 90, 430],
+  "runs": [
+    {
+      "name": "queda",
+      "duration": 2,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "maxDisp",
+          "label": "o pino nunca toca a peça da camada 1 no caminho (a caixa não se move)",
+          "parts": ["p2"],
+          "from": 0.2,
+          "max": 0.001
+        },
+        {
+          "kind": "mean",
+          "label": "atravessa e para no piso da camada 3 (centro a 92 mm ± 0,1)",
+          "q": {
+            "part": "p4",
+            "field": "y"
+          },
+          "from": 1.5,
+          "to": 2,
+          "min": 91.9,
+          "max": 92.1
+        }
+      ]
+    }
+  ],
+  "scene": "camadas.scene.json"
+}
