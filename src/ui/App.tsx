@@ -5,6 +5,7 @@ import { prepareScene } from "@/render/prepare";
 import { ExampleMenu } from "./ExampleMenu";
 import { Panel } from "./Panel";
 import { DEFAULT_EXAMPLE, openExample } from "./scenes/examples";
+import { useSimStore } from "./sim/simStore";
 import { useSimulation } from "./sim/useSimulation";
 import { Stage } from "./Stage";
 import { ToolBar } from "./ToolBar";
@@ -43,6 +44,11 @@ function Workbench() {
   }, []);
 
   useSimulation(mode === "simulate", nodes);
+
+  // gancho dos testes automatizados (tests/e2e): estados da interface e da simulação
+  useEffect(() => {
+    (window as unknown as { __IL__?: unknown }).__IL__ = { ui: useUiStore, sim: useSimStore, openExample };
+  }, []);
 
   const title = current?.scene.meta.title ?? (error ? "Erro ao abrir" : "Carregando…");
   return (

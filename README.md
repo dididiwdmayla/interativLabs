@@ -17,7 +17,7 @@ Uso pessoal. Roda no navegador, no celular e no computador.
 
 ## Estado
 
-Fase 1 (fundação) em andamento. A Parte C (branch `fase-1-parte-c`) trouxe o motor definitivo (Box2D v3 calibrado para gravidade real, determinístico entre Node e navegador), o formato de cena v2 e as ligações 2.0. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
+Fase 1 (fundação) em andamento. A Parte C trouxe o motor definitivo (Box2D v3 calibrado para gravidade real, determinístico entre Node e navegador), o formato de cena v2 e as ligações 2.0. A Parte D trouxe o palco vivo: o app abre com um mecanismo montado na pele da Prancha índigo, que se simula, opera com o dedo, vê em câmera lenta e volta na linha do tempo. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
 
 ## Rodar
 
@@ -38,10 +38,14 @@ npm run fixtures:hashes  # grava o hash de poses de cada cena de teste (scenes/f
 npm run calibrate    # tabela da calibração do Box2D para gravidade real → docs/decisoes/calibracao-node.json
 npm run test:e2e     # determinismo: o Chromium dá o mesmo hash que o Node em todas as cenas de teste
 npx playwright test --project=lab   # capturas do laboratório em docs/capturas/fase-1/parte-c/
+npx playwright test --project=capture-d   # capturas do palco em docs/capturas/fase-1/parte-d/
 ```
 
-Duas páginas de trabalho, carregadas sob demanda:
+No app: o menu (☰) lista os exemplos; um dedo no fundo move a vista, pinça (ou roda do mouse) faz zoom, o botão de enquadrar volta ao desenho todo; tocar numa peça ou ligação mostra as propriedades. **Simular** liga a física: pausa, um passo, 0,05×/0,25×/1×, reiniciar, arrastar peças com o dedo e a régua da linha do tempo (arrastar para ver, continuar para seguir dali).
 
+Três páginas de trabalho, carregadas sob demanda:
+
+- `/#perf`: a medição de desempenho. A cena de 150 peças e 100 ligações no palco real por 10 s; tocar em "Rodar 10 s" e depois em "Copiar resultado".
 - `/#lab`: o laboratório. Lista as cenas de teste e os exemplos, roda cada um no motor do app (Box2D) com um desenho simples, deixa pausar, ver em câmera lenta (0,05×, 0,25×, 1×), reiniciar e arrastar as peças com o dedo, e mostra ao lado se as afirmações da cena passam. Uma cena direto: `/#lab/<grupo>/<nome>`, por exemplo `/#lab/exemplos/cilindro-dois-pistoes`.
 - `/#bench`: o comparativo de motores (Planck, Rapier e Box2D). No celular: abrir, esperar o "Pronto", tocar em "Copiar resultado".
 

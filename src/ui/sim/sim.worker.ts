@@ -67,14 +67,15 @@ self.onmessage = async (e: MessageEvent<SimRequest>) => {
     if (!session) return;
     if (m.t === "run") {
       session.enqueue(m.inputs);
+      const steps = Math.max(0, Math.floor(m.steps));
       const t0 = performance.now();
       const from = session.step + 1;
-      for (let i = 0; i < m.steps; i++) session.advance();
+      for (let i = 0; i < steps; i++) session.advance();
       const physics = performance.now() - t0;
       frames(
         m.id,
         from,
-        m.steps,
+        steps,
         session.events.filter((x) => x.step >= from),
         physics,
       );

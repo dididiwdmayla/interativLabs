@@ -5,7 +5,7 @@ import { OVERFLOW_WIDTHS } from "./viewports";
  * Reprova rolagem lateral da página em 360, 390 e 412 px.
  * Confere também que todo controle clicável tem alvo de pelo menos 44 px.
  */
-const ROUTES = ["/", "/#bench", "/#lab", "/#lab/exemplos/cilindro-dois-pistoes"];
+const ROUTES = ["/", "/#bench", "/#lab", "/#lab/exemplos/cilindro-dois-pistoes", "/#perf"];
 
 for (const width of OVERFLOW_WIDTHS) {
   for (const route of ROUTES) {
@@ -15,6 +15,7 @@ for (const width of OVERFLOW_WIDTHS) {
       await page.evaluate(() => document.fonts.ready);
       if (route === "/#bench") await page.getByRole("heading", { name: "Bancada de motores" }).waitFor();
       if (route.startsWith("/#lab")) await page.locator(".lab__svg").waitFor();
+      if (route === "/" || route === "/#perf") await page.locator(".stage__sheet--static").first().waitFor();
       const m = await page.evaluate(() => ({
         doc: document.documentElement.scrollWidth,
         body: document.body.scrollWidth,
@@ -30,7 +31,7 @@ for (const width of OVERFLOW_WIDTHS) {
         for (const el of Array.from(document.querySelectorAll("body *"))) {
           const r = el.getBoundingClientRect();
           if (r.width === 0 || r.height === 0) continue;
-          if (el.closest(".toolbar__scroll, .bench__tablewrap, .lab__stage")) continue;
+          if (el.closest(".toolbar__scroll, .bench__tablewrap, .lab__stage, .stage__sheets")) continue;
           const cs = getComputedStyle(el);
           if (cs.visibility === "hidden") continue;
           if (r.right > window.innerWidth + 0.5 || r.left < -0.5) out.push(`${el.tagName}.${el.className}`);

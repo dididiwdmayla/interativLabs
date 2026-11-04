@@ -75,6 +75,9 @@ export interface WriteContext {
   walls?: boolean;
 }
 
+/** pressão manométrica (kPa) em que o gás chega à metade da opacidade máxima */
+const GAS_HALF_KPA = 40;
+
 const f = (n: number) => (Math.round(n * 1000) / 1000).toString();
 const deg = (a: number) => (a * 180) / Math.PI;
 export const poseTransform = (p: PartPose, dx = 0, dy = 0) =>
@@ -243,8 +246,9 @@ export class StageNodes {
       const body = link.body === null ? null : frame.pose(link.body);
       c.gas?.setAttribute("points", gasPolygon(c.geo, body, st.travel));
       const gauge = st.pressure - link.gas.p0;
-      c.peak = Math.max(c.peak, gauge, 1);
-      c.gas?.setAttribute("fill-opacity", f(Math.max(0.06, Math.min(0.85, (0.85 * gauge) / c.peak))));
+      // opacidade pela pressão manométrica, saturando (a mesma ao voltar na régua)
+      const g = Math.max(0, gauge);
+      c.gas?.setAttribute("fill-opacity", f(Math.max(0.06, (0.85 * g) / (g + GAS_HALF_KPA))));
       if (c.label) {
         c.label.textContent = `${Math.round(st.pressure)} kPa`;
         const base = worldOf(body, link.at);

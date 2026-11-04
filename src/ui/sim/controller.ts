@@ -129,9 +129,9 @@ class Controller implements SimControl {
     if (this.inflight || this.rewinding) return;
     let n = force;
     if (!force && !this.state.paused && this.shownStep === null) {
-      n = Math.min(MAX_STEPS, Math.floor(this.acc / this.h));
+      n = Math.max(0, Math.min(MAX_STEPS, Math.floor(this.acc / this.h + 1e-9)));
       this.acc -= n * this.h;
-      if (this.acc > MAX_STEPS * this.h) this.acc = 0;
+      if (this.acc > MAX_STEPS * this.h || this.acc < 0) this.acc = 0;
     }
     if (n === 0 && this.queue.length === 0) return;
     const inputs = this.queue;
