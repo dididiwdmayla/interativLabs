@@ -4,6 +4,18 @@
 
 O manifesto (`art/source/lote-01/asset-manifest.md`) guarda formato, escala, âncoras e processamento de cada imagem. Este documento guarda só o que você cola no ChatGPT.
 
+## Revisão 2 — 04/11 · lote fechado
+
+As três versões novas foram aprovadas, e as 17 imagens do lote estão aprovadas.
+
+| ID | Status | Motivo |
+| --- | --- | --- |
+| `spring-coil` (v2) | Aprovada | Frente grossa com sombreado de tubo e costas finas, inclinadas ao contrário: lê como hélice. Seis espiras de passo igual. O fio entra e sai pelas bordas. O diâmetro ocupa 52% da altura (pedido: 45%), o que não muda nada, porque a escala vem da medida. |
+| `spring-end` (v2) | Aprovada | Mesmo fio, mesmo diâmetro e mesmos dois traços da espira. Não vieram as duas espiras fechadas junto ao olhal: as espiras já saem no passo normal, o que facilita a emenda com a `spring-coil`. O olhal tem cerca de 1,15 vez o diâmetro da mola. |
+| `tex-ink-wear` (v2) | Aprovada | Cobertura de 4,6%, entre 4,3% e 4,9% em todos os 16 quadrantes. Cerca de 9 200 marcas, de pontos a riscos curtos, sem direção. |
+
+Ajuste novo para o código: o fio da `spring-end` sai pela borda direita perto do alto, e não no meio da altura. O corte da direita deve ser feito na mesma fase em que a `spring-coil` é cortada (no ponto em que o fio da frente cruza a linha do eixo), para as duas emendarem.
+
 ## Revisão 1 — 04/11
 
 As 17 imagens chegaram. Ficam aprovadas 14 e voltam 3 para geração. As duas molas voltam juntas, porque precisam casar uma com a outra.

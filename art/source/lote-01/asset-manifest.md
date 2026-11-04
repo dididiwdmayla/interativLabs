@@ -177,3 +177,4 @@ Cada reprovação entra aqui com a data, o ID, o motivo e o ajuste no prompt. A 
   - as ferragens redondas saíram cerca de 2% mais altas que largas e levam um fator de escala vertical por asset;
   - o `hw-sensor` leva um fator de cerca de 0,934 para o hexágono ficar regular;
   - as frações de rarefação do `fx-gas` e os níveis do `mask-develop` ficam em aberto até a conferência na folha de contato (detalhes em `prompts.md`).
+- **04/11 · revisão 2: lote fechado.** As versões v2 de `spring-coil`, `spring-end` e `tex-ink-wear` foram aprovadas, e as 17 imagens estão aprovadas. Os originais sobem neste diretório com o nome igual ao ID, sem sufixo. Ajuste de pipeline: cortar a borda direita da `spring-end` na mesma fase do corte da `spring-coil`, para as duas emendarem.
