@@ -1,0 +1,1221 @@
+{
+  "createdAt": "2026-11-04T08:55:53.571Z",
+  "environment": {
+    "kind": "node",
+    "userAgent": "Node v22.23.4 (linux x64) · Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "hardwareConcurrency": 4,
+    "timerResolutionUs": 0.458
+  },
+  "unitMm": 10,
+  "engines": [
+    {
+      "id": "planck",
+      "name": "Planck",
+      "version": "1.5.1",
+      "iterations": "10 de velocidade + 4 de posição por passo"
+    },
+    {
+      "id": "rapier-det",
+      "name": "Rapier 2D (determinístico)",
+      "version": "0.21.0",
+      "iterations": "4 iterações de solver + 1 PGS internas, CCD com até 1 subpassos"
+    },
+    {
+      "id": "rapier",
+      "name": "Rapier 2D (padrão)",
+      "version": "0.21.0",
+      "iterations": "4 iterações de solver + 1 PGS internas, CCD com até 1 subpassos"
+    },
+    {
+      "id": "box2d",
+      "name": "Box2D v3 (WASM)",
+      "version": "6.0.0",
+      "iterations": "4 subpassos do solver suave por passo, contínuo contra estáticos"
+    }
+  ],
+  "results": [
+    {
+      "scene": "01-lancador",
+      "title": "Lançador",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "parado, o percussor não se move mais que 0,2 mm em 1 s",
+          "pass": true,
+          "value": "0,000 mm",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "puxando o gatilho, o sensor dispara exatamente 1 vez",
+          "pass": true,
+          "value": "1 disparo",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "a esfera passa da saída do cano em até 0,5 s",
+          "pass": true,
+          "value": "0,242 s",
+          "run": "repouso e disparo"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.15854400000000624,
+      "stepP95": 0.3891950000000861,
+      "timing": "passo",
+      "maxDepth": 0.060649927539276116,
+      "jitter": 3.1739925390419976e-11,
+      "hash": "69e948255c418780",
+      "hashRepeat": "69e948255c418780",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 314.682917
+    },
+    {
+      "scene": "02-trava",
+      "title": "Trava",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "a maçaneta gira 30°",
+          "pass": true,
+          "value": "-30,1°",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
+          "pass": true,
+          "value": "7,33 mm",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "pass": true,
+          "value": "0,050 mm",
+          "run": "girar e soltar"
+        }
+      ],
+      "steps": 840,
+      "stepMedian": 0.051625999999941996,
+      "stepP95": 0.12620300000003226,
+      "timing": "passo",
+      "maxDepth": 0.06550270567846067,
+      "jitter": 0,
+      "hash": "b5ae863bd8131634",
+      "hashRepeat": "b5ae863bd8131634",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 105.57592
+    },
+    {
+      "scene": "03-engrenagens",
+      "title": "Engrenagens e catraca",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s"
+      ],
+      "assertions": [
+        {
+          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+          "pass": false,
+          "value": "erro máx. 10,54%",
+          "run": "a favor"
+        },
+        {
+          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
+          "pass": true,
+          "value": "0,8°",
+          "run": "a favor"
+        }
+      ],
+      "steps": 1800,
+      "stepMedian": 0.16371499999991102,
+      "stepP95": 0.3882009999999809,
+      "timing": "passo",
+      "maxDepth": 0.18472606149385531,
+      "jitter": 0,
+      "hash": "aff9080379c49d50",
+      "hashRepeat": "aff9080379c49d50",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 564.183156
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "2,021 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 1.3960770000003322,
+      "stepP95": 2.762282000000141,
+      "timing": "passo",
+      "maxDepth": 0.34110410052712675,
+      "jitter": 0.026907912576326368,
+      "hash": "49466777ada22ee6",
+      "hashRepeat": "49466777ada22ee6",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 2239.979295
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": true,
+          "value": "0,038 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.08620900000005349,
+      "stepP95": 0.16352499999993597,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "90669e7d44e2783c",
+      "hashRepeat": "90669e7d44e2783c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 269.02268900000036
+    },
+    {
+      "scene": "06-pinhao-cremalheira",
+      "title": "Pinhão e cremalheira",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
+        "penetração entre dentes menor que 0,1 mm"
+      ],
+      "assertions": [
+        {
+          "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
+          "pass": false,
+          "value": "erro máx. 2,71%, giro mín. 1%",
+          "run": "50 inversões"
+        },
+        {
+          "label": "penetração entre dentes menor que 0,1 mm",
+          "pass": false,
+          "value": "0,2021 mm",
+          "run": "50 inversões"
+        }
+      ],
+      "steps": 4896,
+      "stepMedian": 0.041059999999561114,
+      "stepP95": 0.060935999999855994,
+      "timing": "passo",
+      "maxDepth": 0.20213596967790426,
+      "jitter": null,
+      "hash": "a0c134c34614c348",
+      "hashRepeat": "a0c134c34614c348",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 488.0963379999994
+    },
+    {
+      "scene": "07-bala",
+      "title": "Bala de prova",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "nenhum dos 100 lançamentos atravessa a parede de 1 mm",
+          "pass": true,
+          "value": "100 de 100 ok",
+          "run": "todas"
+        }
+      ],
+      "steps": 1000,
+      "stepMedian": 0.00837500000034197,
+      "stepP95": 0.06549699999959557,
+      "timing": "passo",
+      "maxDepth": 0.03466785416666618,
+      "jitter": null,
+      "hash": "8a20e95dabcfea8e",
+      "hashRepeat": "8a20e95dabcfea8e",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 67.19680700000026
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.16058000000066386,
+      "stepP95": 0.5623850000001767,
+      "timing": "passo",
+      "maxDepth": 0.1241638892988148,
+      "jitter": 0,
+      "hash": "14da7573b2aed426",
+      "hashRepeat": "14da7573b2aed426",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 296.70015799999965
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "planck",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.14412200000060693,
+      "stepP95": 0.18345899999985704,
+      "timing": "passo",
+      "maxDepth": 0.012493922717532007,
+      "jitter": 0,
+      "hash": "8cb06c45c24f6e64",
+      "hashRepeat": "8cb06c45c24f6e64",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 297.36162199999944
+    },
+    {
+      "scene": "01-lancador",
+      "title": "Lançador",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "parado, o percussor não se move mais que 0,2 mm em 1 s",
+          "pass": true,
+          "value": "0,002 mm",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "puxando o gatilho, o sensor dispara exatamente 1 vez",
+          "pass": true,
+          "value": "1 disparo",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "a esfera passa da saída do cano em até 0,5 s",
+          "pass": true,
+          "value": "0,233 s",
+          "run": "repouso e disparo"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.05862600000000384,
+      "stepP95": 0.1385919999993348,
+      "timing": "passo",
+      "maxDepth": 0.09137339890003204,
+      "jitter": 0.0004447577133867568,
+      "hash": "4a6482c47e350467",
+      "hashRepeat": "4a6482c47e350467",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 207.44830400000046
+    },
+    {
+      "scene": "02-trava",
+      "title": "Trava",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "a maçaneta gira 30°",
+          "pass": true,
+          "value": "-30,0°",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
+          "pass": true,
+          "value": "7,22 mm",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "pass": true,
+          "value": "0,000 mm",
+          "run": "girar e soltar"
+        }
+      ],
+      "steps": 840,
+      "stepMedian": 0.02129899999999907,
+      "stepP95": 0.04005200000028708,
+      "timing": "passo",
+      "maxDepth": 0.059255510568618774,
+      "jitter": 0,
+      "hash": "98f3b85f6885fece",
+      "hashRepeat": "98f3b85f6885fece",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 53.10104000000047
+    },
+    {
+      "scene": "03-engrenagens",
+      "title": "Engrenagens e catraca",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
+      ],
+      "assertions": [
+        {
+          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+          "pass": true,
+          "value": "erro máx. 1,79%",
+          "run": "a favor"
+        },
+        {
+          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
+          "pass": false,
+          "value": "34,0°",
+          "run": "a favor"
+        }
+      ],
+      "steps": 1800,
+      "stepMedian": 0.09361100000023725,
+      "stepP95": 0.1826469999996334,
+      "timing": "passo",
+      "maxDepth": 0.1462399959564209,
+      "jitter": 0.00024686145012793104,
+      "hash": "ad46100451885385",
+      "hashRepeat": "ad46100451885385",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 449.7201759999998
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "1,351 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.3329589999993914,
+      "stepP95": 0.5822250000001077,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 3.6300290811516516e-7,
+      "hash": "2282d37d7034f4d8",
+      "hashRepeat": "2282d37d7034f4d8",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 1267.983572
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": true,
+          "value": "0,055 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.07329400000071473,
+      "stepP95": 0.1340700000000652,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "2f93620ca9fc76ed",
+      "hashRepeat": "2f93620ca9fc76ed",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 307.3514699999996
+    },
+    {
+      "scene": "06-pinhao-cremalheira",
+      "title": "Pinhão e cremalheira",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
+          "pass": true,
+          "value": "erro máx. 1,21%, giro mín. 99%",
+          "run": "50 inversões"
+        },
+        {
+          "label": "penetração entre dentes menor que 0,1 mm",
+          "pass": true,
+          "value": "0,0052 mm",
+          "run": "50 inversões"
+        }
+      ],
+      "steps": 4896,
+      "stepMedian": 0.047657999999501044,
+      "stepP95": 0.0967979999995805,
+      "timing": "passo",
+      "maxDepth": 0.005224846536293626,
+      "jitter": null,
+      "hash": "9d02f2b37d50d10e",
+      "hashRepeat": "9d02f2b37d50d10e",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 767.9399910000002
+    },
+    {
+      "scene": "07-bala",
+      "title": "Bala de prova",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "nenhum dos 100 lançamentos atravessa a parede de 1 mm",
+          "pass": true,
+          "value": "100 de 100 ok",
+          "run": "todas"
+        }
+      ],
+      "steps": 1000,
+      "stepMedian": 0.014596999999412219,
+      "stepP95": 0.042884000000412925,
+      "timing": "passo",
+      "maxDepth": 0.4865354299545288,
+      "jitter": null,
+      "hash": "5732e8442d22b76f",
+      "hashRepeat": "5732e8442d22b76f",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 91.86634099999901
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.03214300000036019,
+      "stepP95": 0.053277999999409076,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 6.471748762673964e-9,
+      "hash": "37266101e232059c",
+      "hashRepeat": "37266101e232059c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 81.75148900000022
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier-det",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.031490999999732594,
+      "stepP95": 0.059283000000505126,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 0,
+      "hash": "d9665a0d0aa3d034",
+      "hashRepeat": "d9665a0d0aa3d034",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 92.10929299999952
+    },
+    {
+      "scene": "01-lancador",
+      "title": "Lançador",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "parado, o percussor não se move mais que 0,2 mm em 1 s",
+          "pass": true,
+          "value": "0,002 mm",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "puxando o gatilho, o sensor dispara exatamente 1 vez",
+          "pass": true,
+          "value": "1 disparo",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "a esfera passa da saída do cano em até 0,5 s",
+          "pass": true,
+          "value": "0,233 s",
+          "run": "repouso e disparo"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.05951599999934842,
+      "stepP95": 0.154156000000512,
+      "timing": "passo",
+      "maxDepth": 0.09137339890003204,
+      "jitter": 0.0004447577133867568,
+      "hash": "4a6482c47e350467",
+      "hashRepeat": "4a6482c47e350467",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 281.1320629999991
+    },
+    {
+      "scene": "02-trava",
+      "title": "Trava",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "a maçaneta gira 30°",
+          "pass": true,
+          "value": "-30,0°",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
+          "pass": true,
+          "value": "7,22 mm",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "pass": true,
+          "value": "0,000 mm",
+          "run": "girar e soltar"
+        }
+      ],
+      "steps": 840,
+      "stepMedian": 0.04146699999910197,
+      "stepP95": 0.08044100000006438,
+      "timing": "passo",
+      "maxDepth": 0.059255510568618774,
+      "jitter": 0,
+      "hash": "98f3b85f6885fece",
+      "hashRepeat": "98f3b85f6885fece",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 89.98630199999934
+    },
+    {
+      "scene": "03-engrenagens",
+      "title": "Engrenagens e catraca",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
+      ],
+      "assertions": [
+        {
+          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+          "pass": true,
+          "value": "erro máx. 1,79%",
+          "run": "a favor"
+        },
+        {
+          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
+          "pass": false,
+          "value": "34,0°",
+          "run": "a favor"
+        }
+      ],
+      "steps": 1800,
+      "stepMedian": 0.0928490000005695,
+      "stepP95": 0.2773560000005091,
+      "timing": "passo",
+      "maxDepth": 0.1462399959564209,
+      "jitter": 0.00024686145012793104,
+      "hash": "ad46100451885385",
+      "hashRepeat": "ad46100451885385",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 524.4411959999998
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "1,351 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.31257800000093994,
+      "stepP95": 0.5125800000005256,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 3.6300290811516516e-7,
+      "hash": "2282d37d7034f4d8",
+      "hashRepeat": "2282d37d7034f4d8",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 1382.7117870000002
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": true,
+          "value": "0,055 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.07428700000127719,
+      "stepP95": 0.14059400000041933,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "2f93620ca9fc76ed",
+      "hashRepeat": "2f93620ca9fc76ed",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 353.8008359999985
+    },
+    {
+      "scene": "06-pinhao-cremalheira",
+      "title": "Pinhão e cremalheira",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
+          "pass": true,
+          "value": "erro máx. 1,21%, giro mín. 99%",
+          "run": "50 inversões"
+        },
+        {
+          "label": "penetração entre dentes menor que 0,1 mm",
+          "pass": true,
+          "value": "0,0052 mm",
+          "run": "50 inversões"
+        }
+      ],
+      "steps": 4896,
+      "stepMedian": 0.046782000001257984,
+      "stepP95": 0.08293199999934586,
+      "timing": "passo",
+      "maxDepth": 0.005224846536293626,
+      "jitter": null,
+      "hash": "9d02f2b37d50d10e",
+      "hashRepeat": "9d02f2b37d50d10e",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 650.6839770000006
+    },
+    {
+      "scene": "07-bala",
+      "title": "Bala de prova",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "nenhum dos 100 lançamentos atravessa a parede de 1 mm",
+          "pass": true,
+          "value": "100 de 100 ok",
+          "run": "todas"
+        }
+      ],
+      "steps": 1000,
+      "stepMedian": 0.009337999999843305,
+      "stepP95": 0.025588999998944928,
+      "timing": "passo",
+      "maxDepth": 0.4865354299545288,
+      "jitter": null,
+      "hash": "5732e8442d22b76f",
+      "hashRepeat": "5732e8442d22b76f",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 63.620152999999846
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.031173999999737134,
+      "stepP95": 0.04824400000143214,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 6.471748762673964e-9,
+      "hash": "37266101e232059c",
+      "hashRepeat": "37266101e232059c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 82.15575200000058
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.030150000000503496,
+      "stepP95": 0.04279099999985192,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 0,
+      "hash": "d9665a0d0aa3d034",
+      "hashRepeat": "d9665a0d0aa3d034",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 79.11306200000035
+    },
+    {
+      "scene": "01-lancador",
+      "title": "Lançador",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "parado, o percussor não se move mais que 0,2 mm em 1 s",
+          "pass": true,
+          "value": "0,005 mm",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "puxando o gatilho, o sensor dispara exatamente 1 vez",
+          "pass": true,
+          "value": "1 disparo",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "a esfera passa da saída do cano em até 0,5 s",
+          "pass": true,
+          "value": "0,233 s",
+          "run": "repouso e disparo"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.04688499999974738,
+      "stepP95": 0.11191200000030221,
+      "timing": "passo",
+      "maxDepth": 0.10934208519756794,
+      "jitter": 0.0012136465958541847,
+      "hash": "e5aa59bd87926c1c",
+      "hashRepeat": "e5aa59bd87926c1c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 133.9556990000001
+    },
+    {
+      "scene": "02-trava",
+      "title": "Trava",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "a maçaneta gira 30°",
+          "pass": true,
+          "value": "-30,1°",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
+          "pass": true,
+          "value": "7,24 mm",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "pass": true,
+          "value": "0,001 mm",
+          "run": "girar e soltar"
+        }
+      ],
+      "steps": 840,
+      "stepMedian": 0.02305800000067393,
+      "stepP95": 0.04603000000133761,
+      "timing": "passo",
+      "maxDepth": 0.06491447798907757,
+      "jitter": 6.899045650118815e-15,
+      "hash": "4d8a97cbb599e00c",
+      "hashRepeat": "4d8a97cbb599e00c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 65.127645999999
+    },
+    {
+      "scene": "03-engrenagens",
+      "title": "Engrenagens e catraca",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
+      ],
+      "assertions": [
+        {
+          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+          "pass": true,
+          "value": "erro máx. 1,55%",
+          "run": "a favor"
+        },
+        {
+          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
+          "pass": false,
+          "value": "34,1°",
+          "run": "a favor"
+        }
+      ],
+      "steps": 1800,
+      "stepMedian": 0.06877999999960593,
+      "stepP95": 0.09871600000042235,
+      "timing": "passo",
+      "maxDepth": 0.1029669027775526,
+      "jitter": 0.000022233879154781153,
+      "hash": "1566b27f7cad670a",
+      "hashRepeat": "1566b27f7cad670a",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 479.301891000001
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "1,367 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.16071399999964342,
+      "stepP95": 0.25881200000003446,
+      "timing": "passo",
+      "maxDepth": 0.13441979885101318,
+      "jitter": 0.006579571033706377,
+      "hash": "a835c7e7ece678f4",
+      "hashRepeat": "a835c7e7ece678f4",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 2629.818759
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": true,
+          "value": "0,215 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.07316700000046694,
+      "stepP95": 0.11927599999944505,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "de20a9035d3273a2",
+      "hashRepeat": "de20a9035d3273a2",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 680.7571889999981
+    },
+    {
+      "scene": "06-pinhao-cremalheira",
+      "title": "Pinhão e cremalheira",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
+          "pass": true,
+          "value": "erro máx. 1,31%, giro mín. 99%",
+          "run": "50 inversões"
+        },
+        {
+          "label": "penetração entre dentes menor que 0,1 mm",
+          "pass": true,
+          "value": "0,0300 mm",
+          "run": "50 inversões"
+        }
+      ],
+      "steps": 4896,
+      "stepMedian": 0.03908900000169524,
+      "stepP95": 0.07056599999850732,
+      "timing": "passo",
+      "maxDepth": 0.029952959157526493,
+      "jitter": null,
+      "hash": "53e22c4ceac37961",
+      "hashRepeat": "53e22c4ceac37961",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 719.4053209999984
+    },
+    {
+      "scene": "07-bala",
+      "title": "Bala de prova",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "nenhum dos 100 lançamentos atravessa a parede de 1 mm",
+          "pass": true,
+          "value": "100 de 100 ok",
+          "run": "todas"
+        }
+      ],
+      "steps": 1000,
+      "stepMedian": 0.01246799999717041,
+      "stepP95": 0.029436000000714557,
+      "timing": "passo",
+      "maxDepth": 1.9288837909698486,
+      "jitter": null,
+      "hash": "af58ee668f9cc97f",
+      "hashRepeat": "af58ee668f9cc97f",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 78.59371299999839
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.023325000001932494,
+      "stepP95": 0.045259999998961575,
+      "timing": "passo",
+      "maxDepth": 0.0008793920278549194,
+      "jitter": 0,
+      "hash": "bb3bc359572c8a0c",
+      "hashRepeat": "bb3bc359572c8a0c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 231.62470400000166
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.02140499999950407,
+      "stepP95": 0.036106999999901745,
+      "timing": "passo",
+      "maxDepth": 0.0008794069290161133,
+      "jitter": 0,
+      "hash": "401f6d5df1f9200c",
+      "hashRepeat": "401f6d5df1f9200c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 200.48167900000044
+    }
+  ]
+}

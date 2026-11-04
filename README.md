@@ -28,7 +28,13 @@ npm run build        # build estático em dist/
 npm run lint && npm run typecheck && npm test
 npm run capture      # capturas Playwright (390×844 e 1440×900) em docs/capturas/fase-1/
 npm run check:overflow  # reprova rolagem lateral em 360, 390 e 412 px
+npm run bench        # comparativo de motores no Node → docs/decisoes/bench-node.json
+npm run bench:browser   # o mesmo no Chromium headless (/#bench) → docs/decisoes/bench-chromium.json
+npm run bench:scenes # regenera as cenas de medição em scenes/fixtures/bench/
+npm run bench:size   # tamanho dos motores no build → docs/decisoes/bundle-size.json
 ```
+
+A página de medição fica em `/#bench` (no celular: abrir, esperar o "Pronto", tocar em "Copiar resultado").
 
 Playwright usa o Chromium indicado por `PLAYWRIGHT_BROWSERS_PATH`; para outro binário, defina `PW_CHROMIUM=/caminho/do/chrome`.
 

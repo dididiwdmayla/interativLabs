@@ -1,0 +1,68 @@
+{
+  "id": "03-engrenagens",
+  "title": "Engrenagens e catraca",
+  "notes": "Migrada do protótipo, com dentes evolventes de verdade (módulo 1,02 mm). Duas execuções a partir do repouso: motor a −12 rpm (a favor, a catraca gira livre) e a +12 rpm (contra, a lingueta trava).",
+  "runs": [
+    {
+      "name": "a favor",
+      "duration": 5.5,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "ratio",
+          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+          "base": "k10",
+          "links": [
+            {
+              "link": "k11",
+              "ratio": -1.5
+            },
+            {
+              "link": "k13",
+              "ratio": 2
+            }
+          ],
+          "from": 0.5,
+          "to": 5.5,
+          "windows": 10,
+          "maxError": 0.02
+        }
+      ]
+    },
+    {
+      "name": "contra",
+      "duration": 2,
+      "inputs": [
+        {
+          "kind": "motor",
+          "link": "k10",
+          "t": 0,
+          "speed": 1.2566
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "maxRotation",
+          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
+          "link": "k13",
+          "from": 0,
+          "to": 2,
+          "max": 0.4488
+        }
+      ]
+    }
+  ],
+  "still": {
+    "run": 1,
+    "parts": [
+      "p5",
+      "p6",
+      "p7",
+      "p8",
+      "p9"
+    ],
+    "from": 1,
+    "to": 2
+  },
+  "scene": "03-engrenagens.scene.json"
+}

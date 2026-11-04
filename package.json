@@ -15,7 +15,11 @@
     "typecheck": "tsc -b --pretty",
     "test": "vitest run",
     "capture": "playwright test --project=capture",
-    "check:overflow": "playwright test --project=overflow"
+    "check:overflow": "playwright test --project=overflow",
+    "bench": "node scripts/run-ts.mjs scripts/bench/run-node.ts",
+    "bench:scenes": "node scripts/run-ts.mjs scripts/bench/generate-scenes.ts",
+    "bench:browser": "playwright test --project=bench",
+    "bench:size": "node scripts/bench/bundle-size.mjs"
   },
   "dependencies": {
     "@dimforge/rapier2d-compat": "^0.21.0",

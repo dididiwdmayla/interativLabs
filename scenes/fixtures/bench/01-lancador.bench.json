@@ -1,0 +1,67 @@
+{
+  "id": "01-lancador",
+  "title": "Lançador",
+  "notes": "Migrado do protótipo. O desenho deixa 0,4 mm entre o pino do percussor e o retém: a medição de repouso começa depois de 0,5 s de acomodação. O tempo de saída da esfera conta a partir do disparo do sensor.",
+  "runs": [
+    {
+      "name": "repouso e disparo",
+      "duration": 3,
+      "inputs": [
+        {
+          "kind": "drag",
+          "part": "p13",
+          "from": [
+            69,
+            69
+          ],
+          "to": [
+            62.15,
+            68.73
+          ],
+          "t0": 1.5,
+          "t1": 1.8,
+          "release": 2.8
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "maxDisplacement",
+          "label": "parado, o percussor não se move mais que 0,2 mm em 1 s",
+          "parts": [
+            "p11"
+          ],
+          "from": 0.5,
+          "to": 1.5,
+          "max": 0.2
+        },
+        {
+          "kind": "sensorCount",
+          "label": "puxando o gatilho, o sensor dispara exatamente 1 vez",
+          "sensor": "k15",
+          "equals": 1
+        },
+        {
+          "kind": "crossAfterSensor",
+          "label": "a esfera passa da saída do cano em até 0,5 s",
+          "part": "p10",
+          "sensor": "k15",
+          "axis": [
+            1,
+            0
+          ],
+          "value": 142.4,
+          "within": 0.5
+        }
+      ]
+    }
+  ],
+  "still": {
+    "run": 0,
+    "parts": [
+      "p11"
+    ],
+    "from": 0.5,
+    "to": 1.5
+  },
+  "scene": "01-lancador.scene.json"
+}

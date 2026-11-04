@@ -5,3 +5,4 @@ docs
 public
 *.md
 package-lock.json
+scenes/fixtures/bench/*.json

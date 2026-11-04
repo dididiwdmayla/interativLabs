@@ -1,0 +1,29 @@
+{
+  "id": "04-pilha",
+  "title": "Pilha",
+  "notes": "10 colunas de 20 caixas de 10 mm (madeira), 1 mm entre colunas, gravidade real.",
+  "runs": [
+    {
+      "name": "3 s",
+      "duration": 3,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "maxDisplacement",
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "parts": "dynamic",
+          "from": 0,
+          "to": 3,
+          "max": 1
+        }
+      ]
+    }
+  ],
+  "still": {
+    "run": 0,
+    "parts": "dynamic",
+    "from": 2,
+    "to": 3
+  },
+  "scene": "04-pilha.scene.json"
+}

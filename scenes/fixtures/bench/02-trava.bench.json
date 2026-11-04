@@ -1,0 +1,62 @@
+{
+  "id": "02-trava",
+  "title": "Trava",
+  "notes": "Migrada do protótipo. A maçaneta é arrastada pela ponta até passar do batente de −30°.",
+  "runs": [
+    {
+      "name": "girar e soltar",
+      "duration": 3.5,
+      "inputs": [
+        {
+          "kind": "drag",
+          "part": "p9",
+          "from": [
+            46,
+            66.8
+          ],
+          "to": [
+            53.9,
+            85.5
+          ],
+          "t0": 0.5,
+          "t1": 1,
+          "release": 1.5
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "linkAt",
+          "label": "a maçaneta gira 30°",
+          "link": "k12",
+          "field": "angle",
+          "at": 1.45,
+          "max": -0.5149
+        },
+        {
+          "kind": "linkAt",
+          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
+          "link": "k10",
+          "field": "translation",
+          "at": 1.45,
+          "min": 6
+        },
+        {
+          "kind": "returnsTo",
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "part": "p8",
+          "at": 2.5,
+          "tol": 0.3
+        }
+      ]
+    }
+  ],
+  "still": {
+    "run": 0,
+    "parts": [
+      "p8"
+    ],
+    "from": 2.5,
+    "to": 3.5
+  },
+  "scene": "02-trava.scene.json"
+}

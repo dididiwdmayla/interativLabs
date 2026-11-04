@@ -30,6 +30,32 @@ Scene (JSON) ──compile──▶ EngineWorld ──step──▶ Snapshot ─
 
 `src/model`, `src/geometry`, `src/engine` e `src/sim` rodam no Node e são cobertos por testes sem navegador.
 
+### Interface do motor (`src/engine/types.ts`)
+
+Todo motor fica atrás do mesmo adaptador. Fora dele, tudo é em mm, g, s e rad; só o adaptador conhece a escala interna.
+
+```ts
+interface EngineAdapter {
+  readonly meta: { id: string; name: string; version: string; iterations: string };
+  compile(scene: Scene, options: { unitMm: number }): CompileReport; // avisos, corpos, formas, juntas
+  step(dt: number): void;            // um passo; o passo fixo de 1/240 s fica em src/sim
+  snapshot(): Snapshot;              // poses (mm, rad), estado das ligações e eventos do passo
+  pose(partId: Id): PartPose | null; // uma peça, sem montar o snapshot
+  dragStart(partId: Id, pointMm: Vec2): boolean;
+  dragMove(pointMm: Vec2): void;
+  dragEnd(): void;
+  contactsDepthMax(): number;        // maior penetração do passo, mm
+  setMotorSpeed(linkId: Id, speed: number): void; // rad/s
+  setVelocity(partId: Id, v: Vec2, omega: number): void; // roteiros de teste
+  dispose(): void;
+}
+```
+
+- `Snapshot`: `time`, `steps`, `parts[id] = { x, y, angle }`, `links[id]` (eixo: `angle`, `speed`, `gap`; trilho: `translation`; mola: `length`; câmara: `gas`, `pressure`, `fired`, `vented`; sensor: `count`) e `events` (`sensor`, `chamber-fired`, `chamber-vented`).
+- Parte comum a todos os motores: `plan.ts` (cena → corpos compostos, peças convexas, massa pela geometria, juntas) e `runtime.ts` (mola de torção, mola do trilho, mola entre pontos, câmara, sensor e arrasto, em unidades da cena). O adaptador só traduz o plano e lê e escreve nos corpos.
+- Corpo dinâmico com origem no centro de massa e ângulo 0 na pose desenhada; cada grupo fixo é um corpo estático próprio (uma junta com uma peça fixa só desliga o contato com aquela peça). O índice 0 é o fundo, ponta das ligações com `a: null`.
+- Adaptadores do comparativo: Planck, Rapier 2D (padrão e determinístico) e Box2D v3 (`box2d3-wasm`), carregados sob demanda por `src/engine/registry.ts`.
+
 ## 3. Formato da cena (versão 1)
 
 Unidades da cena: milímetros e radianos. A interface mostra graus.
@@ -150,10 +176,11 @@ A cena é em mm, mas os motores 2D funcionam melhor com corpos de 0,1 a 10 unida
 - **Visual**: capturas Playwright em 390×844 e 1440×900, nos dois temas quando houver, guardadas em `docs/capturas/fase-N/`.
 - **Desempenho**: cena sintética de 150 peças e 100 ligações; registra quadros por segundo e tempo de passo.
 
-## 9. Decisões abertas
+## 9. Decisões
 
-| Decisão | Quando | Como |
+| Decisão | Quando | Estado |
 | --- | --- | --- |
-| Motor de física | Fase 1 · item 4 | Comparativo medido |
-| Identidade visual | Fase 0 | Escolha entre os frames de `docs/identidade/frames.md` |
-| Biblioteca de booleanos de polígono | Fase 1 · item 3 | Robustez nos casos de teste da geometria |
+| Identidade visual | Fase 0 | Fechada: Prancha índigo (`docs/identidade/identidade.md`) |
+| Biblioteca de booleanos de polígono | Fase 1 · item 3 | Fechada: Clipper2 (`clipper2-ts`), escala inteira de 10 000 por mm; triangulação pelo earcut (`docs/decisoes/geometria.md`) |
+| Motor de física | Fase 1 · item 4 | Medido no Node e no Chromium, recomendação em `docs/decisoes/motor.md`; aguarda a rodada no celular do Will e a decisão do coordenador |
+| Escala interna e limite de velocidade | Fase 1 · item 4 | Proposta: 1 mm por unidade, 40 m/s (`docs/decisoes/motor.md`); entra no §4 depois da decisão do motor |
