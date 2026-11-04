@@ -5,10 +5,10 @@
 | Papel | Quem | Entrega | Não faz |
 | --- | --- | --- | --- |
 | Coordenador geral | Claude, no chat do projeto interativLabs | Documentos de fase com itens e aceites; a instrução pronta de cada sessão do executor, com agente, modelo e esforço recomendados; revisão do resultado e do PR; atualização de `AGENTS.md`, `docs/arquitetura.md` e `docs/roadmap.md` | Código do app; abrir sessões de executor por conta própria |
-| Coordenador visual | Papel assumido pelo Claude do projeto quando a fase pede arte, seguindo `docs/coordenacao/coordenador-visual.md` | Identidade, manifesto de cada lote, a lista completa de prompts do lote, revisão de cada imagem antes de entrar no repositório, revisão das folhas de contato, briefing ao coordenador geral | Código do app; gerar imagem |
-| Coordenador sonoro | Papel assumido na fase de som | Lista de sons por evento, manifesto do lote de som, prompts, revisão de cada arquivo, briefing ao coordenador geral | Código do app; gerar áudio |
+| Coordenador visual | Claude, num chat próprio do projeto interativLabs, separado do chat do coordenador geral, seguindo `docs/coordenacao/coordenador-visual.md` | Identidade, manifesto de cada lote, a lista completa de prompts do lote, revisão de cada imagem antes de entrar no repositório, revisão das folhas de contato, briefing ao coordenador geral | Código do app; gerar imagem |
+| Coordenador sonoro | Claude, num chat próprio do projeto, aberto na fase de som | Lista de sons por evento, manifesto do lote de som, prompts, revisão de cada arquivo, briefing ao coordenador geral | Código do app; gerar áudio |
 | Executor | Sessão do Claude Code ou do Codex aberta pelo Will no repositório | Implementação dos itens, testes, capturas, documento de verificação, PR | Gerar ou trocar assets e sons; seguir além de um ponto de revisão |
-| Dono do projeto | Will | Escolhas de direção; abre as sessões do executor; gera a arte e o som; sobe os originais aprovados; merge | |
+| Dono do projeto | Will | Escolhas de direção; abre as sessões do executor; gera a arte e o som; sobe os originais aprovados; leva os briefings de um chat para o outro; merge | |
 
 ## Ciclo de uma fase
 
