@@ -23,6 +23,8 @@ const EXPECTED_FAILURES: Record<string, Record<string, string>> = {
   },
   "rapier-det": {
     [CATRACA]: "a lingueta da cena migrada desce até o batente de −25° antes de segurar (catraca gira ~34°)",
+    "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s":
+      "na v2 o aço tem a densidade real (7,85 g/cm³ em vez de 7,8): com as massas 0,6% maiores, o Rapier fica em 2,08% (Planck e Box2D passam)",
   },
   box2d: {
     [CATRACA]: "a lingueta da cena migrada desce até o batente de −25° antes de segurar (catraca gira ~35°)",

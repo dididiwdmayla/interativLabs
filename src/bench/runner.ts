@@ -3,6 +3,7 @@ import type { EngineAdapter, Snapshot } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
 import type { AssertionResult, BenchAssertion, BenchRun, BenchScript, SceneResult } from "./types";
+import { dhypot } from "@/geometry/dmath";
 
 /**
  * Executor da bancada, sem DOM: roda no Node, no Web Worker e no Vitest.
@@ -61,7 +62,7 @@ function dynamicParts(scene: Scene): Id[] {
   return scene.parts.filter((p) => !p.fixed && !screwed.has(p.id)).map((p) => p.id);
 }
 
-const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);
+const dist = (a: { x: number; y: number }, b: { x: number; y: number }) => dhypot(a.x - b.x, a.y - b.y);
 
 class JitterAcc {
   private ref = new Map<Id, Vec2>();

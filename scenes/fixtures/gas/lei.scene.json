@@ -1,0 +1,121 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Lei dos gases",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Cilindro",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Cilindro",
+      "layer": "L1",
+      "x": 0,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -9],
+          [70, -9],
+          [70, -5],
+          [0, -5],
+          [0, 5],
+          [70, 5],
+          [70, 9],
+          [-4, 9]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Pistão",
+      "layer": "L1",
+      "x": 14,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -4.9],
+          [4, -4.9],
+          [4, 4.9],
+          [-4, 4.9]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k3",
+      "ref": 3,
+      "kind": "slider",
+      "a": "p1",
+      "b": "p2",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-9.5, 50],
+      "spring": {
+        "k": 1,
+        "rest": 0,
+        "damping": 0.0008
+      }
+    },
+    {
+      "id": "k4",
+      "ref": 4,
+      "kind": "chamber",
+      "body": "p1",
+      "at": [0, 0],
+      "dir": 0,
+      "bore": 10,
+      "length": 70,
+      "walls": [
+        {
+          "part": "p2",
+          "seal": 100
+        }
+      ],
+      "vents": [],
+      "ports": [],
+      "gas": {
+        "model": "isothermal",
+        "gamma": 1.4,
+        "p0": 101.325,
+        "charge": {
+          "amount": 0.1,
+          "burnMs": 2
+        }
+      }
+    }
+  ]
+}

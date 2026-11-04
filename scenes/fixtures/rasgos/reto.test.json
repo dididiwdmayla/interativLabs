@@ -1,0 +1,70 @@
+{
+  "id": "rasgos/reto",
+  "group": "rasgos",
+  "title": "Rasgo reto (junta)",
+  "notes": "Placa fixa com um rasgo reto de 20 mm (linha de centro) e 4,2 mm de largura; uma alavanca pendurada por um pino de Ø 4 mm que corre no rasgo. O roteiro arrasta a ponta de baixo da alavanca para a direita e para a esquerda, além dos batentes do pino (a alavanca inclina ~0,5 rad), e solta.",
+  "view": [-50, -20, 100, 80],
+  "runs": [
+    {
+      "name": "arrasto",
+      "duration": 3,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p2",
+          "path": [
+            [0, 44],
+            [30, 38],
+            [-30, 38]
+          ],
+          "t0": 0.2,
+          "t1": 1.6,
+          "release": 1.6
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "desvio transversal do pino < 0,01 mm",
+          "q": {
+            "link": "k4",
+            "field": "deviation"
+          },
+          "min": -0.01,
+          "max": 0.01
+        },
+        {
+          "kind": "range",
+          "label": "o pino para nos batentes (10 mm + 0,1 mm de folga de cada lado)",
+          "q": {
+            "link": "k4",
+            "field": "position"
+          },
+          "min": -10.11,
+          "max": 10.11
+        },
+        {
+          "kind": "span",
+          "label": "e chega aos dois batentes",
+          "q": {
+            "link": "k4",
+            "field": "position"
+          },
+          "min": 20.15
+        },
+        {
+          "kind": "span",
+          "label": "solta, a alavanca gira livre em torno do pino",
+          "q": {
+            "part": "p2",
+            "field": "angle"
+          },
+          "from": 1.8,
+          "to": 3,
+          "min": 0.2
+        }
+      ]
+    }
+  ],
+  "scene": "reto.scene.json"
+}

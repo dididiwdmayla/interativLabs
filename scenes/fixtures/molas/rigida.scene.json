@@ -1,0 +1,104 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Mola rígida",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Mola",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Base",
+      "layer": "L1",
+      "x": 0,
+      "y": 5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-15, -5],
+          [15, -5],
+          [15, 5],
+          [-15, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Bloco",
+      "layer": "L1",
+      "x": 0,
+      "y": -29,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -4],
+          [5, -4],
+          [5, 4],
+          [-5, 4]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k3",
+      "ref": 3,
+      "kind": "slider",
+      "a": null,
+      "b": "p2",
+      "at": [0, 0],
+      "dir": 1.5708,
+      "travel": [-50, 50]
+    },
+    {
+      "id": "k4",
+      "ref": 4,
+      "kind": "spring",
+      "a": null,
+      "b": "p2",
+      "atA": [0, 0],
+      "atB": [0, 4],
+      "k": 2,
+      "damping": 0.0019411300000000001,
+      "freeLength": 25,
+      "mode": "seated",
+      "solidLength": 4,
+      "coil": {
+        "outerD": 6,
+        "wireD": 0.5,
+        "turns": 8
+      }
+    }
+  ]
+}

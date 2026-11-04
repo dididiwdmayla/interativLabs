@@ -1,0 +1,53 @@
+{
+  "id": "exemplos/cilindro-dois-pistoes",
+  "group": "exemplos",
+  "title": "Cilindro de dois pistões",
+  "notes": "Recuo do fundo: o gás empurra as duas paredes. O pistão leve (7,7 g) avança pelo furo; o fundo móvel (28 g), num trilho com mola, recua e volta ao batente. Uma esfera cai no sensor e acende a carga. Veja em 0,05×.",
+  "view": [-75, -80, 200, 110],
+  "runs": [
+    {
+      "name": "disparo",
+      "duration": 1.5,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "a esfera acende a carga",
+          "event": "chamber-fired",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "span",
+          "label": "o fundo recua",
+          "q": {
+            "link": "k5",
+            "field": "translation"
+          },
+          "min": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "o pistão sai pela boca",
+          "q": {
+            "part": "p3",
+            "along": [1, 0]
+          },
+          "t": 1.5,
+          "min": 60
+        },
+        {
+          "kind": "at",
+          "label": "a mola devolve o fundo ao batente (±0,2 mm)",
+          "q": {
+            "part": "p4",
+            "disp": true
+          },
+          "t": 1.5,
+          "max": 0.2
+        }
+      ]
+    }
+  ],
+  "scene": "../../examples/cilindro-dois-pistoes.json"
+}

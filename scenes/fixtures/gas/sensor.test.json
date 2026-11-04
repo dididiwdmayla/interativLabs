@@ -1,0 +1,163 @@
+{
+  "id": "gas/sensor",
+  "group": "gas",
+  "title": "Sensor",
+  "notes": "Esferas de aço caem através de um sensor (Ø 8 mm, impacto mínimo 300 mm/s). Na primeira execução, o sensor abre o respiro de uma câmara já acesa; nas outras, acende a câmara. De 10 mm de altura a esfera passa a 443 mm/s; de 1 mm, a 140 mm/s.",
+  "view": [-35, -80, 115, 135],
+  "runs": [
+    {
+      "name": "abre o respiro",
+      "duration": 0.6,
+      "override": {
+        "p4": {
+          "x": -60
+        }
+      },
+      "inputs": [
+        {
+          "kind": "ignite",
+          "link": "k8",
+          "t": 0.02
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "acima do mínimo, o sensor abre o respiro",
+          "event": "vent-opened",
+          "match": {
+            "chamber": "k8",
+            "by": "sensor"
+          },
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "dropsAfter",
+          "label": "e o gás escapa (abaixo de 5% do pico em 20 ms)",
+          "q": {
+            "diff": [
+              {
+                "link": "k8",
+                "field": "pressure"
+              },
+              {
+                "const": 101.325
+              }
+            ]
+          },
+          "event": "vent-opened",
+          "match": {
+            "chamber": "k8"
+          },
+          "fraction": 0.05,
+          "within": 0.02
+        }
+      ]
+    },
+    {
+      "name": "abaixo do mínimo",
+      "duration": 0.6,
+      "override": {
+        "p4": {
+          "x": -60
+        },
+        "p3": {
+          "y": -8
+        }
+      },
+      "inputs": [
+        {
+          "kind": "ignite",
+          "link": "k8",
+          "t": 0.02
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "abaixo do mínimo, nada acontece (sensor)",
+          "event": "sensor",
+          "max": 0
+        },
+        {
+          "kind": "events",
+          "label": "abaixo do mínimo, nada acontece (respiro)",
+          "event": "vent-opened",
+          "max": 0
+        }
+      ]
+    },
+    {
+      "name": "acende",
+      "duration": 0.6,
+      "override": {
+        "p4": {
+          "x": -60
+        }
+      },
+      "patch": {
+        "k9": {
+          "actions": [
+            {
+              "do": "ignite",
+              "target": "k8"
+            }
+          ]
+        }
+      },
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "numa segunda cena, o sensor acende a câmara",
+          "event": "chamber-fired",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "at",
+          "label": "e o pistão avança",
+          "q": {
+            "part": "p6",
+            "along": [1, 0]
+          },
+          "t": 0.6,
+          "min": 1
+        }
+      ]
+    },
+    {
+      "name": "dois toques",
+      "duration": 0.8,
+      "patch": {
+        "k9": {
+          "actions": [
+            {
+              "do": "ignite",
+              "target": "k8"
+            }
+          ]
+        }
+      },
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "dois toques seguidos: o sensor conta os dois",
+          "event": "sensor",
+          "min": 2,
+          "max": 2
+        },
+        {
+          "kind": "events",
+          "label": "mas a câmara não reacende",
+          "event": "chamber-fired",
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ],
+  "scene": "sensor.scene.json"
+}

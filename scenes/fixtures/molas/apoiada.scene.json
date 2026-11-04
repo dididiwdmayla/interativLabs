@@ -1,0 +1,177 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Mola apoiada e mola de tração",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Molas",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Base",
+      "layer": "L1",
+      "x": 0,
+      "y": 105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-25, -5],
+          [25, -5],
+          [25, 5],
+          [-25, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Bloco apoiado",
+      "layer": "L1",
+      "x": 0,
+      "y": 45.8457,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-15, -14.1543],
+          [15, -14.1543],
+          [15, 14.1543],
+          [-15, 14.1543]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 5,
+      "name": "Teto",
+      "layer": "L1",
+      "x": 80,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-25, -5],
+          [25, -5],
+          [25, 5],
+          [-25, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p6",
+      "ref": 6,
+      "name": "Bloco pendurado",
+      "layer": "L1",
+      "x": 80,
+      "y": 54.1543,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-15, -14.1543],
+          [15, -14.1543],
+          [15, 14.1543],
+          [-15, 14.1543]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k3",
+      "ref": 3,
+      "kind": "slider",
+      "a": null,
+      "b": "p2",
+      "at": [0, 0],
+      "dir": 1.5708,
+      "travel": [-100, 100]
+    },
+    {
+      "id": "k4",
+      "ref": 4,
+      "kind": "spring",
+      "a": null,
+      "b": "p2",
+      "atA": [0, 100],
+      "atB": [0, 14.1543],
+      "k": 0.02,
+      "damping": 0.00037947,
+      "freeLength": 40,
+      "mode": "seated",
+      "solidLength": 8,
+      "coil": {
+        "outerD": 8,
+        "wireD": 0.8,
+        "turns": 10
+      }
+    },
+    {
+      "id": "k7",
+      "ref": 7,
+      "kind": "slider",
+      "a": null,
+      "b": "p6",
+      "at": [0, 0],
+      "dir": 1.5708,
+      "travel": [-100, 100]
+    },
+    {
+      "id": "k8",
+      "ref": 8,
+      "kind": "spring",
+      "a": null,
+      "b": "p6",
+      "atA": [80, 0],
+      "atB": [0, -14.1543],
+      "k": 0.02,
+      "damping": 0.00037947,
+      "freeLength": 40,
+      "mode": "tension",
+      "solidLength": 8,
+      "coil": {
+        "outerD": 8,
+        "wireD": 0.8,
+        "turns": 10
+      }
+    }
+  ]
+}

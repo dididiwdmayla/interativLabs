@@ -17,7 +17,7 @@ Uso pessoal. Roda no navegador, no celular e no computador.
 
 ## Estado
 
-Fase 1 (fundação) em andamento no branch `fase-1`. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
+Fase 1 (fundação) em andamento. A Parte C (branch `fase-1-parte-c`) trouxe o motor definitivo (Box2D v3 calibrado para gravidade real, determinístico entre Node e navegador), o formato de cena v2 e as ligações 2.0. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
 
 ## Rodar
 
@@ -33,9 +33,17 @@ npm run bench        # comparativo de motores no Node → docs/decisoes/bench-no
 npm run bench:browser   # o mesmo no Chromium headless (/#bench) → docs/decisoes/bench-chromium.json
 npm run bench:scenes # regenera as cenas de medição em scenes/fixtures/bench/
 npm run bench:size   # tamanho dos motores no build → docs/decisoes/bundle-size.json
+npm run fixtures     # regenera as cenas de teste (scenes/fixtures/) e os exemplos (scenes/examples/)
+npm run fixtures:hashes  # grava o hash de poses de cada cena de teste (scenes/fixtures/hashes.json)
+npm run calibrate    # tabela da calibração do Box2D para gravidade real → docs/decisoes/calibracao-node.json
+npm run test:e2e     # determinismo: o Chromium dá o mesmo hash que o Node em todas as cenas de teste
+npx playwright test --project=lab   # capturas do laboratório em docs/capturas/fase-1/parte-c/
 ```
 
-A página de medição fica em `/#bench` (no celular: abrir, esperar o "Pronto", tocar em "Copiar resultado").
+Duas páginas de trabalho, carregadas sob demanda:
+
+- `/#lab`: o laboratório. Lista as cenas de teste e os exemplos, roda cada um no motor do app (Box2D) com um desenho simples, deixa pausar, ver em câmera lenta (0,05×, 0,25×, 1×), reiniciar e arrastar as peças com o dedo, e mostra ao lado se as afirmações da cena passam. Uma cena direto: `/#lab/<grupo>/<nome>`, por exemplo `/#lab/exemplos/cilindro-dois-pistoes`.
+- `/#bench`: o comparativo de motores (Planck, Rapier e Box2D). No celular: abrir, esperar o "Pronto", tocar em "Copiar resultado".
 
 Playwright usa o Chromium indicado por `PLAYWRIGHT_BROWSERS_PATH`; para outro binário, defina `PW_CHROMIUM=/caminho/do/chrome`.
 

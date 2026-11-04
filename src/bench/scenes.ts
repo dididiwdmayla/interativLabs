@@ -1,4 +1,4 @@
-import { validateScene } from "@/model/scene";
+import { loadScene } from "@/model/scene";
 import type { Scene } from "@/model/types";
 import type { BenchScript } from "./types";
 import b1 from "../../scenes/fixtures/bench/01-lancador.bench.json";
@@ -18,7 +18,7 @@ import s7 from "../../scenes/fixtures/bench/07-bala.scene.json";
 import b8 from "../../scenes/fixtures/bench/08-escalas.bench.json";
 import s8 from "../../scenes/fixtures/bench/08-escalas.scene.json";
 
-/** As oito cenas de medição (scenes/fixtures/bench/), validadas pelo schema. */
+/** As oito cenas de medição (scenes/fixtures/bench/, cena v1), migradas para a v2 ao abrir. */
 export interface BenchCase {
   script: BenchScript;
   scene: Scene;
@@ -38,7 +38,7 @@ const raw: [unknown, unknown][] = [
 export function benchCases(): BenchCase[] {
   return raw.map(([b, s]) => {
     const script = b as BenchScript;
-    const v = validateScene(s);
+    const v = loadScene(s);
     if (!v.ok)
       throw new Error(
         `Cena ${script.id} inválida: ${v.issues.map((i) => `${i.path}: ${i.message}`).join("; ")}`,

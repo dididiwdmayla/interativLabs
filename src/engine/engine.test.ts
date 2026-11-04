@@ -13,13 +13,13 @@ const pkg = (name: string) => JSON.parse(readFileSync(`node_modules/${name}/pack
 const NOW = "2026-11-04T00:00:00.000Z";
 function scene(parts: Scene["parts"], links: Scene["links"]): Scene {
   return {
-    version: 1,
+    version: 2,
     meta: { title: "t", createdAt: NOW, updatedAt: NOW },
     settings: { gravity: { on: true, g: 100 }, snap: { grid: 1, on: true } },
     layers: [
-      { id: "L1", name: "a", visible: true, locked: false },
-      { id: "L2", name: "b", visible: true, locked: false },
-      { id: "L3", name: "c", visible: true, locked: false },
+      { id: "L1", name: "a", visible: true, locked: false, thickness: 10 },
+      { id: "L2", name: "b", visible: true, locked: false, thickness: 10 },
+      { id: "L3", name: "c", visible: true, locked: false, thickness: 10 },
     ],
     parts,
     links,
@@ -90,8 +90,8 @@ describe("adaptadores", () => {
     const composite = p.bodies[bodyOf("p1")]!;
     expect(composite.static).toBe(false);
     expect(composite.position[0]).toBeCloseTo(5, 9);
-    // 2 caixas de aço de 100 mm² × 10 mm
-    expect(composite.mass).toBeCloseTo(2 * 7.8 * 100 * 10 * 1e-3, 9);
+    // 2 caixas de aço de 100 mm² × 10 mm (0,00785 g/mm³)
+    expect(composite.mass).toBeCloseTo(2 * 0.00785 * 100 * 10, 9);
     expect(p.bodies[bodyOf("p3")]!.static).toBe(true);
     expect(p.bodies[bodyOf("p4")]!.static).toBe(true);
     expect(bodyOf("p3")).not.toBe(bodyOf("p4"));
@@ -123,4 +123,50 @@ describe("adaptadores", () => {
       a.dispose();
     });
   }
+});
+
+describe("Box2D calibrado", () => {
+  it("impacto acima do limiar vira evento com a velocidade de aproximação", async () => {
+    const { loadBox2d } = await import("./box2d/load");
+    const a = (await loadBox2d())();
+    const s = scene([box("p1", 0, "L1", true), { ...box("p2", 0, "L1"), y: -40 }], []);
+    s.settings.gravity.g = 9810;
+    a.compile(s, { unitMm: 1 });
+    const hits: number[] = [];
+    for (let i = 0; i < 120; i++) {
+      a.step(1 / 240);
+      for (const e of a.snapshot().events) if (e.kind === "impact") hits.push(e.speed);
+    }
+    // queda de 30 mm: v = √(2·g·h) ≈ 767 mm/s
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits[0]!).toBeGreaterThan(650);
+    expect(hits[0]!).toBeLessThan(800);
+    a.dispose();
+  });
+
+  it("força externa em N: 1 N num bloco de 7,85 g acelera 127 m/s²", async () => {
+    const { loadBox2d } = await import("./box2d/load");
+    const a = (await loadBox2d())();
+    const s = scene([box("p1", 0)], []);
+    s.settings.gravity.on = false;
+    a.compile(s, { unitMm: 1 });
+    a.setForce("p1", [1, 0]);
+    for (let i = 0; i < 24; i++) a.step(1 / 240);
+    const t = 0.1;
+    // m = 0,00785 × 100 × 10 = 7,85 g; x = F/m · t²/2 (Euler simplético em 384 subpassos: × 385/384)
+    expect(a.pose("p1")!.x / ((1e6 / 7.85) * t * t * 0.5)).toBeCloseTo(385 / 384, 4);
+    a.dispose();
+  });
+});
+
+describe("molas", () => {
+  it("mola rígida demais para o passo explícito vira nativa", async () => {
+    const { springNeedsNative } = await import("./box2d/box2dAdapter");
+    // 2 N/mm num bloco de 1,9 g: ω·h ≈ 4,3
+    expect(springNeedsNative({ k: 2e6, damping: 0, effMass: 1.884 })).toBe(true);
+    // 0,02 N/mm em 20 g: ω·h ≈ 0,13
+    expect(springNeedsNative({ k: 2e4, damping: 380, effMass: 20 })).toBe(false);
+    // duas pontas fixas: nunca
+    expect(springNeedsNative({ k: 2e6, damping: 0, effMass: Infinity })).toBe(false);
+  });
 });

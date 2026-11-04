@@ -7,19 +7,20 @@
  * mesma dos motores de física e do Clipper.
  */
 export type Vec2 = [number, number];
+import { dcos, dhypot, dsin } from "./dmath";
 
 export const add = (a: Vec2, b: Vec2): Vec2 => [a[0] + b[0], a[1] + b[1]];
 export const sub = (a: Vec2, b: Vec2): Vec2 => [a[0] - b[0], a[1] - b[1]];
 export const scale = (a: Vec2, k: number): Vec2 => [a[0] * k, a[1] * k];
 export const dot = (a: Vec2, b: Vec2): number => a[0] * b[0] + a[1] * b[1];
 export const cross = (a: Vec2, b: Vec2): number => a[0] * b[1] - a[1] * b[0];
-export const len = (a: Vec2): number => Math.hypot(a[0], a[1]);
-export const dist = (a: Vec2, b: Vec2): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
+export const len = (a: Vec2): number => dhypot(a[0], a[1]);
+export const dist = (a: Vec2, b: Vec2): number => dhypot(a[0] - b[0], a[1] - b[1]);
 export const lerp = (a: Vec2, b: Vec2, t: number): Vec2 => [
   a[0] + (b[0] - a[0]) * t,
   a[1] + (b[1] - a[1]) * t,
 ];
-export const polar = (r: number, a: number): Vec2 => [r * Math.cos(a), r * Math.sin(a)];
+export const polar = (r: number, a: number): Vec2 => [r * dcos(a), r * dsin(a)];
 
 /** Produto vetorial de (b − a) × (c − a): > 0 quando a→b→c vira à esquerda (CCW). */
 export function orient(a: Vec2, b: Vec2, c: Vec2): number {
@@ -27,8 +28,8 @@ export function orient(a: Vec2, b: Vec2, c: Vec2): number {
 }
 
 export function rotate(p: Vec2, angle: number): Vec2 {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
+  const c = dcos(angle);
+  const s = dsin(angle);
   return [p[0] * c - p[1] * s, p[0] * s + p[1] * c];
 }
 
@@ -45,7 +46,7 @@ export function distToSegment(p: Vec2, a: Vec2, b: Vec2): number {
   const l2 = dx * dx + dy * dy;
   if (l2 === 0) return dist(p, a);
   const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2));
-  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+  return dhypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
 }
 
 /** Distância mínima entre os segmentos ab e cd (0 se cruzam). */

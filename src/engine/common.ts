@@ -26,10 +26,17 @@ export function trackedBodies(plan: Plan): number[] {
   const s = new Set<number>();
   for (const a of plan.axles) s.add(a.a).add(a.b);
   for (const a of plan.sliders) s.add(a.a).add(a.b);
-  for (const a of plan.springs) s.add(a.a).add(a.b);
+  for (const a of plan.distances) s.add(a.a).add(a.b);
+  for (const a of plan.slots) s.add(a.a).add(a.b);
+  for (const a of plan.slotContacts) s.add(a.pinBody).add(a.guideBody);
+  for (const a of plan.mounts) s.add(a.a).add(a.b);
+  for (const a of plan.springs) {
+    s.add(a.a).add(a.b);
+    if (a.guide) s.add(a.guide.body);
+  }
   for (const a of plan.chambers) {
-    s.add(a.a);
-    if (a.b > 0) s.add(a.b);
+    s.add(a.body);
+    for (const w of a.walls) s.add(w.body);
   }
   s.delete(0);
   return [...s].filter((i) => i >= 0 && !plan.bodies[i]!.static).sort((a, b) => a - b);

@@ -1,0 +1,72 @@
+{
+  "id": "exemplos/engrenagens",
+  "group": "exemplos",
+  "title": "Engrenagens e catraca",
+  "notes": "Recalibrada do protótipo para gravidade real: camadas de 3 mm, forças × 29,43, amortecimentos × 2,97. Batente da lingueta corrigido para −12° (era −25°): ela segura antes de a catraca girar um passo de dente. A favor, o motor gira a −12 rpm e a catraca passa livre; contra, a +12 rpm, a lingueta trava.",
+  "view": [5, 15, 95, 70],
+  "runs": [
+    {
+      "name": "a favor",
+      "duration": 5,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "compare",
+          "label": "a intermediária gira −1,5 × a motora (±2%)",
+          "a": {
+            "link": "k11",
+            "field": "angle"
+          },
+          "b": {
+            "link": "k10",
+            "field": "angle"
+          },
+          "t": 5,
+          "op": "ratio",
+          "min": -1.53,
+          "max": -1.47
+        },
+        {
+          "kind": "compare",
+          "label": "a catraca gira 2 × a motora (±2%)",
+          "a": {
+            "link": "k13",
+            "field": "angle"
+          },
+          "b": {
+            "link": "k10",
+            "field": "angle"
+          },
+          "t": 5,
+          "op": "ratio",
+          "min": 1.96,
+          "max": 2.04
+        }
+      ]
+    },
+    {
+      "name": "contra",
+      "duration": 2,
+      "inputs": [
+        {
+          "kind": "motor",
+          "link": "k10",
+          "t": 0,
+          "speed": 1.2566
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "span",
+          "label": "contra, a lingueta trava antes de um passo de dente (25,7°)",
+          "q": {
+            "link": "k13",
+            "field": "angle"
+          },
+          "max": 0.4488
+        }
+      ]
+    }
+  ],
+  "scene": "../../examples/engrenagens.json"
+}

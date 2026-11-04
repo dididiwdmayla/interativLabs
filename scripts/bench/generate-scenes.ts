@@ -7,8 +7,11 @@ import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { rack } from "@/geometry/gear";
 import { seededRandom } from "@/model/ids";
 import type { MaterialId } from "@/model/materials";
-import { loadScene, serializeScene, validateScene } from "@/model/scene";
-import type { Layer, Link, Part, Scene, Vec2 } from "@/model/types";
+import { migrateV0ToV1 } from "@/model/migrations/v0-to-v1";
+import { validateSceneV1 } from "@/model/scene";
+import type { LinkV1 as Link, Part, SceneV1 as Scene, Vec2 } from "@/model/types";
+
+type Layer = Scene["layers"][number];
 import { DEG, rpmToRadPerSec } from "@/model/units";
 import type { BenchAssertion, BenchRun, BenchScript } from "@/bench/types";
 
@@ -19,7 +22,7 @@ const G = Number(process.env.BENCH_G ?? 100);
 
 function migrated(name: string, title?: string): Scene {
   const v0 = JSON.parse(readFileSync(`reference/prototype-v0/scenes/${name}.json`, "utf8"));
-  const r = loadScene(v0, { now: NOW });
+  const r = validateSceneV1(migrateV0ToV1(v0, { now: NOW }));
   if (!r.ok) throw new Error(`${name}: ${JSON.stringify(r.issues)}`);
   if (title) r.scene.meta.title = title;
   return r.scene;
@@ -81,9 +84,9 @@ class Builder {
 }
 
 function write(name: string, scene: Scene, script: Omit<BenchScript, "scene">) {
-  const v = validateScene(scene);
+  const v = validateSceneV1(scene);
   if (!v.ok) throw new Error(`${name}: ${JSON.stringify(v.issues)}`);
-  writeFileSync(`${DIR}/${name}.scene.json`, serializeScene(v.scene) + "\n");
+  writeFileSync(`${DIR}/${name}.scene.json`, JSON.stringify(v.scene, null, 2) + "\n");
   const full: BenchScript = { ...script, scene: `${name}.scene.json` };
   writeFileSync(`${DIR}/${name}.bench.json`, JSON.stringify(full, null, 2) + "\n");
   console.log(`${name}: ${scene.parts.length} peças, ${scene.links.length} ligações`);

@@ -75,6 +75,10 @@ export function createPlanckAdapter(): EngineAdapter {
       Settings.maxTranslation = (SPEED_LIMIT * FIXED_STEP) / L;
       const plan = buildPlan(scene);
       const warnings = [...plan.warnings];
+      if (plan.distances.length || plan.mounts.length || plan.slots.length)
+        warnings.push(
+          "Planck: haste, cabo, suporte elástico e rasgo em junta só existem no Box2D; ficaram de fora",
+        );
       const w = new World({ gravity: PVec2(plan.gravity[0] / L, plan.gravity[1] / L) });
       world = w;
       let fixtures = 0;
@@ -220,6 +224,18 @@ export function createPlanckAdapter(): EngineAdapter {
       if (!b || rt!.plan.bodies[r!.body]!.static) return;
       b.setLinearVelocity(PVec2(v[0] / L, v[1] / L));
       b.setAngularVelocity(omega);
+    },
+
+    setForce(partId: Id, force: Vec2 | null, at?: Vec2) {
+      rt?.setForce(partId, force, at);
+    },
+
+    ignite(linkId: Id) {
+      return rt ? rt.ignite(linkId) : false;
+    },
+
+    setVent(linkId: Id, vent: number, open: boolean) {
+      rt?.setVent(linkId, vent, open);
     },
 
     dispose() {

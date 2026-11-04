@@ -1,0 +1,84 @@
+{
+  "id": "fixacoes/cabo",
+  "group": "fixacoes",
+  "title": "Cabo",
+  "notes": "Peso de 20 g pendurado num cabo de 50 mm. Em 1 s, um empurrão para cima (400 mm/s) afrouxa o cabo; o peso cai e o cabo estica de novo.",
+  "view": [-40, -10, 80, 85],
+  "runs": [
+    {
+      "name": "empurrão",
+      "duration": 2.5,
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p1",
+          "t": 1,
+          "v": [0, -400],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "esticado, a distância fica em 50 ± 0,05 mm",
+          "q": {
+            "link": "k2",
+            "field": "length"
+          },
+          "from": 0.3,
+          "to": 1,
+          "min": 49.95,
+          "max": 50.05
+        },
+        {
+          "kind": "range",
+          "label": "empurrado para cima, o cabo afrouxa (distância < 50 mm)",
+          "q": {
+            "link": "k2",
+            "field": "length"
+          },
+          "from": 1.01,
+          "to": 1.06,
+          "max": 49.9
+        },
+        {
+          "kind": "range",
+          "label": "frouxo, o cabo não puxa (força nula)",
+          "q": {
+            "link": "k2",
+            "field": "force"
+          },
+          "from": 1.01,
+          "to": 1.06,
+          "min": -0.000001,
+          "max": 0.000001
+        },
+        {
+          "kind": "range",
+          "label": "o peso cai de volta e o cabo estica de novo (50 ± 0,05 mm)",
+          "q": {
+            "link": "k2",
+            "field": "length"
+          },
+          "from": 1.8,
+          "to": 2.5,
+          "min": 49.95,
+          "max": 50.05
+        },
+        {
+          "kind": "mean",
+          "label": "esticado, o cabo sustenta o peso (0,196 N ± 1%)",
+          "q": {
+            "link": "k2",
+            "field": "force"
+          },
+          "from": 2,
+          "to": 2.5,
+          "min": 0.1942,
+          "max": 0.1982
+        }
+      ]
+    }
+  ],
+  "scene": "cabo.scene.json"
+}

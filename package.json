@@ -21,7 +21,11 @@
     "bench:browser": "playwright test --project=bench",
     "bench:size": "node scripts/bench/bundle-size.mjs",
     "assets": "node scripts/assets/build.mjs",
-    "test:assets": "node --test scripts/assets/*.test.mjs"
+    "test:assets": "node --test scripts/assets/*.test.mjs",
+    "fixtures": "node scripts/run-ts.mjs scripts/fixtures/generate.ts",
+    "fixtures:hashes": "node scripts/run-ts.mjs scripts/fixtures/hashes.ts",
+    "calibrate": "node scripts/run-ts.mjs scripts/bench/calibrate.ts",
+    "test:e2e": "playwright test --project=determinism"
   },
   "dependencies": {
     "@dimforge/rapier2d-compat": "^0.21.0",

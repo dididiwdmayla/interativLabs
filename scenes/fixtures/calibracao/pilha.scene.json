@@ -1,0 +1,4452 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Pilha de 200 caixas",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Pilha",
+      "visible": true,
+      "locked": false,
+      "thickness": 10
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Chão",
+      "layer": "L1",
+      "x": 55,
+      "y": 5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-70, -5],
+          [70, -5],
+          [70, 5],
+          [-70, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Caixa 1.1",
+      "layer": "L1",
+      "x": 5,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Caixa 1.2",
+      "layer": "L1",
+      "x": 5,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Caixa 1.3",
+      "layer": "L1",
+      "x": 5,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 5,
+      "name": "Caixa 1.4",
+      "layer": "L1",
+      "x": 5,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p6",
+      "ref": 6,
+      "name": "Caixa 1.5",
+      "layer": "L1",
+      "x": 5,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p7",
+      "ref": 7,
+      "name": "Caixa 1.6",
+      "layer": "L1",
+      "x": 5,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p8",
+      "ref": 8,
+      "name": "Caixa 1.7",
+      "layer": "L1",
+      "x": 5,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p9",
+      "ref": 9,
+      "name": "Caixa 1.8",
+      "layer": "L1",
+      "x": 5,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p10",
+      "ref": 10,
+      "name": "Caixa 1.9",
+      "layer": "L1",
+      "x": 5,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p11",
+      "ref": 11,
+      "name": "Caixa 1.10",
+      "layer": "L1",
+      "x": 5,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p12",
+      "ref": 12,
+      "name": "Caixa 1.11",
+      "layer": "L1",
+      "x": 5,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p13",
+      "ref": 13,
+      "name": "Caixa 1.12",
+      "layer": "L1",
+      "x": 5,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p14",
+      "ref": 14,
+      "name": "Caixa 1.13",
+      "layer": "L1",
+      "x": 5,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p15",
+      "ref": 15,
+      "name": "Caixa 1.14",
+      "layer": "L1",
+      "x": 5,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p16",
+      "ref": 16,
+      "name": "Caixa 1.15",
+      "layer": "L1",
+      "x": 5,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p17",
+      "ref": 17,
+      "name": "Caixa 1.16",
+      "layer": "L1",
+      "x": 5,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p18",
+      "ref": 18,
+      "name": "Caixa 1.17",
+      "layer": "L1",
+      "x": 5,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p19",
+      "ref": 19,
+      "name": "Caixa 1.18",
+      "layer": "L1",
+      "x": 5,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p20",
+      "ref": 20,
+      "name": "Caixa 1.19",
+      "layer": "L1",
+      "x": 5,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p21",
+      "ref": 21,
+      "name": "Caixa 1.20",
+      "layer": "L1",
+      "x": 5,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p22",
+      "ref": 22,
+      "name": "Caixa 2.1",
+      "layer": "L1",
+      "x": 16,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p23",
+      "ref": 23,
+      "name": "Caixa 2.2",
+      "layer": "L1",
+      "x": 16,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p24",
+      "ref": 24,
+      "name": "Caixa 2.3",
+      "layer": "L1",
+      "x": 16,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p25",
+      "ref": 25,
+      "name": "Caixa 2.4",
+      "layer": "L1",
+      "x": 16,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p26",
+      "ref": 26,
+      "name": "Caixa 2.5",
+      "layer": "L1",
+      "x": 16,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p27",
+      "ref": 27,
+      "name": "Caixa 2.6",
+      "layer": "L1",
+      "x": 16,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p28",
+      "ref": 28,
+      "name": "Caixa 2.7",
+      "layer": "L1",
+      "x": 16,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p29",
+      "ref": 29,
+      "name": "Caixa 2.8",
+      "layer": "L1",
+      "x": 16,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p30",
+      "ref": 30,
+      "name": "Caixa 2.9",
+      "layer": "L1",
+      "x": 16,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p31",
+      "ref": 31,
+      "name": "Caixa 2.10",
+      "layer": "L1",
+      "x": 16,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p32",
+      "ref": 32,
+      "name": "Caixa 2.11",
+      "layer": "L1",
+      "x": 16,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p33",
+      "ref": 33,
+      "name": "Caixa 2.12",
+      "layer": "L1",
+      "x": 16,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p34",
+      "ref": 34,
+      "name": "Caixa 2.13",
+      "layer": "L1",
+      "x": 16,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p35",
+      "ref": 35,
+      "name": "Caixa 2.14",
+      "layer": "L1",
+      "x": 16,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p36",
+      "ref": 36,
+      "name": "Caixa 2.15",
+      "layer": "L1",
+      "x": 16,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p37",
+      "ref": 37,
+      "name": "Caixa 2.16",
+      "layer": "L1",
+      "x": 16,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p38",
+      "ref": 38,
+      "name": "Caixa 2.17",
+      "layer": "L1",
+      "x": 16,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p39",
+      "ref": 39,
+      "name": "Caixa 2.18",
+      "layer": "L1",
+      "x": 16,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p40",
+      "ref": 40,
+      "name": "Caixa 2.19",
+      "layer": "L1",
+      "x": 16,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p41",
+      "ref": 41,
+      "name": "Caixa 2.20",
+      "layer": "L1",
+      "x": 16,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p42",
+      "ref": 42,
+      "name": "Caixa 3.1",
+      "layer": "L1",
+      "x": 27,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p43",
+      "ref": 43,
+      "name": "Caixa 3.2",
+      "layer": "L1",
+      "x": 27,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p44",
+      "ref": 44,
+      "name": "Caixa 3.3",
+      "layer": "L1",
+      "x": 27,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p45",
+      "ref": 45,
+      "name": "Caixa 3.4",
+      "layer": "L1",
+      "x": 27,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p46",
+      "ref": 46,
+      "name": "Caixa 3.5",
+      "layer": "L1",
+      "x": 27,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p47",
+      "ref": 47,
+      "name": "Caixa 3.6",
+      "layer": "L1",
+      "x": 27,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p48",
+      "ref": 48,
+      "name": "Caixa 3.7",
+      "layer": "L1",
+      "x": 27,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p49",
+      "ref": 49,
+      "name": "Caixa 3.8",
+      "layer": "L1",
+      "x": 27,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p50",
+      "ref": 50,
+      "name": "Caixa 3.9",
+      "layer": "L1",
+      "x": 27,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p51",
+      "ref": 51,
+      "name": "Caixa 3.10",
+      "layer": "L1",
+      "x": 27,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p52",
+      "ref": 52,
+      "name": "Caixa 3.11",
+      "layer": "L1",
+      "x": 27,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p53",
+      "ref": 53,
+      "name": "Caixa 3.12",
+      "layer": "L1",
+      "x": 27,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p54",
+      "ref": 54,
+      "name": "Caixa 3.13",
+      "layer": "L1",
+      "x": 27,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p55",
+      "ref": 55,
+      "name": "Caixa 3.14",
+      "layer": "L1",
+      "x": 27,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p56",
+      "ref": 56,
+      "name": "Caixa 3.15",
+      "layer": "L1",
+      "x": 27,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p57",
+      "ref": 57,
+      "name": "Caixa 3.16",
+      "layer": "L1",
+      "x": 27,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p58",
+      "ref": 58,
+      "name": "Caixa 3.17",
+      "layer": "L1",
+      "x": 27,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p59",
+      "ref": 59,
+      "name": "Caixa 3.18",
+      "layer": "L1",
+      "x": 27,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p60",
+      "ref": 60,
+      "name": "Caixa 3.19",
+      "layer": "L1",
+      "x": 27,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p61",
+      "ref": 61,
+      "name": "Caixa 3.20",
+      "layer": "L1",
+      "x": 27,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p62",
+      "ref": 62,
+      "name": "Caixa 4.1",
+      "layer": "L1",
+      "x": 38,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p63",
+      "ref": 63,
+      "name": "Caixa 4.2",
+      "layer": "L1",
+      "x": 38,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p64",
+      "ref": 64,
+      "name": "Caixa 4.3",
+      "layer": "L1",
+      "x": 38,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p65",
+      "ref": 65,
+      "name": "Caixa 4.4",
+      "layer": "L1",
+      "x": 38,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p66",
+      "ref": 66,
+      "name": "Caixa 4.5",
+      "layer": "L1",
+      "x": 38,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p67",
+      "ref": 67,
+      "name": "Caixa 4.6",
+      "layer": "L1",
+      "x": 38,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p68",
+      "ref": 68,
+      "name": "Caixa 4.7",
+      "layer": "L1",
+      "x": 38,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p69",
+      "ref": 69,
+      "name": "Caixa 4.8",
+      "layer": "L1",
+      "x": 38,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p70",
+      "ref": 70,
+      "name": "Caixa 4.9",
+      "layer": "L1",
+      "x": 38,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p71",
+      "ref": 71,
+      "name": "Caixa 4.10",
+      "layer": "L1",
+      "x": 38,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p72",
+      "ref": 72,
+      "name": "Caixa 4.11",
+      "layer": "L1",
+      "x": 38,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p73",
+      "ref": 73,
+      "name": "Caixa 4.12",
+      "layer": "L1",
+      "x": 38,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p74",
+      "ref": 74,
+      "name": "Caixa 4.13",
+      "layer": "L1",
+      "x": 38,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p75",
+      "ref": 75,
+      "name": "Caixa 4.14",
+      "layer": "L1",
+      "x": 38,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p76",
+      "ref": 76,
+      "name": "Caixa 4.15",
+      "layer": "L1",
+      "x": 38,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p77",
+      "ref": 77,
+      "name": "Caixa 4.16",
+      "layer": "L1",
+      "x": 38,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p78",
+      "ref": 78,
+      "name": "Caixa 4.17",
+      "layer": "L1",
+      "x": 38,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p79",
+      "ref": 79,
+      "name": "Caixa 4.18",
+      "layer": "L1",
+      "x": 38,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p80",
+      "ref": 80,
+      "name": "Caixa 4.19",
+      "layer": "L1",
+      "x": 38,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p81",
+      "ref": 81,
+      "name": "Caixa 4.20",
+      "layer": "L1",
+      "x": 38,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p82",
+      "ref": 82,
+      "name": "Caixa 5.1",
+      "layer": "L1",
+      "x": 49,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p83",
+      "ref": 83,
+      "name": "Caixa 5.2",
+      "layer": "L1",
+      "x": 49,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p84",
+      "ref": 84,
+      "name": "Caixa 5.3",
+      "layer": "L1",
+      "x": 49,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p85",
+      "ref": 85,
+      "name": "Caixa 5.4",
+      "layer": "L1",
+      "x": 49,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p86",
+      "ref": 86,
+      "name": "Caixa 5.5",
+      "layer": "L1",
+      "x": 49,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p87",
+      "ref": 87,
+      "name": "Caixa 5.6",
+      "layer": "L1",
+      "x": 49,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p88",
+      "ref": 88,
+      "name": "Caixa 5.7",
+      "layer": "L1",
+      "x": 49,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p89",
+      "ref": 89,
+      "name": "Caixa 5.8",
+      "layer": "L1",
+      "x": 49,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p90",
+      "ref": 90,
+      "name": "Caixa 5.9",
+      "layer": "L1",
+      "x": 49,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p91",
+      "ref": 91,
+      "name": "Caixa 5.10",
+      "layer": "L1",
+      "x": 49,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p92",
+      "ref": 92,
+      "name": "Caixa 5.11",
+      "layer": "L1",
+      "x": 49,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p93",
+      "ref": 93,
+      "name": "Caixa 5.12",
+      "layer": "L1",
+      "x": 49,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p94",
+      "ref": 94,
+      "name": "Caixa 5.13",
+      "layer": "L1",
+      "x": 49,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p95",
+      "ref": 95,
+      "name": "Caixa 5.14",
+      "layer": "L1",
+      "x": 49,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p96",
+      "ref": 96,
+      "name": "Caixa 5.15",
+      "layer": "L1",
+      "x": 49,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p97",
+      "ref": 97,
+      "name": "Caixa 5.16",
+      "layer": "L1",
+      "x": 49,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p98",
+      "ref": 98,
+      "name": "Caixa 5.17",
+      "layer": "L1",
+      "x": 49,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p99",
+      "ref": 99,
+      "name": "Caixa 5.18",
+      "layer": "L1",
+      "x": 49,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p100",
+      "ref": 100,
+      "name": "Caixa 5.19",
+      "layer": "L1",
+      "x": 49,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p101",
+      "ref": 101,
+      "name": "Caixa 5.20",
+      "layer": "L1",
+      "x": 49,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p102",
+      "ref": 102,
+      "name": "Caixa 6.1",
+      "layer": "L1",
+      "x": 60,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p103",
+      "ref": 103,
+      "name": "Caixa 6.2",
+      "layer": "L1",
+      "x": 60,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p104",
+      "ref": 104,
+      "name": "Caixa 6.3",
+      "layer": "L1",
+      "x": 60,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p105",
+      "ref": 105,
+      "name": "Caixa 6.4",
+      "layer": "L1",
+      "x": 60,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p106",
+      "ref": 106,
+      "name": "Caixa 6.5",
+      "layer": "L1",
+      "x": 60,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p107",
+      "ref": 107,
+      "name": "Caixa 6.6",
+      "layer": "L1",
+      "x": 60,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p108",
+      "ref": 108,
+      "name": "Caixa 6.7",
+      "layer": "L1",
+      "x": 60,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p109",
+      "ref": 109,
+      "name": "Caixa 6.8",
+      "layer": "L1",
+      "x": 60,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p110",
+      "ref": 110,
+      "name": "Caixa 6.9",
+      "layer": "L1",
+      "x": 60,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p111",
+      "ref": 111,
+      "name": "Caixa 6.10",
+      "layer": "L1",
+      "x": 60,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p112",
+      "ref": 112,
+      "name": "Caixa 6.11",
+      "layer": "L1",
+      "x": 60,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p113",
+      "ref": 113,
+      "name": "Caixa 6.12",
+      "layer": "L1",
+      "x": 60,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p114",
+      "ref": 114,
+      "name": "Caixa 6.13",
+      "layer": "L1",
+      "x": 60,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p115",
+      "ref": 115,
+      "name": "Caixa 6.14",
+      "layer": "L1",
+      "x": 60,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p116",
+      "ref": 116,
+      "name": "Caixa 6.15",
+      "layer": "L1",
+      "x": 60,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p117",
+      "ref": 117,
+      "name": "Caixa 6.16",
+      "layer": "L1",
+      "x": 60,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p118",
+      "ref": 118,
+      "name": "Caixa 6.17",
+      "layer": "L1",
+      "x": 60,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p119",
+      "ref": 119,
+      "name": "Caixa 6.18",
+      "layer": "L1",
+      "x": 60,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p120",
+      "ref": 120,
+      "name": "Caixa 6.19",
+      "layer": "L1",
+      "x": 60,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p121",
+      "ref": 121,
+      "name": "Caixa 6.20",
+      "layer": "L1",
+      "x": 60,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p122",
+      "ref": 122,
+      "name": "Caixa 7.1",
+      "layer": "L1",
+      "x": 71,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p123",
+      "ref": 123,
+      "name": "Caixa 7.2",
+      "layer": "L1",
+      "x": 71,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p124",
+      "ref": 124,
+      "name": "Caixa 7.3",
+      "layer": "L1",
+      "x": 71,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p125",
+      "ref": 125,
+      "name": "Caixa 7.4",
+      "layer": "L1",
+      "x": 71,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p126",
+      "ref": 126,
+      "name": "Caixa 7.5",
+      "layer": "L1",
+      "x": 71,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p127",
+      "ref": 127,
+      "name": "Caixa 7.6",
+      "layer": "L1",
+      "x": 71,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p128",
+      "ref": 128,
+      "name": "Caixa 7.7",
+      "layer": "L1",
+      "x": 71,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p129",
+      "ref": 129,
+      "name": "Caixa 7.8",
+      "layer": "L1",
+      "x": 71,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p130",
+      "ref": 130,
+      "name": "Caixa 7.9",
+      "layer": "L1",
+      "x": 71,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p131",
+      "ref": 131,
+      "name": "Caixa 7.10",
+      "layer": "L1",
+      "x": 71,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p132",
+      "ref": 132,
+      "name": "Caixa 7.11",
+      "layer": "L1",
+      "x": 71,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p133",
+      "ref": 133,
+      "name": "Caixa 7.12",
+      "layer": "L1",
+      "x": 71,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p134",
+      "ref": 134,
+      "name": "Caixa 7.13",
+      "layer": "L1",
+      "x": 71,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p135",
+      "ref": 135,
+      "name": "Caixa 7.14",
+      "layer": "L1",
+      "x": 71,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p136",
+      "ref": 136,
+      "name": "Caixa 7.15",
+      "layer": "L1",
+      "x": 71,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p137",
+      "ref": 137,
+      "name": "Caixa 7.16",
+      "layer": "L1",
+      "x": 71,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p138",
+      "ref": 138,
+      "name": "Caixa 7.17",
+      "layer": "L1",
+      "x": 71,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p139",
+      "ref": 139,
+      "name": "Caixa 7.18",
+      "layer": "L1",
+      "x": 71,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p140",
+      "ref": 140,
+      "name": "Caixa 7.19",
+      "layer": "L1",
+      "x": 71,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p141",
+      "ref": 141,
+      "name": "Caixa 7.20",
+      "layer": "L1",
+      "x": 71,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p142",
+      "ref": 142,
+      "name": "Caixa 8.1",
+      "layer": "L1",
+      "x": 82,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p143",
+      "ref": 143,
+      "name": "Caixa 8.2",
+      "layer": "L1",
+      "x": 82,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p144",
+      "ref": 144,
+      "name": "Caixa 8.3",
+      "layer": "L1",
+      "x": 82,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p145",
+      "ref": 145,
+      "name": "Caixa 8.4",
+      "layer": "L1",
+      "x": 82,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p146",
+      "ref": 146,
+      "name": "Caixa 8.5",
+      "layer": "L1",
+      "x": 82,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p147",
+      "ref": 147,
+      "name": "Caixa 8.6",
+      "layer": "L1",
+      "x": 82,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p148",
+      "ref": 148,
+      "name": "Caixa 8.7",
+      "layer": "L1",
+      "x": 82,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p149",
+      "ref": 149,
+      "name": "Caixa 8.8",
+      "layer": "L1",
+      "x": 82,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p150",
+      "ref": 150,
+      "name": "Caixa 8.9",
+      "layer": "L1",
+      "x": 82,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p151",
+      "ref": 151,
+      "name": "Caixa 8.10",
+      "layer": "L1",
+      "x": 82,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p152",
+      "ref": 152,
+      "name": "Caixa 8.11",
+      "layer": "L1",
+      "x": 82,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p153",
+      "ref": 153,
+      "name": "Caixa 8.12",
+      "layer": "L1",
+      "x": 82,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p154",
+      "ref": 154,
+      "name": "Caixa 8.13",
+      "layer": "L1",
+      "x": 82,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p155",
+      "ref": 155,
+      "name": "Caixa 8.14",
+      "layer": "L1",
+      "x": 82,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p156",
+      "ref": 156,
+      "name": "Caixa 8.15",
+      "layer": "L1",
+      "x": 82,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p157",
+      "ref": 157,
+      "name": "Caixa 8.16",
+      "layer": "L1",
+      "x": 82,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p158",
+      "ref": 158,
+      "name": "Caixa 8.17",
+      "layer": "L1",
+      "x": 82,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p159",
+      "ref": 159,
+      "name": "Caixa 8.18",
+      "layer": "L1",
+      "x": 82,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p160",
+      "ref": 160,
+      "name": "Caixa 8.19",
+      "layer": "L1",
+      "x": 82,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p161",
+      "ref": 161,
+      "name": "Caixa 8.20",
+      "layer": "L1",
+      "x": 82,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p162",
+      "ref": 162,
+      "name": "Caixa 9.1",
+      "layer": "L1",
+      "x": 93,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p163",
+      "ref": 163,
+      "name": "Caixa 9.2",
+      "layer": "L1",
+      "x": 93,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p164",
+      "ref": 164,
+      "name": "Caixa 9.3",
+      "layer": "L1",
+      "x": 93,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p165",
+      "ref": 165,
+      "name": "Caixa 9.4",
+      "layer": "L1",
+      "x": 93,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p166",
+      "ref": 166,
+      "name": "Caixa 9.5",
+      "layer": "L1",
+      "x": 93,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p167",
+      "ref": 167,
+      "name": "Caixa 9.6",
+      "layer": "L1",
+      "x": 93,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p168",
+      "ref": 168,
+      "name": "Caixa 9.7",
+      "layer": "L1",
+      "x": 93,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p169",
+      "ref": 169,
+      "name": "Caixa 9.8",
+      "layer": "L1",
+      "x": 93,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p170",
+      "ref": 170,
+      "name": "Caixa 9.9",
+      "layer": "L1",
+      "x": 93,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p171",
+      "ref": 171,
+      "name": "Caixa 9.10",
+      "layer": "L1",
+      "x": 93,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p172",
+      "ref": 172,
+      "name": "Caixa 9.11",
+      "layer": "L1",
+      "x": 93,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p173",
+      "ref": 173,
+      "name": "Caixa 9.12",
+      "layer": "L1",
+      "x": 93,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p174",
+      "ref": 174,
+      "name": "Caixa 9.13",
+      "layer": "L1",
+      "x": 93,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p175",
+      "ref": 175,
+      "name": "Caixa 9.14",
+      "layer": "L1",
+      "x": 93,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p176",
+      "ref": 176,
+      "name": "Caixa 9.15",
+      "layer": "L1",
+      "x": 93,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p177",
+      "ref": 177,
+      "name": "Caixa 9.16",
+      "layer": "L1",
+      "x": 93,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p178",
+      "ref": 178,
+      "name": "Caixa 9.17",
+      "layer": "L1",
+      "x": 93,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p179",
+      "ref": 179,
+      "name": "Caixa 9.18",
+      "layer": "L1",
+      "x": 93,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p180",
+      "ref": 180,
+      "name": "Caixa 9.19",
+      "layer": "L1",
+      "x": 93,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p181",
+      "ref": 181,
+      "name": "Caixa 9.20",
+      "layer": "L1",
+      "x": 93,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p182",
+      "ref": 182,
+      "name": "Caixa 10.1",
+      "layer": "L1",
+      "x": 104,
+      "y": -5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p183",
+      "ref": 183,
+      "name": "Caixa 10.2",
+      "layer": "L1",
+      "x": 104,
+      "y": -15,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p184",
+      "ref": 184,
+      "name": "Caixa 10.3",
+      "layer": "L1",
+      "x": 104,
+      "y": -25,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p185",
+      "ref": 185,
+      "name": "Caixa 10.4",
+      "layer": "L1",
+      "x": 104,
+      "y": -35,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p186",
+      "ref": 186,
+      "name": "Caixa 10.5",
+      "layer": "L1",
+      "x": 104,
+      "y": -45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p187",
+      "ref": 187,
+      "name": "Caixa 10.6",
+      "layer": "L1",
+      "x": 104,
+      "y": -55,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p188",
+      "ref": 188,
+      "name": "Caixa 10.7",
+      "layer": "L1",
+      "x": 104,
+      "y": -65,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p189",
+      "ref": 189,
+      "name": "Caixa 10.8",
+      "layer": "L1",
+      "x": 104,
+      "y": -75,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p190",
+      "ref": 190,
+      "name": "Caixa 10.9",
+      "layer": "L1",
+      "x": 104,
+      "y": -85,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p191",
+      "ref": 191,
+      "name": "Caixa 10.10",
+      "layer": "L1",
+      "x": 104,
+      "y": -95,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p192",
+      "ref": 192,
+      "name": "Caixa 10.11",
+      "layer": "L1",
+      "x": 104,
+      "y": -105,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p193",
+      "ref": 193,
+      "name": "Caixa 10.12",
+      "layer": "L1",
+      "x": 104,
+      "y": -115,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p194",
+      "ref": 194,
+      "name": "Caixa 10.13",
+      "layer": "L1",
+      "x": 104,
+      "y": -125,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p195",
+      "ref": 195,
+      "name": "Caixa 10.14",
+      "layer": "L1",
+      "x": 104,
+      "y": -135,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p196",
+      "ref": 196,
+      "name": "Caixa 10.15",
+      "layer": "L1",
+      "x": 104,
+      "y": -145,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p197",
+      "ref": 197,
+      "name": "Caixa 10.16",
+      "layer": "L1",
+      "x": 104,
+      "y": -155,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p198",
+      "ref": 198,
+      "name": "Caixa 10.17",
+      "layer": "L1",
+      "x": 104,
+      "y": -165,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p199",
+      "ref": 199,
+      "name": "Caixa 10.18",
+      "layer": "L1",
+      "x": 104,
+      "y": -175,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p200",
+      "ref": 200,
+      "name": "Caixa 10.19",
+      "layer": "L1",
+      "x": 104,
+      "y": -185,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p201",
+      "ref": 201,
+      "name": "Caixa 10.20",
+      "layer": "L1",
+      "x": 104,
+      "y": -195,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -5],
+          [5, -5],
+          [5, 5],
+          [-5, 5]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": []
+}

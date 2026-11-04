@@ -1,0 +1,51 @@
+{
+  "id": "fixacoes/biela",
+  "group": "fixacoes",
+  "title": "Biela e manivela (cena de teste)",
+  "notes": "Manivela de raio 15 mm num eixo com motor a 1 volta/s, haste de 50 mm até um bloco num trilho horizontal.",
+  "view": [-30, -30, 110, 60],
+  "runs": [
+    {
+      "name": "3 s",
+      "duration": 3,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "span",
+          "label": "curso do bloco = 2 × raio da manivela (30 mm ± 1%)",
+          "q": {
+            "link": "k5",
+            "field": "translation"
+          },
+          "from": 1,
+          "to": 3,
+          "min": 29.7,
+          "max": 30.3
+        },
+        {
+          "kind": "range",
+          "label": "comprimento da haste constante (50 ± 0,01 mm)",
+          "q": {
+            "link": "k4",
+            "field": "length"
+          },
+          "min": 49.99,
+          "max": 50.01
+        },
+        {
+          "kind": "mean",
+          "label": "a manivela gira na velocidade do motor (1 volta/s ± 1%)",
+          "q": {
+            "link": "k2",
+            "field": "speed"
+          },
+          "from": 1,
+          "to": 3,
+          "min": 6.2204,
+          "max": 6.346
+        }
+      ]
+    }
+  ],
+  "scene": "biela.scene.json"
+}

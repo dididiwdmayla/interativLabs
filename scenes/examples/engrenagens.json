@@ -1,0 +1,234 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Engrenagens e catraca",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": false,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 2,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Placa",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Engrenagens",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L3",
+      "name": "Catraca",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p4",
+      "ref": 1,
+      "name": "Placa",
+      "layer": "L1",
+      "x": 70,
+      "y": 52,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-58, -34],
+          [58, -34],
+          [58, 34],
+          [-58, 34]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 2,
+      "name": "Motora",
+      "layer": "L2",
+      "x": 34,
+      "y": 52,
+      "angle": 0,
+      "shape": {
+        "kind": "gear",
+        "module": 1.0185916357881302,
+        "teeth": 24,
+        "pressureAngle": 0.3490658503988659,
+        "profile": "involute",
+        "bore": 0
+      },
+      "material": "brass",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p6",
+      "ref": 3,
+      "name": "Intermediária",
+      "layer": "L2",
+      "x": 54.37183271576261,
+      "y": 52,
+      "angle": 0.19634954084936207,
+      "shape": {
+        "kind": "gear",
+        "module": 1.0185916357881302,
+        "teeth": 16,
+        "pressureAngle": 0.3490658503988659,
+        "profile": "involute",
+        "bore": 0
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p7",
+      "ref": 4,
+      "name": "Pinhão",
+      "layer": "L2",
+      "x": 68.63211561679643,
+      "y": 52,
+      "angle": 0,
+      "shape": {
+        "kind": "gear",
+        "module": 1.0185916357881302,
+        "teeth": 12,
+        "pressureAngle": 0.3490658503988659,
+        "profile": "involute",
+        "bore": 0
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p8",
+      "ref": 5,
+      "name": "Roda da catraca",
+      "layer": "L3",
+      "x": 68.63211561679643,
+      "y": 52,
+      "angle": 0,
+      "shape": {
+        "kind": "gear",
+        "module": 1.4857142857142858,
+        "teeth": 14,
+        "pressureAngle": 0.3490658503988659,
+        "profile": "ratchet",
+        "bore": 0
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p9",
+      "ref": 6,
+      "name": "Lingueta",
+      "layer": "L3",
+      "x": 72.81004056160883,
+      "y": 36.072406181015495,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [0.22207505518758808, -4.072406181015492],
+          [3.4220750551875883, -4.072406181015492],
+          [3.0220750551875883, -0.4724061810154922],
+          [-4.977924944812412, 5.527593818984508],
+          [-4.577924944812412, 3.527593818984508],
+          [0.22207505518758808, -0.8724061810154922]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k10",
+      "ref": 7,
+      "kind": "axle",
+      "a": "p4",
+      "b": "p5",
+      "at": [0, 0],
+      "motor": {
+        "speed": -1.2566370614359172,
+        "maxTorque": 1.1772
+      }
+    },
+    {
+      "id": "k11",
+      "ref": 8,
+      "kind": "axle",
+      "a": "p4",
+      "b": "p6",
+      "at": [0, 0],
+      "torsion": {
+        "k": 0,
+        "rest": 0,
+        "damping": 0.000005942700000000001
+      }
+    },
+    {
+      "id": "k12",
+      "ref": 9,
+      "kind": "screw",
+      "a": "p7",
+      "b": "p8",
+      "at": [0, 0]
+    },
+    {
+      "id": "k13",
+      "ref": 10,
+      "kind": "axle",
+      "a": "p4",
+      "b": "p8",
+      "at": [0, 0],
+      "torsion": {
+        "k": 0,
+        "rest": 0,
+        "damping": 0.000005942700000000001
+      }
+    },
+    {
+      "id": "k14",
+      "ref": 11,
+      "kind": "axle",
+      "a": "p4",
+      "b": "p9",
+      "at": [1.8220750551875882, -2.4724061810154923],
+      "limit": {
+        "lower": -0.2094,
+        "upper": 0.4363323129985824
+      },
+      "torsion": {
+        "k": 0.008829,
+        "rest": 0,
+        "damping": 0.000005942700000000001
+      }
+    }
+  ]
+}

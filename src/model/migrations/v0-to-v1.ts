@@ -1,10 +1,12 @@
 import { V0_MATERIALS, type MaterialId } from "../materials";
-import type { Layer, Link, Part, Scene, Shape, Vec2 } from "../types";
+import type { LinkV1 as Link, Part, SceneV1 as Scene, Shape, Vec2 } from "../types";
 import { DEG, MM_PER_PX, V0_MM_PER_UNIT, rpmToRadPerSec } from "../units";
 import type { V0Link, V0Part, V0Scene, V0Shape, V0Vec } from "../v0";
+import { dcos, dhypot, dsin } from "@/geometry/dmath";
 
 /**
- * Migração v0 (protótipo, px) → v1 (mm).
+ * Migração v0 (protótipo, px) → v1 (mm). Depois a cena segue para a v2
+ * (src/model/migrations/v1-to-v2.ts).
  *
  * Comprimento: 1 px = 0,2 mm. O motor do protótipo usava 50 px por unidade,
  * ou seja, 10 mm por unidade, com massa em g (densidade × área em cm² ×
@@ -37,8 +39,8 @@ const mm = (px: number) => px * MM_PER_PX + 0;
 const vmm = (p: V0Vec): Vec2 => [mm(p[0]), mm(p[1])];
 
 function rot(p: Vec2, a: number): Vec2 {
-  const c = Math.cos(a);
-  const s = Math.sin(a);
+  const c = dcos(a);
+  const s = dsin(a);
   return [p[0] * c - p[1] * s, p[0] * s + p[1] * c];
 }
 
@@ -74,7 +76,7 @@ export function migrateV0ToV1(v0: V0Scene, opts: MigrateOptions = {}): Scene {
   let ref = 0;
   const nextRef = () => ++ref;
 
-  const layers: Layer[] = v0.layers.map((l) => ({
+  const layers: Scene["layers"] = v0.layers.map((l) => ({
     id: l.id,
     name: l.name,
     visible: l.visible !== false,
@@ -159,7 +161,7 @@ export function migrateV0ToV1(v0: V0Scene, opts: MigrateOptions = {}): Scene {
       case "spring": {
         const pa = L.a && byId.get(L.a) ? toWorld(byId.get(L.a) as V0Part, L.pa) : L.pa;
         const pb = L.b && byId.get(L.b) ? toWorld(byId.get(L.b) as V0Part, L.pb) : L.pb;
-        const drawn = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]);
+        const drawn = dhypot(pb[0] - pa[0], pb[1] - pa[1]);
         return {
           id,
           ref: nextRef(),

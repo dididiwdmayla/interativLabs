@@ -1,0 +1,23 @@
+{
+  "id": "calibracao/pilha",
+  "group": "calibracao",
+  "title": "Pilha de 200 caixas",
+  "notes": "10 colunas de 20 caixas de 10 mm (madeira), 1 mm entre colunas, gravidade real.",
+  "view": [-15, -215, 140, 230],
+  "runs": [
+    {
+      "name": "3 s",
+      "duration": 3,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "maxDisp",
+          "label": "em 3 s, nenhuma caixa sai mais de 1 mm do lugar",
+          "parts": "dynamic",
+          "max": 1
+        }
+      ]
+    }
+  ],
+  "scene": "pilha.scene.json"
+}

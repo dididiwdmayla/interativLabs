@@ -29,5 +29,7 @@ export default defineConfig({
     { name: "capture", testMatch: /capture\.spec\.ts/ },
     { name: "overflow", testMatch: /overflow\.spec\.ts/ },
     { name: "bench", testMatch: /bench\.spec\.ts/, timeout: 30 * 60_000 },
+    { name: "lab", testMatch: /lab\.spec\.ts/ },
+    { name: "determinism", testMatch: /determinism\.spec\.ts/, timeout: 20 * 60_000 },
   ],
 });

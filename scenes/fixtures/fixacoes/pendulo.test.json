@@ -1,0 +1,71 @@
+{
+  "id": "fixacoes/pendulo",
+  "group": "fixacoes",
+  "title": "Pêndulo",
+  "notes": "Barra de aço de 100 × 6 mm presa ao fundo por um eixo numa ponta, solta a 30°. Período do pêndulo físico 2π·√(I/(m·g·d)) = 0,5182 s (a 30° de amplitude o período real é 1,7% maior). Na segunda execução o eixo tem 0,3 N·mm de atrito.",
+  "view": [-70, -20, 140, 130],
+  "runs": [
+    {
+      "name": "sem atrito",
+      "duration": 3,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "period",
+          "label": "o período bate com 2π·√(I/(m·g·d)) (±3%)",
+          "q": {
+            "link": "k2",
+            "field": "angle"
+          },
+          "from": 0.1,
+          "to": 3,
+          "expected": 0.5182,
+          "tol": 0.03
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo não abre (≤ 0,05 mm)",
+          "links": ["k2"],
+          "field": "gap",
+          "max": 0.05
+        }
+      ]
+    },
+    {
+      "name": "com atrito",
+      "duration": 4,
+      "patch": {
+        "k2": {
+          "friction": 0.3
+        }
+      },
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "decays",
+          "label": "com atrito, a amplitude cai a cada ciclo até parar",
+          "q": {
+            "link": "k2",
+            "field": "angle"
+          },
+          "from": 0,
+          "to": 4,
+          "final": 0.002
+        },
+        {
+          "kind": "range",
+          "label": "parado no fim (|ω| < 0,01 rad/s)",
+          "q": {
+            "link": "k2",
+            "field": "speed"
+          },
+          "from": 3.5,
+          "to": 4,
+          "min": -0.01,
+          "max": 0.01
+        }
+      ]
+    }
+  ],
+  "scene": "pendulo.scene.json"
+}

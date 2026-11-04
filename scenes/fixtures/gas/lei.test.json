@@ -1,0 +1,139 @@
+{
+  "id": "gas/lei",
+  "group": "gas",
+  "title": "Lei dos gases",
+  "notes": "Cilindro fechado de Ø 10 mm com um pistão de alumínio num trilho com mola de 1 N/mm (a carga). A 0,1 s, 0,1 mmol de gás entra em 2 ms; o pistão avança e assenta onde a força do gás iguala a da mola. Ambiente a 101,325 kPa.",
+  "view": [-10, -15, 90, 30],
+  "runs": [
+    {
+      "name": "isotérmica",
+      "duration": 1.5,
+      "inputs": [
+        {
+          "kind": "ignite",
+          "link": "k4",
+          "t": 0.1
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "relSpan",
+          "label": "isotérmica: P·V constante durante a expansão (±1%)",
+          "q": {
+            "pv": "k4",
+            "gamma": 1
+          },
+          "from": 0.11,
+          "to": 1.5,
+          "max": 0.01
+        },
+        {
+          "kind": "compare",
+          "label": "a força do gás na parede = (P − P_atm) × A (±0,5%)",
+          "a": {
+            "gasForce": "k4",
+            "wall": 0,
+            "p0": 101.325
+          },
+          "b": {
+            "const": 1
+          },
+          "t": 1.5,
+          "op": "ratio",
+          "min": 0.995,
+          "max": 1.005
+        },
+        {
+          "kind": "compare",
+          "label": "e é a força que a carga (a mola do trilho) mede (±0,5%)",
+          "a": {
+            "abs": {
+              "link": "k3",
+              "field": "force"
+            }
+          },
+          "b": {
+            "link": "k4",
+            "field": "walls.0.force"
+          },
+          "t": 1.5,
+          "op": "ratio",
+          "min": 0.995,
+          "max": 1.005
+        }
+      ]
+    },
+    {
+      "name": "adiabática",
+      "duration": 1.5,
+      "patch": {
+        "k4": {
+          "gas": {
+            "model": "adiabatic",
+            "gamma": 1.4,
+            "p0": 101.325,
+            "charge": {
+              "amount": 0.1,
+              "burnMs": 2
+            }
+          }
+        }
+      },
+      "inputs": [
+        {
+          "kind": "ignite",
+          "link": "k4",
+          "t": 0.1
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "relSpan",
+          "label": "adiabática: P·V^γ constante depois da queima (±1%)",
+          "q": {
+            "pv": "k4",
+            "gamma": 1.4
+          },
+          "from": 0.11,
+          "to": 1.5,
+          "max": 0.01
+        },
+        {
+          "kind": "compare",
+          "label": "a força do gás na parede = (P − P_atm) × A (±0,5%)",
+          "a": {
+            "gasForce": "k4",
+            "wall": 0,
+            "p0": 101.325
+          },
+          "b": {
+            "const": 1
+          },
+          "t": 1.5,
+          "op": "ratio",
+          "min": 0.995,
+          "max": 1.005
+        },
+        {
+          "kind": "compare",
+          "label": "e é a força que a carga (a mola do trilho) mede (±0,5%)",
+          "a": {
+            "abs": {
+              "link": "k3",
+              "field": "force"
+            }
+          },
+          "b": {
+            "link": "k4",
+            "field": "walls.0.force"
+          },
+          "t": 1.5,
+          "op": "ratio",
+          "min": 0.995,
+          "max": 1.005
+        }
+      ]
+    }
+  ],
+  "scene": "lei.scene.json"
+}

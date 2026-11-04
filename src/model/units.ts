@@ -1,22 +1,27 @@
 /**
- * Sistema de unidades da cena v1.
+ * Sistema de unidades da cena.
  *
- * Base: milímetro (mm), grama (g), segundo (s), radiano (rad).
- * Eixo y para baixo (o mesmo do SVG); ângulo positivo = sentido horário na tela.
+ * Cena v2 (atual), na cena e na interface: mm, g, s, N, N/mm, N·mm, kPa, °
+ * (a cena guarda radianos). Eixo y para baixo (o mesmo do SVG); ângulo
+ * positivo = sentido horário na tela.
  *
- * Derivadas:
- *   velocidade        mm/s
- *   aceleração        mm/s²
- *   força             g·mm/s²          (= 1 µN)
- *   rigidez linear    g/s²             (força por mm)
- *   amortecimento lin g/s              (força por mm/s)
- *   torque            g·mm²/s²         (= 1 nN·m)
- *   rigidez de torção g·mm²/s² por rad
- *   carga da câmara   g·mm²/s²         (força × distância: F = carga / s)
+ *   força             N
+ *   rigidez linear    N/mm
+ *   amortecimento lin N·s/mm
+ *   torque            N·mm
+ *   rigidez de torção N·mm/rad
+ *   amortecimento tor N·mm·s/rad
+ *   pressão           kPa
+ *   gás               mmol
+ *   densidade         g/mm³ (src/model/materials.ts)
+ *   massa             g = densidade × área × espessura da camada
  *
- * Massa = densidade do material × área × espessura nominal de 10 mm
- * (src/model/materials.ts). Com essa espessura, as massas do protótipo
- * (densidade × área em unidades de 10 mm) já saem em gramas.
+ * Dentro do motor (src/engine) tudo fica na base mm, g, s: força em
+ * g·mm/s² (= 1 µN). O plano de compilação converte com `N` abaixo.
+ *
+ * Cena v1 (só leitura, migrada ao abrir): forças já em g·mm/s², rigidez em
+ * g/s², torque em g·mm²/s², massa com espessura nominal de 10 mm e densidade
+ * em g/cm³.
  *
  * O protótipo v0 trabalhava em px, com 50 px por unidade do motor.
  * Escala de conversão (docs/fases/fase-1.md, item 2): 1 px = 0,2 mm.
@@ -32,8 +37,29 @@ export const V0_PX_PER_UNIT = 50;
 /** mm por unidade de comprimento do motor do protótipo (= 10 mm). */
 export const V0_MM_PER_UNIT = V0_PX_PER_UNIT * MM_PER_PX;
 
-/** Espessura nominal das peças, em mm, usada para massa a partir da densidade. */
-export const NOMINAL_THICKNESS_MM = 10;
+/** Espessura das camadas migradas da v1 (a espessura nominal do protótipo), mm. */
+export const V1_THICKNESS_MM = 10;
+
+/** Espessura padrão de uma camada nova, mm. */
+export const DEFAULT_THICKNESS_MM = 3;
+
+/** 1 N em g·mm/s² (a unidade de força dentro do motor). */
+export const N = 1e6;
+
+/** Gravidade real, mm/s² (padrão de cena nova). */
+export const G_REAL = 9810;
+
+/** Pressão atmosférica, kPa (p0 padrão de câmara nova). */
+export const P_ATM = 101.325;
+
+/** Temperatura do gás, K (20 °C). */
+export const GAS_T = 293.15;
+
+/** R·T em kPa·mm³ por mmol: P[kPa] = n[mmol] × RT / V[mm³]. */
+export const GAS_RT = 8.314462618 * GAS_T * 1000;
+
+/** 1 kPa × 1 mm² em g·mm/s² (= 1 mN). */
+export const KPA_MM2 = 1e3;
 
 export const DEG = Math.PI / 180;
 

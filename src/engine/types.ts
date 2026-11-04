@@ -1,11 +1,13 @@
-import type { Id, Scene } from "@/model/types";
+import type { Id, LinkKind, Scene } from "@/model/types";
 import type { Vec2 } from "@/geometry/vec";
 
 /**
  * Interface comum dos motores de física (docs/arquitetura.md §2).
  *
- * Tudo que entra e sai está nas unidades da cena: mm, g, s, rad. Só o
- * adaptador conhece a escala interna do motor (`unitMm` = mm por unidade).
+ * Entra a cena v2 (mm, g, s, N, kPa, rad). Sai o snapshot: poses em mm e rad;
+ * forças em N; torques em N·mm; pressão em kPa; gás em mmol; trabalho em mJ
+ * (N·mm). Só o adaptador conhece a escala interna do motor
+ * (`unitMm` = mm por unidade).
  */
 
 export interface CompileOptions {
@@ -29,30 +31,70 @@ export interface PartPose {
   angle: number;
 }
 
+export interface WallState {
+  part: Id;
+  /** força do gás na parede, N (positiva = para fora da câmara) */
+  force: number;
+  /** impulso recebido ao longo do eixo da câmara, N·s (com sinal) */
+  impulse: number;
+  /** trabalho feito pelo gás na parede, mJ */
+  work: number;
+  /** curso desde a pose desenhada, mm (positivo = para fora) */
+  travel: number;
+  sealed: boolean;
+}
+
 export interface LinkState {
-  kind: string;
-  /** eixo: ângulo relativo à pose desenhada (rad) e velocidade (rad/s) */
+  kind: LinkKind;
+  /** eixo: ângulo relativo à pose desenhada (rad), velocidade (rad/s), abertura entre os dois pontos (mm) */
   angle?: number;
   speed?: number;
+  gap?: number;
+  /** eixo: torque do motor ou do atrito (N·mm) */
+  torque?: number;
   /** trilho: deslocamento ao longo do eixo (mm) */
   translation?: number;
-  /** mola: comprimento atual (mm) */
+  /** força ao longo da ligação, N: trilho (reação ao longo do eixo), mola (+ empurra), haste e cabo (+ puxa) */
+  force?: number;
+  /** mola: parte da força que vem do batente das espiras encostadas, N */
+  stopForce?: number;
+  /** força transversal ao eixo da mola, N (mola com guia) */
+  sideForce?: number;
+  /** mola, haste, cabo: comprimento atual (mm) */
   length?: number;
-  /** câmara: gás (g·mm²/s²), pressão (g/(mm·s²)), disparada, gás escapou */
-  gas?: number;
+  /** cabo: folga (comprimento máximo − atual, mm; > 0 = frouxo) */
+  slack?: number;
+  /** suporte elástico: deslocamento do ponto (mm) e giro (rad) */
+  offset?: number;
+  /** rasgo reto (junta): posição do pino ao longo do rasgo (mm, a partir do meio) e desvio transversal (mm) */
+  position?: number;
+  deviation?: number;
+  /** rasgo por contato: folga entre o pino e a parede do furo (mm; negativa = penetrando ou fora) */
+  clearance?: number;
+  /** câmara: pressão absoluta (kPa), volume (mm³), gás (mmol), acesa, queimando */
   pressure?: number;
+  volume?: number;
+  gas?: number;
   fired?: boolean;
-  vented?: boolean;
+  burning?: boolean;
+  walls?: WallState[];
+  /** câmara: respiros (aberto e fração descoberta) */
+  vents?: { open: boolean; exposed: number }[];
+  /** câmara: portas (fração descoberta) */
+  ports?: { exposed: number }[];
   /** sensor: quantas vezes disparou */
   count?: number;
-  /** distância entre os dois pontos da junta (mm) — mede a abertura do eixo */
-  gap?: number;
 }
 
 export type EngineEvent =
   | { kind: "sensor"; sensor: Id; part: Id; speed: number; time: number }
   | { kind: "chamber-fired"; chamber: Id; time: number }
-  | { kind: "chamber-vented"; chamber: Id; exitSpeed: number; time: number };
+  | { kind: "wall-unsealed"; chamber: Id; part: Id; time: number }
+  | { kind: "vent-opened"; chamber: Id; vent: number; by: "wall" | "sensor"; time: number }
+  | { kind: "vent-closed"; chamber: Id; vent: number; time: number }
+  | { kind: "port-opened"; chamber: Id; port: number; time: number }
+  /** choque entre duas peças com velocidade de aproximação acima do limiar (som e faíscas, mm/s) */
+  | { kind: "impact"; a: Id; b: Id; speed: number; point: Vec2; time: number };
 
 export interface Snapshot {
   /** s simulados desde a compilação */
@@ -90,6 +132,12 @@ export interface EngineAdapter {
   setMotorSpeed(linkId: Id, speed: number): void;
   /** Impõe velocidade a uma peça (mm/s, rad/s). Usado por roteiros de teste. */
   setVelocity(partId: Id, v: Vec2, omega: number): void;
+  /** Força constante numa peça (N, no mundo), aplicada no ponto local `at` até ser trocada; null tira. */
+  setForce(partId: Id, force: Vec2 | null, at?: Vec2): void;
+  /** Acende uma câmara (como o sensor). */
+  ignite(linkId: Id): boolean;
+  /** Abre ou fecha a válvula de um respiro. */
+  setVent(linkId: Id, vent: number, open: boolean): void;
   dispose(): void;
 }
 

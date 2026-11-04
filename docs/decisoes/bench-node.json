@@ -1,10 +1,10 @@
 {
-  "createdAt": "2026-11-04T08:55:12.016Z",
+  "createdAt": "2026-11-04T17:59:24.639Z",
   "environment": {
     "kind": "node",
     "userAgent": "Node v22.23.4 (linux x64) · Intel(R) Xeon(R) Processor @ 2.10GHz",
     "hardwareConcurrency": 4,
-    "timerResolutionUs": 0.48
+    "timerResolutionUs": 0.466
   },
   "unitMm": 1,
   "engines": [
@@ -30,7 +30,7 @@
       "id": "box2d",
       "name": "Box2D v3 (WASM)",
       "version": "6.0.0",
-      "iterations": "4 subpassos do solver suave por passo, contínuo contra estáticos"
+      "iterations": "16 subpassos do solver suave por passo; contato 480 Hz, juntas 960 Hz; contínuo contra estáticos"
     }
   ],
   "results": [
@@ -57,21 +57,21 @@
         {
           "label": "a esfera passa da saída do cano em até 0,5 s",
           "pass": true,
-          "value": "0,242 s",
+          "value": "0,250 s",
           "run": "repouso e disparo"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.14095700000007128,
-      "stepP95": 0.3489430000001903,
+      "stepMedian": 0.13994499999989785,
+      "stepP95": 0.53029499999991,
       "timing": "passo",
-      "maxDepth": 0.05313486992289986,
-      "jitter": 0.006548784025509606,
-      "hash": "2c2de6dc62c1aa35",
-      "hashRepeat": "2c2de6dc62c1aa35",
+      "maxDepth": 0.05150250372831927,
+      "jitter": 0.006507696170784992,
+      "hash": "b1863f12ea88be4d",
+      "hashRepeat": "b1863f12ea88be4d",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 302.14312800000016
+      "wallMs": 325.294166
     },
     {
       "scene": "02-trava",
@@ -101,16 +101,16 @@
         }
       ],
       "steps": 840,
-      "stepMedian": 0.04299799999989773,
-      "stepP95": 0.08943199999998797,
+      "stepMedian": 0.017360000000053333,
+      "stepP95": 0.053490000000010696,
       "timing": "passo",
-      "maxDepth": 0.04854557984332636,
+      "maxDepth": 0.048341658963161845,
       "jitter": 0,
-      "hash": "82dd81385c5b5bcf",
-      "hashRepeat": "82dd81385c5b5bcf",
+      "hash": "0b2c990026fffea7",
+      "hashRepeat": "0b2c990026fffea7",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 89.48385200000007
+      "wallMs": 52.01700400000004
     },
     {
       "scene": "03-engrenagens",
@@ -125,27 +125,27 @@
         {
           "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
           "pass": true,
-          "value": "erro máx. 1,29%",
+          "value": "erro máx. 1,48%",
           "run": "a favor"
         },
         {
           "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
           "pass": false,
-          "value": "28,4°",
+          "value": "28,2°",
           "run": "a favor"
         }
       ],
       "steps": 1800,
-      "stepMedian": 0.17183899999986352,
-      "stepP95": 0.3415050000000974,
+      "stepMedian": 0.12289699999996628,
+      "stepP95": 0.4237420000001748,
       "timing": "passo",
-      "maxDepth": 0.10666738571313447,
-      "jitter": 0.010288425153051485,
-      "hash": "b391fb35284b38dc",
-      "hashRepeat": "b391fb35284b38dc",
+      "maxDepth": 0.1032789408770444,
+      "jitter": 0.010767500647286415,
+      "hash": "e7b9de3a2f08ef05",
+      "hashRepeat": "e7b9de3a2f08ef05",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 702.5097039999998
+      "wallMs": 539.894542
     },
     {
       "scene": "04-pilha",
@@ -163,8 +163,8 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 1.0903250000001208,
-      "stepP95": 2.0310960000001614,
+      "stepMedian": 1.432303999999931,
+      "stepP95": 2.182949000000008,
       "timing": "passo",
       "maxDepth": 0.034664653163440896,
       "jitter": 0.002801500871740711,
@@ -172,7 +172,7 @@
       "hashRepeat": "a9ad4fcb13f24306",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 1786.3120249999997
+      "wallMs": 2002.8617
     },
     {
       "scene": "05-corrente",
@@ -190,8 +190,8 @@
         }
       ],
       "steps": 1200,
-      "stepMedian": 0.12611000000015338,
-      "stepP95": 0.2979089999998905,
+      "stepMedian": 0.11407199999985096,
+      "stepP95": 0.39342500000020664,
       "timing": "passo",
       "maxDepth": 0,
       "jitter": null,
@@ -199,7 +199,7 @@
       "hashRepeat": "3aa3440ad53c0b85",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 394.7774860000004
+      "wallMs": 403.7678170000004
     },
     {
       "scene": "06-pinhao-cremalheira",
@@ -212,27 +212,27 @@
         {
           "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
           "pass": true,
-          "value": "erro máx. 1,13%, giro mín. 98%",
+          "value": "erro máx. 0,76%, giro mín. 98%",
           "run": "50 inversões"
         },
         {
           "label": "penetração entre dentes menor que 0,1 mm",
           "pass": true,
-          "value": "0,0464 mm",
+          "value": "0,0452 mm",
           "run": "50 inversões"
         }
       ],
       "steps": 4896,
-      "stepMedian": 0.03413000000000466,
-      "stepP95": 0.0757899999998699,
+      "stepMedian": 0.03708199999982753,
+      "stepP95": 0.08263600000009319,
       "timing": "passo",
-      "maxDepth": 0.046423847800531916,
+      "maxDepth": 0.04519505089160759,
       "jitter": null,
-      "hash": "efe1650c03896437",
-      "hashRepeat": "efe1650c03896437",
+      "hash": "f914a80ac91a2a63",
+      "hashRepeat": "f914a80ac91a2a63",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 457.9742070000002
+      "wallMs": 403.98248800000056
     },
     {
       "scene": "07-bala",
@@ -250,16 +250,16 @@
         }
       ],
       "steps": 1000,
-      "stepMedian": 0.00475300000016432,
-      "stepP95": 0.03343400000085239,
+      "stepMedian": 0.003232999999454478,
+      "stepP95": 0.01710800000000745,
       "timing": "passo",
       "maxDepth": 0,
       "jitter": null,
-      "hash": "fbb939b877f1c90b",
-      "hashRepeat": "fbb939b877f1c90b",
+      "hash": "8447b30b7766d64c",
+      "hashRepeat": "8447b30b7766d64c",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 52.63324599999942
+      "wallMs": 48.558546000000206
     },
     {
       "scene": "08-escalas",
@@ -283,16 +283,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.13504399999965244,
-      "stepP95": 0.19754699999975855,
+      "stepMedian": 0.10660100000040984,
+      "stepP95": 0.17289100000016333,
       "timing": "passo",
       "maxDepth": 0.012493922717532007,
-      "jitter": 0,
+      "jitter": 2.7937480765167913e-17,
       "hash": "8cb06c45c24f6e64",
       "hashRepeat": "8cb06c45c24f6e64",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 238.99188400000003
+      "wallMs": 184.37083299999995
     },
     {
       "scene": "08-escalas",
@@ -316,16 +316,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.13309900000058406,
-      "stepP95": 0.18642600000021048,
+      "stepMedian": 0.10584099999960017,
+      "stepP95": 0.1922309999999925,
       "timing": "passo",
-      "maxDepth": 0.1241638892988148,
+      "maxDepth": 0.12416388929881564,
       "jitter": 0,
       "hash": "14da7573b2aed426",
       "hashRepeat": "14da7573b2aed426",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 216.09556900000007
+      "wallMs": 180.71807499999977
     },
     {
       "scene": "01-lancador",
@@ -350,21 +350,21 @@
         {
           "label": "a esfera passa da saída do cano em até 0,5 s",
           "pass": true,
-          "value": "0,233 s",
+          "value": "0,238 s",
           "run": "repouso e disparo"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.05286199999954988,
-      "stepP95": 0.11177599999973609,
+      "stepMedian": 0.05537300000014511,
+      "stepP95": 0.21183800000017072,
       "timing": "passo",
-      "maxDepth": 0.11380386352539062,
-      "jitter": 3.7489543666160123e-10,
-      "hash": "d018d4969e0671ad",
-      "hashRepeat": "d018d4969e0671ad",
+      "maxDepth": 0.11307144165039062,
+      "jitter": 2.73383655375237e-10,
+      "hash": "40e2709e5a9d021d",
+      "hashRepeat": "40e2709e5a9d021d",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 194.16098599999987
+      "wallMs": 246.38583599999947
     },
     {
       "scene": "02-trava",
@@ -394,16 +394,16 @@
         }
       ],
       "steps": 840,
-      "stepMedian": 0.023627999999916938,
-      "stepP95": 0.04019799999969109,
+      "stepMedian": 0.01990399999976944,
+      "stepP95": 0.035719999999855645,
       "timing": "passo",
-      "maxDepth": 0.0881391167640686,
+      "maxDepth": 0.08757895231246948,
       "jitter": 0,
-      "hash": "cc30e9e0fda8901b",
-      "hashRepeat": "cc30e9e0fda8901b",
+      "hash": "d63d91567c574523",
+      "hashRepeat": "d63d91567c574523",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 59.06302599999981
+      "wallMs": 55.313154999999824
     },
     {
       "scene": "03-engrenagens",
@@ -412,33 +412,34 @@
       "unitMm": 1,
       "pass": false,
       "failed": [
+        "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
         "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
       ],
       "assertions": [
         {
           "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
-          "pass": true,
-          "value": "erro máx. 1,89%",
+          "pass": false,
+          "value": "erro máx. 2,08%",
           "run": "a favor"
         },
         {
           "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
           "pass": false,
-          "value": "34,1°",
+          "value": "34,0°",
           "run": "a favor"
         }
       ],
       "steps": 1800,
-      "stepMedian": 0.06654299999991053,
-      "stepP95": 0.12462299999970128,
+      "stepMedian": 0.06025000000045111,
+      "stepP95": 0.11227899999994406,
       "timing": "passo",
-      "maxDepth": 0.1615954041481018,
-      "jitter": 0.00021944725845186888,
-      "hash": "53e232dfb279680e",
-      "hashRepeat": "53e232dfb279680e",
+      "maxDepth": 0.1498081535100937,
+      "jitter": 0.00023366368646541265,
+      "hash": "3277f0214dd0a770",
+      "hashRepeat": "3277f0214dd0a770",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 345.80951899999945
+      "wallMs": 295.3527839999997
     },
     {
       "scene": "04-pilha",
@@ -458,8 +459,8 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.28658700000050885,
-      "stepP95": 0.3549830000001748,
+      "stepMedian": 0.3043600000000879,
+      "stepP95": 0.49266499999976077,
       "timing": "passo",
       "maxDepth": 0.1022176742553711,
       "jitter": 0,
@@ -467,7 +468,7 @@
       "hashRepeat": "44fce4b8de5e5ff9",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 702.3302400000002
+      "wallMs": 808.2186190000002
     },
     {
       "scene": "05-corrente",
@@ -485,16 +486,16 @@
         }
       ],
       "steps": 1200,
-      "stepMedian": 0.0601409999999305,
-      "stepP95": 0.08934600000065984,
+      "stepMedian": 0.05679800000052637,
+      "stepP95": 0.09809899999982008,
       "timing": "passo",
       "maxDepth": 0,
       "jitter": null,
-      "hash": "dae79bcb24f4cb06",
-      "hashRepeat": "dae79bcb24f4cb06",
+      "hash": "59e3851f75ea1ae4",
+      "hashRepeat": "59e3851f75ea1ae4",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 296.65689699999984
+      "wallMs": 295.53214599999956
     },
     {
       "scene": "06-pinhao-cremalheira",
@@ -509,27 +510,27 @@
         {
           "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
           "pass": true,
-          "value": "erro máx. 1,03%, giro mín. 99%",
+          "value": "erro máx. 1,14%, giro mín. 99%",
           "run": "50 inversões"
         },
         {
           "label": "penetração entre dentes menor que 0,1 mm",
           "pass": false,
-          "value": "0,1350 mm",
+          "value": "0,1347 mm",
           "run": "50 inversões"
         }
       ],
       "steps": 4896,
-      "stepMedian": 0.035402999999860185,
-      "stepP95": 0.06445300000086718,
+      "stepMedian": 0.03434999999990396,
+      "stepP95": 0.06408800000008341,
       "timing": "passo",
-      "maxDepth": 0.13502644002437592,
+      "maxDepth": 0.13471999764442444,
       "jitter": null,
-      "hash": "8af94c8d3dc58e5a",
-      "hashRepeat": "8af94c8d3dc58e5a",
+      "hash": "dce16648c18dad13",
+      "hashRepeat": "dce16648c18dad13",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 518.6583999999993
+      "wallMs": 474.6862860000001
     },
     {
       "scene": "07-bala",
@@ -547,16 +548,16 @@
         }
       ],
       "steps": 1000,
-      "stepMedian": 0.007700999999542546,
-      "stepP95": 0.025466999999480322,
+      "stepMedian": 0.006841000000349595,
+      "stepP95": 0.026423000000249885,
       "timing": "passo",
-      "maxDepth": 0.04854416847229004,
+      "maxDepth": 0.04854440689086914,
       "jitter": null,
-      "hash": "f3e9660c32ac658b",
-      "hashRepeat": "f3e9660c32ac658b",
+      "hash": "c6e4576b87dc4720",
+      "hashRepeat": "c6e4576b87dc4720",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 67.86946499999976
+      "wallMs": 67.96636899999976
     },
     {
       "scene": "08-escalas",
@@ -580,8 +581,8 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.03150199999981851,
-      "stepP95": 0.059460999999828346,
+      "stepMedian": 0.028205999999954656,
+      "stepP95": 0.08616299999994226,
       "timing": "passo",
       "maxDepth": 0,
       "jitter": 0,
@@ -589,7 +590,7 @@
       "hashRepeat": "d9665a0d0aa3d034",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 86.83602500000052
+      "wallMs": 91.6363569999994
     },
     {
       "scene": "08-escalas",
@@ -613,16 +614,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.03235099999983504,
-      "stepP95": 0.051544999999350694,
+      "stepMedian": 0.028535000000374566,
+      "stepP95": 0.07438000000001921,
       "timing": "passo",
       "maxDepth": 0,
-      "jitter": 6.471748762673964e-9,
+      "jitter": 0,
       "hash": "37266101e232059c",
       "hashRepeat": "37266101e232059c",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 86.26686100000006
+      "wallMs": 92.35481299999992
     },
     {
       "scene": "01-lancador",
@@ -647,21 +648,21 @@
         {
           "label": "a esfera passa da saída do cano em até 0,5 s",
           "pass": true,
-          "value": "0,233 s",
+          "value": "0,238 s",
           "run": "repouso e disparo"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.05062699999962206,
-      "stepP95": 0.1332990000000791,
+      "stepMedian": 0.07436199999938253,
+      "stepP95": 0.22425299999940762,
       "timing": "passo",
-      "maxDepth": 0.11380386352539062,
-      "jitter": 3.7489543666160123e-10,
-      "hash": "d018d4969e0671ad",
-      "hashRepeat": "d018d4969e0671ad",
+      "maxDepth": 0.11307144165039062,
+      "jitter": 2.73383655375237e-10,
+      "hash": "40e2709e5a9d021d",
+      "hashRepeat": "40e2709e5a9d021d",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 180.81007200000022
+      "wallMs": 252.63255900000058
     },
     {
       "scene": "02-trava",
@@ -691,16 +692,16 @@
         }
       ],
       "steps": 840,
-      "stepMedian": 0.022100000000136788,
-      "stepP95": 0.04673400000046968,
+      "stepMedian": 0.01962400000047637,
+      "stepP95": 0.04543499999999767,
       "timing": "passo",
-      "maxDepth": 0.0881391167640686,
+      "maxDepth": 0.08757895231246948,
       "jitter": 0,
-      "hash": "cc30e9e0fda8901b",
-      "hashRepeat": "cc30e9e0fda8901b",
+      "hash": "d63d91567c574523",
+      "hashRepeat": "d63d91567c574523",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 66.56059000000005
+      "wallMs": 57.16895199999999
     },
     {
       "scene": "03-engrenagens",
@@ -709,33 +710,34 @@
       "unitMm": 1,
       "pass": false,
       "failed": [
+        "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
         "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
       ],
       "assertions": [
         {
           "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
-          "pass": true,
-          "value": "erro máx. 1,89%",
+          "pass": false,
+          "value": "erro máx. 2,08%",
           "run": "a favor"
         },
         {
           "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
           "pass": false,
-          "value": "34,1°",
+          "value": "34,0°",
           "run": "a favor"
         }
       ],
       "steps": 1800,
-      "stepMedian": 0.06744400000025053,
-      "stepP95": 0.16560499999923195,
+      "stepMedian": 0.05825399999957881,
+      "stepP95": 0.10769100000015897,
       "timing": "passo",
-      "maxDepth": 0.1615954041481018,
-      "jitter": 0.00021944725845186888,
-      "hash": "53e232dfb279680e",
-      "hashRepeat": "53e232dfb279680e",
+      "maxDepth": 0.1498081535100937,
+      "jitter": 0.00023366368646541265,
+      "hash": "3277f0214dd0a770",
+      "hashRepeat": "3277f0214dd0a770",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 351.17443300000014
+      "wallMs": 301.08936300000005
     },
     {
       "scene": "04-pilha",
@@ -755,8 +757,8 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.27987000000030093,
-      "stepP95": 0.36196799999925133,
+      "stepMedian": 0.2692449999995006,
+      "stepP95": 0.3939840000002732,
       "timing": "passo",
       "maxDepth": 0.1022176742553711,
       "jitter": 0,
@@ -764,7 +766,7 @@
       "hashRepeat": "44fce4b8de5e5ff9",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 764.8249419999993
+      "wallMs": 845.188048
     },
     {
       "scene": "05-corrente",
@@ -782,16 +784,16 @@
         }
       ],
       "steps": 1200,
-      "stepMedian": 0.06545700000060606,
-      "stepP95": 0.10360499999842432,
+      "stepMedian": 0.045790000000124564,
+      "stepP95": 0.07033299999966403,
       "timing": "passo",
       "maxDepth": 0,
       "jitter": null,
-      "hash": "dae79bcb24f4cb06",
-      "hashRepeat": "dae79bcb24f4cb06",
+      "hash": "59e3851f75ea1ae4",
+      "hashRepeat": "59e3851f75ea1ae4",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 279.96774000000005
+      "wallMs": 229.08232599999974
     },
     {
       "scene": "06-pinhao-cremalheira",
@@ -806,27 +808,27 @@
         {
           "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
           "pass": true,
-          "value": "erro máx. 1,03%, giro mín. 99%",
+          "value": "erro máx. 1,14%, giro mín. 99%",
           "run": "50 inversões"
         },
         {
           "label": "penetração entre dentes menor que 0,1 mm",
           "pass": false,
-          "value": "0,1350 mm",
+          "value": "0,1347 mm",
           "run": "50 inversões"
         }
       ],
       "steps": 4896,
-      "stepMedian": 0.03722399999969639,
-      "stepP95": 0.06790899999941757,
+      "stepMedian": 0.02721700000074634,
+      "stepP95": 0.044112999999924796,
       "timing": "passo",
-      "maxDepth": 0.13502644002437592,
+      "maxDepth": 0.13471999764442444,
       "jitter": null,
-      "hash": "8af94c8d3dc58e5a",
-      "hashRepeat": "8af94c8d3dc58e5a",
+      "hash": "dce16648c18dad13",
+      "hashRepeat": "dce16648c18dad13",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 499.8022639999999
+      "wallMs": 391.80997299999945
     },
     {
       "scene": "07-bala",
@@ -844,16 +846,16 @@
         }
       ],
       "steps": 1000,
-      "stepMedian": 0.007837999999537715,
-      "stepP95": 0.021333000000595348,
+      "stepMedian": 0.00680599999941478,
+      "stepP95": 0.02186700000129349,
       "timing": "passo",
-      "maxDepth": 0.04854416847229004,
+      "maxDepth": 0.04854440689086914,
       "jitter": null,
-      "hash": "f3e9660c32ac658b",
-      "hashRepeat": "f3e9660c32ac658b",
+      "hash": "c6e4576b87dc4720",
+      "hashRepeat": "c6e4576b87dc4720",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 55.18924999999945
+      "wallMs": 54.05497900000046
     },
     {
       "scene": "08-escalas",
@@ -877,8 +879,8 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.030262000000220723,
-      "stepP95": 0.04699299999992945,
+      "stepMedian": 0.025761999999303953,
+      "stepP95": 0.04478000000017346,
       "timing": "passo",
       "maxDepth": 0,
       "jitter": 0,
@@ -886,7 +888,7 @@
       "hashRepeat": "d9665a0d0aa3d034",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 82.75004500000068
+      "wallMs": 73.51802599999974
     },
     {
       "scene": "08-escalas",
@@ -910,16 +912,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.03068100000018603,
-      "stepP95": 0.048150999999052146,
+      "stepMedian": 0.0326599999989412,
+      "stepP95": 0.045802000000549015,
       "timing": "passo",
       "maxDepth": 0,
-      "jitter": 6.471748762673964e-9,
+      "jitter": 0,
       "hash": "37266101e232059c",
       "hashRepeat": "37266101e232059c",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 83.08064399999967
+      "wallMs": 86.47315300000082
     },
     {
       "scene": "01-lancador",
@@ -944,21 +946,21 @@
         {
           "label": "a esfera passa da saída do cano em até 0,5 s",
           "pass": true,
-          "value": "0,233 s",
+          "value": "0,250 s",
           "run": "repouso e disparo"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.052706999998918036,
-      "stepP95": 0.16471799999999348,
+      "stepMedian": 0.10901399999966088,
+      "stepP95": 0.30107700000007753,
       "timing": "passo",
-      "maxDepth": 0.12010669708251953,
-      "jitter": 0.00011665051194485819,
-      "hash": "c58f68d31433bf72",
-      "hashRepeat": "c58f68d31433bf72",
+      "maxDepth": 0.005420684814453125,
+      "jitter": 1.0924500481232089e-8,
+      "hash": "d0e95d868461a031",
+      "hashRepeat": "d0e95d868461a031",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 158.5589999999993
+      "wallMs": 246.1128520000002
     },
     {
       "scene": "02-trava",
@@ -971,33 +973,33 @@
         {
           "label": "a maçaneta gira 30°",
           "pass": true,
-          "value": "-30,1°",
+          "value": "-30,0°",
           "run": "girar e soltar"
         },
         {
           "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
           "pass": true,
-          "value": "7,23 mm",
+          "value": "7,92 mm",
           "run": "girar e soltar"
         },
         {
           "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
           "pass": true,
-          "value": "0,001 mm",
+          "value": "0,000 mm",
           "run": "girar e soltar"
         }
       ],
       "steps": 840,
-      "stepMedian": 0.02485800000067684,
-      "stepP95": 0.04671500000040396,
+      "stepMedian": 0.026563999999780208,
+      "stepP95": 0.04717100000016217,
       "timing": "passo",
-      "maxDepth": 0.05755755305290222,
-      "jitter": 3.552683094539116e-15,
-      "hash": "8013ab32e939fa17",
-      "hashRepeat": "8013ab32e939fa17",
+      "maxDepth": 0.0033944621682167053,
+      "jitter": 0,
+      "hash": "1a850d2faa4da2ca",
+      "hashRepeat": "1a850d2faa4da2ca",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 65.56996000000072
+      "wallMs": 78.67841699999917
     },
     {
       "scene": "03-engrenagens",
@@ -1012,56 +1014,54 @@
         {
           "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
           "pass": true,
-          "value": "erro máx. 1,35%",
+          "value": "erro máx. 1,68%",
           "run": "a favor"
         },
         {
           "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
           "pass": false,
-          "value": "35,1°",
+          "value": "26,3°",
           "run": "a favor"
         }
       ],
       "steps": 1800,
-      "stepMedian": 0.05801700000120036,
-      "stepP95": 0.091961000000083,
+      "stepMedian": 0.10450300000047719,
+      "stepP95": 0.17990699999973003,
       "timing": "passo",
-      "maxDepth": 0.13046115636825562,
-      "jitter": 0.000003090521704166624,
-      "hash": "8966c335d9b6ffac",
-      "hashRepeat": "8966c335d9b6ffac",
+      "maxDepth": 0.022947242483496666,
+      "jitter": 0.0000029159593160831667,
+      "hash": "2d63483a8da9184d",
+      "hashRepeat": "2d63483a8da9184d",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 374.26086399999986
+      "wallMs": 596.1550970000008
     },
     {
       "scene": "04-pilha",
       "title": "Pilha",
       "engine": "box2d",
       "unitMm": 1,
-      "pass": false,
-      "failed": [
-        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
-      ],
+      "pass": true,
+      "failed": [],
       "assertions": [
         {
           "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
-          "pass": false,
-          "value": "1,365 mm",
+          "pass": true,
+          "value": "0,006 mm",
           "run": "3 s"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.15229100000033213,
-      "stepP95": 0.22126199999911478,
+      "stepMedian": 0.3618289999994886,
+      "stepP95": 0.5214520000008633,
       "timing": "passo",
-      "maxDepth": 0.13444563746452332,
-      "jitter": 0.006153955483178617,
-      "hash": "c4ea4f8f3a3b1a8c",
-      "hashRepeat": "c4ea4f8f3a3b1a8c",
+      "maxDepth": 0.0006437301635742188,
+      "jitter": 0.00008312694767254371,
+      "hash": "2c0a1b524999368b",
+      "hashRepeat": "2c0a1b524999368b",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 2556.6238009999997
+      "wallMs": 2442.373122000001
     },
     {
       "scene": "05-corrente",
@@ -1074,56 +1074,54 @@
         {
           "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
           "pass": true,
-          "value": "0,215 mm",
+          "value": "0,002 mm",
           "run": "5 s"
         }
       ],
       "steps": 1200,
-      "stepMedian": 0.07202200000028824,
-      "stepP95": 0.12271900000087044,
+      "stepMedian": 0.10484199999882549,
+      "stepP95": 0.1832109999995737,
       "timing": "passo",
       "maxDepth": 0,
       "jitter": null,
-      "hash": "1413504e50548669",
-      "hashRepeat": "1413504e50548669",
+      "hash": "cbaa631bed48acce",
+      "hashRepeat": "cbaa631bed48acce",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 593.5520589999996
+      "wallMs": 762.0485020000015
     },
     {
       "scene": "06-pinhao-cremalheira",
       "title": "Pinhão e cremalheira",
       "engine": "box2d",
       "unitMm": 1,
-      "pass": false,
-      "failed": [
-        "penetração entre dentes menor que 0,1 mm"
-      ],
+      "pass": true,
+      "failed": [],
       "assertions": [
         {
           "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
           "pass": true,
-          "value": "erro máx. 1,01%, giro mín. 99%",
+          "value": "erro máx. 0,98%, giro mín. 99%",
           "run": "50 inversões"
         },
         {
           "label": "penetração entre dentes menor que 0,1 mm",
-          "pass": false,
-          "value": "0,1348 mm",
+          "pass": true,
+          "value": "0,0024 mm",
           "run": "50 inversões"
         }
       ],
       "steps": 4896,
-      "stepMedian": 0.02942299999995157,
-      "stepP95": 0.05366200000025856,
+      "stepMedian": 0.0885180000004766,
+      "stepP95": 0.145661000000473,
       "timing": "passo",
-      "maxDepth": 0.13475322723388672,
+      "maxDepth": 0.0023806747049093246,
       "jitter": null,
-      "hash": "81db952b59c492a2",
-      "hashRepeat": "81db952b59c492a2",
+      "hash": "5f49f3833be25150",
+      "hashRepeat": "5f49f3833be25150",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 485.3312810000007
+      "wallMs": 1243.0844260000013
     },
     {
       "scene": "07-bala",
@@ -1141,16 +1139,16 @@
         }
       ],
       "steps": 1000,
-      "stepMedian": 0.010855999998966581,
-      "stepP95": 0.02403299999969022,
+      "stepMedian": 0.01910399999906076,
+      "stepP95": 0.053834999998798594,
       "timing": "passo",
-      "maxDepth": 1.880000114440918,
+      "maxDepth": 0.10395669937133789,
       "jitter": null,
-      "hash": "e4d39ecb47710df6",
-      "hashRepeat": "e4d39ecb47710df6",
+      "hash": "e9f08d724c287093",
+      "hashRepeat": "e9f08d724c287093",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 73.7415490000003
+      "wallMs": 100.38467700000001
     },
     {
       "scene": "08-escalas",
@@ -1174,16 +1172,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.021532999999180902,
-      "stepP95": 0.036314999999376596,
+      "stepMedian": 0.05050699999992503,
+      "stepP95": 0.08355899999878602,
       "timing": "passo",
-      "maxDepth": 0.0008794069290161133,
-      "jitter": 0,
-      "hash": "401f6d5df1f9200c",
-      "hashRepeat": "401f6d5df1f9200c",
+      "maxDepth": 0.0000034570693969726562,
+      "jitter": 1.4897953870233165e-8,
+      "hash": "9df8a305ae941cc4",
+      "hashRepeat": "9df8a305ae941cc4",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 207.7644650000002
+      "wallMs": 242.95312899999954
     },
     {
       "scene": "08-escalas",
@@ -1207,16 +1205,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.02230000000054133,
-      "stepP95": 0.04165800000009767,
+      "stepMedian": 0.050004999999146094,
+      "stepP95": 0.08371600000100443,
       "timing": "passo",
-      "maxDepth": 0.0008793920278549194,
+      "maxDepth": 0.00000346451997756958,
       "jitter": 0,
-      "hash": "bb3bc359572c8a0c",
-      "hashRepeat": "bb3bc359572c8a0c",
+      "hash": "95a2517d8ec1a904",
+      "hashRepeat": "95a2517d8ec1a904",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 214.37371600000006
+      "wallMs": 235.7366579999998
     }
   ]
 }

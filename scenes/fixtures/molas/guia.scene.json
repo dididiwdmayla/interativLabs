@@ -1,0 +1,111 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Mola com guia",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Haste",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Bloco",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Haste-guia",
+      "layer": "L1",
+      "x": 0,
+      "y": 0,
+      "angle": 0.5236,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-60, -2],
+          [60, -2],
+          [60, 2],
+          [-60, 2]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Bloco",
+      "layer": "L2",
+      "x": 1.2679,
+      "y": -6.1962,
+      "angle": 0.5236,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-8, -5],
+          [8, -5],
+          [8, 5],
+          [-8, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k3",
+      "ref": 3,
+      "kind": "slider",
+      "a": "p1",
+      "b": "p2",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-30, 30]
+    },
+    {
+      "id": "k4",
+      "ref": 4,
+      "kind": "spring",
+      "a": "p1",
+      "b": "p2",
+      "atA": [-50, 0],
+      "atB": [-8, 0],
+      "k": 0.01,
+      "damping": 0.00003882,
+      "freeLength": 40,
+      "mode": "fixed",
+      "guide": "p1",
+      "coil": {
+        "outerD": 7,
+        "wireD": 0.6,
+        "turns": 12
+      }
+    }
+  ]
+}

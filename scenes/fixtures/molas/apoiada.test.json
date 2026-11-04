@@ -1,0 +1,107 @@
+{
+  "id": "molas/apoiada",
+  "group": "molas",
+  "title": "Mola apoiada e mola de tração",
+  "notes": "Dois blocos de 20 g em trilhos verticais, molas de 0,02 N/mm e 40 mm livres. À esquerda, apoiado numa mola de compressão (só empurra); à direita, pendurado numa mola de tração (só puxa). Compressão e extensão estáticas esperadas: m·g/k = 9,81 mm. Na segunda execução os dois levam um empurrão para cima.",
+  "view": [-40, -20, 160, 135],
+  "runs": [
+    {
+      "name": "repouso",
+      "duration": 3,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "mean",
+          "label": "apoiada: compressão estática = m·g/k (9,81 mm ± 2%)",
+          "q": {
+            "link": "k4",
+            "field": "length"
+          },
+          "from": 2.5,
+          "to": 3,
+          "min": 29.9938,
+          "max": 30.3862
+        },
+        {
+          "kind": "mean",
+          "label": "só tração: extensão estática = m·g/k (9,81 mm ± 2%)",
+          "q": {
+            "link": "k8",
+            "field": "length"
+          },
+          "from": 2.5,
+          "to": 3,
+          "min": 49.6138,
+          "max": 50.0062
+        }
+      ]
+    },
+    {
+      "name": "empurrão para cima",
+      "duration": 3,
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 1.5,
+          "v": [0, -700],
+          "omega": 0
+        },
+        {
+          "kind": "velocity",
+          "part": "p6",
+          "t": 1.5,
+          "v": [0, -700],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "apoiada, puxada além do comprimento livre: não puxa (força nula)",
+          "cond": {
+            "link": "k4",
+            "field": "length"
+          },
+          "condMin": 40.2,
+          "q": {
+            "link": "k4",
+            "field": "force"
+          },
+          "min": 0,
+          "max": 0,
+          "minSteps": 5
+        },
+        {
+          "kind": "while",
+          "label": "só tração, empurrada abaixo do comprimento livre: não empurra (força nula)",
+          "cond": {
+            "link": "k8",
+            "field": "length"
+          },
+          "condMax": 39.8,
+          "q": {
+            "link": "k8",
+            "field": "force"
+          },
+          "min": 0,
+          "max": 0,
+          "minSteps": 5
+        },
+        {
+          "kind": "mean",
+          "label": "os dois caem pela gravidade e voltam ao repouso (apoiada ± 2%)",
+          "q": {
+            "link": "k4",
+            "field": "length"
+          },
+          "from": 2.7,
+          "to": 3,
+          "min": 29.9938,
+          "max": 30.3862
+        }
+      ]
+    }
+  ],
+  "scene": "apoiada.scene.json"
+}

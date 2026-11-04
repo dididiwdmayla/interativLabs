@@ -1,0 +1,220 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Portas",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Cilindro A",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Cilindro B",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Cilindro A",
+      "layer": "L1",
+      "x": 0,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -9],
+          [80, -9],
+          [80, -5],
+          [0, -5],
+          [0, 5],
+          [80, 5],
+          [80, 9],
+          [-4, 9]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Pistão A",
+      "layer": "L1",
+      "x": 14,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -4.9],
+          [4, -4.9],
+          [4, 4.9],
+          [-4, 4.9]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Cilindro B",
+      "layer": "L2",
+      "x": 0,
+      "y": 30,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -9],
+          [80, -9],
+          [80, -5],
+          [0, -5],
+          [0, 5],
+          [80, 5],
+          [80, 9],
+          [-4, 9]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 5,
+      "name": "Pistão B",
+      "layer": "L2",
+      "x": 14,
+      "y": 30,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -4.9],
+          [4, -4.9],
+          [4, 4.9],
+          [-4, 4.9]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k3",
+      "ref": 3,
+      "kind": "slider",
+      "a": "p1",
+      "b": "p2",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-9.5, 45],
+      "spring": {
+        "k": 0.05,
+        "rest": 0,
+        "damping": 0.0002
+      }
+    },
+    {
+      "id": "k6",
+      "ref": 6,
+      "kind": "slider",
+      "a": "p4",
+      "b": "p5",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-9.5, 60],
+      "spring": {
+        "k": 0.05,
+        "rest": 0,
+        "damping": 0.0002
+      }
+    },
+    {
+      "id": "k7",
+      "ref": 7,
+      "kind": "chamber",
+      "body": "p4",
+      "at": [0, 0],
+      "dir": 0,
+      "bore": 10,
+      "length": 80,
+      "walls": [
+        {
+          "part": "p5",
+          "seal": 200
+        }
+      ],
+      "vents": [],
+      "ports": [],
+      "gas": {
+        "model": "isothermal",
+        "gamma": 1.4,
+        "p0": 101.325
+      }
+    },
+    {
+      "id": "k8",
+      "ref": 8,
+      "kind": "chamber",
+      "body": "p1",
+      "at": [0, 0],
+      "dir": 0,
+      "bore": 10,
+      "length": 80,
+      "walls": [
+        {
+          "part": "p2",
+          "seal": 200
+        }
+      ],
+      "vents": [],
+      "ports": [
+        {
+          "to": "k7",
+          "at": 25,
+          "d": 3
+        }
+      ],
+      "gas": {
+        "model": "isothermal",
+        "gamma": 1.4,
+        "p0": 101.325,
+        "charge": {
+          "amount": 0.15,
+          "burnMs": 2
+        }
+      }
+    }
+  ]
+}

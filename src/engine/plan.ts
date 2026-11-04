@@ -1,9 +1,12 @@
 import { type Piece } from "@/geometry/decompose";
 import { shapeGeometry } from "@/geometry/shape";
+import { principalAxis, straightSlot } from "@/geometry/slot";
 import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
-import { NOMINAL_THICKNESS_MM } from "@/model/units";
+import type { PlanChamber } from "./chamber";
+import { N } from "@/model/units";
+import { PI, dcos, dhypot, dsin } from "@/geometry/dmath";
 
 /**
  * Plano de compilação comum a todos os motores, em unidades da cena.
@@ -16,7 +19,7 @@ import { NOMINAL_THICKNESS_MM } from "@/model/units";
  *   Assim o ângulo de um eixo é a diferença dos ângulos dos corpos, o eixo de
  *   um trilho é o mesmo nos dois corpos, e nenhum motor precisa de ângulo de
  *   referência.
- * - Massa e inércia vêm da geometria (densidade × área × espessura nominal),
+ * - Massa e inércia vêm da geometria (densidade × área × espessura da camada),
  *   não das peças convexas: sobreposições da decomposição não contam.
  */
 
@@ -64,6 +67,32 @@ export interface PlanAxle {
   motor?: { speed: number; maxTorque: number };
   limit?: { lower: number; upper: number };
   torsion?: { k: number; rest: number; damping: number };
+  /** g·mm²/s² (atrito como motor de velocidade zero; 0 = sem atrito) */
+  friction: number;
+}
+
+/** Haste (distância fixa) ou cabo (só o máximo). */
+export interface PlanDistance {
+  id: Id;
+  kind: "rod" | "cable";
+  a: number;
+  b: number;
+  /** pontos no mundo na pose desenhada, mm */
+  anchorA: Vec2;
+  anchorB: Vec2;
+  /** haste: comprimento desenhado; cabo: comprimento máximo (mm) */
+  length: number;
+}
+
+/** Suporte elástico: solda com frequências. */
+export interface PlanMount {
+  id: Id;
+  a: number;
+  b: number;
+  anchor: Vec2;
+  linearHz: number;
+  angularHz: number;
+  damping: number;
 }
 
 export interface PlanSlider {
@@ -76,6 +105,8 @@ export interface PlanSlider {
   lower: number;
   upper: number;
   spring?: { k: number; rest: number; damping: number };
+  /** g·mm/s² (atrito como motor de velocidade zero; 0 = sem atrito) */
+  friction: number;
 }
 
 export interface PlanSpring {
@@ -85,25 +116,50 @@ export interface PlanSpring {
   /** pontos no espaço de cada corpo, mm */
   localA: Vec2;
   localB: Vec2;
+  /** g/s² */
   k: number;
+  /** g/s */
   damping: number;
   freeLength: number;
+  /** presa | apoiada (só empurra) | só puxa */
+  mode: "fixed" | "seated" | "tension";
+  /** espiras encostadas: batente rígido, mm */
+  solidLength: number;
+  /** peça-guia: o eixo da mola acompanha este corpo (direção de A para B no espaço dele) */
+  guide?: { body: number; axis: Vec2 };
+  /** massa efetiva ao longo da mola na pose desenhada, g (Infinity se as duas pontas são fixas) */
+  effMass: number;
 }
 
-export interface PlanChamber {
+export type { PlanChamber, PlanWall } from "./chamber";
+
+/** Pino num rasgo reto em modo junta: ponto sobre a linha de centro, com batentes. */
+export interface PlanSlot {
   id: Id;
+  /** corpo da peça-guia (com o rasgo) e corpo do pino */
   a: number;
-  /** projétil: corpo, ou −1 se não houver */
   b: number;
-  /** fundo e direção no espaço do corpo a */
-  base: Vec2;
+  /** centro do pino no mundo, na pose desenhada (origem da junta) */
+  anchor: Vec2;
+  /** direção do rasgo no mundo, na pose desenhada */
   axis: Vec2;
-  bore: number;
-  length: number;
-  charge: number;
-  burn: number;
-  /** distância do centro de massa do projétil até a face traseira, ao longo do eixo */
-  rearOffset: number;
+  /** curso ao longo do eixo a partir da pose desenhada, descontado o raio do pino */
+  lower: number;
+  upper: number;
+  /** meio do rasgo, em relação à origem (mm ao longo do eixo) */
+  mid: number;
+}
+
+/** Pino num furo em modo contato: só para o snapshot (a colisão é da geometria). */
+export interface PlanSlotContact {
+  id: Id;
+  /** corpo e ponto (no espaço do corpo) do centro do pino */
+  pinBody: number;
+  pinLocal: Vec2;
+  /** corpo da guia e contorno do furo no espaço do corpo */
+  guideBody: number;
+  hole: Vec2[];
+  r: number;
 }
 
 export interface PlanSensor {
@@ -113,7 +169,7 @@ export interface PlanSensor {
   center: Vec2;
   r: number;
   minSpeed: number;
-  triggers: Id[];
+  actions: { do: "ignite" | "open" | "close"; target: Id; vent?: number }[];
 }
 
 export interface Plan {
@@ -122,7 +178,11 @@ export interface Plan {
   /** peças na ordem da cena (para snapshots estáveis) */
   partIds: Id[];
   axles: PlanAxle[];
+  distances: PlanDistance[];
+  mounts: PlanMount[];
   sliders: PlanSlider[];
+  slots: PlanSlot[];
+  slotContacts: PlanSlotContact[];
   springs: PlanSpring[];
   chambers: PlanChamber[];
   sensors: PlanSensor[];
@@ -133,13 +193,13 @@ export interface Plan {
   warnings: string[];
 }
 
-/** Densidade do pino (aço), como no protótipo. */
-const PIN_DENSITY = 7.8;
+/** Densidade do pino (aço), g/mm³. */
+const PIN_DENSITY = MATERIALS.steel.density;
 const PIN_FRICTION = 0.2;
 const PIN_RESTITUTION = 0.05;
 
-/** g por mm² de área para a densidade dada (g/cm³) e a espessura nominal. */
-const massPerArea = (density: number) => density * NOMINAL_THICKNESS_MM * 1e-3;
+/** g por mm² de área: densidade (g/mm³) × espessura da camada (mm). */
+const massPerArea = (density: number, thickness: number) => density * thickness;
 
 export function layerBitsSpan(order: Map<Id, number>, from: Id, to: Id): number {
   const a = order.get(from) ?? 0;
@@ -152,6 +212,8 @@ export function layerBitsSpan(order: Map<Id, number>, from: Id, to: Id): number 
 export function buildPlan(scene: Scene): Plan {
   const warnings: string[] = [];
   const order = new Map(scene.layers.map((l, i) => [l.id, i] as const));
+  const thickness = new Map(scene.layers.map((l) => [l.id, l.thickness] as const));
+  const thick = (layer: Id) => thickness.get(layer) ?? 0;
   const parts = scene.parts.filter((p) => order.has(p.layer));
   const byId = new Map(parts.map((p) => [p.id, p] as const));
 
@@ -242,12 +304,12 @@ export function buildPlan(scene: Scene): Plan {
       for (const p of group) {
         const g = geo.get(p.id)!;
         if (!g.ok) continue;
-        const k = massPerArea(MATERIALS[p.material].density);
+        const k = massPerArea(MATERIALS[p.material].density, thick(p.layer));
         const c = transform(g.value.mass.centroid, p.x, p.y, p.angle);
         items.push({ m: k * g.value.mass.area, c, j: k * g.value.mass.inertia });
         for (const pin of pinsByHost.get(p.id) ?? []) {
           if (pin.kind !== "pin") continue;
-          const pm = massPerArea(PIN_DENSITY) * Math.PI * pin.r * pin.r;
+          const pm = massPerArea(PIN_DENSITY, thick(p.layer)) * Math.PI * pin.r * pin.r;
           items.push({ m: pm, c: transform(pin.at, p.x, p.y, p.angle), j: (pm * pin.r * pin.r) / 2 });
         }
       }
@@ -323,7 +385,11 @@ export function buildPlan(scene: Scene): Plan {
     partRel,
     partIds: valid.map((p) => p.id),
     axles: [],
+    distances: [],
+    mounts: [],
     sliders: [],
+    slots: [],
+    slotContacts: [],
     springs: [],
     chambers: [],
     sensors: [],
@@ -349,9 +415,61 @@ export function buildPlan(scene: Scene): Plan {
           a,
           b,
           anchor: worldOf(l.b, l.at),
-          ...(l.motor ? { motor: { ...l.motor } } : {}),
+          ...(l.motor ? { motor: { speed: l.motor.speed, maxTorque: l.motor.maxTorque * N } } : {}),
           ...(l.limit ? { limit: { ...l.limit } } : {}),
-          ...(l.torsion ? { torsion: { ...l.torsion } } : {}),
+          ...(l.torsion
+            ? { torsion: { k: l.torsion.k * N, rest: l.torsion.rest, damping: l.torsion.damping * N } }
+            : {}),
+          friction: (l.friction ?? 0) * N,
+        });
+        break;
+      }
+      case "rod":
+      case "cable": {
+        const a = bodyIdx(l.a);
+        const b = bodyIdx(l.b);
+        if (a < 0 || b < 0) break;
+        const what = l.kind === "rod" ? "Haste" : "Cabo";
+        if (a === b) {
+          warnings.push(`${what} ${l.ref}: as duas pontas estão no mesmo corpo; foi ignorado`);
+          break;
+        }
+        const anchorA = worldOf(l.a, l.atA);
+        const anchorB = worldOf(l.b, l.atB);
+        const drawn = dhypot(anchorB[0] - anchorA[0], anchorB[1] - anchorA[1]);
+        if (l.kind === "rod" && drawn < 1e-6) {
+          warnings.push(`Haste ${l.ref}: as duas pontas coincidem; foi ignorada`);
+          break;
+        }
+        if (l.kind === "cable" && drawn > l.maxLength + 1e-6)
+          warnings.push(`Cabo ${l.ref}: desenhado mais longo que o comprimento máximo; começa puxando`);
+        plan.distances.push({
+          id: l.id,
+          kind: l.kind,
+          a,
+          b,
+          anchorA,
+          anchorB,
+          length: l.kind === "rod" ? drawn : l.maxLength,
+        });
+        break;
+      }
+      case "mount": {
+        const a = bodyIdx(l.a);
+        const b = bodyIdx(l.b);
+        if (a < 0 || b < 0) break;
+        if (a === b) {
+          warnings.push(`Suporte ${l.ref}: as duas peças já estão no mesmo corpo; foi ignorado`);
+          break;
+        }
+        plan.mounts.push({
+          id: l.id,
+          a,
+          b,
+          anchor: worldOf(l.b, l.at),
+          linearHz: l.linearHz,
+          angularHz: l.angularHz,
+          damping: l.damping,
         });
         break;
       }
@@ -369,10 +487,13 @@ export function buildPlan(scene: Scene): Plan {
           a,
           b,
           anchor: worldOf(l.b, l.at),
-          axis: [Math.cos(ang), Math.sin(ang)],
+          axis: [dcos(ang), dsin(ang)],
           lower: l.travel[0],
           upper: l.travel[1],
-          ...(l.spring ? { spring: { ...l.spring } } : {}),
+          ...(l.spring
+            ? { spring: { k: l.spring.k * N, rest: l.spring.rest, damping: l.spring.damping * N } }
+            : {}),
+          friction: (l.friction ?? 0) * N,
         });
         break;
       }
@@ -384,47 +505,177 @@ export function buildPlan(scene: Scene): Plan {
           warnings.push(`Mola ${l.ref}: as duas pontas estão no mesmo corpo; foi ignorada`);
           break;
         }
+        const wa = worldOf(l.a, l.atA);
+        const wb = worldOf(l.b, l.atB);
+        const dl = dhypot(wb[0] - wa[0], wb[1] - wa[1]);
+        let guide: PlanSpring["guide"];
+        if (l.guide !== undefined) {
+          const gb = bodyIdx(l.guide);
+          const gp = byId.get(l.guide);
+          // eixo da guia: eixo principal do contorno da peça-guia, apontando de A para B
+          const ax = gp && gp.shape.kind === "poly" ? principalAxis(gp.shape.outer) : null;
+          if (gb >= 0 && gp && ax && dl > 1e-9) {
+            const u = rotate(ax.u, gp.angle);
+            const sg = u[0] * (wb[0] - wa[0]) + u[1] * (wb[1] - wa[1]) < 0 ? -1 : 1;
+            guide = { body: gb, axis: [u[0] * sg, u[1] * sg] };
+          } else warnings.push(`Mola ${l.ref}: a guia precisa ser um polígono alongado; ficou sem guia`);
+        }
+        // Massa efetiva ao longo da mola: 1 / (1/mA + 1/mB + (rA×u)²/IA + (rB×u)²/IB).
+        let K = 0;
+        if (dl > 1e-9) {
+          const u: Vec2 = [(wb[0] - wa[0]) / dl, (wb[1] - wa[1]) / dl];
+          for (const [bi, w] of [
+            [a, wa],
+            [b, wb],
+          ] as const) {
+            const bd = bodies[bi]!;
+            if (bd.static) continue;
+            const rx = w[0] - bd.position[0];
+            const ry = w[1] - bd.position[1];
+            const c = rx * u[1] - ry * u[0];
+            K += 1 / bd.mass + (c * c) / bd.inertia;
+          }
+        }
         plan.springs.push({
           id: l.id,
           a,
           b,
-          localA: toLocal(a, worldOf(l.a, l.atA)),
-          localB: toLocal(b, worldOf(l.b, l.atB)),
-          k: l.k,
-          damping: l.damping,
+          localA: toLocal(a, wa),
+          localB: toLocal(b, wb),
+          k: l.k * N,
+          damping: l.damping * N,
           freeLength: l.freeLength,
+          mode: l.mode,
+          solidLength: l.solidLength ?? l.coil.turns * l.coil.wireD,
+          ...(guide ? { guide } : {}),
+          effMass: K > 0 ? 1 / K : Infinity,
         });
         break;
       }
       case "chamber": {
-        const a = bodyIdx(l.a);
-        const bi = l.b === null ? -1 : bodyIdx(l.b);
-        const b = bi > 0 && !bodies[bi]!.static ? bi : -1;
-        if (a < 0) break;
-        const ang = angleOf(l.a) + l.dir;
-        const axis: Vec2 = [Math.cos(ang), Math.sin(ang)];
-        let rear = 0;
-        if (b > 0) {
+        const body = bodyIdx(l.body);
+        if (body < 0) break;
+        const ang = angleOf(l.body) + l.dir;
+        const u: Vec2 = [dcos(ang), dsin(ang)];
+        const baseW = worldOf(l.body, l.at);
+        const proj = (q: Vec2) => (q[0] - baseW[0]) * u[0] + (q[1] - baseW[1]) * u[1];
+        // extremos de cada parede ao longo do eixo, pela geometria da peça
+        const ext = l.walls.map((w) => {
+          const part = byId.get(w.part);
+          const g = geo.get(w.part);
+          const bi = bodyIdx(w.part);
+          if (!part || !g || !g.ok || bi < 0 || bodies[bi]!.static) return null;
           let mn = Infinity;
-          for (const f of bodies[b]!.fixtures) {
-            if (f.sensor) continue;
-            if (f.piece.kind === "circle")
-              mn = Math.min(mn, f.piece.c[0] * axis[0] + f.piece.c[1] * axis[1] - f.piece.r);
-            else for (const q of f.piece.points) mn = Math.min(mn, q[0] * axis[0] + q[1] * axis[1]);
+          let mx = -Infinity;
+          for (const pc of g.value.pieces) {
+            const pts = pc.kind === "circle" ? [] : pc.points;
+            if (pc.kind === "circle") {
+              const c = proj(transform(pc.c, part.x, part.y, part.angle));
+              mn = Math.min(mn, c - pc.r);
+              mx = Math.max(mx, c + pc.r);
+            }
+            for (const q of pts) {
+              const t = proj(transform(q, part.x, part.y, part.angle));
+              mn = Math.min(mn, t);
+              mx = Math.max(mx, t);
+            }
           }
-          rear = Number.isFinite(mn) ? -mn : 0;
-        } else if (l.b !== null) warnings.push(`Câmara ${l.ref}: o projétil precisa ser uma peça móvel`);
+          return { w, bi, mn, mx, mid: (mn + mx) / 2 };
+        });
+        if (ext.some((e) => e === null) || ext.length === 0) {
+          warnings.push(`Câmara ${l.ref}: as paredes precisam ser peças móveis; ficou de fora`);
+          break;
+        }
+        const ok = ext as NonNullable<(typeof ext)[number]>[];
+        const frontIdx = ok.length === 2 && ok[1]!.mid > ok[0]!.mid ? 1 : 0;
+        const walls = ok.map((e, i) => {
+          const side: 1 | -1 = ok.length === 1 || i === frontIdx ? 1 : -1;
+          const s0 = side > 0 ? e.mn : e.mx;
+          const faceW: Vec2 = [baseW[0] + u[0] * s0, baseW[1] + u[1] * s0];
+          return { part: e.w.part, body: e.bi, side, face: toLocal(e.bi, faceW), s0, seal: e.w.seal };
+        });
+        if (walls.length === 1 && walls[0]!.s0 < 0)
+          warnings.push(`Câmara ${l.ref}: a parede está atrás do fundo; o gás começa sem volume`);
+        if (walls.length === 2 && walls[0]!.side === walls[1]!.side)
+          warnings.push(`Câmara ${l.ref}: as duas paredes estão do mesmo lado`);
+        const area = (PI * l.bore * l.bore) / 4;
         plan.chambers.push({
           id: l.id,
-          a,
-          b: b > 0 ? b : -1,
-          base: toLocal(a, worldOf(l.a, l.at)),
-          axis,
-          bore: l.bore,
+          ref: l.ref,
+          body,
+          base: toLocal(body, baseW),
+          axis: u,
+          area,
           length: l.length,
-          charge: l.charge,
-          burn: l.burn,
-          rearOffset: rear,
+          walls,
+          vents: l.vents.map((v) => ({ at: v.at, d: v.d, area: (PI * v.d * v.d) / 4, open: v.open })),
+          ports: l.ports.map((pt) => ({
+            to: -1,
+            toId: pt.to,
+            at: pt.at,
+            d: pt.d,
+            area: (PI * pt.d * pt.d) / 4,
+          })),
+          model: l.gas.model,
+          gamma: l.gas.gamma,
+          p0: l.gas.p0,
+          charge: l.gas.charge?.amount ?? 0,
+          burn: (l.gas.charge?.burnMs ?? 0) / 1000,
+        });
+        break;
+      }
+      case "slot": {
+        const pin = scene.links.find((x) => x.id === l.pin);
+        const guide = byId.get(l.guide);
+        if (!pin || pin.kind !== "pin" || !guide || guide.shape.kind === "gear") break;
+        const hole = guide.shape.holes[l.hole];
+        const a = bodyIdx(l.guide);
+        const b = bodyIdx(pin.host);
+        if (!hole || a < 0 || b < 0) break;
+        if (a === b) {
+          warnings.push(`Rasgo ${l.ref}: o pino e a guia estão no mesmo corpo; foi ignorado`);
+          break;
+        }
+        const center = worldOf(pin.host, pin.at);
+        if (l.mode === "contact") {
+          plan.slotContacts.push({
+            id: l.id,
+            pinBody: b,
+            pinLocal: toLocal(b, center),
+            guideBody: a,
+            hole: hole.map((q) => toLocal(a, worldOf(l.guide, q))),
+            r: pin.r,
+          });
+          break;
+        }
+        const st = straightSlot(hole);
+        if (!st) {
+          warnings.push(`Rasgo ${l.ref}: o furo não é um rasgo reto; use o modo contato`);
+          break;
+        }
+        const p1 = worldOf(l.guide, st.p1);
+        const p2 = worldOf(l.guide, st.p2);
+        const ux = (p2[0] - p1[0]) / st.length;
+        const uy = (p2[1] - p1[1]) / st.length;
+        const t1 = (p1[0] - center[0]) * ux + (p1[1] - center[1]) * uy;
+        const t2 = (p2[0] - center[0]) * ux + (p2[1] - center[1]) * uy;
+        const play = Math.max(0, st.r - pin.r);
+        // origem da junta: o centro do pino projetado na linha de centro do rasgo
+        const off = -(center[0] - p1[0]) * uy + (center[1] - p1[1]) * ux;
+        if (Math.abs(off) > 1e-6)
+          warnings.push(
+            `Rasgo ${l.ref}: o pino está ${off.toFixed(3)} mm fora da linha de centro; foi encostado nela`,
+          );
+        const anchor: Vec2 = [center[0] + uy * off, center[1] - ux * off];
+        plan.slots.push({
+          id: l.id,
+          a,
+          b,
+          anchor,
+          axis: [ux, uy],
+          lower: t1 - play,
+          upper: t2 + play,
+          mid: (t1 + t2) / 2,
         });
         break;
       }
@@ -453,13 +704,18 @@ export function buildPlan(scene: Scene): Plan {
             center: c,
             r: l.r,
             minSpeed: l.minSpeed,
-            triggers: l.triggers.slice(),
+            actions: l.actions.map((x) => ({ ...x })),
           });
         }
         break;
       }
     }
   }
+  for (const ch of plan.chambers)
+    for (const pt of ch.ports) {
+      pt.to = plan.chambers.findIndex((c) => c.id === pt.toId);
+      if (pt.to < 0) warnings.push(`Câmara ${ch.ref}: a porta leva a uma câmara que ficou de fora`);
+    }
   if (bodies.some((b) => !b.static && b.fixtures.length === 0))
     warnings.push(
       `Há corpo sem forma de colisão (${bodies.filter((b) => !b.static && !b.fixtures.length).length})`,

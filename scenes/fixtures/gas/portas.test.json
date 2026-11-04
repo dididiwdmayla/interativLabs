@@ -1,0 +1,75 @@
+{
+  "id": "gas/portas",
+  "group": "gas",
+  "title": "Portas entre câmaras",
+  "notes": "Dois cilindros com pistão e mola. A câmara A tem uma porta de Ø 3 mm a 25 mm do fundo que leva à câmara B; o pistão A cobre a porta até avançar. A 0,1 s a carga de A acende.",
+  "view": [-10, -15, 100, 60],
+  "runs": [
+    {
+      "name": "disparo",
+      "duration": 1,
+      "inputs": [
+        {
+          "kind": "ignite",
+          "link": "k8",
+          "t": 0.1
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "onlyAfter",
+          "label": "o segundo pistão só se move depois que a porta é descoberta",
+          "q": {
+            "link": "k6",
+            "field": "translation"
+          },
+          "threshold": 0.01,
+          "event": "port-opened",
+          "match": {
+            "chamber": "k8"
+          }
+        },
+        {
+          "kind": "at",
+          "label": "com a porta aberta, as pressões se igualam (diferença < 1% no fim)",
+          "t": 1,
+          "q": {
+            "div": [
+              {
+                "abs": {
+                  "diff": [
+                    {
+                      "link": "k8",
+                      "field": "pressure"
+                    },
+                    {
+                      "link": "k7",
+                      "field": "pressure"
+                    }
+                  ]
+                }
+              },
+              {
+                "link": "k8",
+                "field": "pressure"
+              }
+            ]
+          },
+          "min": 0,
+          "max": 0.01
+        },
+        {
+          "kind": "at",
+          "label": "e a porta continua aberta",
+          "t": 1,
+          "q": {
+            "link": "k8",
+            "field": "ports.0.exposed"
+          },
+          "min": 0.2
+        }
+      ]
+    }
+  ],
+  "scene": "portas.scene.json"
+}

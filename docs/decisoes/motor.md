@@ -119,6 +119,67 @@ Falhas (as mesmas no Node e no Chromium):
 
 Com peças de 10 mm sob gravidade real, nenhum motor segura a pilha (afunda e desaba) nem a corrente (eixos abrem 0,85 a 11 mm) com os parâmetros padrão. Para eles, é como empilhar caixas de 1 m sob 100 g. Se o app quiser gravidade real em escala de milímetro, vai precisar de contato mais rígido e mais subpassos, medidos num item próprio.
 
+## Calibração para gravidade real (Fase 1 · Parte C, item 5.2)
+
+Motor do app: Box2D v3 (`box2d3-wasm` 6.0.0, o mais novo no npm em 04/11/2026; build `compat`, Box2D v3.2). As quatro cenas pesadas viraram cenas de teste v2 com 9 810 mm/s² em `scenes/fixtures/calibracao/` (pilha de 200 caixas, corrente de 40 elos, pinhão e cremalheira com 20 inversões, bala de 20 m/s em 100 lançamentos). `npm run calibrate` roda a sequência de ajustes abaixo e grava `docs/decisoes/calibracao-node.json`.
+
+**Causa do desabamento.** Os parâmetros de velocidade do Box2D são definidos em metros por segundo. A 1 mm por unidade, o empurrão máximo de contato padrão (`contactSpeed` = 3 unidades/s) vira 3 mm/s: uma caixa que afunda não consegue sair da sobreposição mais depressa que isso, e sob 9,81 m/s² ela ganha 41 mm/s por passo. Converter as velocidades não basta, porém: com o contato a 30 Hz, a pilha de 20 caixas afunda g/ω² por contato (0,28 mm × 210 contatos acumulados no topo). O que segura é contato e junta tão rígidos quanto o solver permite, e isso pede subpassos (o Box2D limita a rigidez a ¼ da frequência do subpasso).
+
+| Ajuste (cumulativo) | Pilha: maior saída do lugar (≤ 1 mm) | Corrente: maior abertura (≤ 0,5 mm) | Pinhão: razão · penetração (< 0,1 mm) | Bala | Pilha, Node: mediana / p95 (ms) |
+| --- | --- | --- | --- | --- | --- |
+| padrão do Box2D (valores em metros lidos como mm) | **não** (38338,7721 mm) | **não** (11,1875) | **não** (6,01604 · 0,1369 mm) | passa (100 de 100) | 0,778 / 2,247 |
+| velocidades em mm/s (empurrão 3 000, quique 1 000, impacto 100) | **não** (35605,6097 mm) | **não** (11,1875) | **não** (5,99766 · 0,1377 mm) | passa (100 de 100) | 0,401 / 0,886 |
+| + lengthUnits 5 (folga 0,025 mm, especulativa 0,1 mm) | **não** (34516,7011 mm) | **não** (11,1875) | passa (5,99627 · 0,0292 mm) | passa (100 de 100) | 0,333 / 0,943 |
+| + contato 60 Hz | **não** (30225,2621 mm) | **não** (11,1875) | passa (6,01603 · 0,0246 mm) | passa (100 de 100) | 0,294 / 0,785 |
+| + contato 240 Hz, 8 subpassos | **não** (2,0932 mm) | **não** (10,6423) | passa (6,03153 · 0,0014 mm) | passa (100 de 100) | 0,257 / 0,559 |
+| + contato 480 Hz, 12 subpassos, juntas 720 Hz (ζ 1) | passa (0,9300 mm) | **não** (0,5950) | passa (6,01982 · 0,0025 mm) | passa (100 de 100) | 0,322 / 0,635 |
+| + juntas sem amortecimento (ζ 0) | passa (0,9300 mm) | passa (0,4101) | passa (6,01439 · 0,0021 mm) | passa (100 de 100) | 0,339 / 0,745 |
+| + 16 subpassos, juntas 960 Hz | passa (0,5230 mm) | **não** (0,8219) | passa (6,01713 · 0,0014 mm) | passa (100 de 100) | 0,447 / 0,899 |
+| calibrado: + amortecimento do contato 3 (era 10) | passa (0,6697 mm) | passa (0,2096) | passa (6,02351 · 0,0022 mm) | passa (100 de 100) | 0,431 / 0,923 |
+
+**Parâmetros finais** (`CALIBRATED_TUNING` em `src/engine/box2d/box2dAdapter.ts`):
+
+| Parâmetro | Padrão do Box2D (m) | No app (1 mm/un) |
+| --- | --- | --- |
+| Subpassos por passo de 1/240 s | 4 | **16** (subpasso de 1/3 840 s) |
+| `contactHertz` / `contactDampingRatio` | 30 Hz / 10 | **480 Hz / 3** |
+| `contactSpeed` (empurrão máximo) | 3 m/s | **3 000 mm/s** (3 m/s) |
+| `constraintHertz` / `constraintDampingRatio` das juntas | 60 Hz / 2 | **960 Hz** (o teto: ¼ do subpasso) **/ 0** |
+| `restitutionThreshold` | 1 m/s | **1 000 mm/s** |
+| `hitEventThreshold` (evento de impacto) | 1 m/s | **100 mm/s** (som e faíscas) |
+| `maximumLinearSpeed` | 400 m/s | **40 000 mm/s** (40 m/s) |
+| `b2SetLengthUnitsPerMeter` | 1 | **5**: folga linear 0,025 mm, distância especulativa 0,1 mm, margem das caixas 0,5 mm |
+
+Leitura:
+
+- A corrente é caótica: o pico de abertura vem do chicote da ponta solta e muda muito com qualquer ajuste (0,21 a 0,82 mm entre configurações vizinhas). As juntas sem amortecimento (ζ = 0: correção de posição inteira a cada subpasso) foram o que a trouxe para baixo de 0,5 mm; o amortecimento de contato 3 (em vez de 10) tirou o pico de 0,82 mm que aparecia com 16 subpassos.
+- `lengthUnits` 5 em vez de 10: com 10 a folga linear (0,05 mm) passa da folga entre dentes das engrenagens de módulo 1 (0,04 mm) e a razão das engrenagens da bancada piora para 2,2–3,6%; com 5 fica em 1,7% e o pinhão continua com 0,002 mm de penetração.
+- Custo: 16 subpassos custam ~2,5 vezes os 4 do padrão na pilha. No Chromium desta sessão a pilha fica em **0,44 ms de mediana e 0,62 ms de p95 por passo** (orçamento: 0,5 e 1 ms), medida pelo teste de determinismo (`docs/decisoes/fixtures-chromium.json`). Cenas leves ficam em 0,1–0,2 ms.
+- Com o contato mais rígido, a catraca da bancada para em 26,3° (antes 35,1°): continua passando do passo de dente de 25,7° porque a lingueta da cena migrada desce até o batente de −25°; a cena corrigida (batente em −12°) entra como exemplo.
+
+**Determinismo entre plataformas.** O código comum (runtime, adaptador, plano, geometria, migrações) não usa mais `Math.sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `exp`, `log`, `pow` nem `hypot`: usa os portes do fdlibm de `src/geometry/dmath.ts` (só +, −, ×, ÷ e `Math.sqrt`, exatos no IEEE 754), com erro de ~1 ulp contra o `Math` (`dmath.test.ts`). O ângulo dos corpos é lido por `datan2` sobre a rotação do Box2D (o `b2Rot_GetAngle` do próprio motor é uma aproximação com erro de 3·10⁻⁵ rad, e o `b2MakeRot`, de 4·10⁻⁴; os dois ficaram de fora). Todas as cenas de `scenes/fixtures/` dão o mesmo hash no Node e no Chromium (`scenes/fixtures/hashes.json`, conferido pelo Vitest e por `tests/e2e/determinism.spec.ts`).
+
+## Bancada com o Box2D calibrado (Parte C, item 5.8)
+
+A bancada roda de novo as oito cenas (gravidade de bancada, 100 mm/s²) com o Box2D na calibração do app (`npm run bench`, `npm run bench:browser`). Planck e Rapier continuam com o que tinham; a v2 mudou para todos só a densidade do aço (7,85 g/cm³ em vez de 7,8) e as funções transcendentais do código comum (`dmath`).
+
+| Cena | Passa | Node mediana / p95 (ms) | Chromium mediana / p95 (ms) | Penetração máx. (mm) | Determinístico | Hash Node = Chromium |
+| --- | --- | --- | --- | --- | --- | --- |
+| 01-lancador | sim | 0,109 / 0,301 | 0,090 / 0,470 | 0,0054 | sim | sim |
+| 02-trava | sim | 0,027 / 0,047 | 0,030 / 0,050 | 0,0034 | sim | sim |
+| 03-engrenagens | **não** | 0,105 / 0,180 | 0,090 / 0,130 | 0,0229 | sim | sim |
+| 04-pilha | sim | 0,362 / 0,521 | 0,400 / 0,600 | 0,0006 | sim | sim |
+| 05-corrente | sim | 0,105 / 0,183 | 0,110 / 0,160 | 0,0000 | sim | sim |
+| 06-pinhao-cremalheira | sim | 0,089 / 0,146 | 0,120 / 0,160 | 0,0024 | sim | sim |
+| 07-bala | sim | 0,019 / 0,054 | 0,060 / 0,100 | 0,1040 | sim | sim |
+| 08-escalas | sim | 0,051 / 0,084 | 0,070 / 0,110 | 0,0000 | sim | sim |
+| 08-escalas (10 mm/un) | sim | 0,050 / 0,084 | 0,070 / 0,120 | 0,0000 | sim | sim |
+
+- Passa em 7 de 8. A única falha é a catraca da cena migrada (26,3°, o passo de dente é 25,7°): com o contato mais rígido ela para mais perto do batente (antes 35,1°). O exemplo `scenes/examples/engrenagens.json` corrige a cena (batente da lingueta em −12°) e passa (23,7°).
+- Pilha e pinhão, que falhavam com o Box2D padrão, passam; a penetração cai de 0,13 mm para menos de 0,003 mm. O preço é o custo: 16 subpassos deixam as cenas leves em 0,03–0,12 ms e a pilha em 0,36–0,40 ms por passo.
+- **Hash Node = Chromium: 36 de 36** (antes 35; a exceção era o Box2D na cena 3, pelo `Math.atan2` na leitura de ângulo). O Rapier fica com 2,08% na razão das engrenagens (passava com 1,9%) por causa do aço mais pesado; está marcado como falha esperada no Vitest.
+- Pacote (build de produção, gzip): app principal 73,6 KB; motor do app sob demanda = JS do Box2D 11,4 KB + WASM 210,9 KB + adaptador 12,4 KB + plano, runtime e geometria 31,2 KB; página `/#lab` 79,6 KB (com o Zod e os roteiros).
+
 ## Escala interna e limite de velocidade (proposta)
 
 - **1 mm por unidade.** A 10 mm/un o Planck emperra as engrenagens de módulo 1 (a pele de polígono, 2 × `linearSlop` = 0,1 mm, passa da folga de 0,04 mm) e trava o pinhão; falha também no tremor da cena 8 com gravidade real. Rapier e Box2D dão o mesmo resultado nas duas escalas, exceto o pinhão, que passa a 10 mm/un nos dois. A 1 mm/un os números da cena são os do motor, sem conversão.

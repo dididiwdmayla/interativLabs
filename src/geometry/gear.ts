@@ -3,6 +3,7 @@ import { convexHull, type PolyWithHoles, type Ring } from "./polygon";
 import type { Piece } from "./decompose";
 import { fail, ok, type GeoResult } from "./result";
 import { distToSegment, polar, type Vec2 } from "./vec";
+import { dacos, dasin, datan2, dcos, dsin, dtan } from "./dmath";
 
 /**
  * Engrenagem evolvente, cremalheira e catraca.
@@ -53,7 +54,7 @@ const DEDENDUM = 1.25;
 /** Menor meia largura do pescoço do dente rebaixado, em módulos. */
 const MIN_NECK = 0.2;
 
-const inv = (a: number) => Math.tan(a) - a;
+const inv = (a: number) => dtan(a) - a;
 
 interface ToothProfile {
   /** raios crescentes, de rf a ra */
@@ -75,12 +76,12 @@ function toothProfile(
   tol: number,
 ): ToothProfile | string {
   const r = (m * z) / 2;
-  const rb = r * Math.cos(alpha);
+  const rb = r * dcos(alpha);
   const ra = r + m;
   const hc = DEDENDUM * m;
   const rf = r - hc;
-  const T = Math.tan(alpha);
-  const sinA = Math.sin(alpha);
+  const T = dtan(alpha);
+  const sinA = dsin(alpha);
   const s = (Math.PI * m) / 2 - backlash;
   const sc = Math.PI * m - s;
   const psiP = s / (2 * r);
@@ -94,20 +95,20 @@ function toothProfile(
     if (rho < rb) return Infinity;
     const d = (r * sinA - Math.sqrt(rho * rho - rb * rb)) * sinA;
     if (d > hc + 1e-12) return Infinity;
-    return psiP + invA - inv(Math.acos(Math.min(1, rb / rho)));
+    return psiP + invA - inv(dacos(Math.min(1, rb / rho)));
   };
   const psiTro = (rho: number): number => {
     const q = Math.sqrt(Math.max(0, rho * rho - rf * rf));
     let best = Infinity;
     for (const u of [q, -q]) {
       const phi = (u - tc) / r;
-      best = Math.min(best, gamma0 - phi + Math.atan2(u, rf));
+      best = Math.min(best, gamma0 - phi + datan2(u, rf));
     }
     return best;
   };
   let clamped = false;
   const psiRaw = (rho: number) => Math.min(psiInv(rho), psiTro(rho));
-  const psiMin = (rho: number) => Math.asin(Math.min(1, (MIN_NECK * m) / rho));
+  const psiMin = (rho: number) => dasin(Math.min(1, (MIN_NECK * m) / rho));
   const psi = (rho: number) => {
     const v = psiRaw(rho);
     const lo = psiMin(rho);
@@ -142,7 +143,7 @@ function toothProfile(
   let neckW = Infinity;
   for (let i = 0; i <= 200; i++) {
     const rho = rf + ((start - rf) * i) / 200;
-    const w = rho * Math.sin(psiRaw(rho));
+    const w = rho * dsin(psiRaw(rho));
     if (w < neckW) {
       neckW = w;
       neck = rho;
@@ -213,7 +214,7 @@ export function involuteGear(p: InvoluteGearParams): GeoResult<GearGeometry> {
   const r = (m * z) / 2;
   const rf = r - DEDENDUM * m;
   const ra = r + m;
-  const rb = r * Math.cos(alpha);
+  const rb = r * dcos(alpha);
   if (!(bore >= 0) || bore / 2 > rf - 0.5 * m) return fail("invalid", "O furo central é grande demais");
 
   const pitch = (2 * Math.PI) / z;
@@ -302,7 +303,7 @@ export function rack(p: RackParams): GeoResult<RackGeometry> {
   if (!Number.isInteger(p.teeth) || p.teeth < 1 || p.teeth > 1000)
     return fail("invalid", "O número de dentes da cremalheira precisa ser inteiro, de 1 a 1000");
   if (!(p.bodyHeight > 0)) return fail("invalid", "A altura do corpo precisa ser maior que zero");
-  const T = Math.tan(alpha);
+  const T = dtan(alpha);
   const pitch = Math.PI * m;
   const s = pitch / 2 - backlash;
   const yf = -DEDENDUM * m;
@@ -388,17 +389,14 @@ export function ratchet(p: RatchetParams): GeoResult<GearGeometry> {
   const thT = RATCHET_TIP_FRACTION * step;
   // Ponto B: a partir de T, na direção do raio para dentro girada de `face` para frente.
   const T: Vec2 = polar(ro, thT);
-  const er: Vec2 = [Math.cos(thT), Math.sin(thT)];
-  const et: Vec2 = [-Math.sin(thT), Math.cos(thT)];
-  const dir: Vec2 = [
-    -Math.cos(face) * er[0] + Math.sin(face) * et[0],
-    -Math.cos(face) * er[1] + Math.sin(face) * et[1],
-  ];
+  const er: Vec2 = [dcos(thT), dsin(thT)];
+  const et: Vec2 = [-dsin(thT), dcos(thT)];
+  const dir: Vec2 = [-dcos(face) * er[0] + dsin(face) * et[0], -dcos(face) * er[1] + dsin(face) * et[1]];
   const bq = T[0] * dir[0] + T[1] * dir[1];
   const cq = ro * ro - rr * rr;
   const t = -bq - Math.sqrt(Math.max(0, bq * bq - cq));
   const B: Vec2 = [T[0] + dir[0] * t, T[1] + dir[1] * t];
-  const thB = Math.atan2(B[1], B[0]);
+  const thB = datan2(B[1], B[0]);
   if (!(thB > thT - step / 2 && thB < step - 1e-6))
     return fail("invalid", "A face de trava inclina demais para este passo");
 
