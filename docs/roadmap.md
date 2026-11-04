@@ -19,9 +19,9 @@ Saída: um app no ar na Vercel que faz tudo o que o protótipo fazia, mais desfa
 
 ## Fase 2 — Linguagem visual
 
-O lote 01 aplicado: tokens finais, tipografia, materiais com textura e chanfro, sombra entre camadas, ferragens nos pontos de ligação, molas desenhadas por espiras, fundo da bancada, ícones próprios, tela de entrada. A peça desenhada à mão passa a parecer usinada.
+A base da pele (contorno, parede, chanfro, sombras, hachuras, papel, ferragens, molas, chamadas) entra antes, no palco vivo da Fase 1 · Parte D. A Fase 2 fecha o acabamento: falhas de tinta e madeira (lote 01 revisto), efeitos (pontilhado do gás, leque do escape, faíscas de impacto), tela de entrada com a ilustração das pranchas, movimento de interface com as curvas da identidade, ícones finais e revisão de diretor de arte em todas as telas.
 
-Saída: as três cenas de exemplo com acabamento de apresentação em 390 e 1440 px.
+Saída: as cenas de exemplo e o objeto padrão com acabamento de apresentação em 390 e 1440 px.
 
 ## Fase 3 — Editor 2.0
 

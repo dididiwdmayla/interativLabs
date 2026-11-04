@@ -1,6 +1,6 @@
 # Fase 1 — Fundação
 
-Branch: `fase-1`. A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt: **A** (itens 1–2, feita), **B** (3–4, feita), **C** (item 5: motor definitivo e ligações 2.0), **D** (item 6: simulação e palco), **E1** (item 10: pipeline de assets, feita), **E2** (itens 7–9: editor, ferramentas das ligações 2.0 e projetos), **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
+Branch: `fase-1`. A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt: **A** (itens 1–2, feita), **B** (3–4, feita), **C** (item 5: motor definitivo e ligações 2.0, feita), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo, com o renderizador definitivo na Prancha índigo), **E1** (item 10: pipeline de assets, feita), **E2** (itens 7–9: editor, ferramentas das ligações 2.0 e projetos), **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
 
 Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual já usa os tokens, a paleta e as fontes da Prancha índigo (`docs/identidade/identidade.md`), mas sem hachuras, texturas nem ferragens: isso é da Fase 2. Alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 completa a pele, não refaz a estrutura.
 
@@ -69,14 +69,9 @@ Motor: Box2D v3 (`docs/arquitetura.md` §4). Formato: v2 (`docs/arquitetura.md` 
 - 5.7 Cenas de teste e exemplos (inclui a catraca corrigida e uma cena de recuo do fundo).
 - 5.8 Verificação.
 
-## Item 6 — Simulação e palco
+## Item 6 — Palco vivo (Parte D)
 
-- Laço com acumulador, câmera lenta (0,05×, 0,25×, 1×), pausa, avanço de um passo.
-- Gravação circular dos últimos 10 s; arrastar na linha do tempo volta a simulação a qualquer quadro gravado e permite continuar dali.
-- Renderizador SVG com as regras de `docs/arquitetura.md` §5, sem texturas por enquanto. Furos e rasgos com `evenodd`.
-- Pinça para zoom, dois dedos para mover, roda do mouse para zoom no computador, botão de enquadrar.
-
-**Aceite:** cena sintética de 150 peças e 100 ligações a 60 qps no computador e medida no celular do Will (registre o número). Captura das três cenas em execução.
+O app principal passa a desenhar e simular a cena: o renderizador definitivo na pele da Prancha índigo (contorno, parede, chanfro, sombra entre camadas, hachuras procedurais, papel, ferragens e molas do lote 01, números de chamada), o modo Simular com câmera lenta e linha do tempo, o arrasto com o dedo, a navegação da vista, o menu de exemplos e o objeto padrão aberto ao entrar. Meta de desempenho: 150 peças e 100 ligações a 60 qps, medida no celular do Will. Subitens e aceites no prompt da Parte D.
 
 ## Item 7 — Editor: comandos, seleção e camadas
 
@@ -112,3 +107,7 @@ Motor: Box2D v3 (`docs/arquitetura.md` §4). Formato: v2 (`docs/arquitetura.md` 
 ## Item 11 — Verificação
 
 `docs/verificacao-fase-1.md`: o que foi feito, o que ficou de fora e por quê, as medidas dos itens 4 e 6, e as capturas em `docs/capturas/fase-1/`. Abra o PR.
+
+## Item 12 — Objeto padrão (Parte C2)
+
+O app abre com um mecanismo montado, que a pessoa opera e edita a partir dele: um lançador de esferas de brinquedo com ferrolho que recua pelo gás (recuo do fundo), percussor, retém, gatilho e carregador. Proporções inventadas, gás didático, nenhuma reprodução de arma real. Mostra as ligações 2.0 juntas: mola de retorno numa haste-guia, molas apoiadas, rasgo como guia, pino entre camadas, câmara com duas paredes, sensor. Cena de teste com o ciclo completo. Subitens e aceites no prompt da Parte C2.
