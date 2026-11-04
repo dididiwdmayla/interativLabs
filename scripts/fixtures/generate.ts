@@ -4,9 +4,11 @@
  * Uso: npm run fixtures [-- calibracao,fixacoes]
  */
 import { generateCalibracao } from "./calibracao";
+import { generateFixacoes } from "./fixacoes";
 
 const GROUPS: Record<string, () => void> = {
   calibracao: generateCalibracao,
+  fixacoes: generateFixacoes,
 };
 
 export async function main(args: string[]) {

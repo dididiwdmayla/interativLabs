@@ -1,29 +1,53 @@
 {
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
   "results": {
+    "fixacoes/biela": {
+      "hash": "04c4dd6669ae4005",
+      "pass": true,
+      "stepMedian": 0.07999999998137355,
+      "stepP95": 0.1800000000745058
+    },
+    "fixacoes/cabo": {
+      "hash": "be117b5930a8450c",
+      "pass": true,
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.07000000001862645
+    },
+    "fixacoes/parafuso-suporte": {
+      "hash": "5caf1dfca5a5b187",
+      "pass": true,
+      "stepMedian": 0.0400000000372529,
+      "stepP95": 0.08999999999068678
+    },
+    "fixacoes/pendulo": {
+      "hash": "d891a728a66ded89",
+      "pass": true,
+      "stepMedian": 0.0800000000745058,
+      "stepP95": 0.13000000002793968
+    },
     "calibracao/bala": {
       "hash": "20103ec8b4211e99",
       "pass": true,
-      "stepMedian": 1.0399999999906868,
-      "stepP95": 1.0399999999906868
+      "stepMedian": 0.22000000001862646,
+      "stepP95": 0.22000000001862646
     },
     "calibracao/corrente": {
       "hash": "007c1ccfc0ee15e4",
       "pass": true,
-      "stepMedian": 0.17999999998137356,
-      "stepP95": 0.3400000000372529
+      "stepMedian": 0.23000000012107194,
+      "stepP95": 0.37000000001862643
     },
     "calibracao/pilha": {
       "hash": "7801499766c01642",
       "pass": true,
-      "stepMedian": 0.4399999999906868,
-      "stepP95": 0.6199999999720603
+      "stepMedian": 0.4599999999627471,
+      "stepP95": 0.8000000000465661
     },
     "calibracao/pinhao": {
       "hash": "753fcbe7b0464bd4",
       "pass": true,
-      "stepMedian": 0.1,
-      "stepP95": 0.2300000000279397
+      "stepMedian": 0.10999999996274709,
+      "stepP95": 0.17000000001862645
     }
   }
 }

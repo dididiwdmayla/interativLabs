@@ -26,6 +26,8 @@ export function trackedBodies(plan: Plan): number[] {
   const s = new Set<number>();
   for (const a of plan.axles) s.add(a.a).add(a.b);
   for (const a of plan.sliders) s.add(a.a).add(a.b);
+  for (const a of plan.distances) s.add(a.a).add(a.b);
+  for (const a of plan.mounts) s.add(a.a).add(a.b);
   for (const a of plan.springs) s.add(a.a).add(a.b);
   for (const a of plan.chambers) {
     s.add(a.a);

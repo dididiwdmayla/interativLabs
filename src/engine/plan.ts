@@ -4,7 +4,7 @@ import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
 import { GAS_RT, KPA_MM2, N } from "@/model/units";
-import { dcos, dsin } from "@/geometry/dmath";
+import { dcos, dhypot, dsin } from "@/geometry/dmath";
 
 /**
  * Plano de compilação comum a todos os motores, em unidades da cena.
@@ -65,6 +65,32 @@ export interface PlanAxle {
   motor?: { speed: number; maxTorque: number };
   limit?: { lower: number; upper: number };
   torsion?: { k: number; rest: number; damping: number };
+  /** g·mm²/s² (atrito como motor de velocidade zero; 0 = sem atrito) */
+  friction: number;
+}
+
+/** Haste (distância fixa) ou cabo (só o máximo). */
+export interface PlanDistance {
+  id: Id;
+  kind: "rod" | "cable";
+  a: number;
+  b: number;
+  /** pontos no mundo na pose desenhada, mm */
+  anchorA: Vec2;
+  anchorB: Vec2;
+  /** haste: comprimento desenhado; cabo: comprimento máximo (mm) */
+  length: number;
+}
+
+/** Suporte elástico: solda com frequências. */
+export interface PlanMount {
+  id: Id;
+  a: number;
+  b: number;
+  anchor: Vec2;
+  linearHz: number;
+  angularHz: number;
+  damping: number;
 }
 
 export interface PlanSlider {
@@ -77,6 +103,8 @@ export interface PlanSlider {
   lower: number;
   upper: number;
   spring?: { k: number; rest: number; damping: number };
+  /** g·mm/s² (atrito como motor de velocidade zero; 0 = sem atrito) */
+  friction: number;
 }
 
 export interface PlanSpring {
@@ -123,6 +151,8 @@ export interface Plan {
   /** peças na ordem da cena (para snapshots estáveis) */
   partIds: Id[];
   axles: PlanAxle[];
+  distances: PlanDistance[];
+  mounts: PlanMount[];
   sliders: PlanSlider[];
   springs: PlanSpring[];
   chambers: PlanChamber[];
@@ -326,6 +356,8 @@ export function buildPlan(scene: Scene): Plan {
     partRel,
     partIds: valid.map((p) => p.id),
     axles: [],
+    distances: [],
+    mounts: [],
     sliders: [],
     springs: [],
     chambers: [],
@@ -357,6 +389,56 @@ export function buildPlan(scene: Scene): Plan {
           ...(l.torsion
             ? { torsion: { k: l.torsion.k * N, rest: l.torsion.rest, damping: l.torsion.damping * N } }
             : {}),
+          friction: (l.friction ?? 0) * N,
+        });
+        break;
+      }
+      case "rod":
+      case "cable": {
+        const a = bodyIdx(l.a);
+        const b = bodyIdx(l.b);
+        if (a < 0 || b < 0) break;
+        const what = l.kind === "rod" ? "Haste" : "Cabo";
+        if (a === b) {
+          warnings.push(`${what} ${l.ref}: as duas pontas estão no mesmo corpo; foi ignorado`);
+          break;
+        }
+        const anchorA = worldOf(l.a, l.atA);
+        const anchorB = worldOf(l.b, l.atB);
+        const drawn = dhypot(anchorB[0] - anchorA[0], anchorB[1] - anchorA[1]);
+        if (l.kind === "rod" && drawn < 1e-6) {
+          warnings.push(`Haste ${l.ref}: as duas pontas coincidem; foi ignorada`);
+          break;
+        }
+        if (l.kind === "cable" && drawn > l.maxLength + 1e-6)
+          warnings.push(`Cabo ${l.ref}: desenhado mais longo que o comprimento máximo; começa puxando`);
+        plan.distances.push({
+          id: l.id,
+          kind: l.kind,
+          a,
+          b,
+          anchorA,
+          anchorB,
+          length: l.kind === "rod" ? drawn : l.maxLength,
+        });
+        break;
+      }
+      case "mount": {
+        const a = bodyIdx(l.a);
+        const b = bodyIdx(l.b);
+        if (a < 0 || b < 0) break;
+        if (a === b) {
+          warnings.push(`Suporte ${l.ref}: as duas peças já estão no mesmo corpo; foi ignorado`);
+          break;
+        }
+        plan.mounts.push({
+          id: l.id,
+          a,
+          b,
+          anchor: worldOf(l.b, l.at),
+          linearHz: l.linearHz,
+          angularHz: l.angularHz,
+          damping: l.damping,
         });
         break;
       }
@@ -380,6 +462,7 @@ export function buildPlan(scene: Scene): Plan {
           ...(l.spring
             ? { spring: { k: l.spring.k * N, rest: l.spring.rest, damping: l.spring.damping * N } }
             : {}),
+          friction: (l.friction ?? 0) * N,
         });
         break;
       }

@@ -10,6 +10,9 @@ import type { FixtureScript } from "@/sim/script";
 export const NOW = "2026-11-04T00:00:00.000Z";
 export const G = 9810;
 
+/** Número com vírgula decimal, para as notas. */
+export const br = (v: number, d = 4) => String(Math.round(v * 10 ** d) / 10 ** d).replace(".", ",");
+
 /** Arredonda para 4 casas (arquivos estáveis e legíveis). */
 export const r4 = (v: number) => Math.round(v * 1e4) / 1e4 + 0;
 

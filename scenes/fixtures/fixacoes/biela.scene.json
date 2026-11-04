@@ -1,0 +1,115 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Biela e manivela",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Base",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Manivela",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L3",
+      "name": "Bloco",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Manivela",
+      "layer": "L2",
+      "x": 0,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 20,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Bloco",
+      "layer": "L3",
+      "x": 65,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-8, -5],
+          [8, -5],
+          [8, 5],
+          [-8, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k2",
+      "ref": 2,
+      "kind": "axle",
+      "a": null,
+      "b": "p1",
+      "at": [0, 0],
+      "motor": {
+        "speed": 6.2832,
+        "maxTorque": 50
+      }
+    },
+    {
+      "id": "k4",
+      "ref": 4,
+      "kind": "rod",
+      "a": "p1",
+      "b": "p3",
+      "atA": [15, 0],
+      "atB": [0, 0]
+    },
+    {
+      "id": "k5",
+      "ref": 5,
+      "kind": "slider",
+      "a": null,
+      "b": "p3",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-45, 15]
+    }
+  ]
+}

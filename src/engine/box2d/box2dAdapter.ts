@@ -264,9 +264,10 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         jd.enableLimit = !!a.limit;
         jd.lowerAngle = a.limit?.lower ?? 0;
         jd.upperAngle = a.limit?.upper ?? 0;
-        jd.enableMotor = !!a.motor;
+        // Atrito: motor de velocidade zero com torque máximo = atrito (só sem motor).
+        jd.enableMotor = !!a.motor || a.friction > 0;
         jd.motorSpeed = a.motor?.speed ?? 0;
-        jd.maxMotorTorque = (a.motor?.maxTorque ?? 0) / (L * L);
+        jd.maxMotorTorque = (a.motor?.maxTorque ?? a.friction) / (L * L);
         if (a.torsion && a.torsion.k > 0) {
           // Mola de torção nativa: o Box2D usa a massa axial 1/(iA + iB).
           const ka = invInertia(a.a) + invInertia(a.b);
@@ -296,6 +297,11 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         jd.enableLimit = true;
         jd.lowerTranslation = s.lower / L;
         jd.upperTranslation = s.upper / L;
+        if (s.friction > 0) {
+          jd.enableMotor = true;
+          jd.motorSpeed = 0;
+          jd.maxMotorForce = s.friction / L;
+        }
         if (s.spring && s.spring.k > 0) {
           // Mola de retorno nativa: massa axial da junta prismática na pose desenhada.
           const ra: Vec2 = [
@@ -321,7 +327,51 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         joints.set(s.id, B.b2CreatePrismaticJoint(w, jd));
         jd.delete();
       }
-      rt = new Runtime(p, io, { native, jointForce });
+      for (const d of p.distances) {
+        // Haste: distância rígida. Cabo: só o máximo (mola ligada sem rigidez = só batentes).
+        const jd = B.b2DefaultDistanceJointDef();
+        jd.base.bodyIdA = bodies[d.a]!;
+        jd.base.bodyIdB = bodies[d.b]!;
+        jd.base.localFrameA.p = local(d.a, d.anchorA);
+        jd.base.localFrameB.p = local(d.b, d.anchorB);
+        jd.base.collideConnected = true;
+        base(jd);
+        jd.length = d.length / L;
+        if (d.kind === "cable") {
+          jd.enableSpring = true;
+          jd.hertz = 0;
+          jd.enableLimit = true;
+          jd.minLength = 0;
+          jd.maxLength = d.length / L;
+        } else {
+          jd.enableSpring = false;
+          jd.minLength = d.length / L;
+          jd.maxLength = d.length / L;
+        }
+        joints.set(d.id, B.b2CreateDistanceJoint(w, jd));
+        jd.delete();
+      }
+      for (const m of p.mounts) {
+        const jd = B.b2DefaultWeldJointDef();
+        jd.base.bodyIdA = bodies[m.a]!;
+        jd.base.bodyIdB = bodies[m.b]!;
+        jd.base.localFrameA.p = local(m.a, m.anchor);
+        jd.base.localFrameB.p = local(m.b, m.anchor);
+        jd.base.collideConnected = false;
+        base(jd);
+        jd.linearHertz = m.linearHz;
+        jd.angularHertz = m.angularHz;
+        jd.linearDampingRatio = m.damping;
+        jd.angularDampingRatio = m.damping;
+        joints.set(m.id, B.b2CreateWeldJoint(w, jd));
+        jd.delete();
+      }
+      const axleIds = new Set(p.axles.map((a) => a.id));
+      const jointTorque = (id: Id): number | null => {
+        const j = joints.get(id);
+        return j && axleIds.has(id) ? B.b2RevoluteJoint_GetCurrentMotorTorque(j) * L * L : null;
+      };
+      rt = new Runtime(p, io, { native, jointForce, jointTorque });
       return {
         warnings,
         bodies: p.bodies.length,

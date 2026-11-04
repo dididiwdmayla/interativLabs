@@ -29,6 +29,8 @@ export interface RuntimeOptions {
   native?: Set<Id>;
   /** força de reação de uma junta nativa, g·mm/s² no mundo (quando o motor sabe) */
   jointForce?: (linkId: Id) => Vec2 | null;
+  /** torque do motor (ou do atrito) de um eixo, g·mm²/s² */
+  jointTorque?: (linkId: Id) => number | null;
 }
 
 export interface BodyIO {
@@ -86,6 +88,7 @@ export class Runtime {
   private forces = new Map<number, { f: Vec2; local: Vec2 }>();
   private native: Set<Id>;
   private jointForce: (linkId: Id) => Vec2 | null;
+  private jointTorque: (linkId: Id) => number | null;
   time = 0;
   steps = 0;
 
@@ -94,6 +97,7 @@ export class Runtime {
     this.io = io;
     this.native = options.native ?? new Set();
     this.jointForce = options.jointForce ?? (() => null);
+    this.jointTorque = options.jointTorque ?? (() => null);
     this.st = plan.bodies.map((b) => ({ x: b.position[0], y: b.position[1], angle: 0, vx: 0, vy: 0, w: 0 }));
     this.fresh = plan.bodies.map(() => false);
     this.chambers = plan.chambers.map((p) => ({
@@ -390,8 +394,30 @@ export class Runtime {
     const links: Record<Id, LinkState> = {};
     this.plan.axles.forEach((a, i) => {
       const s = this.axleAngle(i);
-      links[a.id] = { kind: "axle", angle: s.angle, speed: s.speed, gap: s.gap };
+      const st: LinkState = { kind: "axle", angle: s.angle, speed: s.speed, gap: s.gap };
+      const tq = this.jointTorque(a.id);
+      if (tq !== null) st.torque = tq / N;
+      links[a.id] = st;
     });
+    for (const d of this.plan.distances) {
+      const pa = this.world(d.a, this.localOf(d.a, d.anchorA));
+      const pb = this.world(d.b, this.localOf(d.b, d.anchorB));
+      const L = dhypot(pb[0] - pa[0], pb[1] - pa[1]);
+      const st: LinkState = { kind: d.kind, length: L };
+      if (d.kind === "cable") st.slack = d.length - L;
+      const f = this.jointForce(d.id);
+      if (f && L > 1e-9) st.force = -(f[0] * (pb[0] - pa[0]) + f[1] * (pb[1] - pa[1])) / L / N;
+      links[d.id] = st;
+    }
+    for (const m of this.plan.mounts) {
+      const pa = this.world(m.a, this.localOf(m.a, m.anchor));
+      const pb = this.world(m.b, this.localOf(m.b, m.anchor));
+      links[m.id] = {
+        kind: "mount",
+        offset: dhypot(pb[0] - pa[0], pb[1] - pa[1]),
+        angle: this.body(m.b).angle - this.body(m.a).angle,
+      };
+    }
     for (const s of this.plan.sliders) {
       const st: LinkState = { kind: "slider", translation: this.sliderTranslation(s.id) };
       const f = this.jointForce(s.id);
