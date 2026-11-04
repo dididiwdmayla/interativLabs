@@ -219,7 +219,9 @@ export function TwoEndArt({ ctx, lm }: { ctx: ArtContext; lm: LinkModel }) {
   if (l.kind === "spring") {
     const D = l.coil.outerD;
     const m = coilMetrics(D);
-    const n = coilCount(l.freeLength, D);
+    const wa = worldOf(l.a === null ? null : ctx.model.drawn.get(l.a), l.atA);
+    const wb = worldOf(l.b === null ? null : ctx.model.drawn.get(l.b), l.atB);
+    const n = coilCount(l.freeLength, D, Math.hypot(wb[0] - wa[0], wb[1] - wa[1]));
     const solid = l.solidLength ?? l.coil.turns * l.coil.wireD;
     const entry: SpringNodes = {
       a: { part: l.a, at: l.atA },

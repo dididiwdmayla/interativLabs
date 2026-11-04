@@ -1,6 +1,7 @@
 import type { PartPose } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
+import { calloutPath } from "./callouts";
 import { cablePath, coilScale, gasPolygon, type ChamberGeo } from "./geometry";
 import { worldOf, type SceneModel } from "./prepare";
 
@@ -91,6 +92,8 @@ export class StageNodes {
   /** fio e anel do arrasto */
   drag: { g?: SVGGElement | null; wire?: SVGLineElement | null; ring?: SVGCircleElement | null } = {};
   dragState: { part: Id; local: Vec2; finger: Vec2 } | null = null;
+  /** chamadas de peça que acompanham a pose (linha e ponto) */
+  partCallouts = new Map<Id, { label: Vec2; line?: SVGPathElement | null; dot?: SVGCircleElement | null }>();
 
   constructor(model: SceneModel) {
     this.model = model;
@@ -158,6 +161,19 @@ export class StageNodes {
     };
   }
 
+  refPartCallout(id: Id, label: Vec2, field: "line" | "dot") {
+    return (el: SVGPathElement | SVGCircleElement | null) => {
+      let c = this.partCallouts.get(id);
+      if (!c || c.label !== label) {
+        c = { label };
+        this.partCallouts.set(id, c);
+      }
+      if (field === "line") c.line = el as SVGPathElement | null;
+      else c.dot = el as SVGCircleElement | null;
+      if (!el && !c.line && !c.dot) this.partCallouts.delete(id);
+    };
+  }
+
   setDrag(d: { part: Id; local: Vec2; finger: Vec2 } | null): void {
     this.dragState = d;
   }
@@ -222,6 +238,13 @@ export class StageNodes {
         c.label.setAttribute("x", f(base[0]));
         c.label.setAttribute("y", f(base[1] - link.bore / 2 - 6 * this.ctx.px));
       }
+    }
+    for (const [id, c] of this.partCallouts) {
+      const p = frame.pose(id);
+      if (!p || !c.line) continue;
+      c.line.setAttribute("d", calloutPath(c.label, [p.x, p.y], this.ctx.px));
+      c.dot?.setAttribute("cx", f(p.x));
+      c.dot?.setAttribute("cy", f(p.y));
     }
     this.writeDrag();
   }

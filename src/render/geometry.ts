@@ -35,10 +35,24 @@ export function coilMetrics(outerD: number): CoilMetrics {
   };
 }
 
-/** Quantas espiras desenhar: vem do comprimento livre e não muda durante a simulação. */
-export function coilCount(freeLength: number, outerD: number): number {
+/** Faixa do scaleX das espiras na pose desenhada (manifesto do lote 01). */
+export const COIL_SCALE_MIN = 0.6;
+export const COIL_SCALE_MAX = 1.6;
+
+/**
+ * Quantas espiras desenhar: vem do comprimento livre e não muda durante a
+ * simulação. Se o comprimento desenhado (`drawn`) deixaria o scaleX fora de
+ * 0,6–1,6, N é corrigido para caber (o que acontece no fim de um gesto).
+ */
+export function coilCount(freeLength: number, outerD: number, drawn = freeLength): number {
   const m = coilMetrics(outerD);
-  return Math.max(1, Math.round((freeLength - 2 * m.end) / m.pitch));
+  let n = Math.max(1, Math.round((freeLength - 2 * m.end) / m.pitch));
+  const avail = Math.max(0, drawn - 2 * m.end);
+  const hi = Math.floor(avail / (m.pitch * COIL_SCALE_MIN));
+  const lo = Math.ceil(avail / (m.pitch * COIL_SCALE_MAX));
+  if (n > hi) n = hi;
+  if (n < lo) n = lo;
+  return Math.max(1, n);
 }
 
 /** Escala horizontal das espiras para o comprimento atual; no sólido, encostam. */

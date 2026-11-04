@@ -30,17 +30,6 @@ export interface Callout extends CalloutTarget {
 
 const f = (n: number) => (Math.round(n * 1000) / 1000).toString();
 
-/** Ponto da borda do retângulo (centro c, meias larguras hw, hh) na direção θ. */
-function onRect(c: Vec2, hw: number, hh: number, th: number): Vec2 {
-  const dx = Math.cos(th);
-  const dy = Math.sin(th);
-  const k = Math.min(
-    Math.abs(dx) > 1e-9 ? hw / Math.abs(dx) : Infinity,
-    Math.abs(dy) > 1e-9 ? hh / Math.abs(dy) : Infinity,
-  );
-  return [c[0] + dx * k, c[1] + dy * k];
-}
-
 function segCross(a: Vec2, b: Vec2, c: Vec2, d: Vec2): boolean {
   const o = (p: Vec2, q: Vec2, r: Vec2) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
   const d1 = o(a, b, c);
@@ -52,103 +41,94 @@ function segCross(a: Vec2, b: Vec2, c: Vec2, d: Vec2): boolean {
 
 /**
  * @param bounds caixa do desenho (mm)
- * @param px mm por px de tela (o número tem 13 px; a margem, 26 px)
+ * @param px mm por px de tela (o número tem 13 px)
+ * @param occupied verdadeiro onde há peça (o número fica em espaço livre)
  */
-export function layoutCallouts(targets: CalloutTarget[], bounds: Box, px: number): Callout[] {
+export function layoutCallouts(
+  targets: CalloutTarget[],
+  bounds: Box,
+  px: number,
+  occupied: (p: Vec2) => boolean = () => false,
+): Callout[] {
   if (targets.length === 0) return [];
   const c: Vec2 = [bounds[0] + bounds[2] / 2, bounds[1] + bounds[3] / 2];
-  const margin = 26 * px;
-  const hw = bounds[2] / 2 + margin;
-  const hh = bounds[3] / 2 + margin;
-  const minGap = 26 * px; // distância mínima entre rótulos ao longo da borda
-
-  // posição ao longo do perímetro (0..per), na ordem angular
-  const items = targets
-    .map((t) => {
-      const th = Math.atan2(t.p[1] - c[1], t.p[0] - c[0]) || -Math.PI / 2;
-      return { t, th };
-    })
-    .sort((a, b) => a.th - b.th);
-  const perimPos = (p: Vec2) => {
-    // parâmetro de perímetro de um ponto da borda, a partir do canto superior esquerdo, horário
-    const x = p[0] - (c[0] - hw);
-    const y = p[1] - (c[1] - hh);
-    const W = 2 * hw;
-    const H = 2 * hh;
-    if (Math.abs(y) < 1e-6) return x;
-    if (Math.abs(x - W) < 1e-6) return W + y;
-    if (Math.abs(y - H) < 1e-6) return W + H + (W - x);
-    return 2 * W + H + (H - y);
+  const reach = Math.hypot(bounds[2], bounds[3]) / 2 + 60 * px;
+  const size = (t: CalloutTarget): [number, number] => [
+    (String(t.ref).length * 8 + 8) * px,
+    (t.sub ? 30 : 18) * px,
+  ];
+  const placed: Callout[] = [];
+  const overlaps = (q: Vec2, wh: [number, number]) =>
+    placed.some((o) => {
+      if (o.hidden) return false;
+      const ow = size(o);
+      return (
+        Math.abs(o.label[0] - q[0]) * 2 < ow[0] + wh[0] && Math.abs(o.label[1] - q[1]) * 2 < ow[1] + wh[1]
+      );
+    });
+  const free = (q: Vec2, wh: [number, number]) => {
+    const hw = wh[0] / 2 + 3 * px;
+    const hh = wh[1] / 2 + 3 * px;
+    for (const d of [
+      [0, 0],
+      [-hw, -hh],
+      [hw, -hh],
+      [-hw, hh],
+      [hw, hh],
+      [0, -hh],
+      [0, hh],
+    ] as const)
+      if (occupied([q[0] + d[0], q[1] + d[1]])) return false;
+    return true;
   };
-  const fromPerim = (s: number): Vec2 => {
-    const W = 2 * hw;
-    const H = 2 * hh;
-    s = ((s % (2 * (W + H))) + 2 * (W + H)) % (2 * (W + H));
-    const x0 = c[0] - hw;
-    const y0 = c[1] - hh;
-    if (s < W) return [x0 + s, y0];
-    if (s < W + H) return [x0 + W, y0 + (s - W)];
-    if (s < 2 * W + H) return [x0 + W - (s - W - H), y0 + H];
-    return [x0, y0 + H - (s - 2 * W - H)];
-  };
-  const total = 2 * (2 * hw + 2 * hh);
-  const pos = items.map((it) => perimPos(onRect(c, hw, hh, it.th)));
-  // espalha mantendo a ordem: algumas passadas de afastamento
-  for (let pass = 0; pass < 40; pass++) {
-    let moved = false;
-    for (let i = 0; i < pos.length; i++) {
-      const j = (i + 1) % pos.length;
-      if (pos.length < 2) break;
-      let gap = pos[j]! - pos[i]!;
-      if (j === 0) gap += total;
-      if (gap < minGap) {
-        const push = (minGap - gap) / 2;
-        pos[i] = pos[i]! - push;
-        pos[j] = pos[j]! + push;
-        moved = true;
-      }
+  const order = targets.slice().sort((a, b) => b.priority - a.priority);
+  for (const t of order) {
+    const wh = size(t);
+    let dx = t.p[0] - c[0];
+    let dy = t.p[1] - c[1];
+    const L = Math.hypot(dx, dy);
+    if (L < 1e-6) {
+      dx = 0;
+      dy = -1;
+    } else {
+      dx /= L;
+      dy /= L;
     }
-    if (!moved) break;
+    const th0 = Math.atan2(dy, dx);
+    let found: Vec2 | null = null;
+    // marcha para fora do ponto, ao longo da direção do centro, com desvios de até 60°
+    outer: for (let r = 26 * px; r <= reach; r += 6 * px)
+      for (const dth of [0, 0.26, -0.26, 0.52, -0.52, 0.79, -0.79, 1.05, -1.05]) {
+        const th = th0 + dth;
+        const q: Vec2 = [t.p[0] + Math.cos(th) * r, t.p[1] + Math.sin(th) * r];
+        if (free(q, wh) && !overlaps(q, wh)) {
+          found = q;
+          break outer;
+        }
+      }
+    placed.push({ ...t, label: found ?? t.p, d: "", hidden: !found });
   }
-  const out: Callout[] = items.map((it, i) => {
-    const label = fromPerim(pos[i]!);
-    return { ...it.t, label, d: "", hidden: false };
-  });
-  // cruzamentos restantes: troca os rótulos
+  // linhas que ainda se cruzam: troca os rótulos (os dois lugares já são livres)
   for (let pass = 0; pass < 6; pass++) {
     let swapped = false;
-    for (let i = 0; i < out.length; i++)
-      for (let j = i + 1; j < out.length; j++) {
-        const A = out[i]!;
-        const B = out[j]!;
+    for (let i = 0; i < placed.length; i++)
+      for (let j = i + 1; j < placed.length; j++) {
+        const A = placed[i]!;
+        const B = placed[j]!;
+        if (A.hidden || B.hidden) continue;
         if (segCross(A.label, A.p, B.label, B.p)) {
-          const t = A.label;
+          const tmp = A.label;
           A.label = B.label;
-          B.label = t;
+          B.label = tmp;
           swapped = true;
         }
       }
     if (!swapped) break;
   }
-  // colisão entre rótulos: esconde o de menor prioridade
-  const box = (o: Callout) => {
-    const w = (String(o.ref).length * 8 + 6) * px;
-    const h = (o.sub ? 30 : 18) * px;
-    return [o.label[0] - w / 2, o.label[1] - h / 2, w, h] as const;
-  };
-  const byPrio = out.slice().sort((a, b) => b.priority - a.priority);
-  const kept: Callout[] = [];
-  for (const o of byPrio) {
-    const b = box(o);
-    const hit = kept.some((k) => {
-      const q = box(k);
-      return b[0] < q[0] + q[2] && q[0] < b[0] + b[2] && b[1] < q[1] + q[3] && q[1] < b[1] + b[3];
-    });
-    if (hit) o.hidden = true;
-    else kept.push(o);
-  }
-  for (const o of out) o.d = calloutPath(o.label, o.p, px);
-  return out;
+  for (const o of placed) o.d = calloutPath(o.label, o.p, px);
+  // ordem original
+  const idx = new Map(targets.map((t, i) => [t.id, i] as const));
+  return placed.sort((a, b) => (idx.get(a.id) ?? 0) - (idx.get(b.id) ?? 0));
 }
 
 /** Linha de chamada: curva suave do rótulo até o ponto, começando a 9 px do número. */
@@ -158,7 +138,7 @@ export function calloutPath(label: Vec2, p: Vec2, px: number): string {
   const L = Math.hypot(dx, dy) || 1;
   const s: Vec2 = [label[0] + (dx / L) * 9 * px, label[1] + (dy / L) * 9 * px];
   // curva: controle deslocado para o lado, 18% do comprimento
-  const k = 0.18 * L;
+  const k = 0.22 * L;
   const cx = (s[0] + p[0]) / 2 - (dy / L) * k;
   const cy = (s[1] + p[1]) / 2 + (dx / L) * k;
   return `M${f(s[0])} ${f(s[1])}Q${f(cx)} ${f(cy)} ${f(p[0])} ${f(p[1])}`;
