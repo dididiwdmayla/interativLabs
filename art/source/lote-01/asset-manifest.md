@@ -2,7 +2,7 @@
 
 Lote 01 da Prancha índigo, escrito pelo coordenador visual em 04/11/2026 a partir de `docs/identidade/identidade.md` e do frame oficial (`docs/identidade/frame-oficial/`).
 
-São 17 imagens para gerar no ChatGPT, em 3 levas, e 23 saídas no registry. O Will gera as imagens com `prompts.md` (os prompts estão lá, não aqui) e traz para o chat do coordenador visual, por grupo ou de uma vez. O coordenador visual revisa antes de as imagens entrarem neste diretório; as reprovadas voltam com o motivo anotado na seção "Revisões" e com o prompt corrigido. As aprovadas sobem aqui com o nome igual ao ID (`hw-screw-slot.png`). Depois o executor roda `npm run assets`, e o coordenador visual confere as folhas de contato em `docs/capturas/lote-01/`.
+São 17 imagens para gerar no ChatGPT, em 3 levas, e 23 saídas no registry. O Will gera as imagens com os prompts que o coordenador visual entrega no chat e traz para o chat dele, por grupo ou de uma vez. O coordenador visual revisa antes de as imagens entrarem neste diretório; as reprovadas voltam com o motivo anotado na seção "Revisões" e com o prompt corrigido. As aprovadas sobem aqui com o nome igual ao ID (`hw-screw-slot.png`). Depois o executor roda `npm run assets`, e o coordenador visual confere as folhas de contato em `docs/capturas/lote-01/`.
 
 Nada neste lote lembra arma de fogo. Os mecanismos são genéricos.
 
@@ -86,7 +86,7 @@ Cores dos tokens que o pipeline usa no tingimento: `ink` `#EAEAEF`, `ink-2` `#A3
    - `fx-spark`: separar as três faíscas pelas colunas vazias, em `fx-spark-1`, `-2` e `-3`.
    - `fx-gas`: o mestre é o pontilhado denso (`fx-gas-3`). Gerar `fx-gas-2` e `fx-gas-1` por rarefação determinística: manter 50% e 25% dos componentes conexos, sorteados com semente fixa (o mesmo resultado a cada execução).
 9. **Tingimento radial** (`fx-exhaust`). A cor de cada pixel vai de `ember` na âncora até `ink` a partir de 60% do raio do leque, interpolada em Lab. O alfa não muda.
-10. **TRANSPARENTE** (`scene-entry`). Alfa ≥ 248 vira 255; alfa ≤ 4 vira 0 e zera o RGB. Se a transparência falhar no gerador, o original vem sobre verde puro (`#00FF00`, fallback de `prompts.md`): recortar o verde por distância de cor, com borda suavizada de 1 px e remoção da franja verde, antes dos mesmos passos.
+10. **TRANSPARENTE** (`scene-entry`). Alfa ≥ 248 vira 255; alfa ≤ 4 vira 0 e zera o RGB. Se a transparência falhar no gerador, o original vem sobre verde puro (`#00FF00`): recortar o verde por distância de cor, com borda suavizada de 1 px e remoção da franja verde, antes dos mesmos passos.
 11. **MÁSCARA** (`mask-develop`). Níveis com ponto preto em ~60 e branco em ~200, para a borda chegar a 0 e a 255.
 12. **Saída.** `public/assets/<grupo>/<id>.webp` (1x) e `<id>@2x.webp` (2x), nas larguras das tabelas. OPACO em WebP com perda, qualidade 90. CHAVE-PRETA, TRANSPARENTE e MÁSCARA em WebP sem perda (traço fino não aguenta compressão com perda no alfa). Variantes tingidas ganham sufixo: `hw-screw-slot-gold.webp`.
 13. **Registry.** Para cada saída: `id`, `group`, `src` 1x e 2x, `width`, `height`, `anchor` (0–1), `mmPerPx` (ou `null`), `repeat` (`none`, `x` ou `xy`), `tints` (lista das variantes).
@@ -101,7 +101,7 @@ Cores dos tokens que o pipeline usa no tingimento: `ink` `#EAEAEF`, `ink-2` `#A3
 | 2 | Madeira, as ferragens restantes e os efeitos da simulação | `hatch-wood`, `hw-rivet`, `hw-bearing`, `hw-sensor`, `fx-gas`, `fx-exhaust`, `fx-spark` |
 | 3 | A tela de entrada | `scene-entry`, `mask-develop` |
 
-Os prompts de geração estão em `prompts.md`, neste diretório, organizados em seis grupos, um por conversa do ChatGPT. Cada grupo abre com a imagem (a) do frame oficial anexada e um texto de abertura. A leva de cada imagem está indicada no próprio prompt.
+Os prompts de geração ficam com o coordenador visual, no chat (pelo método do projeto, prompt não vai para o repositório). Cada grupo abre com a imagem (a) do frame oficial anexada.
 
 ---
 
@@ -169,12 +169,12 @@ Regras de uso e de conferência:
 
 ## Revisões
 
-Cada reprovação entra aqui com a data, o ID, o motivo e o ajuste no prompt. A revisão completa, com os prompts corrigidos, fica em `prompts.md`.
+Cada reprovação entra aqui com a data, o ID, o motivo e o ajuste no prompt.
 
 - **04/11 · `spring-coil` e `spring-end`.** A metade de trás das espiras saiu com a mesma espessura da da frente, e a mola ficou parecendo um zigue-zague, com contorno branco em volta do fio. Os prompts v2 descrevem cada espira como dois traços: a frente grossa com sombreado de tubo e as costas com um terço da espessura, inclinadas ao contrário.
 - **04/11 · `tex-ink-wear`.** A cobertura saiu em 0,3%, para 3–5% pedidos. O prompt v2 pede cerca de 1 500 marcas e dez marcas por área de 100×100 px.
 - **04/11 · ajustes de pipeline**, sem geração nova:
   - as ferragens redondas saíram cerca de 2% mais altas que largas e levam um fator de escala vertical por asset;
   - o `hw-sensor` leva um fator de cerca de 0,934 para o hexágono ficar regular;
-  - as frações de rarefação do `fx-gas` e os níveis do `mask-develop` ficam em aberto até a conferência na folha de contato (detalhes em `prompts.md`).
+  - as frações de rarefação do `fx-gas` e os níveis do `mask-develop` ficam em aberto até a conferência na folha de contato.
 - **04/11 · revisão 2: lote fechado.** As versões v2 de `spring-coil`, `spring-end` e `tex-ink-wear` foram aprovadas, e as 17 imagens estão aprovadas. Os originais sobem neste diretório com o nome igual ao ID, sem sufixo. Ajuste de pipeline: cortar a borda direita da `spring-end` na mesma fase do corte da `spring-coil`, para as duas emendarem.
