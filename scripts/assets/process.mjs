@@ -56,12 +56,12 @@ function marginBox(input, center = null) {
 }
 
 export async function processBatch(root) {
-  const masters = new Map();
   const raw = new Map();
   for (const id of sourceIds) {
-    const original = await readImage(join(root, "art/source", settings.batch, `${id}.png`));
-    masters.set(id, original);
     const spec = outputs.find((output) => output.source === id);
+    const original = await readImage(join(root, "art/source", settings.batch, `${id}.png`), {
+      grayscale: spec.format === "MÁSCARA",
+    });
     raw.set(
       id,
       spec.format === "CHAVE-PRETA"
@@ -171,7 +171,7 @@ export async function processBatch(root) {
       const thinned = thinComponents(input, spec.gas.fraction, spec.gas.seed);
       input = thinned.output;
       metrics.components = { count: thinned.count, kept: thinned.kept };
-      input = crossfade(input, settings.crossfade);
+      input = crossfade(input, spec.gas.crossfade);
     } else if (spec.spark) {
       const ranges = splitColumns(input, spec.spark.emptyThreshold, spec.spark.minGap);
       if (ranges.length !== 3)
@@ -227,8 +227,8 @@ export async function processBatch(root) {
     // Resampling can change the first/last pixel. Restore periodic edges at
     // each output resolution, then measure the actual encoded files later.
     if (spec.repeat === "xy") {
-      x1 = crossfade(x1, settings.crossfade);
-      x2 = crossfade(x2, settings.crossfade);
+      x1 = crossfade(x1, spec.gas?.crossfade ?? settings.crossfade);
+      x2 = crossfade(x2, spec.gas?.crossfade ?? settings.crossfade);
     }
     if (spec.tints.length) {
       x1 = tint(x1, colors[spec.tints[0]]);

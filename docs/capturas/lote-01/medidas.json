@@ -30,7 +30,7 @@
     "zlib-ng": "2.3.3",
     "sharp": "0.35.5"
   },
-  "assetsBytes": 4920318,
+  "assetsBytes": 4859894,
   "outputs": [
     {
       "id": "paper-stage",
@@ -547,7 +547,7 @@
       "diameter1x": null,
       "coverage": { "binary": 0.2514190673828125, "weighted": 0.030045991785379568 },
       "masterCoverage": { "binary": 0.061456290428841424, "weighted": 0.02520764401088689 },
-      "seam": { "seam": 0, "internal": 15.797928155637255, "ratio": 0 },
+      "seam": { "seam": 0, "internal": 3.5393526077688158, "ratio": 0 },
       "files": [
         {
           "token": "stage",
@@ -562,7 +562,7 @@
         "width": 256,
         "height": 256,
         "coverage": { "binary": 0.2514190673828125, "weighted": 0.030045991785379568 },
-        "seam": { "seam": 0, "internal": 15.797928155637255, "ratio": 0 }
+        "seam": { "seam": 0, "internal": 3.5393526077688158, "ratio": 0 }
       }
     },
     {
@@ -576,7 +576,7 @@
       "diameter1x": null,
       "coverage": { "binary": 0.4149017333984375, "weighted": 0.09566841873465322 },
       "masterCoverage": { "binary": 0.1559551699314983, "weighted": 0.0870387527837864 },
-      "seam": { "seam": 0, "internal": 45.251914828431374, "ratio": 0 },
+      "seam": { "seam": 0, "internal": 13.927619485293613, "ratio": 0 },
       "files": [
         {
           "token": "ink-2",
@@ -588,7 +588,7 @@
         "width": 256,
         "height": 256,
         "coverage": { "binary": 0.4149017333984375, "weighted": 0.09566841873465322 },
-        "seam": { "seam": 0, "internal": 45.251914828431374, "ratio": 0 }
+        "seam": { "seam": 0, "internal": 13.927619485293613, "ratio": 0 }
       }
     },
     {
@@ -601,14 +601,14 @@
       "anchor": [0, 0],
       "mmPerPx": null,
       "diameter1x": null,
-      "coverage": { "binary": 0.134033203125, "weighted": 0.03566888547410882 },
+      "coverage": { "binary": 0.118377685546875, "weighted": 0.03565177169500406 },
       "masterCoverage": { "binary": 0.18699396381340477, "weighted": 0.13004240637670547 },
-      "seam": { "seam": 0, "internal": 40.641620710784316, "ratio": 0 },
+      "seam": { "seam": 7.513183593750007, "internal": 8.348006663605142, "ratio": 0.8999973163060927 },
       "files": [
         {
           "token": "ink-2",
           "src": { "x1": "assets/efeitos/fx-gas-1.webp", "x2": "assets/efeitos/fx-gas-1@2x.webp" },
-          "bytes": { "x1": 21864, "x2": 51782 }
+          "bytes": { "x1": 20102, "x2": 45368 }
         },
         {
           "token": "ember",
@@ -616,14 +616,14 @@
             "x1": "assets/efeitos/fx-gas-1-ember.webp",
             "x2": "assets/efeitos/fx-gas-1-ember@2x.webp"
           },
-          "bytes": { "x1": 21864, "x2": 51782 }
+          "bytes": { "x1": 20100, "x2": 45368 }
         }
       ],
       "delivered": {
         "width": 256,
         "height": 256,
-        "coverage": { "binary": 0.134033203125, "weighted": 0.03566888547410882 },
-        "seam": { "seam": 0, "internal": 40.641620710784316, "ratio": 0 }
+        "coverage": { "binary": 0.118377685546875, "weighted": 0.03565177169500406 },
+        "seam": { "seam": 7.513183593750007, "internal": 8.348006663605142, "ratio": 0.8999973163060927 }
       }
     },
     {
@@ -636,14 +636,14 @@
       "anchor": [0, 0],
       "mmPerPx": null,
       "diameter1x": null,
-      "coverage": { "binary": 0.2705841064453125, "weighted": 0.07339339910767881 },
+      "coverage": { "binary": 0.242279052734375, "weighted": 0.07353132659312808 },
       "masterCoverage": { "binary": 0.18699396381340477, "weighted": 0.13004240637670547 },
-      "seam": { "seam": 0, "internal": 57.300045955882354, "ratio": 0 },
+      "seam": { "seam": 12.701660156250005, "internal": 17.023776424632977, "ratio": 0.7461129563397592 },
       "files": [
         {
           "token": "ink-2",
           "src": { "x1": "assets/efeitos/fx-gas-2.webp", "x2": "assets/efeitos/fx-gas-2@2x.webp" },
-          "bytes": { "x1": 34038, "x2": 92936 }
+          "bytes": { "x1": 32158, "x2": 83366 }
         },
         {
           "token": "ember",
@@ -651,14 +651,14 @@
             "x1": "assets/efeitos/fx-gas-2-ember.webp",
             "x2": "assets/efeitos/fx-gas-2-ember@2x.webp"
           },
-          "bytes": { "x1": 34038, "x2": 92936 }
+          "bytes": { "x1": 32158, "x2": 83366 }
         }
       ],
       "delivered": {
         "width": 256,
         "height": 256,
-        "coverage": { "binary": 0.2705841064453125, "weighted": 0.07339339910767881 },
-        "seam": { "seam": 0, "internal": 57.300045955882354, "ratio": 0 }
+        "coverage": { "binary": 0.242279052734375, "weighted": 0.07353132659312808 },
+        "seam": { "seam": 12.701660156250005, "internal": 17.023776424632977, "ratio": 0.7461129563397592 }
       }
     },
     {
@@ -671,14 +671,14 @@
       "anchor": [0, 0],
       "mmPerPx": null,
       "diameter1x": null,
-      "coverage": { "binary": 0.507965087890625, "weighted": 0.1434362673292024 },
+      "coverage": { "binary": 0.47540283203125, "weighted": 0.14429171693091503 },
       "masterCoverage": { "binary": 0.18699396381340477, "weighted": 0.13004240637670547 },
-      "seam": { "seam": 0, "internal": 59.77387408088235, "ratio": 0 },
+      "seam": { "seam": 18.227050781250004, "internal": 32.81900850183436, "ratio": 0.5553809092139769 },
       "files": [
         {
           "token": "ink-2",
           "src": { "x1": "assets/efeitos/fx-gas-3.webp", "x2": "assets/efeitos/fx-gas-3@2x.webp" },
-          "bytes": { "x1": 47376, "x2": 149168 }
+          "bytes": { "x1": 45852, "x2": 139666 }
         },
         {
           "token": "ember",
@@ -686,14 +686,14 @@
             "x1": "assets/efeitos/fx-gas-3-ember.webp",
             "x2": "assets/efeitos/fx-gas-3-ember@2x.webp"
           },
-          "bytes": { "x1": 47376, "x2": 149168 }
+          "bytes": { "x1": 45852, "x2": 139666 }
         }
       ],
       "delivered": {
         "width": 256,
         "height": 256,
-        "coverage": { "binary": 0.507965087890625, "weighted": 0.1434362673292024 },
-        "seam": { "seam": 0, "internal": 59.77387408088235, "ratio": 0 }
+        "coverage": { "binary": 0.47540283203125, "weighted": 0.14429171693091503 },
+        "seam": { "seam": 18.227050781250004, "internal": 32.81900850183436, "ratio": 0.5553809092139769 }
       }
     },
     {
@@ -832,7 +832,7 @@
       "axesDifference": null,
       "levels": [40, 220],
       "initialTransition": 0.045572916666666664,
-      "transition": 0.061197916666666664,
+      "transition": 0.061848958333333336,
       "extrema": [0, 255],
       "anchor": [0, 0],
       "mmPerPx": null,
@@ -843,7 +843,7 @@
         {
           "token": null,
           "src": { "x1": "assets/entrada/mask-develop.webp", "x2": "assets/entrada/mask-develop@2x.webp" },
-          "bytes": { "x1": 14606, "x2": 48042 }
+          "bytes": { "x1": 14496, "x2": 49034 }
         }
       ],
       "delivered": {

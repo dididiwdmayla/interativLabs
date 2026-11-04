@@ -269,6 +269,7 @@ export function phaseCut(input, reference, { min, max, strip = 8, top = 0, botto
 }
 
 export function seamError(input) {
+  const sample = (p) => (p % 4 === 3 ? input.data[p] : (input.data[p] * input.data[p - (p % 4) + 3]) / 255);
   let seam = 0,
     inside = 0,
     ns = 0,
@@ -278,17 +279,17 @@ export function seamError(input) {
       for (let c = 0; c < 4; c++) {
         const p = (y * input.width + x) * 4 + c;
         if (x === 0) {
-          seam += Math.abs(input.data[p] - input.data[(y * input.width + input.width - 1) * 4 + c]);
+          seam += Math.abs(sample(p) - sample((y * input.width + input.width - 1) * 4 + c));
           ns++;
         } else {
-          inside += Math.abs(input.data[p] - input.data[p - 4]);
+          inside += Math.abs(sample(p) - sample(p - 4));
           ni++;
         }
         if (y === 0) {
-          seam += Math.abs(input.data[p] - input.data[((input.height - 1) * input.width + x) * 4 + c]);
+          seam += Math.abs(sample(p) - sample(((input.height - 1) * input.width + x) * 4 + c));
           ns++;
         } else {
-          inside += Math.abs(input.data[p] - input.data[p - input.width * 4]);
+          inside += Math.abs(sample(p) - sample(p - input.width * 4));
           ni++;
         }
       }
@@ -299,6 +300,7 @@ export function seamError(input) {
 // into the original over a narrow strip. This is a half-tile offset/crossfade
 // expressed in original coordinates, so no interpolation or content rescale occurs.
 export function crossfade(input, fraction = 0.08) {
+  if (fraction <= 0) return input;
   const output = image(input.width, input.height, Uint8Array.from(input.data));
   for (const axis of ["x", "y"]) {
     const length = axis === "x" ? output.width : output.height;

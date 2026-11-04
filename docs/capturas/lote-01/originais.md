@@ -22,4 +22,4 @@ Extração binária dos dois zips, sem recompressão. SHA-256 do arquivo extraí
 | `spring-end` | 1536×1024 | RGB | 1482498 | [1, 1, 3, 1] | `488da46e34c66386dfe19ae0e68b96f47f2e2ebaa0832e873fc08def7cbe6117` | `lote-01-parte-1.zip` |
 | `tex-ink-wear` | 1254×1254 | RGB | 1704807 | [126, 155, 3, 4] | `cab2ebf7caae44bc646fb24c7eb0045ccb3d16a81cad9b169a9f70aed5af4510` | `lote-01-parte-2.zip` |
 
-Os mestres quadrados têm 1254×1254, acima dos 1024×1024 previstos na coluna “Gerar”; o pipeline usa as dimensões reais. `mask-develop` é RGB com canais iguais e será lida como L no processamento.
+Os mestres quadrados têm 1254×1254, acima dos 1024×1024 previstos na coluna “Gerar”; o pipeline usa as dimensões reais. `mask-develop` é RGB e será convertida para L na leitura do processamento.

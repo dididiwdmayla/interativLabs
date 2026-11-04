@@ -4,8 +4,19 @@ import { image } from "./operations.mjs";
 
 sharp.concurrency(1);
 
-export async function readImage(path) {
+export async function readImage(path, { grayscale = false } = {}) {
   if (path instanceof URL) path = fileURLToPath(path);
+  if (grayscale) {
+    const { data, info } = await sharp(path)
+      .removeAlpha()
+      .greyscale()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const output = image(info.width, info.height);
+    for (let p = 0; p < info.width * info.height; p++)
+      output.data.set([data[p], data[p], data[p], 255], p * 4);
+    return output;
+  }
   const { data, info } = await sharp(path)
     .toColourspace("srgb")
     .ensureAlpha()

@@ -21,7 +21,29 @@ export const settings = {
   crossfade: 0.08,
   webp: { quality: 90, effort: 6 },
   paperLuminance: ["181C3D", "262C4D"].map((hex) => hex.match(/../g).map((v) => parseInt(v, 16))),
-  contact: { maxBytes: 3_145_728, zoom: 4, opacity: 0.3, hardwareSizes: [256, 32, 24] },
+  contact: {
+    maxBytes: 3_145_728,
+    zoom: 4,
+    opacity: 0.3,
+    hardwareSizes: [256, 32, 24],
+    width: 1200,
+    margin: 28,
+    heading: 64,
+    font: 19,
+    smallFont: 15,
+    seamCrop: 64,
+    alphaCrop: 32,
+    hardwareRow: 360,
+    hardwarePage: 4,
+    springOverlap: 0.2,
+    springRow: 450,
+    hatchSpacing: 6,
+    hatchStroke: 0.65,
+    entryMin: 358,
+    effectMin: 24,
+    gasMin: 128,
+    paperMin: 240,
+  },
 };
 
 const hardware = (id, mm, factor = 1) => ({
@@ -115,7 +137,7 @@ export const outputs = [
   tile("hatch-wood", "materiais", ["ink-2"]),
   ...[1, 2, 3].map((density) => ({
     ...tile(`fx-gas-${density}`, "efeitos", ["ink-2", "ember"], "fx-gas"),
-    gas: { fraction: [0.25, 0.5, 1][density - 1], seed: 104729 },
+    gas: { fraction: [0.25, 0.5, 1][density - 1], seed: 104729, crossfade: 0 },
   })),
   {
     id: "fx-exhaust",
