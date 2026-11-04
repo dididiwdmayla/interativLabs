@@ -12,11 +12,13 @@ Identidade: **Prancha índigo**. Um desenho de patente impresso em traço branco
 
 ## Papéis
 
-- **Coordenador geral**: o Claude do projeto interativLabs. Escreve as fases, os itens e os critérios de aceite, revisa os PRs contra as capturas e mantém estes documentos. Não escreve código do app.
-- **Coordenador visual** e **coordenador sonoro**: subordinados ao coordenador geral, ativados quando a fase pede. Escrevem frames, manifestos de lote e prompts. A arte e o som são gerados fora do repositório.
-- **Executor**: um agente disparado pelo coordenador geral dentro do projeto, trabalhando direto no repositório. Implementa os itens da fase, um por vez, e para nos pontos de revisão. O Will acompanha pelo chat e faz o merge.
+- **Coordenador geral**: o Claude do Project interativLabs. Planeja fases, escreve todos os prompts de execução, revisa os relatórios conferindo no repositório e mantém este arquivo, `docs/arquitetura.md`, `docs/roadmap.md` e `docs/fases/`. Não escreve código do app.
+- **Coordenadores especializados** (visual, sonoro): conversas próprias no mesmo Project. Escrevem os prompts de geração e o manifesto de cada lote. A arte e o som são gerados fora do repositório.
+- **Executor**: uma sessão do Claude Code na web ou do Codex, aberta pelo Will com o prompt do coordenador. Executa só o que o prompt pede, um commit por item, e termina com o relatório pedido. Não escreve o próximo prompt nem reabre decisões fechadas.
 
-O executor nunca gera nem substitui assets ou sons. Se um asset não servir, registre no documento de verificação da fase e devolva ao coordenador visual.
+O executor nunca gera nem substitui assets ou sons. Se um asset não servir, registre no relatório e devolva ao coordenador visual.
+
+O Will trabalha só pelo navegador e pelo celular: nada do que for entregue pode exigir instalar algo no computador dele.
 
 ## Stack
 
@@ -116,7 +118,7 @@ Bonito o bastante para apresentar. Nada genérico, nada com cara de template. A 
 ## Commits
 
 - Mensagens em português: `Fase N · item M — descrição`. Um commit por item, push após cada commit.
-- Cada fase roda num branch próprio e chega ao `main` por PR. O coordenador revisa o PR; o Will faz o merge.
+- Cada fase roda num branch próprio (`fase-N`); cada parte da fase chega ao `main` por um PR, com o título que o prompt definir. O coordenador revisa; o Will faz o merge.
 - Se a sessão cair, retome pelo `git log`: o último `Fase N · item M` diz onde parou.
 - Antes de commitar: `npm run lint`, `npm run typecheck`, `npm test` e `npm run build` limpos, sem avisos.
 - Ao fechar uma fase: `docs/verificacao-fase-N.md` com o que foi feito, o que ficou de fora e por quê, as medidas pedidas e as capturas em `docs/capturas/fase-N/`.

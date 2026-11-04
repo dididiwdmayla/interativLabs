@@ -112,6 +112,10 @@ Cada camada `i` tem o bit `1 << i`. Uma peça usa categoria e máscara iguais ao
 
 Passo fixo de 1/240 s, com acumulador. Câmera lenta reduz o tempo simulado por quadro, não o passo. A linha do tempo grava snapshots (poses e estado das ligações) para voltar e repetir.
 
+### Escala de tela
+
+No zoom 1, **5 px de tela por mm**. É a escala do protótipo (1 px do v0 = 0,2 mm), então as cenas migradas aparecem do mesmo tamanho. O zoom vai de 0,15× a 8× (0,75 a 40 px por mm). Os tamanhos dos assets do lote 01 foram calculados para essa escala.
+
 ### Escala interna
 
 A cena é em mm, mas os motores 2D funcionam melhor com corpos de 0,1 a 10 unidades. O adaptador converte com uma escala única. A escala e os limites de velocidade são decididos no comparativo do item 1.4 e documentados em `docs/decisoes/motor.md`.

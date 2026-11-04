@@ -12,13 +12,12 @@ Uso pessoal. Roda no navegador, no celular e no computador.
 - `docs/arquitetura.md`: como o app é dividido, o formato da cena e o modelo de física.
 - `docs/roadmap.md`: as fases do projeto.
 - `docs/fases/`: o plano detalhado de cada fase, com itens e critérios de aceite.
-- `docs/identidade/frames.md`: as direções visuais candidatas.
-- `docs/coordenacao/`: papéis e instruções do coordenador.
+- `docs/identidade/`: a identidade Prancha índigo e o frame oficial.
 - `reference/prototype-v0/`: o protótipo que validou a ideia. É referência, não código do app.
 
 ## Estado
 
-Fase 0 (direção) em andamento. A Fase 1 (fundação) pode começar em paralelo.
+Fase 1 (fundação) em andamento no branch `fase-1`. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
 
 ## Rodar
 
