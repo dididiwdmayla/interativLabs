@@ -118,7 +118,7 @@ Bonito o bastante para apresentar. Nada genérico, nada com cara de template. A 
 ## Commits
 
 - Mensagens em português: `Fase N · item M — descrição`. Um commit por item, push após cada commit.
-- Cada fase roda num branch próprio e chega ao `main` por PR. O coordenador revisa o PR; o Will faz o merge.
+- Cada fase roda num branch próprio (`fase-N`); cada parte da fase chega ao `main` por um PR, com o título que o prompt definir. O coordenador revisa; o Will faz o merge.
 - Se a sessão cair, retome pelo `git log`: o último `Fase N · item M` diz onde parou.
 - Antes de commitar: `npm run lint`, `npm run typecheck`, `npm test` e `npm run build` limpos, sem avisos.
 - Ao fechar uma fase: `docs/verificacao-fase-N.md` com o que foi feito, o que ficou de fora e por quê, as medidas pedidas e as capturas em `docs/capturas/fase-N/`.
