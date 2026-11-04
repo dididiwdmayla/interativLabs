@@ -107,6 +107,7 @@ export class Runtime {
   private io: BodyIO;
   private st: BodyState[];
   private fresh: boolean[];
+  private pre: BodyState[];
   private chambers: ChamberSim[];
   private chamberById = new Map<Id, ChamberSim>();
   private chamberGeo: ChamberGeometry[] = [];
@@ -130,6 +131,7 @@ export class Runtime {
     this.jointTorque = options.jointTorque ?? (() => null);
     this.st = plan.bodies.map((b) => ({ x: b.position[0], y: b.position[1], angle: 0, vx: 0, vy: 0, w: 0 }));
     this.fresh = plan.bodies.map(() => false);
+    this.pre = this.st.map((b) => ({ ...b }));
     this.gasSpring = options.gasSpring;
     this.chambers = plan.chambers.map((p) => new ChamberSim(p));
     for (const c of this.chambers) this.chamberById.set(c.p.id, c);
@@ -170,6 +172,9 @@ export class Runtime {
     this.fresh.fill(false);
     this.events = [];
     const io = this.io;
+    // estado antes do passo (velocidade de aproximação dos sensores)
+    if (this.plan.sensors.length)
+      for (let i = 1; i < this.st.length; i++) if (this.dyn(i)) Object.assign(this.pre[i]!, this.body(i));
     for (const a of this.plan.axles) {
       if (!a.torsion || this.native.has(a.id)) continue;
       const A = this.body(a.a);
@@ -343,12 +348,26 @@ export class Runtime {
     const s = this.sensors.get(sensorId);
     if (!s) return;
     if (otherBody === s.p.body) return;
+    // velocidade relativa no centro do sensor antes e depois do passo: vale a
+    // maior (um batente rígido pode parar a peça dentro do passo do toque)
+    const rel = (st: (i: number) => BodyState) => {
+      const at = (i: number, px: number, py: number): Vec2 => {
+        if (!this.dyn(i)) return [0, 0];
+        const b = st(i);
+        return [b.vx - b.w * (py - b.y), b.vy + b.w * (px - b.x)];
+      };
+      const c = this.world(s.p.body, s.p.center);
+      const v1 = at(otherBody, c[0], c[1]);
+      const v0 = at(s.p.body, c[0], c[1]);
+      return dhypot(v1[0] - v0[0], v1[1] - v0[1]);
+    };
+    const before = rel((i) => this.pre[i]!);
     this.fresh[otherBody] = false;
     this.fresh[s.p.body] = false;
-    const c = this.world(s.p.body, s.p.center);
-    const v1 = this.pointVel(otherBody, c[0], c[1]);
-    const v0 = this.pointVel(s.p.body, c[0], c[1]);
-    const speed = dhypot(v1[0] - v0[0], v1[1] - v0[1]);
+    const speed = Math.max(
+      before,
+      rel((i) => this.body(i)),
+    );
     if (speed + 1e-9 >= s.p.minSpeed) this.pending.push({ sensor: sensorId, part: otherPart, speed });
   }
 

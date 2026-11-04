@@ -1,0 +1,222 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Trava de porta",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 2,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Porta",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Lingueta e batente",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L3",
+      "name": "Maçaneta",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p4",
+      "ref": 1,
+      "name": "Porta",
+      "layer": "L1",
+      "x": 56,
+      "y": 50,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-38, -20],
+          [38, -20],
+          [38, 20],
+          [-38, 20]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 2,
+      "name": "Batente superior",
+      "layer": "L2",
+      "x": 100,
+      "y": 38,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-6, -8],
+          [6, -8],
+          [6, 8],
+          [-6, 8]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p6",
+      "ref": 3,
+      "name": "Batente inferior",
+      "layer": "L2",
+      "x": 100,
+      "y": 62,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-6, -8],
+          [6, -8],
+          [6, 8],
+          [-6, 8]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p7",
+      "ref": 4,
+      "name": "Fundo do batente",
+      "layer": "L2",
+      "x": 104.2,
+      "y": 50,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-1.8, -4],
+          [1.8, -4],
+          [1.8, 4],
+          [-1.8, 4]
+        ],
+        "holes": []
+      },
+      "material": "wood",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p8",
+      "ref": 5,
+      "name": "Lingueta",
+      "layer": "L2",
+      "x": 86.81720430107526,
+      "y": 50.05591397849463,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-12.417204301075266, -2.855913978494624],
+          [10.382795698924737, -2.855913978494624],
+          [13.182795698924735, 0.34408602150537604],
+          [13.182795698924735, 2.7440860215053764],
+          [-12.417204301075266, 2.7440860215053764]
+        ],
+        "holes": []
+      },
+      "material": "brass",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p9",
+      "ref": 6,
+      "name": "Maçaneta",
+      "layer": "L3",
+      "x": 67.64021781408012,
+      "y": 62.94780241151304,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [10.959782185919881, -16.547802411513032],
+          [12.959782185919881, -16.547802411513032],
+          [13.55978218591988, 1.4521975884869676],
+          [11.959782185919881, 3.4521975884869676],
+          [-21.64021781408012, 5.452197588486968],
+          [-22.44021781408012, 2.252197588486968],
+          [10.359782185919881, -0.5478024115130324]
+        ],
+        "holes": []
+      },
+      "material": "polymer",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k10",
+      "ref": 7,
+      "kind": "slider",
+      "a": "p4",
+      "b": "p8",
+      "at": [-0.8172043010752645, -0.05591397849462396],
+      "dir": 3.141592653589793,
+      "travel": [0, 14],
+      "spring": {
+        "k": 0.0035316,
+        "rest": -2.4000000000000004,
+        "damping": 0.0000029714
+      }
+    },
+    {
+      "id": "k11",
+      "ref": 8,
+      "kind": "pin",
+      "host": "p8",
+      "at": [-9.817204301075265, 0.34408602150537604],
+      "r": 0.8,
+      "layers": ["L2", "L3"]
+    },
+    {
+      "id": "k12",
+      "ref": 9,
+      "kind": "axle",
+      "a": "p4",
+      "b": "p9",
+      "at": [11.959782185919881, 0.6521975884869676],
+      "limit": {
+        "lower": -0.5235987755982988,
+        "upper": 0
+      },
+      "torsion": {
+        "k": 0.35316,
+        "rest": 0.3490658503988659,
+        "damping": 0.00014856819999999998
+      }
+    }
+  ]
+}

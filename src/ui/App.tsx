@@ -32,7 +32,7 @@ export function App() {
       </Suspense>
     );
   }
-  if (route === "#lab") {
+  if (route === "#lab" || route.startsWith("#lab/")) {
     return (
       <Suspense fallback={<p className="route-missing">Carregando o laboratório…</p>}>
         <LabPage />

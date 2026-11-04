@@ -29,7 +29,3 @@ export async function runAllFixtures(): Promise<LabHashReport> {
   }
   return { userAgent: navigator.userAgent, results };
 }
-
-export function exposeLabHook(): void {
-  (window as unknown as { __LAB__?: { runAll: typeof runAllFixtures } }).__LAB__ = { runAll: runAllFixtures };
-}

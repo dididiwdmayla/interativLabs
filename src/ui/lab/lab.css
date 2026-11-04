@@ -1,0 +1,379 @@
+/*
+ * Página /#lab. Mobile-first (390 px). Só tokens da Prancha índigo; o desenho
+ * do palco é provisório (traço branco, gás em brasa, a mão em ouro velho).
+ */
+
+.lab {
+  height: 100%;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-stage);
+  color: var(--color-ink);
+  padding: var(--space-5) var(--space-4) var(--space-10);
+  font-variant-numeric: tabular-nums;
+}
+
+.lab > * {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lab__head {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--stroke-frame-thin) solid var(--color-ink-3);
+  box-shadow: 0 3px 0 -2px var(--color-ink-3);
+  margin-bottom: var(--space-4);
+}
+
+.lab__kicker {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-label);
+  line-height: var(--leading-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+.lab__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-screen);
+  line-height: var(--leading-screen);
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+}
+
+.lab__lede {
+  margin: var(--space-2) 0 0;
+  max-width: 62ch;
+  color: var(--color-ink-2);
+}
+
+/* ---------- escolha ---------- */
+
+.lab__pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  margin-bottom: var(--space-3);
+}
+
+.lab__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.lab__label,
+.lab__sub {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-label);
+  line-height: var(--leading-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+.lab__field select {
+  min-height: var(--touch-min);
+  width: 100%;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-ink-3);
+  border-radius: var(--radius-1);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.lab__runs,
+.lab__speeds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.lab__chip {
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-ink-3);
+  border-radius: var(--radius-1);
+  background: transparent;
+  color: var(--color-ink-2);
+  font-size: var(--text-button);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lab__chip[aria-pressed="true"] {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+/* ---------- palco ---------- */
+
+.lab__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.lab__stage {
+  position: relative;
+  aspect-ratio: var(--ar, 4 / 3);
+  max-height: 60vh;
+  min-height: 220px;
+  width: 100%;
+  border: var(--stroke-frame-thin) solid var(--color-ink-3);
+  background: var(--color-stage-low);
+  touch-action: none;
+  overflow: hidden;
+}
+
+.lab__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.lab__wait {
+  margin: var(--space-4);
+  color: var(--color-ink-2);
+}
+
+.lab__part path {
+  fill: var(--color-raised);
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-outline);
+  stroke-linejoin: round;
+}
+
+.lab__part:not(.lab__part--dyn) path {
+  fill: url(#lab-hatch);
+  stroke: var(--color-ink-2);
+}
+
+.lab__hatch-bg {
+  fill: var(--color-stage-low);
+}
+
+.lab__hatch {
+  stroke: var(--color-ink-3);
+  stroke-width: 0.75px;
+  vector-effect: non-scaling-stroke;
+}
+
+.lab__part--dyn path {
+  cursor: grab;
+}
+
+.lab__part--held path {
+  stroke: var(--color-gold);
+  stroke-width: var(--stroke-select);
+}
+
+.lab__pin {
+  fill: var(--color-stage);
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-outline);
+}
+
+.lab__sensor {
+  fill: none;
+  stroke: var(--color-ember);
+  stroke-width: var(--stroke-bevel);
+  stroke-dasharray: var(--dash-hidden);
+}
+
+.lab__sensor--hit {
+  fill: var(--color-ember);
+  fill-opacity: 0.5;
+}
+
+.lab__joint circle,
+.lab__joint rect {
+  fill: var(--color-stage);
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-bevel);
+}
+
+.lab__joint path {
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-bevel);
+}
+
+.lab__spring {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-outline);
+  stroke-linejoin: round;
+}
+
+.lab__rod {
+  stroke: var(--color-ink);
+  stroke-width: 3px;
+  stroke-linecap: round;
+}
+
+.lab__cable {
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-outline);
+}
+
+.lab__cable--slack {
+  stroke-dasharray: var(--dash-hidden);
+}
+
+.lab__gas {
+  fill: var(--color-ember);
+  stroke: var(--color-ember);
+  stroke-width: var(--stroke-bevel);
+}
+
+.lab__gauge {
+  fill: var(--color-ember);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- controles ---------- */
+
+.lab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.lab__play {
+  min-width: 120px;
+}
+
+.lab__time {
+  margin-left: auto;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: var(--text-value);
+  line-height: var(--leading-value);
+  color: var(--color-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- informação ---------- */
+
+.lab__name {
+  margin: 0;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-panel-title);
+  line-height: var(--leading-panel-title);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.lab__notes {
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--color-ink-2);
+}
+
+.lab__sub {
+  margin: 0 0 var(--space-2);
+}
+
+.lab__asserts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--stroke-frame-thin) solid var(--color-ink-faint);
+}
+
+.lab__assert {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  column-gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: var(--stroke-frame-thin) solid var(--color-ink-faint);
+}
+
+.lab__alabel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lab__arun,
+.lab__aexp {
+  color: var(--color-ink-2);
+}
+
+.lab__avalue {
+  grid-column: 2;
+  color: var(--color-ink-2);
+  font-size: var(--text-label);
+  line-height: var(--leading-label);
+  overflow-wrap: anywhere;
+}
+
+.lab__mark {
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  fill: none;
+  stroke-width: 2;
+}
+
+.lab__mark--pass {
+  stroke: var(--color-ink);
+}
+
+.lab__mark--fail {
+  stroke: var(--color-ember);
+}
+
+.lab__mark--expected {
+  stroke: var(--color-ink-3);
+}
+
+.lab__mark--wait {
+  fill: var(--color-ink-3);
+  stroke: none;
+}
+
+.lab__assert--fail .lab__alabel {
+  color: var(--color-ember);
+}
+
+@media (min-width: 1024px) {
+  .lab {
+    padding: var(--space-6) var(--space-8) var(--space-10);
+  }
+
+  .lab__body {
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+    align-items: start;
+  }
+
+  .lab__stage {
+    aspect-ratio: auto;
+    height: 62vh;
+    max-height: none;
+  }
+
+  .lab__info {
+    max-height: calc(62vh + var(--touch-min) + var(--space-3));
+    overflow-y: auto;
+  }
+}

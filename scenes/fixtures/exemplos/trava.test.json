@@ -1,0 +1,57 @@
+{
+  "id": "exemplos/trava",
+  "group": "exemplos",
+  "title": "Trava de porta",
+  "notes": "Recalibrada do protótipo para gravidade real: camadas de 3 mm, forças × 29,43, amortecimentos × 2,97. Girar a maçaneta recolhe a lingueta pelo pino; soltando, a mola de torção e a do trilho devolvem tudo.",
+  "view": [30, 25, 90, 50],
+  "runs": [
+    {
+      "name": "girar e soltar",
+      "duration": 2,
+      "inputs": [
+        {
+          "kind": "drag",
+          "part": "p9",
+          "from": [46, 66.8],
+          "to": [53.9, 85.5],
+          "t0": 0.3,
+          "t1": 0.6,
+          "release": 0.9
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "at",
+          "label": "a maçaneta gira 30°",
+          "q": {
+            "link": "k12",
+            "field": "angle"
+          },
+          "t": 0.85,
+          "max": -0.5149
+        },
+        {
+          "kind": "at",
+          "label": "e a lingueta recolhe pelo menos 6 mm",
+          "q": {
+            "link": "k10",
+            "field": "translation"
+          },
+          "t": 0.85,
+          "min": 6
+        },
+        {
+          "kind": "at",
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "q": {
+            "part": "p8",
+            "disp": true
+          },
+          "t": 1.9,
+          "max": 0.3
+        }
+      ]
+    }
+  ],
+  "scene": "../../examples/trava.json"
+}

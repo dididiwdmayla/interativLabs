@@ -4,6 +4,7 @@
  * Uso: npm run fixtures [-- calibracao,fixacoes]
  */
 import { generateCalibracao } from "./calibracao";
+import { generateExemplos } from "./exemplos";
 import { generateFixacoes } from "./fixacoes";
 import { generateGas } from "./gas";
 import { generateMolas } from "./molas";
@@ -15,6 +16,7 @@ const GROUPS: Record<string, () => void> = {
   molas: generateMolas,
   rasgos: generateRasgos,
   gas: generateGas,
+  exemplos: generateExemplos,
 };
 
 export async function main(args: string[]) {
