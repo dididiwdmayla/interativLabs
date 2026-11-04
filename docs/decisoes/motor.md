@@ -159,6 +159,27 @@ Leitura:
 
 **Determinismo entre plataformas.** O código comum (runtime, adaptador, plano, geometria, migrações) não usa mais `Math.sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `exp`, `log`, `pow` nem `hypot`: usa os portes do fdlibm de `src/geometry/dmath.ts` (só +, −, ×, ÷ e `Math.sqrt`, exatos no IEEE 754), com erro de ~1 ulp contra o `Math` (`dmath.test.ts`). O ângulo dos corpos é lido por `datan2` sobre a rotação do Box2D (o `b2Rot_GetAngle` do próprio motor é uma aproximação com erro de 3·10⁻⁵ rad, e o `b2MakeRot`, de 4·10⁻⁴; os dois ficaram de fora). Todas as cenas de `scenes/fixtures/` dão o mesmo hash no Node e no Chromium (`scenes/fixtures/hashes.json`, conferido pelo Vitest e por `tests/e2e/determinism.spec.ts`).
 
+## Bancada com o Box2D calibrado (Parte C, item 5.8)
+
+A bancada roda de novo as oito cenas (gravidade de bancada, 100 mm/s²) com o Box2D na calibração do app (`npm run bench`, `npm run bench:browser`). Planck e Rapier continuam com o que tinham; a v2 mudou para todos só a densidade do aço (7,85 g/cm³ em vez de 7,8) e as funções transcendentais do código comum (`dmath`).
+
+| Cena | Passa | Node mediana / p95 (ms) | Chromium mediana / p95 (ms) | Penetração máx. (mm) | Determinístico | Hash Node = Chromium |
+| --- | --- | --- | --- | --- | --- | --- |
+| 01-lancador | sim | 0,109 / 0,301 | 0,090 / 0,470 | 0,0054 | sim | sim |
+| 02-trava | sim | 0,027 / 0,047 | 0,030 / 0,050 | 0,0034 | sim | sim |
+| 03-engrenagens | **não** | 0,105 / 0,180 | 0,090 / 0,130 | 0,0229 | sim | sim |
+| 04-pilha | sim | 0,362 / 0,521 | 0,400 / 0,600 | 0,0006 | sim | sim |
+| 05-corrente | sim | 0,105 / 0,183 | 0,110 / 0,160 | 0,0000 | sim | sim |
+| 06-pinhao-cremalheira | sim | 0,089 / 0,146 | 0,120 / 0,160 | 0,0024 | sim | sim |
+| 07-bala | sim | 0,019 / 0,054 | 0,060 / 0,100 | 0,1040 | sim | sim |
+| 08-escalas | sim | 0,051 / 0,084 | 0,070 / 0,110 | 0,0000 | sim | sim |
+| 08-escalas (10 mm/un) | sim | 0,050 / 0,084 | 0,070 / 0,120 | 0,0000 | sim | sim |
+
+- Passa em 7 de 8. A única falha é a catraca da cena migrada (26,3°, o passo de dente é 25,7°): com o contato mais rígido ela para mais perto do batente (antes 35,1°). O exemplo `scenes/examples/engrenagens.json` corrige a cena (batente da lingueta em −12°) e passa (23,7°).
+- Pilha e pinhão, que falhavam com o Box2D padrão, passam; a penetração cai de 0,13 mm para menos de 0,003 mm. O preço é o custo: 16 subpassos deixam as cenas leves em 0,03–0,12 ms e a pilha em 0,36–0,40 ms por passo.
+- **Hash Node = Chromium: 36 de 36** (antes 35; a exceção era o Box2D na cena 3, pelo `Math.atan2` na leitura de ângulo). O Rapier fica com 2,08% na razão das engrenagens (passava com 1,9%) por causa do aço mais pesado; está marcado como falha esperada no Vitest.
+- Pacote (build de produção, gzip): app principal 73,6 KB; motor do app sob demanda = JS do Box2D 11,4 KB + WASM 210,9 KB + adaptador 12,4 KB + plano, runtime e geometria 31,2 KB; página `/#lab` 79,6 KB (com o Zod e os roteiros).
+
 ## Escala interna e limite de velocidade (proposta)
 
 - **1 mm por unidade.** A 10 mm/un o Planck emperra as engrenagens de módulo 1 (a pele de polígono, 2 × `linearSlop` = 0,1 mm, passa da folga de 0,04 mm) e trava o pinhão; falha também no tremor da cena 8 com gravidade real. Rapier e Box2D dão o mesmo resultado nas duas escalas, exceto o pinhão, que passa a 10 mm/un nos dois. A 1 mm/un os números da cena são os do motor, sem conversão.

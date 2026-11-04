@@ -1,11 +1,11 @@
 {
   "planck": {
     "files": [
-      "engine-planck-D_qvq2fX.js"
+      "engine-planck-nofJXKpu.js"
     ],
-    "js": 210792,
+    "js": 211055,
     "wasm": 0,
-    "gzip": 46887
+    "gzip": 47019
   },
   "rapier-det": {
     "files": [
@@ -34,19 +34,19 @@
   },
   "comum (bancada, geometria, runtime)": {
     "files": [
-      "runtime-Bjii5qAN.js",
-      "bench.worker-Ckt0JoGK.js"
+      "runtime-BlIMQ8tK.js",
+      "bench.worker-BqrotD--.js"
     ],
-    "js": 302089,
+    "js": 332076,
     "wasm": 0,
-    "gzip": 74414
+    "gzip": 85127
   },
   "app principal": {
     "files": [
-      "index-CalgmcdK.js"
+      "index-CIzTMDFZ.js"
     ],
-    "js": 236902,
+    "js": 237379,
     "wasm": 0,
-    "gzip": 73502
+    "gzip": 73671
   }
 }

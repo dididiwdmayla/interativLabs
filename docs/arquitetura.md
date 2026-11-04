@@ -32,29 +32,47 @@ Scene (JSON) ──compile──▶ EngineWorld ──step──▶ Snapshot ─
 
 ### Interface do motor (`src/engine/types.ts`)
 
-Todo motor fica atrás do mesmo adaptador. Fora dele, tudo é em mm, g, s e rad; só o adaptador conhece a escala interna.
+O app usa um motor só, o Box2D v3, carregado sob demanda por `src/engine/box2d/load.ts`. Ele fica atrás do adaptador comum, que a bancada (`/#bench`) também usa para Planck e Rapier. Entra a cena v2 (mm, g, s, N, kPa, rad); sai o snapshot nas unidades da cena. Só o adaptador conhece a escala interna.
 
 ```ts
 interface EngineAdapter {
   readonly meta: { id: string; name: string; version: string; iterations: string };
   compile(scene: Scene, options: { unitMm: number }): CompileReport; // avisos, corpos, formas, juntas
   step(dt: number): void;            // um passo; o passo fixo de 1/240 s fica em src/sim
-  snapshot(): Snapshot;              // poses (mm, rad), estado das ligações e eventos do passo
+  snapshot(): Snapshot;              // poses, estado das ligações e eventos do passo
   pose(partId: Id): PartPose | null; // uma peça, sem montar o snapshot
-  dragStart(partId: Id, pointMm: Vec2): boolean;
+  dragStart(partId: Id, pointMm: Vec2): boolean; // o dedo
   dragMove(pointMm: Vec2): void;
   dragEnd(): void;
   contactsDepthMax(): number;        // maior penetração do passo, mm
-  setMotorSpeed(linkId: Id, speed: number): void; // rad/s
+  setMotorSpeed(linkId: Id, speed: number): void;        // rad/s
   setVelocity(partId: Id, v: Vec2, omega: number): void; // roteiros de teste
+  setForce(partId: Id, force: Vec2 | null, at?: Vec2): void; // N, constante até trocar (roteiros)
+  ignite(linkId: Id): boolean;                           // acende uma câmara (como o sensor)
+  setVent(linkId: Id, vent: number, open: boolean): void; // válvula de um respiro
   dispose(): void;
 }
 ```
 
-- `Snapshot`: `time`, `steps`, `parts[id] = { x, y, angle }`, `links[id]` (eixo: `angle`, `speed`, `gap`; trilho: `translation`; mola: `length`; câmara: `gas`, `pressure`, `fired`, `vented`; sensor: `count`) e `events` (`sensor`, `chamber-fired`, `chamber-vented`).
-- Parte comum a todos os motores: `plan.ts` (cena → corpos compostos, peças convexas, massa pela geometria, juntas) e `runtime.ts` (mola de torção, mola do trilho, mola entre pontos, câmara, sensor e arrasto, em unidades da cena). O adaptador só traduz o plano e lê e escreve nos corpos.
+Snapshot (`time`, `steps`, `parts[id] = { x, y, angle }`, `links[id]`, `events`). Forças em N, torques em N·mm, pressão em kPa, gás em mmol, trabalho em mJ (N·mm):
+
+| Ligação | Estado |
+| --- | --- |
+| Eixo | `angle` (rad, relativo à pose desenhada), `speed` (rad/s), `gap` (abertura entre os dois pontos, mm), `torque` (motor ou atrito) |
+| Trilho | `translation` (mm), `force` (ao longo do eixo: batentes, atrito e mola de retorno) |
+| Haste, cabo | `length`, `force` (+ puxa); cabo: `slack` (folga; > 0 = frouxo) |
+| Suporte elástico | `offset` (deslocamento do ponto, mm), `angle` |
+| Rasgo | modo junta: `position` (ao longo do rasgo, a partir do meio) e `deviation` (transversal); modo contato: `clearance` (folga até a parede; negativa = penetrando) |
+| Mola | `length`, `force` (+ empurra; inclui o batente das espiras), `stopForce` (só o batente), `sideForce` (transversal ao eixo da guia) |
+| Câmara | `pressure` (absoluta), `volume` (mm³), `gas`, `fired`, `burning`, `walls[] = { part, force, impulse (N·s), work, travel, sealed }`, `vents[] = { open, exposed }`, `ports[] = { exposed }` |
+| Sensor | `count` |
+
+Eventos do passo: `sensor` (peça e velocidade de aproximação), `chamber-fired`, `wall-unsealed`, `vent-opened` (pela parede que passa ou pelo sensor), `vent-closed`, `port-opened` e `impact` (duas peças, velocidade de aproximação acima de 100 mm/s e o ponto; para som e faíscas futuros).
+
+- Parte comum a todos os motores: `plan.ts` (cena → corpos compostos, peças convexas, massa pela geometria e pela espessura da camada, ligações em unidades internas g·mm·s), `runtime.ts` (forças explícitas, sensor, arrasto de reserva, snapshot) e `chamber.ts` (o gás). O adaptador traduz o plano e lê e escreve nos corpos.
 - Corpo dinâmico com origem no centro de massa e ângulo 0 na pose desenhada; cada grupo fixo é um corpo estático próprio (uma junta com uma peça fixa só desliga o contato com aquela peça). O índice 0 é o fundo, ponta das ligações com `a: null`.
-- Adaptadores do comparativo: Planck, Rapier 2D (padrão e determinístico) e Box2D v3 (`box2d3-wasm`), carregados sob demanda por `src/engine/registry.ts`.
+- Determinismo: o código comum (geometria, plano, runtime, câmara, adaptador, migrações) não usa as funções transcendentais do JS; usa `src/geometry/dmath.ts` (portes do fdlibm, só operações exatas do IEEE). O mesmo hash no Node e no Chromium em todas as cenas de `scenes/fixtures/`.
+- `src/sim/`: roteiros das cenas de teste (`script.ts`: entradas no tempo e afirmações sobre grandezas), executor sem DOM (`runner.ts`) e o registro das cenas (`fixtures.ts`). O laboratório (`/#lab`) e o Vitest usam o mesmo executor.
 
 ## 3. Formato da cena (versão 1)
 
@@ -168,6 +186,16 @@ Regras da v2:
 - **Furo e rasgo como guia.** `slot` liga um pino ao furo `hole` da peça-guia. `joint`: só em rasgo reto, vira restrição de ponto sobre segmento com rotação livre e batentes nas pontas (preciso, sem folga). `contact`: qualquer forma de furo (curva, em L, mancal redondo); o pino colide com as paredes do furo, com a folga real do desenho. O pino precisa ocupar a camada da peça-guia.
 - **Gás que empurra tudo.** A pressão age em cada parede (`walls`) para fora e devolve a reação ao `body`. Com duas paredes móveis (um pistão à frente e um bloco atrás, sobre um trilho com mola), o bloco recua enquanto o pistão avança: o efeito de recuo do fundo (blowback) sai da física, não de animação.
 
+Como ficou na implementação (Parte C), onde o texto acima deixava margem:
+
+- **Schema** em `src/model/schema.ts`; a v1 continua lida por `schema-v1.ts` e migrada por `migrations/v1-to-v2.ts`. `parseScene` abre v0, v1 e v2, em objeto ou texto. Integridade nova: `slot.pin` aponta para um `pin`, `slot.hole` existe nos furos da guia, o pino ocupa a camada da guia, `joint` exige rasgo reto (reconhecido pela geometria em `src/geometry/slot.ts`, com tolerância; senão "Rasgo curvo: use o modo contato"), `chamber.walls` com 1 ou 2 peças móveis (nem fixas nem parafusadas ao fundo), `chamber.ports` para outra câmara, ações do sensor para câmaras e respiros existentes, `solidLength ≤ freeLength` (exceto só tração) e arame mais fino que meio diâmetro.
+- **`p0` da câmara é a pressão inicial e a do ambiente** dela: a força é `(P − p0)·A` e os respiros soltam o gás até `p0`. Câmara nova usa 101,325 kPa. A migração da v1 usa `p0 = 0`, que reproduz a força da v1 (`F = carga / s`) com `n = carga / (R·T)`.
+- **Respiro**: `open` é a válvula; o orifício só solta gás quando está dentro da câmara (descoberto pela parede, com fração linear no diâmetro). Um respiro aberto à frente do pistão é a porta que a parede descobre ao passar; um respiro fechado dentro da câmara é uma válvula que o sensor abre.
+- **Paredes**: com uma, ela é a da frente e o fundo é `at`; com duas, a da frente é a de centro mais adiante no eixo. A face interna é o extremo da peça ao longo do eixo. `seal` conta o curso para fora desde a pose desenhada. A boca do cilindro (`length`) também solta o gás quando a parede da frente passa dela.
+- **Portas**: a fração descoberta é medida na câmara que declara a porta.
+- **Mola com guia**: o eixo é o eixo principal (maior momento de área) do contorno da peça-guia, orientado de A para B; o comprimento é a projeção nesse eixo.
+- **Espessura**: camada nova com 3 mm; camada migrada com 10 mm (as massas da v1).
+
 ## 4. Física
 
 ### Camadas como filtros
@@ -176,33 +204,38 @@ Cada camada `i` tem o bit `1 << i`. Uma peça usa categoria e máscara iguais ao
 
 ### Motor
 
-**Box2D v3** (`box2d3-wasm`, build compat), decidido em 04/11/2026 pelo comparativo de `docs/decisoes/motor.md`: o mais rápido nas cenas pesadas, determinístico entre plataformas (o motor é WASM), 219 KB gzip carregados só no modo Simular. Planck e Rapier ficam só na página `/#bench`, para comparação, e saem do pacote do app. Escala interna: **1 mm por unidade**. Os padrões do Box2D estão em metros: todo parâmetro de velocidade (empurrão de contato, limiar de restituição, limiar de evento de impacto, velocidade máxima) é convertido para mm/s no adaptador.
+**Box2D v3** (`box2d3-wasm` 6.0.0, build compat, Box2D v3.2), decidido em 04/11/2026 pelo comparativo de `docs/decisoes/motor.md`. O app carrega só ele, sob demanda (`src/engine/box2d/load.ts`: ~222 KB gzip de JS e WASM); Planck e Rapier ficam só na página `/#bench`. Escala interna: **1 mm por unidade**.
+
+**Calibração para gravidade real** (`CALIBRATED_TUNING`, tabela em `docs/decisoes/motor.md`): os parâmetros que o Box2D define em metros viraram mm/s (empurrão máximo de contato 3 000 mm/s, limiar de quique 1 000 mm/s, impacto 100 mm/s, velocidade máxima 40 000 mm/s); `b2SetLengthUnitsPerMeter(5)` (folga linear 0,025 mm, distância especulativa 0,1 mm); contato a 480 Hz com amortecimento 3; juntas no teto de rigidez (960 Hz, ¼ do subpasso) sem amortecimento; **16 subpassos** por passo de 1/240 s. Com isso a pilha de 200 caixas, a corrente de 40 elos, o pinhão e a bala passam com 9 810 mm/s², e a pilha custa 0,44 ms por passo no Chromium.
 
 ### Ligações no motor (v2)
 
 | Ligação | No motor |
 | --- | --- |
 | Parafuso | Corpo composto (união por componentes conexos). Grupo com peça fixa ou parafuso ao fundo = corpo estático. |
-| Eixo | Junta de revolução nativa: motor, batente e mola de torção nativos; atrito como motor de velocidade zero com torque máximo = atrito. |
-| Haste | Junta de distância rígida (mínimo = máximo). |
-| Cabo | Junta de distância com só o máximo ativo; sem mola. |
-| Suporte elástico | Junta soldada com frequências linear e angular e amortecimento. |
-| Trilho | Junta prismática nativa com batentes; mola de retorno nativa ou força, o que for estável; atrito como motor de velocidade zero. |
-| Pino, sensor | Forma circular extra no corpo hospedeiro, com o filtro da faixa de camadas. Sensor gera evento com a velocidade de aproximação. |
-| Rasgo (`joint`) | Junta de roda (ponto sobre reta, rotação livre) sem mola, com batentes nas pontas do rasgo. |
+| Eixo | Junta de revolução: motor e batente nativos; mola de torção nativa (frequência pela rigidez e pela massa axial 1/(iA + iB) do Box2D); atrito como motor de velocidade zero com torque máximo = atrito (sem motor). |
+| Haste | Junta de distância rígida no comprimento desenhado; não desliga o contato entre as peças. |
+| Cabo | Junta de distância com mola ligada e rigidez zero: só os batentes, com máximo = comprimento do cabo. |
+| Suporte elástico | Junta soldada com `linearHz`, `angularHz` e a mesma razão de amortecimento. Estática: mola linear ω²·K⁻¹ no ponto e angular ω²·I. |
+| Trilho | Junta prismática com batentes; mola de retorno nativa (frequência pela massa axial na pose desenhada; o Box2D v3.2 não conta a mola na força de reação, então o snapshot soma `−k·(x − repouso) − c·v`); atrito como motor de velocidade zero. |
+| Pino, sensor | Forma circular extra no corpo hospedeiro, com o filtro da faixa de camadas. O sensor conta a maior velocidade relativa entre antes e depois do passo (um batente rígido pode parar a peça dentro do passo do toque). |
+| Rasgo (`joint`) | Junta de roda sem mola: o centro do pino sobre a linha de centro do rasgo reto, rotação livre, batentes nas pontas descontado o raio do pino. Desliga o contato entre a guia e a peça do pino. |
 | Rasgo (`contact`) | Nada além da geometria: o furo existe na peça-guia (decomposição com furos) e o pino colide com as paredes. |
-| Mola | Força de Hooke com amortecimento, aplicada a cada passo; mola rígida demais para o passo vira junta de distância com mola nativa (rigidez e massa efetiva convertidas em frequência). Modos e comprimento sólido como na v2. |
-| Câmara | Força customizada a cada passo (ver abaixo). |
+| Mola | Toda mola ganha uma junta de distância com mínimo = comprimento sólido (o batente das espiras) e sem colisão desligada. Força de Hooke explícita a cada passo, com o modo (apoiada só age encostada e só empurra; só tração só age esticada e só puxa); se `ω·h > 0,5` ou `c·h/m > 0,25` (m = massa efetiva ao longo da mola na pose desenhada), vira a mola nativa da junta, com `lower/upperSpringForce` no lugar do modo. Mola com guia é sempre explícita. |
+| Câmara | Estado do gás comum (`src/engine/chamber.ts`); a força entra no solver como mola de distância entre as faces (ver abaixo). |
+| Arrasto (o dedo) | Corpo cinemático no dedo e junta de motor com mola linear (resolvida junto com os contatos, como nos exemplos do Box2D v3.2). Frequência `min(30, 6·√(g/100))` Hz e força máxima `(6 000·m + 4 000)·g/100` g·mm/s²: os 6 Hz e a força do protótipo, escalados com a gravidade. |
 
 ### Câmara de gás (v2)
 
-- Gás ideal. `V = A × L`, com `A = π·(bore/2)²` e `L` a distância entre as faces internas das paredes ao longo do eixo (ou entre o fundo e a parede, com uma só).
-- `isothermal`: `P = nRT/V`. `adiabatic`: depois da queima, `P·V^γ` constante. Pressão em kPa; força em cada parede `F = (P − P_atm) × A`, para fora; a soma das reações vai ao `body`.
-- Queima: o sensor aciona; a carga entra linear em `burnMs`.
-- Vedação: uma parede que anda mais que `seal` abre a câmara.
-- Escape: respiro aberto, ou descoberto por uma parede que passa por ele, solta gás pelo orifício: `dn/dt` proporcional à área do orifício e à pressão (fluxo estrangulado simplificado). Portas ligam câmaras e trocam gás pela diferença de pressão.
-- O snapshot traz, por câmara: pressão, volume, gás e o trabalho feito em cada parede. Esse é o dado dos gráficos da Fase 5.
-- Plausível e didático, não balística real.
+- Gás ideal. `V = A·L`, com `A = π·(bore/2)²` e `L` a distância entre as faces internas das paredes ao longo do eixo (ou entre o fundo e a parede, com uma só), no mínimo 0,05 mm.
+- Estado: gás `n` (mmol) e, no adiabático, a energia interna `U` (kPa·mm³). `P = n·R·T/V` (isotérmico, `R·T` = 2 437,4 kPa·mm³/mmol a 20 °C) ou `P = (γ − 1)·U/V` (adiabático). Entre um passo e o seguinte sem troca de gás, `U ← U·(V_antes/V)^(γ−1)`: `P·V^γ` constante exatamente.
+- Queima: a carga entra linear em `burnMs`, na temperatura de referência; acende por `ignite` ou ação de sensor, uma vez só.
+- Força em cada parede `F = (P − p0)·A`, para fora; a reação vai ao corpo (com duas paredes, as reações se anulam).
+- Escape (respiros descobertos e abertos, paredes desvedadas, boca do cilindro): `dn/dt = −K·A_o·(P − p0)`, `K = 0,05 mmol/(s·mm²·kPa)` (fluxo estrangulado do ar a 20 °C, 0,0814·P, com coeficiente de descarga 0,62, aplicado à diferença de pressão). Com orifícios de milímetros a constante de tempo `τ = V/(K·A_o·R·T)` é de microssegundos: integração exata, `n ← n_eq + (n − n_eq)·e^(−h/τ)`. No adiabático, o gás que sai expande o que fica (`U ∝ n^γ`); o que entra traz `γ·R·T/(γ − 1)` por mol.
+- Portas: a diferença de `n/V` entre as duas câmaras decai com taxa `K·A·R·T·(1/V₁ + 1/V₂)`, exata no passo; o gás leva a temperatura de quem cede.
+- **Força no solver.** Como força explícita, uma vez por passo, o gás é rígido demais: um pistão de gramas sob centenas de kPa atravessaria a câmara num passo. No Box2D a força do gás entra como mola de distância entre as faces, relinearizada a cada passo: rigidez `k = γ·P·A/L` (γ = 1 no isotérmico) e comprimento livre `L + F/k`, implícita no solver. Com a câmara aberta a rigidez efetiva cai para `k·τ/(τ + h)`; quando `ω·h < 0,5` a força volta a ser explícita (e a junta tem o impulso zerado). O estado termodinâmico (P, V, n, U) é sempre o exato; o trabalho e o impulso de cada parede vêm da força que o motor de fato aplicou.
+- Snapshot por câmara: pressão, volume, gás e, por parede, força, impulso, trabalho, curso e vedação. É o dado dos gráficos da Fase 5.
+- Plausível e didático, não balística real. Com 240 passos por segundo, um disparo de gás dura de 2 a 10 passos: a câmera lenta (0,05×) mostra cada um.
 
 ### Passo de tempo
 
@@ -256,5 +289,6 @@ No zoom 1, **5 px de tela por mm**. É a escala do protótipo (1 px do v0 = 0,2 
 | Biblioteca de booleanos de polígono | Fase 1 · item 3 | Fechada: Clipper2 (`clipper2-ts`), escala inteira de 10 000 por mm; triangulação pelo earcut (`docs/decisoes/geometria.md`) |
 | Motor de física | Fase 1 · item 4 | Fechada em 04/11: Box2D v3 (`box2d3-wasm`). A rodada no celular do Will, quando a Vercel estiver ligada, só confirma; se o celular mostrar problema, volta à mesa |
 | Escala interna e limite de velocidade | Fase 1 · item 4 | Fechada: 1 mm por unidade, 40 m/s (§4) |
-| Formato v2 e ligações 2.0 | 04/11 | Fechada (§3.1); entra na Fase 1 · Parte C |
-| Gravidade | 04/11 | Real (9 810 mm/s²) por padrão; calibração de contato e subpassos na Parte C |
+| Formato v2 e ligações 2.0 | 04/11 | Fechada (§3.1); implementada na Fase 1 · Parte C |
+| Gravidade | 04/11 | Real (9 810 mm/s²) por padrão; calibração de contato e subpassos feita na Parte C (§4) |
+| Funções transcendentais | Fase 1 · Parte C | Fechada: `src/geometry/dmath.ts` (fdlibm) em todo o código de física e geometria; mesmo hash no Node e no Chromium |

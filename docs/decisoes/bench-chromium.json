@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-11-04T11:00:28.404Z",
+  "createdAt": "2026-11-04T17:59:51.764Z",
   "environment": {
     "kind": "browser",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
@@ -30,7 +30,7 @@
       "id": "box2d",
       "name": "Box2D v3 (WASM)",
       "version": "6.0.0",
-      "iterations": "4 subpassos do solver suave por passo, contínuo contra estáticos"
+      "iterations": "16 subpassos do solver suave por passo; contato 480 Hz, juntas 960 Hz; contínuo contra estáticos"
     }
   ],
   "results": [
@@ -57,21 +57,21 @@
         {
           "label": "a esfera passa da saída do cano em até 0,5 s",
           "pass": true,
-          "value": "0,242 s",
+          "value": "0,250 s",
           "run": "repouso e disparo"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.07000000000116416,
-      "stepP95": 0.25,
+      "stepMedian": 0.09999999998835847,
+      "stepP95": 0.2600000000093132,
       "timing": "lote de 10",
-      "maxDepth": 0.05313486992289986,
-      "jitter": 0.006548784025509606,
-      "hash": "2c2de6dc62c1aa35",
-      "hashRepeat": "2c2de6dc62c1aa35",
+      "maxDepth": 0.05150250372831927,
+      "jitter": 0.006507696170784992,
+      "hash": "b1863f12ea88be4d",
+      "hashRepeat": "b1863f12ea88be4d",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 155.69999999998254
+      "wallMs": 184.59999999997672
     },
     {
       "scene": "02-trava",
@@ -101,16 +101,16 @@
         }
       ],
       "steps": 840,
-      "stepMedian": 0.020000000001164153,
-      "stepP95": 0.1099999999976717,
+      "stepMedian": 0.02000000000698492,
+      "stepP95": 0.10999999998603016,
       "timing": "lote de 10",
-      "maxDepth": 0.04854557984331047,
+      "maxDepth": 0.048341658963161845,
       "jitter": 0,
-      "hash": "82dd81385c5b5bcf",
-      "hashRepeat": "82dd81385c5b5bcf",
+      "hash": "0b2c990026fffea7",
+      "hashRepeat": "0b2c990026fffea7",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 51.60000000000582
+      "wallMs": 63.40000000002328
     },
     {
       "scene": "03-engrenagens",
@@ -125,27 +125,27 @@
         {
           "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
           "pass": true,
-          "value": "erro máx. 1,29%",
+          "value": "erro máx. 1,48%",
           "run": "a favor"
         },
         {
           "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
           "pass": false,
-          "value": "28,4°",
+          "value": "28,2°",
           "run": "a favor"
         }
       ],
       "steps": 1800,
-      "stepMedian": 0.11000000000058208,
-      "stepP95": 0.21000000000058208,
+      "stepMedian": 0.0900000000023283,
+      "stepP95": 0.2099999999976717,
       "timing": "lote de 10",
-      "maxDepth": 0.10666738571307256,
-      "jitter": 0.010288425153208616,
-      "hash": "b391fb35284b38dc",
-      "hashRepeat": "b391fb35284b38dc",
+      "maxDepth": 0.1032789408770444,
+      "jitter": 0.010767500647286935,
+      "hash": "e7b9de3a2f08ef05",
+      "hashRepeat": "e7b9de3a2f08ef05",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 416.69999999998254
+      "wallMs": 357.5999999999767
     },
     {
       "scene": "04-pilha",
@@ -163,8 +163,8 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.6499999999970896,
-      "stepP95": 1.139999999999418,
+      "stepMedian": 0.5400000000023283,
+      "stepP95": 1.3400000000139698,
       "timing": "lote de 10",
       "maxDepth": 0.034664653163440896,
       "jitter": 0.002801500871740711,
@@ -172,7 +172,7 @@
       "hashRepeat": "a9ad4fcb13f24306",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 1046.2000000000116
+      "wallMs": 1024.6000000000931
     },
     {
       "scene": "05-corrente",
@@ -190,8 +190,8 @@
         }
       ],
       "steps": 1200,
-      "stepMedian": 0.1099999999976717,
-      "stepP95": 0.14999999999708963,
+      "stepMedian": 0.09999999998835847,
+      "stepP95": 0.17999999998137356,
       "timing": "lote de 10",
       "maxDepth": 0,
       "jitter": null,
@@ -199,7 +199,7 @@
       "hashRepeat": "3aa3440ad53c0b85",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 303.30000000001746
+      "wallMs": 296.4000000000233
     },
     {
       "scene": "06-pinhao-cremalheira",
@@ -212,27 +212,27 @@
         {
           "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
           "pass": true,
-          "value": "erro máx. 1,13%, giro mín. 98%",
+          "value": "erro máx. 0,76%, giro mín. 98%",
           "run": "50 inversões"
         },
         {
           "label": "penetração entre dentes menor que 0,1 mm",
           "pass": true,
-          "value": "0,0464 mm",
+          "value": "0,0452 mm",
           "run": "50 inversões"
         }
       ],
       "steps": 4890,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.05,
+      "stepMedian": 0.02999999999301508,
+      "stepP95": 0.040000000002328305,
       "timing": "lote de 10",
-      "maxDepth": 0.04642384780052448,
+      "maxDepth": 0.04519505089160759,
       "jitter": null,
-      "hash": "efe1650c03896437",
-      "hashRepeat": "efe1650c03896437",
+      "hash": "f914a80ac91a2a63",
+      "hashRepeat": "f914a80ac91a2a63",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 372.30000000001746
+      "wallMs": 319.80000000004657
     },
     {
       "scene": "07-bala",
@@ -250,16 +250,16 @@
         }
       ],
       "steps": 1000,
-      "stepMedian": 0.010000000000582076,
-      "stepP95": 0.020000000001164153,
+      "stepMedian": 0.009999999997671694,
+      "stepP95": 0.02000000000698492,
       "timing": "lote de 10",
       "maxDepth": 0,
       "jitter": null,
-      "hash": "fbb939b877f1c90b",
-      "hashRepeat": "fbb939b877f1c90b",
+      "hash": "8447b30b7766d64c",
+      "hashRepeat": "8447b30b7766d64c",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 879.9000000000233
+      "wallMs": 898.3000000000466
     },
     {
       "scene": "08-escalas",
@@ -283,16 +283,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.1,
-      "stepP95": 0.13999999999941792,
+      "stepMedian": 0.07999999999301508,
+      "stepP95": 0.14000000000232832,
       "timing": "lote de 10",
       "maxDepth": 0.012493922717532007,
-      "jitter": 0,
+      "jitter": 2.7937480765167913e-17,
       "hash": "8cb06c45c24f6e64",
       "hashRepeat": "8cb06c45c24f6e64",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 158.5
+      "wallMs": 135
     },
     {
       "scene": "08-escalas",
@@ -316,16 +316,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.08999999999941792,
-      "stepP95": 0.12999999999883585,
+      "stepMedian": 0.0900000000023283,
+      "stepP95": 0.1599999999976717,
       "timing": "lote de 10",
-      "maxDepth": 0.1241638892988148,
+      "maxDepth": 0.12416388929881564,
       "jitter": 0,
       "hash": "14da7573b2aed426",
       "hashRepeat": "14da7573b2aed426",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 150.20000000001164
+      "wallMs": 166.20000000006985
     },
     {
       "scene": "01-lancador",
@@ -350,21 +350,21 @@
         {
           "label": "a esfera passa da saída do cano em até 0,5 s",
           "pass": true,
-          "value": "0,233 s",
+          "value": "0,238 s",
           "run": "repouso e disparo"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.059999999997671694,
-      "stepP95": 0.1899999999994179,
+      "stepMedian": 0.08000000000465661,
+      "stepP95": 0.34999999998835846,
       "timing": "lote de 10",
-      "maxDepth": 0.11380386352539062,
-      "jitter": 3.7489543666160123e-10,
-      "hash": "d018d4969e0671ad",
-      "hashRepeat": "d018d4969e0671ad",
+      "maxDepth": 0.11307144165039062,
+      "jitter": 2.73383655375237e-10,
+      "hash": "40e2709e5a9d021d",
+      "hashRepeat": "40e2709e5a9d021d",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 269.69999999998254
+      "wallMs": 273.5999999999767
     },
     {
       "scene": "02-trava",
@@ -394,16 +394,16 @@
         }
       ],
       "steps": 840,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.060000000000582074,
+      "stepMedian": 0.02999999999301508,
+      "stepP95": 0.06999999998370185,
       "timing": "lote de 10",
-      "maxDepth": 0.0881391167640686,
+      "maxDepth": 0.08757895231246948,
       "jitter": 0,
-      "hash": "cc30e9e0fda8901b",
-      "hashRepeat": "cc30e9e0fda8901b",
+      "hash": "d63d91567c574523",
+      "hashRepeat": "d63d91567c574523",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 61.20000000001164
+      "wallMs": 56.29999999993015
     },
     {
       "scene": "03-engrenagens",
@@ -412,33 +412,34 @@
       "unitMm": 1,
       "pass": false,
       "failed": [
+        "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
         "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
       ],
       "assertions": [
         {
           "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
-          "pass": true,
-          "value": "erro máx. 1,89%",
+          "pass": false,
+          "value": "erro máx. 2,08%",
           "run": "a favor"
         },
         {
           "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
           "pass": false,
-          "value": "34,1°",
+          "value": "34,0°",
           "run": "a favor"
         }
       ],
       "steps": 1800,
-      "stepMedian": 0.07000000000116416,
-      "stepP95": 0.19999999999708962,
+      "stepMedian": 0.06999999999534338,
+      "stepP95": 0.15000000001164154,
       "timing": "lote de 10",
-      "maxDepth": 0.1615954041481018,
-      "jitter": 0.00021944725845186888,
-      "hash": "53e232dfb279680e",
-      "hashRepeat": "53e232dfb279680e",
+      "maxDepth": 0.1498081535100937,
+      "jitter": 0.00023366368646541265,
+      "hash": "3277f0214dd0a770",
+      "hashRepeat": "3277f0214dd0a770",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 347.0999999999767
+      "wallMs": 333.60000000009313
     },
     {
       "scene": "04-pilha",
@@ -458,8 +459,8 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.29999999998835847,
-      "stepP95": 0.39000000000814905,
+      "stepMedian": 0.33000000001629815,
+      "stepP95": 0.5599999999860301,
       "timing": "lote de 10",
       "maxDepth": 0.1022176742553711,
       "jitter": 0,
@@ -467,7 +468,7 @@
       "hashRepeat": "44fce4b8de5e5ff9",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 668.8000000000175
+      "wallMs": 701.6999999999534
     },
     {
       "scene": "05-corrente",
@@ -485,16 +486,16 @@
         }
       ],
       "steps": 1200,
-      "stepMedian": 0.07999999999592547,
-      "stepP95": 0.18999999999650755,
+      "stepMedian": 0.06000000000931323,
+      "stepP95": 0.09999999998835847,
       "timing": "lote de 10",
       "maxDepth": 0,
       "jitter": null,
-      "hash": "dae79bcb24f4cb06",
-      "hashRepeat": "dae79bcb24f4cb06",
+      "hash": "59e3851f75ea1ae4",
+      "hashRepeat": "59e3851f75ea1ae4",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 307.3999999999942
+      "wallMs": 229.60000000009313
     },
     {
       "scene": "06-pinhao-cremalheira",
@@ -509,27 +510,27 @@
         {
           "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
           "pass": true,
-          "value": "erro máx. 1,03%, giro mín. 99%",
+          "value": "erro máx. 1,14%, giro mín. 99%",
           "run": "50 inversões"
         },
         {
           "label": "penetração entre dentes menor que 0,1 mm",
           "pass": false,
-          "value": "0,1350 mm",
+          "value": "0,1347 mm",
           "run": "50 inversões"
         }
       ],
       "steps": 4890,
-      "stepMedian": 0.039999999999417925,
+      "stepMedian": 0.02999999999301508,
       "stepP95": 0.05,
       "timing": "lote de 10",
-      "maxDepth": 0.13502644002437592,
+      "maxDepth": 0.13471999764442444,
       "jitter": null,
-      "hash": "8af94c8d3dc58e5a",
-      "hashRepeat": "8af94c8d3dc58e5a",
+      "hash": "dce16648c18dad13",
+      "hashRepeat": "dce16648c18dad13",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 407
+      "wallMs": 389.5
     },
     {
       "scene": "07-bala",
@@ -547,16 +548,16 @@
         }
       ],
       "steps": 1000,
-      "stepMedian": 0.01999999999825377,
-      "stepP95": 0.03000000000174623,
+      "stepMedian": 0.01999999999534339,
+      "stepP95": 0.040000000002328305,
       "timing": "lote de 10",
-      "maxDepth": 0.04854416847229004,
+      "maxDepth": 0.04854440689086914,
       "jitter": null,
-      "hash": "f3e9660c32ac658b",
-      "hashRepeat": "f3e9660c32ac658b",
+      "hash": "c6e4576b87dc4720",
+      "hashRepeat": "c6e4576b87dc4720",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 922.5
+      "wallMs": 939.8000000000466
     },
     {
       "scene": "08-escalas",
@@ -580,304 +581,7 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.060000000000582074,
-      "timing": "lote de 10",
-      "maxDepth": 0,
-      "jitter": 0,
-      "hash": "d9665a0d0aa3d034",
-      "hashRepeat": "d9665a0d0aa3d034",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 97.10000000000582
-    },
-    {
-      "scene": "08-escalas",
-      "title": "Escalas misturadas",
-      "engine": "rapier-det",
-      "unitMm": 10,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
-          "pass": true,
-          "value": "20 de 20 ok",
-          "run": "todas"
-        },
-        {
-          "label": "tremor abaixo de 0,05 mm",
-          "pass": true,
-          "value": "0,0000 mm",
-          "run": "3 s"
-        }
-      ],
-      "steps": 720,
-      "stepMedian": 0.039999999999417925,
-      "stepP95": 0.07000000000116416,
-      "timing": "lote de 10",
-      "maxDepth": 0,
-      "jitter": 6.471748762673964e-9,
-      "hash": "37266101e232059c",
-      "hashRepeat": "37266101e232059c",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 93.89999999999418
-    },
-    {
-      "scene": "01-lancador",
-      "title": "Lançador",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "parado, o percussor não se move mais que 0,2 mm em 1 s",
-          "pass": true,
-          "value": "0,000 mm",
-          "run": "repouso e disparo"
-        },
-        {
-          "label": "puxando o gatilho, o sensor dispara exatamente 1 vez",
-          "pass": true,
-          "value": "1 disparo",
-          "run": "repouso e disparo"
-        },
-        {
-          "label": "a esfera passa da saída do cano em até 0,5 s",
-          "pass": true,
-          "value": "0,233 s",
-          "run": "repouso e disparo"
-        }
-      ],
-      "steps": 720,
-      "stepMedian": 0.060000000000582074,
-      "stepP95": 0.11999999999825377,
-      "timing": "lote de 10",
-      "maxDepth": 0.11380386352539062,
-      "jitter": 3.7489543666160123e-10,
-      "hash": "d018d4969e0671ad",
-      "hashRepeat": "d018d4969e0671ad",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 214.5
-    },
-    {
-      "scene": "02-trava",
-      "title": "Trava",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "a maçaneta gira 30°",
-          "pass": true,
-          "value": "-30,0°",
-          "run": "girar e soltar"
-        },
-        {
-          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
-          "pass": true,
-          "value": "7,14 mm",
-          "run": "girar e soltar"
-        },
-        {
-          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
-          "pass": true,
-          "value": "0,000 mm",
-          "run": "girar e soltar"
-        }
-      ],
-      "steps": 840,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.07999999999883585,
-      "timing": "lote de 10",
-      "maxDepth": 0.0881391167640686,
-      "jitter": 0,
-      "hash": "cc30e9e0fda8901b",
-      "hashRepeat": "cc30e9e0fda8901b",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 64.79999999998836
-    },
-    {
-      "scene": "03-engrenagens",
-      "title": "Engrenagens e catraca",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": false,
-      "failed": [
-        "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
-      ],
-      "assertions": [
-        {
-          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
-          "pass": true,
-          "value": "erro máx. 1,89%",
-          "run": "a favor"
-        },
-        {
-          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
-          "pass": false,
-          "value": "34,1°",
-          "run": "a favor"
-        }
-      ],
-      "steps": 1800,
-      "stepMedian": 0.07999999999883585,
-      "stepP95": 0.18999999999359715,
-      "timing": "lote de 10",
-      "maxDepth": 0.1615954041481018,
-      "jitter": 0.00021944725845186888,
-      "hash": "53e232dfb279680e",
-      "hashRepeat": "53e232dfb279680e",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 378.8999999999942
-    },
-    {
-      "scene": "04-pilha",
-      "title": "Pilha",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": false,
-      "failed": [
-        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
-      ],
-      "assertions": [
-        {
-          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
-          "pass": false,
-          "value": "1,352 mm",
-          "run": "3 s"
-        }
-      ],
-      "steps": 720,
-      "stepMedian": 0.27000000000698493,
-      "stepP95": 0.3700000000040745,
-      "timing": "lote de 10",
-      "maxDepth": 0.1022176742553711,
-      "jitter": 0,
-      "hash": "44fce4b8de5e5ff9",
-      "hashRepeat": "44fce4b8de5e5ff9",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 669.0999999999767
-    },
-    {
-      "scene": "05-corrente",
-      "title": "Corrente",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
-          "pass": true,
-          "value": "0,025 mm",
-          "run": "5 s"
-        }
-      ],
-      "steps": 1200,
-      "stepMedian": 0.060000000000582074,
-      "stepP95": 0.11999999999534339,
-      "timing": "lote de 10",
-      "maxDepth": 0,
-      "jitter": null,
-      "hash": "dae79bcb24f4cb06",
-      "hashRepeat": "dae79bcb24f4cb06",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 257.80000000001746
-    },
-    {
-      "scene": "06-pinhao-cremalheira",
-      "title": "Pinhão e cremalheira",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": false,
-      "failed": [
-        "penetração entre dentes menor que 0,1 mm"
-      ],
-      "assertions": [
-        {
-          "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
-          "pass": true,
-          "value": "erro máx. 1,03%, giro mín. 99%",
-          "run": "50 inversões"
-        },
-        {
-          "label": "penetração entre dentes menor que 0,1 mm",
-          "pass": false,
-          "value": "0,1350 mm",
-          "run": "50 inversões"
-        }
-      ],
-      "steps": 4890,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.05,
-      "timing": "lote de 10",
-      "maxDepth": 0.13502644002437592,
-      "jitter": null,
-      "hash": "8af94c8d3dc58e5a",
-      "hashRepeat": "8af94c8d3dc58e5a",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 414.30000000001746
-    },
-    {
-      "scene": "07-bala",
-      "title": "Bala de prova",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "nenhum dos 100 lançamentos atravessa a parede de 1 mm",
-          "pass": true,
-          "value": "100 de 100 ok",
-          "run": "todas"
-        }
-      ],
-      "steps": 1000,
-      "stepMedian": 0.010000000000582076,
-      "stepP95": 0.029999999998835847,
-      "timing": "lote de 10",
-      "maxDepth": 0.04854416847229004,
-      "jitter": null,
-      "hash": "f3e9660c32ac658b",
-      "hashRepeat": "f3e9660c32ac658b",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 906.2000000000116
-    },
-    {
-      "scene": "08-escalas",
-      "title": "Escalas misturadas",
-      "engine": "rapier",
-      "unitMm": 1,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
-          "pass": true,
-          "value": "20 de 20 ok",
-          "run": "todas"
-        },
-        {
-          "label": "tremor abaixo de 0,05 mm",
-          "pass": true,
-          "value": "0,0000 mm",
-          "run": "3 s"
-        }
-      ],
-      "steps": 720,
-      "stepMedian": 0.03000000000174623,
+      "stepMedian": 0.030000000004656614,
       "stepP95": 0.059999999997671694,
       "timing": "lote de 10",
       "maxDepth": 0,
@@ -886,12 +590,12 @@
       "hashRepeat": "d9665a0d0aa3d034",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 83.79999999998836
+      "wallMs": 94.40000000002328
     },
     {
       "scene": "08-escalas",
       "title": "Escalas misturadas",
-      "engine": "rapier",
+      "engine": "rapier-det",
       "unitMm": 10,
       "pass": true,
       "failed": [],
@@ -910,21 +614,21 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.059999999997671694,
-      "stepP95": 0.1,
+      "stepMedian": 0.05000000001164153,
+      "stepP95": 0.08000000000465661,
       "timing": "lote de 10",
       "maxDepth": 0,
-      "jitter": 6.471748762673964e-9,
+      "jitter": 0,
       "hash": "37266101e232059c",
       "hashRepeat": "37266101e232059c",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 142.5
+      "wallMs": 120.40000000002328
     },
     {
       "scene": "01-lancador",
       "title": "Lançador",
-      "engine": "box2d",
+      "engine": "rapier",
       "unitMm": 1,
       "pass": true,
       "failed": [],
@@ -944,156 +648,157 @@
         {
           "label": "a esfera passa da saída do cano em até 0,5 s",
           "pass": true,
-          "value": "0,233 s",
+          "value": "0,238 s",
           "run": "repouso e disparo"
         }
       ],
       "steps": 720,
-      "stepMedian": 0.06999999999825376,
-      "stepP95": 0.22000000000407455,
-      "timing": "lote de 10",
-      "maxDepth": 0.12010669708251953,
-      "jitter": 0.00011665051194485819,
-      "hash": "c58f68d31433bf72",
-      "hashRepeat": "c58f68d31433bf72",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 172.29999999998836
-    },
-    {
-      "scene": "02-trava",
-      "title": "Trava",
-      "engine": "box2d",
-      "unitMm": 1,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "a maçaneta gira 30°",
-          "pass": true,
-          "value": "-30,1°",
-          "run": "girar e soltar"
-        },
-        {
-          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
-          "pass": true,
-          "value": "7,23 mm",
-          "run": "girar e soltar"
-        },
-        {
-          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
-          "pass": true,
-          "value": "0,001 mm",
-          "run": "girar e soltar"
-        }
-      ],
-      "steps": 840,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.05,
-      "timing": "lote de 10",
-      "maxDepth": 0.05755755305290222,
-      "jitter": 3.552683094539116e-15,
-      "hash": "8013ab32e939fa17",
-      "hashRepeat": "8013ab32e939fa17",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 68.79999999998836
-    },
-    {
-      "scene": "03-engrenagens",
-      "title": "Engrenagens e catraca",
-      "engine": "box2d",
-      "unitMm": 1,
-      "pass": false,
-      "failed": [
-        "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
-      ],
-      "assertions": [
-        {
-          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
-          "pass": true,
-          "value": "erro máx. 1,37%",
-          "run": "a favor"
-        },
-        {
-          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
-          "pass": false,
-          "value": "35,1°",
-          "run": "a favor"
-        }
-      ],
-      "steps": 1800,
-      "stepMedian": 0.060000000000582074,
-      "stepP95": 0.1,
-      "timing": "lote de 10",
-      "maxDepth": 0.13046115636825562,
-      "jitter": 0.000003090521704166624,
-      "hash": "077fb75b9c5a8488",
-      "hashRepeat": "077fb75b9c5a8488",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 333.30000000001746
-    },
-    {
-      "scene": "04-pilha",
-      "title": "Pilha",
-      "engine": "box2d",
-      "unitMm": 1,
-      "pass": false,
-      "failed": [
-        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
-      ],
-      "assertions": [
-        {
-          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
-          "pass": false,
-          "value": "1,365 mm",
-          "run": "3 s"
-        }
-      ],
-      "steps": 720,
-      "stepMedian": 0.1599999999976717,
-      "stepP95": 0.20999999999476132,
-      "timing": "lote de 10",
-      "maxDepth": 0.13444563746452332,
-      "jitter": 0.006153955483178617,
-      "hash": "c4ea4f8f3a3b1a8c",
-      "hashRepeat": "c4ea4f8f3a3b1a8c",
-      "deterministic": true,
-      "warnings": [],
-      "wallMs": 1895.1000000000058
-    },
-    {
-      "scene": "05-corrente",
-      "title": "Corrente",
-      "engine": "box2d",
-      "unitMm": 1,
-      "pass": true,
-      "failed": [],
-      "assertions": [
-        {
-          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
-          "pass": true,
-          "value": "0,215 mm",
-          "run": "5 s"
-        }
-      ],
-      "steps": 1200,
-      "stepMedian": 0.08000000000465661,
+      "stepMedian": 0.05000000001164153,
       "stepP95": 0.15,
       "timing": "lote de 10",
-      "maxDepth": 0,
-      "jitter": null,
-      "hash": "1413504e50548669",
-      "hashRepeat": "1413504e50548669",
+      "maxDepth": 0.11307144165039062,
+      "jitter": 2.73383655375237e-10,
+      "hash": "40e2709e5a9d021d",
+      "hashRepeat": "40e2709e5a9d021d",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 533.2000000000116
+      "wallMs": 199.80000000004657
+    },
+    {
+      "scene": "02-trava",
+      "title": "Trava",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "a maçaneta gira 30°",
+          "pass": true,
+          "value": "-30,0°",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
+          "pass": true,
+          "value": "7,14 mm",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "pass": true,
+          "value": "0,000 mm",
+          "run": "girar e soltar"
+        }
+      ],
+      "steps": 840,
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.06999999999534338,
+      "timing": "lote de 10",
+      "maxDepth": 0.08757895231246948,
+      "jitter": 0,
+      "hash": "d63d91567c574523",
+      "hashRepeat": "d63d91567c574523",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 83.70000000006985
+    },
+    {
+      "scene": "03-engrenagens",
+      "title": "Engrenagens e catraca",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+        "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
+      ],
+      "assertions": [
+        {
+          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+          "pass": false,
+          "value": "erro máx. 2,08%",
+          "run": "a favor"
+        },
+        {
+          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
+          "pass": false,
+          "value": "34,0°",
+          "run": "a favor"
+        }
+      ],
+      "steps": 1800,
+      "stepMedian": 0.06000000000931323,
+      "stepP95": 0.16999999998370185,
+      "timing": "lote de 10",
+      "maxDepth": 0.1498081535100937,
+      "jitter": 0.00023366368646541265,
+      "hash": "3277f0214dd0a770",
+      "hashRepeat": "3277f0214dd0a770",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 351.19999999995343
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "1,352 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.3800000000046566,
+      "stepP95": 0.7200000000186264,
+      "timing": "lote de 10",
+      "maxDepth": 0.1022176742553711,
+      "jitter": 0,
+      "hash": "44fce4b8de5e5ff9",
+      "hashRepeat": "44fce4b8de5e5ff9",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 864.3000000000466
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": true,
+          "value": "0,025 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.05,
+      "stepP95": 0.0900000000023283,
+      "timing": "lote de 10",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "59e3851f75ea1ae4",
+      "hashRepeat": "59e3851f75ea1ae4",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 214.40000000002328
     },
     {
       "scene": "06-pinhao-cremalheira",
       "title": "Pinhão e cremalheira",
-      "engine": "box2d",
+      "engine": "rapier",
       "unitMm": 1,
       "pass": false,
       "failed": [
@@ -1103,27 +808,320 @@
         {
           "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
           "pass": true,
-          "value": "erro máx. 1,01%, giro mín. 99%",
+          "value": "erro máx. 1,14%, giro mín. 99%",
           "run": "50 inversões"
         },
         {
           "label": "penetração entre dentes menor que 0,1 mm",
           "pass": false,
-          "value": "0,1348 mm",
+          "value": "0,1347 mm",
           "run": "50 inversões"
         }
       ],
       "steps": 4890,
-      "stepMedian": 0.039999999999417925,
-      "stepP95": 0.059999999997671694,
+      "stepMedian": 0.02999999999301508,
+      "stepP95": 0.040000000002328305,
       "timing": "lote de 10",
-      "maxDepth": 0.13475322723388672,
+      "maxDepth": 0.13471999764442444,
       "jitter": null,
-      "hash": "81db952b59c492a2",
-      "hashRepeat": "81db952b59c492a2",
+      "hash": "dce16648c18dad13",
+      "hashRepeat": "dce16648c18dad13",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 517
+      "wallMs": 352.70000000006985
+    },
+    {
+      "scene": "07-bala",
+      "title": "Bala de prova",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "nenhum dos 100 lançamentos atravessa a parede de 1 mm",
+          "pass": true,
+          "value": "100 de 100 ok",
+          "run": "todas"
+        }
+      ],
+      "steps": 1000,
+      "stepMedian": 0.01999999999534339,
+      "stepP95": 0.03999999999068678,
+      "timing": "lote de 10",
+      "maxDepth": 0.04854440689086914,
+      "jitter": null,
+      "hash": "c6e4576b87dc4720",
+      "hashRepeat": "c6e4576b87dc4720",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 941.5999999999767
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.06999999999534338,
+      "timing": "lote de 10",
+      "maxDepth": 0,
+      "jitter": 0,
+      "hash": "d9665a0d0aa3d034",
+      "hashRepeat": "d9665a0d0aa3d034",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 83.5
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.02999999999301508,
+      "stepP95": 0.05,
+      "timing": "lote de 10",
+      "maxDepth": 0,
+      "jitter": 0,
+      "hash": "37266101e232059c",
+      "hashRepeat": "37266101e232059c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 71.59999999997672
+    },
+    {
+      "scene": "01-lancador",
+      "title": "Lançador",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "parado, o percussor não se move mais que 0,2 mm em 1 s",
+          "pass": true,
+          "value": "0,000 mm",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "puxando o gatilho, o sensor dispara exatamente 1 vez",
+          "pass": true,
+          "value": "1 disparo",
+          "run": "repouso e disparo"
+        },
+        {
+          "label": "a esfera passa da saída do cano em até 0,5 s",
+          "pass": true,
+          "value": "0,250 s",
+          "run": "repouso e disparo"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.08999999999068678,
+      "stepP95": 0.46999999999534336,
+      "timing": "lote de 10",
+      "maxDepth": 0.005420684814453125,
+      "jitter": 1.0924500481232089e-8,
+      "hash": "d0e95d868461a031",
+      "hashRepeat": "d0e95d868461a031",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 204.70000000006985
+    },
+    {
+      "scene": "02-trava",
+      "title": "Trava",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "a maçaneta gira 30°",
+          "pass": true,
+          "value": "-30,0°",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "girando a maçaneta 30°, a lingueta recolhe pelo menos 6 mm",
+          "pass": true,
+          "value": "7,92 mm",
+          "run": "girar e soltar"
+        },
+        {
+          "label": "soltando, volta à posição inicial (±0,3 mm) em até 1 s",
+          "pass": true,
+          "value": "0,000 mm",
+          "run": "girar e soltar"
+        }
+      ],
+      "steps": 840,
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.05,
+      "timing": "lote de 10",
+      "maxDepth": 0.0033944621682167053,
+      "jitter": 0,
+      "hash": "1a850d2faa4da2ca",
+      "hashRepeat": "1a850d2faa4da2ca",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 88.40000000002328
+    },
+    {
+      "scene": "03-engrenagens",
+      "title": "Engrenagens e catraca",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)"
+      ],
+      "assertions": [
+        {
+          "label": "a favor, a razão das velocidades bate com a dos dentes (erro < 2%) por 5 s",
+          "pass": true,
+          "value": "erro máx. 1,68%",
+          "run": "a favor"
+        },
+        {
+          "label": "contra, o conjunto para antes de girar um passo de dente da catraca (25,7°)",
+          "pass": false,
+          "value": "26,3°",
+          "run": "a favor"
+        }
+      ],
+      "steps": 1800,
+      "stepMedian": 0.0900000000023283,
+      "stepP95": 0.1300000000046566,
+      "timing": "lote de 10",
+      "maxDepth": 0.022947242483496666,
+      "jitter": 0.0000029159593160831667,
+      "hash": "2d63483a8da9184d",
+      "hashRepeat": "2d63483a8da9184d",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 593.8000000000466
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": true,
+          "value": "0,006 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.40000000001164154,
+      "stepP95": 0.6,
+      "timing": "lote de 10",
+      "maxDepth": 0.0006437301635742188,
+      "jitter": 0.00008312694767254371,
+      "hash": "2c0a1b524999368b",
+      "hashRepeat": "2c0a1b524999368b",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 2186.6999999999534
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": true,
+          "value": "0,002 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.11000000000931323,
+      "stepP95": 0.1599999999976717,
+      "timing": "lote de 10",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "cbaa631bed48acce",
+      "hashRepeat": "cbaa631bed48acce",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 611.5
+    },
+    {
+      "scene": "06-pinhao-cremalheira",
+      "title": "Pinhão e cremalheira",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
+          "pass": true,
+          "value": "erro máx. 0,98%, giro mín. 99%",
+          "run": "50 inversões"
+        },
+        {
+          "label": "penetração entre dentes menor que 0,1 mm",
+          "pass": true,
+          "value": "0,0024 mm",
+          "run": "50 inversões"
+        }
+      ],
+      "steps": 4890,
+      "stepMedian": 0.11999999999534339,
+      "stepP95": 0.16000000000931322,
+      "timing": "lote de 10",
+      "maxDepth": 0.0023806747049093246,
+      "jitter": null,
+      "hash": "5f49f3833be25150",
+      "hashRepeat": "5f49f3833be25150",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 1310.6999999999534
     },
     {
       "scene": "07-bala",
@@ -1141,16 +1139,16 @@
         }
       ],
       "steps": 1000,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.060000000000582074,
+      "stepMedian": 0.059999999997671694,
+      "stepP95": 0.09999999998835847,
       "timing": "lote de 10",
-      "maxDepth": 1.880000114440918,
+      "maxDepth": 0.10395669937133789,
       "jitter": null,
-      "hash": "e4d39ecb47710df6",
-      "hashRepeat": "e4d39ecb47710df6",
+      "hash": "e9f08d724c287093",
+      "hashRepeat": "e9f08d724c287093",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 997.3000000000175
+      "wallMs": 1021.7999999999302
     },
     {
       "scene": "08-escalas",
@@ -1174,16 +1172,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.059999999997671694,
-      "stepP95": 0.08999999999941792,
+      "stepMedian": 0.06999999998370185,
+      "stepP95": 0.1099999999976717,
       "timing": "lote de 10",
-      "maxDepth": 0.0008794069290161133,
-      "jitter": 0,
-      "hash": "401f6d5df1f9200c",
-      "hashRepeat": "401f6d5df1f9200c",
+      "maxDepth": 0.0000034570693969726562,
+      "jitter": 1.4897953870233165e-8,
+      "hash": "9df8a305ae941cc4",
+      "hashRepeat": "9df8a305ae941cc4",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 277.3999999999942
+      "wallMs": 253.5
     },
     {
       "scene": "08-escalas",
@@ -1207,16 +1205,16 @@
         }
       ],
       "steps": 720,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.060000000000582074,
+      "stepMedian": 0.06999999999534338,
+      "stepP95": 0.11999999999534339,
       "timing": "lote de 10",
-      "maxDepth": 0.0008793920278549194,
+      "maxDepth": 0.00000346451997756958,
       "jitter": 0,
-      "hash": "bb3bc359572c8a0c",
-      "hashRepeat": "bb3bc359572c8a0c",
+      "hash": "95a2517d8ec1a904",
+      "hashRepeat": "95a2517d8ec1a904",
       "deterministic": true,
       "warnings": [],
-      "wallMs": 201
+      "wallMs": 224.80000000004657
     }
   ]
 }
