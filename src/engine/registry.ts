@@ -1,9 +1,9 @@
 import type { EngineAdapter, EngineEntry } from "./types";
 
 /**
- * Motores do comparativo, carregados sob demanda (cada um vira um pedaço
- * próprio do pacote). Nada aqui escolhe o motor do app: isso vem depois da
- * revisão do comparativo (docs/decisoes/motor.md).
+ * Motores do comparativo (/#bench), carregados sob demanda (cada um vira um
+ * pedaço próprio do pacote). O app usa só o Box2D, por src/engine/box2d/load.ts;
+ * Planck e Rapier ficam só aqui. O Box2D da bancada é o calibrado do app.
  */
 export const ENGINES: EngineEntry[] = [
   {
@@ -41,14 +41,10 @@ export const ENGINES: EngineEntry[] = [
   },
   {
     id: "box2d",
-    label: "Box2D v3",
+    label: "Box2D v3 (calibrado)",
     async load() {
-      const [{ default: factory }, m] = await Promise.all([
-        import("box2d3-wasm/compat"),
-        import("./box2d/box2dAdapter"),
-      ]);
-      const B = await factory();
-      return () => m.createBox2dAdapter(B as never);
+      const { loadBox2d } = await import("./box2d/load");
+      return loadBox2d();
     },
   },
 ];

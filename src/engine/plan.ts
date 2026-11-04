@@ -4,6 +4,7 @@ import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
 import { GAS_RT, KPA_MM2, N } from "@/model/units";
+import { dcos, dsin } from "@/geometry/dmath";
 
 /**
  * Plano de compilação comum a todos os motores, em unidades da cena.
@@ -373,7 +374,7 @@ export function buildPlan(scene: Scene): Plan {
           a,
           b,
           anchor: worldOf(l.b, l.at),
-          axis: [Math.cos(ang), Math.sin(ang)],
+          axis: [dcos(ang), dsin(ang)],
           lower: l.travel[0],
           upper: l.travel[1],
           ...(l.spring
@@ -409,7 +410,7 @@ export function buildPlan(scene: Scene): Plan {
         const b = bi > 0 && !bodies[bi]!.static ? bi : -1;
         if (a < 0) break;
         const ang = angleOf(l.body) + l.dir;
-        const axis: Vec2 = [Math.cos(ang), Math.sin(ang)];
+        const axis: Vec2 = [dcos(ang), dsin(ang)];
         let rear = 0;
         if (b > 0) {
           let mn = Infinity;

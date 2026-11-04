@@ -124,3 +124,37 @@ describe("adaptadores", () => {
     });
   }
 });
+
+describe("Box2D calibrado", () => {
+  it("impacto acima do limiar vira evento com a velocidade de aproximação", async () => {
+    const { loadBox2d } = await import("./box2d/load");
+    const a = (await loadBox2d())();
+    const s = scene([box("p1", 0, "L1", true), { ...box("p2", 0, "L1"), y: -40 }], []);
+    s.settings.gravity.g = 9810;
+    a.compile(s, { unitMm: 1 });
+    const hits: number[] = [];
+    for (let i = 0; i < 120; i++) {
+      a.step(1 / 240);
+      for (const e of a.snapshot().events) if (e.kind === "impact") hits.push(e.speed);
+    }
+    // queda de 30 mm: v = √(2·g·h) ≈ 767 mm/s
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits[0]!).toBeGreaterThan(650);
+    expect(hits[0]!).toBeLessThan(800);
+    a.dispose();
+  });
+
+  it("força externa em N: 1 N num bloco de 7,85 g acelera 127 m/s²", async () => {
+    const { loadBox2d } = await import("./box2d/load");
+    const a = (await loadBox2d())();
+    const s = scene([box("p1", 0)], []);
+    s.settings.gravity.on = false;
+    a.compile(s, { unitMm: 1 });
+    a.setForce("p1", [1, 0]);
+    for (let i = 0; i < 24; i++) a.step(1 / 240);
+    const t = 0.1;
+    // m = 0,00785 × 100 × 10 = 7,85 g; x = F/m · t²/2 (Euler simplético em 384 subpassos: × 385/384)
+    expect(a.pose("p1")!.x / ((1e6 / 7.85) * t * t * 0.5)).toBeCloseTo(385 / 384, 4);
+    a.dispose();
+  });
+});

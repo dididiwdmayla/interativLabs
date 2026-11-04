@@ -1,4 +1,5 @@
 import { distToSegment, type Vec2 } from "./vec";
+import { dcos, dhypot, dsin } from "./dmath";
 
 /** Contorno fechado (o último ponto não repete o primeiro). */
 export type Ring = Vec2[];
@@ -183,7 +184,7 @@ export function cleanRing(ring: Ring, dupTol = DUPLICATE_TOL, colTol = COLLINEAR
     const out: Ring = [];
     for (const p of pts) {
       const last = out[out.length - 1];
-      if (last && Math.hypot(p[0] - last[0], p[1] - last[1]) < dupTol) {
+      if (last && dhypot(p[0] - last[0], p[1] - last[1]) < dupTol) {
         changed = true;
         continue;
       }
@@ -192,7 +193,7 @@ export function cleanRing(ring: Ring, dupTol = DUPLICATE_TOL, colTol = COLLINEAR
     while (out.length > 1) {
       const a = out[0]!;
       const b = out[out.length - 1]!;
-      if (Math.hypot(a[0] - b[0], a[1] - b[1]) < dupTol) {
+      if (dhypot(a[0] - b[0], a[1] - b[1]) < dupTol) {
         out.pop();
         changed = true;
       } else break;
@@ -235,7 +236,7 @@ export function isConvex(ring: Ring, eps = 1e-9): boolean {
     const b = ring[(i + 1) % n]!;
     const c = ring[(i + 2) % n]!;
     const z = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
-    const l = Math.hypot(b[0] - a[0], b[1] - a[1]) * Math.hypot(c[0] - b[0], c[1] - b[1]);
+    const l = dhypot(b[0] - a[0], b[1] - a[1]) * dhypot(c[0] - b[0], c[1] - b[1]);
     if (Math.abs(z) <= eps * Math.max(l, 1e-30)) continue;
     const s = z > 0 ? 1 : -1;
     if (sign === 0) sign = s;
@@ -272,8 +273,8 @@ function orient2(a: Vec2, b: Vec2, c: Vec2): number {
 
 /** Aplica pose (translação + rotação) a uma forma. */
 export function transformShape(shape: PolyWithHoles, x: number, y: number, angle: number): PolyWithHoles {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
+  const c = dcos(angle);
+  const s = dsin(angle);
   const t = (r: Ring): Ring => r.map(([px, py]) => [px * c - py * s + x, px * s + py * c + y]);
   return { outer: t(shape.outer), holes: shape.holes.map(t) };
 }

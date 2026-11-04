@@ -240,6 +240,18 @@ export function createRapierAdapter(RAPIER: R, variant: { id: string; name: stri
       b.setAngvel(omega, true);
     },
 
+    setForce(partId: Id, force: Vec2 | null, at?: Vec2) {
+      rt?.setForce(partId, force, at);
+    },
+
+    ignite(linkId: Id) {
+      return rt ? rt.ignite(linkId) : false;
+    },
+
+    setVent(linkId: Id, vent: number, open: boolean) {
+      rt?.setVent(linkId, vent, open);
+    },
+
     dispose() {
       events?.free();
       world?.free();

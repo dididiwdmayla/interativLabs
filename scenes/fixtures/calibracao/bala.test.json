@@ -1,0 +1,3010 @@
+{
+  "id": "calibracao/bala",
+  "group": "calibracao",
+  "title": "Bala de prova",
+  "notes": "Esfera de 5 mm (aço, detecção contínua) a 20 m/s contra parede fixa de 1 mm, 100 lançamentos de −60° a 60°.",
+  "view": [-70, -60, 90, 120],
+  "runs": [
+    {
+      "name": "lançamento 1",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -45.4415,
+          "y": 35.2935
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [10421.5543, -17070.1847],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 2",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -34.3141,
+          "y": -12.3715
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18287.4196, 8097.548],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 3",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -49.4927,
+          "y": -17.477
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19950.0045, -1413.2654],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 4",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -14.9055,
+          "y": -25.8543
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17727.523, 9259.3158],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 5",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -17.3295,
+          "y": -7.6834
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17017.912, 10506.6965],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 6",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -46.3305,
+          "y": -4.1003
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19240.0799, -5460.7073],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 7",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -22.1898,
+          "y": 47.1841
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18207.8473, -8274.9198],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 8",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -11.6186,
+          "y": -33.9621
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [14059.567, 14224.225],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 9",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -37.476,
+          "y": 14.158
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [14992.3565, -13237.4184],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 10",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -68.2729,
+          "y": -74.2257
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17066.4962, 10427.5936],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 11",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -59.8097,
+          "y": 3.2558
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19873.5899, 2245.0885],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 12",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -46.0782,
+          "y": -54.4597
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [11207.3555, 16564.878],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 13",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -14.5526,
+          "y": -46.6721
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15473.3948, 12671.7818],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 14",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -5.062,
+          "y": -5.1835
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19109.4568, -5901.5812],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 15",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -23.1489,
+          "y": 45.556
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [13008.2602, -15191.615],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 16",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -81.413,
+          "y": 9.7011
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19764.8818, -3057.6868],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 17",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -28.5049,
+          "y": 3.2709
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18214.5772, 8260.0955],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 18",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -14.0638,
+          "y": -25.3083
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19101.4485, -5927.4502],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 19",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -13.4383,
+          "y": -27.0421
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [12971.9163, 15222.6603],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 20",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -6.9594,
+          "y": -14.3257
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19238.1649, 5467.4502],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 21",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -45.725,
+          "y": 16.1487
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18529.1995, 7527.8659],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 22",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -62.6886,
+          "y": -36.6504
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15501.2495, 12637.6922],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 23",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -40.8048,
+          "y": 41.9979
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [13904.4543, -14375.8878],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 24",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -50.871,
+          "y": -14.9008
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [13658.3911, 14609.8717],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 25",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -82.5409,
+          "y": 21.1041
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19611.7355, 3921.7125],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 26",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -3.9674,
+          "y": 25.3317
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19896.6173, 2030.9162],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 27",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -63.8212,
+          "y": -15.8206
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19988.6683, 673.1577],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 28",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -84.4688,
+          "y": 11.9057
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19892.6375, 2069.5348],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 29",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -39.0656,
+          "y": 21.4237
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19854.8784, 2404.9542],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 30",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -47.4024,
+          "y": 5.2858
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19117.6896, 5874.8569],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 31",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -4.1409,
+          "y": -20.3731
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18475.7279, -7658.1642],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 32",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -40.7536,
+          "y": 94.6283
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [10860.1877, -16794.5325],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 33",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -53.1201,
+          "y": -53.05
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19256.4615, 5402.6558],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 34",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -84.7533,
+          "y": 0.7813
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19606.2788, 3948.9025],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 35",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -51.808,
+          "y": 63.637
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17876.7797, -8967.7615],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 36",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -58.8476,
+          "y": -31.8804
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16058.4111, 11921.721],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 37",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -33.9657,
+          "y": 69.2004
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [14552.51, -13719.4917],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 38",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -36.1806,
+          "y": -31.879
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19804.0578, 2792.7221],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 39",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -62.3356,
+          "y": 66.546
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16438.9622, -11391.2476],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 40",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -76.0306,
+          "y": -26.9328
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17607.8396, 9484.9346],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 41",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -81.0123,
+          "y": 0.6212
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19478.158, 4538.8723],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 42",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -52.1546,
+          "y": -20.4968
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19994.9025, -451.5219],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 43",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -16.2019,
+          "y": 18.5466
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16285.9992, 11608.8858],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 44",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -47.008,
+          "y": -6.9235
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19867.9556, 2294.4146],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 45",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -31.9615,
+          "y": 3.3808
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15679.2246, -12416.1957],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 46",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -3.7662,
+          "y": -26.2731
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19977.8212, -941.6263],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 47",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -10.1972,
+          "y": -31.789
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15494.1083, -12646.4464],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 48",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -6.7381,
+          "y": 34.364
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [14103.4277, 14180.7379],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 49",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -35.5626,
+          "y": 19.2391
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15528.5356, -12604.1494],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 50",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -29.9029,
+          "y": -25.0371
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17678.5591, 9352.4621],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 51",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -57.9485,
+          "y": -21.9424
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16386.4206, 11466.7004],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 52",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -37.7774,
+          "y": 21.647
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19960.5613, 1255.3851],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 53",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -47.0521,
+          "y": -22.4667
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19828.15, 2616.1934],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 54",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -20.9272,
+          "y": -45.6473
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16739.4871, 10944.8422],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 55",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -53.2869,
+          "y": -15.262
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15494.2283, 12646.2994],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 56",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -79.3563,
+          "y": -0.0699
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19784.4042, -2928.7115],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 57",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -37.8447,
+          "y": 9.1878
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17348.3396, -9951.6388],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 58",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -65.8132,
+          "y": -60.1227
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15402.0692, 12758.3802],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 59",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -31.545,
+          "y": -8.2264
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19884.7557, 2143.9432],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 60",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -76.9579,
+          "y": -22.3275
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19939.8471, 1549.9988],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 61",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -72.7713,
+          "y": 28.1665
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19771.404, 3015.2256],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 62",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -61.6368,
+          "y": -4.515
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19999.1646, -182.7945],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 63",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -37.0505,
+          "y": -39.74
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [12387.9389, 15701.5595],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 64",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -28.0192,
+          "y": 37.2703
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15204.9832, -12992.6319],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 65",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -34.6179,
+          "y": 20.9695
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19474.327, 4555.2814],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 66",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -55.2142,
+          "y": -8.6751
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18191.4035, -8311.0071],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 67",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -26.7707,
+          "y": 24.3439
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17682.5926, 9344.8338],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 68",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -55.9585,
+          "y": -5.1657
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17518.8259, -9648.3542],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 69",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -46.458,
+          "y": -31.8252
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [12547.7602, 15574.136],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 70",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -49.2303,
+          "y": -89.9449
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [11319.8891, 16488.1809],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 71",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -32.6687,
+          "y": 17.8467
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17962.2518, -8795.3118],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 72",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -50.2661,
+          "y": -2.105
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18032.5908, 8650.1833],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 73",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -47.4849,
+          "y": -13.2628
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17810.1557, 9099.3601],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 74",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -39.1026,
+          "y": 45.5043
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17761.1326, -9194.6816],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 75",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -31.3993,
+          "y": 44.9617
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [14574.2712, -13696.3725],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 76",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -76.9201,
+          "y": -5.2237
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19844.7259, 2487.3391],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 77",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -8.023,
+          "y": -35.4406
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [11652.6813, 16254.6922],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 78",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -32.926,
+          "y": 16.4679
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18041.0939, -8632.4348],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 79",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -32.0149,
+          "y": -5.6204
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [13066.5879, 15141.4755],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 80",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -30.1408,
+          "y": -49.4483
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [13133.0048, 15083.9048],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 81",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -44.7606,
+          "y": -38.3231
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [12555.8716, 15567.5974],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 82",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -79.3801,
+          "y": 60.711
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18796.7327, -6832.4841],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 83",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -13.7648,
+          "y": -49.625
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15063.2453, 13156.6957],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 84",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -9.2998,
+          "y": -35.6132
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17265.2908, 10095.035],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 85",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -35.097,
+          "y": -56.3551
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [13010.5048, 15189.6927],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 86",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -56.0572,
+          "y": 52.6398
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17569.7894, -9555.2343],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 87",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -52.1089,
+          "y": 61.8084
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [12008.1194, -15993.9072],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 88",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -23.5118,
+          "y": -8.0206
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [12824.9652, -15346.6696],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 89",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -21.9526,
+          "y": 1.8321
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16441.5041, 11387.5784],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 90",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -43.723,
+          "y": -31.2793
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19999.7344, -103.0677],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 91",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -17.3706,
+          "y": 5.5102
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [19826.9827, -2625.0251],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 92",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -51.8728,
+          "y": -47.4072
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16835.344, 10796.814],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 93",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -14.9063,
+          "y": -47.4162
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15344.0875, 12828.0544],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 94",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -24.5006,
+          "y": 20.6748
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [17966.3766, 8786.883],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 95",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -23.6021,
+          "y": -6.6547
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15144.0509, 13063.603],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 96",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -57.6017,
+          "y": 31.0993
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [13219.1278, -15008.4862],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 97",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -43.0869,
+          "y": -36.7842
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [18381.0795, 7882.6338],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 98",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -25.2447,
+          "y": 29.8756
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [12449.0617, -15653.1422],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 99",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -54.8347,
+          "y": -61.6631
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [16676.9689, 11039.8691],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    },
+    {
+      "name": "lançamento 100",
+      "duration": 0.04,
+      "override": {
+        "p2": {
+          "x": -16.4208,
+          "y": -9.3961
+        }
+      },
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p2",
+          "t": 0,
+          "v": [15422.5041, -12733.6707],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "não atravessa a parede de 1 mm",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "max": 0.5
+        }
+      ]
+    }
+  ],
+  "scene": "bala.scene.json"
+}

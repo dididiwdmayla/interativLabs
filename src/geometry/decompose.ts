@@ -11,6 +11,7 @@ import {
 } from "./polygon";
 import { fail, fmt, ok, type GeoResult } from "./result";
 import type { Vec2 } from "./vec";
+import { dhypot } from "./dmath";
 
 /**
  * Decomposição convexa para o motor de física.
@@ -194,7 +195,7 @@ export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {
       const [p, q] = k.split("_").map(Number) as [number, number];
       const a = verts[p]!;
       const b = verts[q]!;
-      cands.push({ k, p, q, l: Math.hypot(a[0] - b[0], a[1] - b[1]) });
+      cands.push({ k, p, q, l: dhypot(a[0] - b[0], a[1] - b[1]) });
     }
     cands.sort((x, y) => y.l - x.l || (x.k < y.k ? -1 : x.k > y.k ? 1 : 0));
     let merged = false;
@@ -293,7 +294,7 @@ function convexCCW(ring: Ring): boolean {
     const b = ring[i]!;
     const c = ring[(i + 1) % n]!;
     const z = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
-    const l = Math.hypot(b[0] - a[0], b[1] - a[1]) * Math.hypot(c[0] - b[0], c[1] - b[1]);
+    const l = dhypot(b[0] - a[0], b[1] - a[1]) * dhypot(c[0] - b[0], c[1] - b[1]);
     if (z < -COLLINEAR_EPS * l) return false;
   }
   return true;
@@ -305,7 +306,7 @@ function isCollinearAt(ring: Ring, i: number): boolean {
   const b = ring[i]!;
   const c = ring[(i + 1) % n]!;
   const z = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
-  const l = Math.hypot(b[0] - a[0], b[1] - a[1]) * Math.hypot(c[0] - b[0], c[1] - b[1]);
+  const l = dhypot(b[0] - a[0], b[1] - a[1]) * dhypot(c[0] - b[0], c[1] - b[1]);
   return Math.abs(z) <= COLLINEAR_EPS * l;
 }
 

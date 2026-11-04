@@ -1,6 +1,7 @@
 import { transform } from "@/geometry/vec";
 import type { Link, LinkV1, Scene, SceneV1, Vec2 } from "../types";
 import { GAS_RT, KPA_MM2, N, V1_THICKNESS_MM } from "../units";
+import { dhypot } from "@/geometry/dmath";
 
 /**
  * Migração v1 → v2 (docs/arquitetura.md §3.1).
@@ -61,7 +62,7 @@ export function migrateV1ToV2(v1: SceneV1): Scene {
       case "spring": {
         const pa = world(l.a, l.atA);
         const pb = world(l.b, l.atB);
-        const drawn = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]);
+        const drawn = dhypot(pb[0] - pa[0], pb[1] - pa[1]);
         return {
           id: l.id,
           ref: l.ref,

@@ -1,14 +1,67 @@
-import type { Box2DModule, b2BodyId, b2JointId, b2ShapeId, b2Vec2, b2WorldId } from "box2d3-wasm";
+import type { Box2DModule, b2BodyId, b2JointId, b2Rot, b2ShapeId, b2Vec2, b2WorldId } from "box2d3-wasm";
+import { PI, datan2, dcos, dsin } from "@/geometry/dmath";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
 import { ANGULAR_DAMPING, SPEED_LIMIT, trackedBodies, unwrapAngle } from "../common";
-import { buildPlan } from "../plan";
+import { buildPlan, type Plan } from "../plan";
 import { Runtime, type BodyIO, type BodyState } from "../runtime";
-import type { CompileOptions, CompileReport, EngineAdapter, PartPose, Snapshot } from "../types";
+import type { CompileOptions, CompileReport, EngineAdapter, EngineEvent, PartPose, Snapshot } from "../types";
 
 export const BOX2D_WASM_VERSION = "6.0.0";
-/** Subpassos internos do solver suave do Box2D v3 em cada passo de 1/240 s. */
-const SUB_STEPS = 4;
+
+/**
+ * Parâmetros do mundo e do solver do Box2D v3 (docs/decisoes/motor.md,
+ * "Calibração para gravidade real"). Velocidades em mm/s: o adaptador
+ * converte para a escala interna.
+ */
+export interface Box2dTuning {
+  /** subpassos do solver suave em cada passo de 1/240 s */
+  subSteps: number;
+  /** rigidez do contato, Hz (o Box2D limita a ¼ da frequência do subpasso) */
+  contactHertz: number;
+  contactDampingRatio: number;
+  /** empurrão máximo de contato (velocidade de separação de peças sobrepostas), mm/s */
+  contactSpeed: number;
+  /** rigidez das juntas, Hz (o Box2D limita a ¼ da frequência do subpasso) */
+  jointHertz: number;
+  jointDampingRatio: number;
+  /** abaixo desta velocidade de aproximação não há quique, mm/s */
+  restitutionThreshold: number;
+  /** limiar do evento de impacto, mm/s */
+  hitEventThreshold: number;
+  /** b2SetLengthUnitsPerMeter: escala a folga linear (0,005 × isto), a distância especulativa e a margem das caixas */
+  lengthUnits: number;
+}
+
+/** Os padrões do Box2D, que valem em metros (aqui, lidos como unidades de 1 mm). */
+export const BOX2D_DEFAULTS: Box2dTuning = {
+  subSteps: 4,
+  contactHertz: 30,
+  contactDampingRatio: 10,
+  contactSpeed: 3,
+  jointHertz: 60,
+  jointDampingRatio: 2,
+  restitutionThreshold: 1,
+  hitEventThreshold: 1,
+  lengthUnits: 1,
+};
+
+/**
+ * Calibração do app para gravidade real em escala de milímetro (medida em
+ * scripts/bench/calibrate.ts): os parâmetros em metros convertidos para mm/s,
+ * contato e juntas tão rígidos quanto o Box2D permite com 16 subpassos.
+ */
+export const CALIBRATED_TUNING: Box2dTuning = {
+  subSteps: 16,
+  contactHertz: 480,
+  contactDampingRatio: 3,
+  contactSpeed: 3000,
+  jointHertz: 960,
+  jointDampingRatio: 0,
+  restitutionThreshold: 1000,
+  hitEventThreshold: 100,
+  lengthUnits: 5,
+};
 
 interface ShapeData {
   part: Id;
@@ -19,10 +72,15 @@ interface ShapeData {
 /**
  * Adaptador do Box2D v3.2 compilado para WASM (box2d3-wasm, build "compat":
  * sem threads nem SIMD, roda em qualquer navegador e no Node).
+ *
+ * Determinismo: o motor é WASM; aqui só entram operações exatas do IEEE e as
+ * funções de src/geometry/dmath.ts (ângulo lido por datan2, rotações das
+ * juntas por dcos/dsin), nunca `Math.sin/cos/atan2`.
  */
-export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
+export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRATED_TUNING): EngineAdapter {
   let worldId: b2WorldId | null = null;
   let rt: Runtime | null = null;
+  let plan: Plan | null = null;
   let L = 1;
   let bodies: b2BodyId[] = [];
   let dynamic: number[] = [];
@@ -32,10 +90,11 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
   const joints = new Map<Id, b2JointId>();
   const v1: b2Vec2 = new B.b2Vec2(0, 0);
   const v2: b2Vec2 = new B.b2Vec2(0, 0);
+  let impacts: EngineEvent[] = [];
 
   const angleOf = (i: number): number => {
     const r = B.b2Body_GetRotation(bodies[i]!);
-    const a = unwrapAngle(angles[i]!, Math.atan2(r.s, r.c));
+    const a = unwrapAngle(angles[i]!, datan2(r.s, r.c));
     r.delete();
     angles[i] = a;
     return a;
@@ -74,31 +133,55 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
     },
   };
 
+  /** Força de reação de uma junta, g·mm/s² no mundo. */
+  const jointForce = (id: Id): Vec2 | null => {
+    const j = joints.get(id);
+    if (!j) return null;
+    const f = B.b2Joint_GetConstraintForce(j);
+    const out: Vec2 = [f.x * L, f.y * L];
+    f.delete();
+    return out;
+  };
+
   const shapeInfo = (id: b2ShapeId): ShapeData | undefined => shapeData[B.b2Shape_GetUserData(id) - 1];
+
+  const rot = (angle: number): b2Rot => {
+    const q = new B.b2Rot();
+    q.c = dcos(angle);
+    q.s = dsin(angle);
+    return q;
+  };
 
   const adapter: EngineAdapter = {
     meta: {
       id: "box2d",
       name: "Box2D v3 (WASM)",
       version: BOX2D_WASM_VERSION,
-      iterations: `${SUB_STEPS} subpassos do solver suave por passo, contínuo contra estáticos`,
+      iterations: `${tuning.subSteps} subpassos do solver suave por passo; contato ${tuning.contactHertz} Hz, juntas ${tuning.jointHertz} Hz; contínuo contra estáticos`,
     },
 
     compile(scene: Scene, options: CompileOptions): CompileReport {
       adapter.dispose();
       L = options.unitMm;
-      const plan = buildPlan(scene);
-      const warnings = [...plan.warnings];
+      const p = buildPlan(scene);
+      plan = p;
+      const warnings = [...p.warnings];
+      B.b2SetLengthUnitsPerMeter(tuning.lengthUnits);
       const wd = B.b2DefaultWorldDef();
-      wd.gravity = new B.b2Vec2(plan.gravity[0] / L, plan.gravity[1] / L);
+      wd.gravity = new B.b2Vec2(p.gravity[0] / L, p.gravity[1] / L);
       wd.enableSleep = false;
       wd.maximumLinearSpeed = SPEED_LIMIT / L;
+      wd.contactHertz = tuning.contactHertz;
+      wd.contactDampingRatio = tuning.contactDampingRatio;
+      wd.contactSpeed = tuning.contactSpeed / L;
+      wd.restitutionThreshold = tuning.restitutionThreshold / L;
+      wd.hitEventThreshold = tuning.hitEventThreshold / L;
       const w = B.b2CreateWorld(wd);
       wd.delete();
       worldId = w;
       let fixtures = 0;
       shapeData.length = 0;
-      bodies = plan.bodies.map((pb) => {
+      bodies = p.bodies.map((pb) => {
         const bd = B.b2DefaultBodyDef();
         bd.type = pb.static ? B.b2BodyType.b2_staticBody : B.b2BodyType.b2_dynamicBody;
         bd.position = new B.b2Vec2(pb.position[0] / L, pb.position[1] / L);
@@ -117,6 +200,7 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
           sd.filter.maskBits = f.bits;
           sd.isSensor = f.sensor;
           sd.enableSensorEvents = true;
+          sd.enableHitEvents = !f.sensor;
           const data: ShapeData = { part: f.part, body: pb.index };
           if (f.sensor && f.link) data.sensor = f.link;
           shapeData.push(data);
@@ -138,7 +222,7 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
               poly.delete();
             }
             hull.delete();
-            for (const p of pts) p.delete();
+            for (const q of pts) q.delete();
           }
           sd.delete();
           if (!ok) warnings.push(`Box2D: uma peça convexa de ${f.part} ficou degenerada nesta escala`);
@@ -154,59 +238,102 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
         }
         return body;
       });
-      dynamic = plan.bodies.filter((b) => !b.static).map((b) => b.index);
-      angles = plan.bodies.map(() => 0);
-      tracked = trackedBodies(plan);
-      rt = new Runtime(plan, io);
+      dynamic = p.bodies.filter((b) => !b.static).map((b) => b.index);
+      angles = p.bodies.map(() => 0);
+      tracked = trackedBodies(p);
       joints.clear();
-      const local = (i: number, p: Vec2) => {
-        const b = plan.bodies[i]!;
-        return new B.b2Vec2((p[0] - b.position[0]) / L, (p[1] - b.position[1]) / L);
+      const native = new Set<Id>();
+      const local = (i: number, q: Vec2) => {
+        const b = p.bodies[i]!;
+        return new B.b2Vec2((q[0] - b.position[0]) / L, (q[1] - b.position[1]) / L);
       };
-      for (const a of plan.axles) {
+      const invMass = (i: number) => (p.bodies[i]!.static ? 0 : 1 / p.bodies[i]!.mass);
+      const invInertia = (i: number) => (p.bodies[i]!.static ? 0 : 1 / p.bodies[i]!.inertia);
+      const base = (jd: { base: { constraintHertz: number; constraintDampingRatio: number } }) => {
+        jd.base.constraintHertz = tuning.jointHertz;
+        jd.base.constraintDampingRatio = tuning.jointDampingRatio;
+      };
+      for (const a of p.axles) {
         const jd = B.b2DefaultRevoluteJointDef();
         jd.base.bodyIdA = bodies[a.a]!;
         jd.base.bodyIdB = bodies[a.b]!;
         jd.base.localFrameA.p = local(a.a, a.anchor);
         jd.base.localFrameB.p = local(a.b, a.anchor);
         jd.base.collideConnected = false;
+        base(jd);
         jd.enableLimit = !!a.limit;
         jd.lowerAngle = a.limit?.lower ?? 0;
         jd.upperAngle = a.limit?.upper ?? 0;
         jd.enableMotor = !!a.motor;
         jd.motorSpeed = a.motor?.speed ?? 0;
         jd.maxMotorTorque = (a.motor?.maxTorque ?? 0) / (L * L);
+        if (a.torsion && a.torsion.k > 0) {
+          // Mola de torção nativa: o Box2D usa a massa axial 1/(iA + iB).
+          const ka = invInertia(a.a) + invInertia(a.b);
+          if (ka > 0) {
+            const omega = Math.sqrt(a.torsion.k * ka);
+            jd.enableSpring = true;
+            jd.hertz = omega / (2 * PI);
+            jd.dampingRatio = (a.torsion.damping * ka) / (2 * omega);
+            jd.targetAngle = a.torsion.rest;
+            native.add(a.id);
+          }
+        }
         joints.set(a.id, B.b2CreateRevoluteJoint(w, jd));
         jd.delete();
       }
-      for (const s of plan.sliders) {
+      for (const s of p.sliders) {
         const jd = B.b2DefaultPrismaticJointDef();
         jd.base.bodyIdA = bodies[s.a]!;
         jd.base.bodyIdB = bodies[s.b]!;
         jd.base.localFrameA.p = local(s.a, s.anchor);
         jd.base.localFrameB.p = local(s.b, s.anchor);
-        const ang = Math.atan2(s.axis[1], s.axis[0]);
-        jd.base.localFrameA.q = B.b2MakeRot(ang);
-        jd.base.localFrameB.q = B.b2MakeRot(ang);
+        const ang = datan2(s.axis[1], s.axis[0]);
+        jd.base.localFrameA.q = rot(ang);
+        jd.base.localFrameB.q = rot(ang);
         jd.base.collideConnected = false;
+        base(jd);
         jd.enableLimit = true;
         jd.lowerTranslation = s.lower / L;
         jd.upperTranslation = s.upper / L;
-        B.b2CreatePrismaticJoint(w, jd);
+        if (s.spring && s.spring.k > 0) {
+          // Mola de retorno nativa: massa axial da junta prismática na pose desenhada.
+          const ra: Vec2 = [
+            s.anchor[0] - p.bodies[s.a]!.position[0],
+            s.anchor[1] - p.bodies[s.a]!.position[1],
+          ];
+          const rb: Vec2 = [
+            s.anchor[0] - p.bodies[s.b]!.position[0],
+            s.anchor[1] - p.bodies[s.b]!.position[1],
+          ];
+          const a1 = ra[0] * s.axis[1] - ra[1] * s.axis[0];
+          const a2 = rb[0] * s.axis[1] - rb[1] * s.axis[0];
+          const k = invMass(s.a) + invMass(s.b) + invInertia(s.a) * a1 * a1 + invInertia(s.b) * a2 * a2;
+          if (k > 0) {
+            const omega = Math.sqrt(s.spring.k * k);
+            jd.enableSpring = true;
+            jd.hertz = omega / (2 * PI);
+            jd.dampingRatio = (s.spring.damping * k) / (2 * omega);
+            jd.targetTranslation = s.spring.rest / L;
+            native.add(s.id);
+          }
+        }
+        joints.set(s.id, B.b2CreatePrismaticJoint(w, jd));
         jd.delete();
       }
+      rt = new Runtime(p, io, { native, jointForce });
       return {
         warnings,
-        bodies: plan.bodies.length,
+        bodies: p.bodies.length,
         fixtures,
-        joints: plan.axles.length + plan.sliders.length,
+        joints: joints.size,
       };
     },
 
     step(dt: number) {
       if (!worldId || !rt) return;
       rt.beforeStep(dt);
-      B.b2World_Step(worldId, dt, SUB_STEPS);
+      B.b2World_Step(worldId, dt, tuning.subSteps);
       const ev = B.b2World_GetSensorEvents(worldId);
       for (let i = 0; i < ev.beginCount; i++) {
         const e = ev.GetBeginEvent(i);
@@ -215,7 +342,26 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
         if (s?.sensor && o && !o.sensor) rt.sensorTouch(s.sensor, o.body, o.part);
       }
       ev.delete();
+      impacts = [];
+      const ce = B.b2World_GetContactEvents(worldId);
+      for (let i = 0; i < ce.hitCount; i++) {
+        const e = ce.GetHitEvent(i);
+        const a = shapeInfo(e.shapeIdA);
+        const b = shapeInfo(e.shapeIdB);
+        if (a && b)
+          impacts.push({
+            kind: "impact",
+            a: a.part,
+            b: b.part,
+            speed: e.approachSpeed * L,
+            point: [e.point.x * L, e.point.y * L],
+            time: rt.time + dt,
+          });
+        e.delete();
+      }
+      ce.delete();
       rt.afterStep(dt);
+      rt.pushEvents(impacts);
       for (const i of tracked) angleOf(i);
     },
 
@@ -231,8 +377,8 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
       const r = rt?.plan.partRel.get(partId);
       return !!(rt && r && rt.dragStart(r.body, pointMm));
     },
-    dragMove(p: Vec2) {
-      rt?.dragMove(p);
+    dragMove(q: Vec2) {
+      rt?.dragMove(q);
     },
     dragEnd() {
       rt?.dragEnd();
@@ -253,9 +399,9 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
         for (const c of list) {
           const m = c.manifold;
           for (let k = 0; k < m.pointCount; k++) {
-            const p = m.GetPoint(k);
-            max = Math.max(max, -p.separation);
-            p.delete();
+            const q = m.GetPoint(k);
+            max = Math.max(max, -q.separation);
+            q.delete();
           }
           c.delete();
         }
@@ -265,7 +411,7 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
 
     setMotorSpeed(linkId: Id, speed: number) {
       const j = joints.get(linkId);
-      if (j) B.b2RevoluteJoint_SetTargetMotorSpeed(j, speed);
+      if (j && plan?.axles.some((a) => a.id === linkId)) B.b2RevoluteJoint_SetTargetMotorSpeed(j, speed);
     },
 
     setVelocity(partId: Id, v: Vec2, omega: number) {
@@ -277,10 +423,23 @@ export function createBox2dAdapter(B: Box2DModule): EngineAdapter {
       B.b2Body_SetAngularVelocity(bodies[r.body]!, omega);
     },
 
+    setForce(partId: Id, force: Vec2 | null, at?: Vec2) {
+      rt?.setForce(partId, force, at);
+    },
+
+    ignite(linkId: Id) {
+      return rt ? rt.ignite(linkId) : false;
+    },
+
+    setVent(linkId: Id, vent: number, open: boolean) {
+      rt?.setVent(linkId, vent, open);
+    },
+
     dispose() {
       if (worldId) B.b2DestroyWorld(worldId);
       worldId = null;
       rt = null;
+      plan = null;
       bodies = [];
       joints.clear();
       shapeData.length = 0;

@@ -1,0 +1,24 @@
+{
+  "id": "calibracao/corrente",
+  "group": "calibracao",
+  "title": "Corrente de 40 elos",
+  "notes": "40 elos de 8 mm (aço) ligados por eixos, presa pela ponta esquerda, solta na horizontal, gravidade real.",
+  "view": [-330, -20, 660, 360],
+  "runs": [
+    {
+      "name": "5 s",
+      "duration": 5,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "maxField",
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "links": "axles",
+          "field": "gap",
+          "max": 0.5
+        }
+      ]
+    }
+  ],
+  "scene": "corrente.scene.json"
+}

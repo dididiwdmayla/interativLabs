@@ -1,7 +1,9 @@
 import type { Id } from "@/model/types";
 import type { Vec2 } from "@/geometry/vec";
 import type { Plan, PlanChamber, PlanSensor } from "./plan";
+import { N } from "@/model/units";
 import type { EngineEvent, LinkState, PartPose, Snapshot } from "./types";
+import { dcos, dexp, dhypot, dsin } from "@/geometry/dmath";
 
 /**
  * Parte comum da simulação, igual em todos os motores e em unidades da cena
@@ -20,6 +22,13 @@ export interface BodyState {
   vy: number;
   /** rad/s */
   w: number;
+}
+
+export interface RuntimeOptions {
+  /** ligações que o motor resolve sozinho (mola de torção e do trilho nativas): o runtime não aplica força */
+  native?: Set<Id>;
+  /** força de reação de uma junta nativa, g·mm/s² no mundo (quando o motor sabe) */
+  jointForce?: (linkId: Id) => Vec2 | null;
 }
 
 export interface BodyIO {
@@ -74,12 +83,17 @@ export class Runtime {
   private pending: { sensor: Id; part: Id; speed: number }[] = [];
   private events: EngineEvent[] = [];
   private drag: { body: number; local: Vec2; target: Vec2 } | null = null;
+  private forces = new Map<number, { f: Vec2; local: Vec2 }>();
+  private native: Set<Id>;
+  private jointForce: (linkId: Id) => Vec2 | null;
   time = 0;
   steps = 0;
 
-  constructor(plan: Plan, io: BodyIO) {
+  constructor(plan: Plan, io: BodyIO, options: RuntimeOptions = {}) {
     this.plan = plan;
     this.io = io;
+    this.native = options.native ?? new Set();
+    this.jointForce = options.jointForce ?? (() => null);
     this.st = plan.bodies.map((b) => ({ x: b.position[0], y: b.position[1], angle: 0, vx: 0, vy: 0, w: 0 }));
     this.fresh = plan.bodies.map(() => false);
     this.chambers = plan.chambers.map((p) => ({
@@ -111,8 +125,8 @@ export class Runtime {
   /** Ponto do espaço do corpo → mundo. */
   world(i: number, p: Vec2): Vec2 {
     const s = this.body(i);
-    const c = Math.cos(s.angle);
-    const n = Math.sin(s.angle);
+    const c = dcos(s.angle);
+    const n = dsin(s.angle);
     return [s.x + p[0] * c - p[1] * n, s.y + p[0] * n + p[1] * c];
   }
 
@@ -132,7 +146,7 @@ export class Runtime {
     this.events = [];
     const io = this.io;
     for (const a of this.plan.axles) {
-      if (!a.torsion) continue;
+      if (!a.torsion || this.native.has(a.id)) continue;
       const A = this.body(a.a);
       const B = this.body(a.b);
       const tau = -a.torsion.k * (B.angle - A.angle - a.torsion.rest) - a.torsion.damping * (B.w - A.w);
@@ -140,11 +154,11 @@ export class Runtime {
       if (this.dyn(a.a)) io.applyTorque(a.a, -tau);
     }
     for (const s of this.plan.sliders) {
-      if (!s.spring) continue;
+      if (!s.spring || this.native.has(s.id)) continue;
       const A = this.body(s.a);
       const B = this.body(s.b);
-      const ca = Math.cos(A.angle);
-      const sa = Math.sin(A.angle);
+      const ca = dcos(A.angle);
+      const sa = dsin(A.angle);
       const ux = s.axis[0] * ca - s.axis[1] * sa;
       const uy = s.axis[0] * sa + s.axis[1] * ca;
       const t = this.sliderTranslation(s.id);
@@ -162,7 +176,7 @@ export class Runtime {
       const pb = this.world(s.b, s.localB);
       const dx = pb[0] - pa[0];
       const dy = pb[1] - pa[1];
-      const L = Math.hypot(dx, dy) || 1e-9;
+      const L = dhypot(dx, dy) || 1e-9;
       const nx = dx / L;
       const ny = dy / L;
       const va = this.pointVel(s.a, pa[0], pa[1]);
@@ -173,7 +187,25 @@ export class Runtime {
       if (this.dyn(s.b)) io.applyForce(s.b, -nx * F, -ny * F, pb[0], pb[1]);
     }
     for (const ch of this.chambers) this.chamberForce(ch, h);
+    for (const [b, f] of this.forces) {
+      const p = this.world(b, f.local);
+      io.applyForce(b, f.f[0], f.f[1], p[0], p[1]);
+    }
     this.dragImpulse(h);
+  }
+
+  /** Força externa constante (roteiros de teste), N no mundo, no ponto local da peça. */
+  setForce(partId: Id, force: Vec2 | null, at: Vec2 = [0, 0]): void {
+    const r = this.plan.partRel.get(partId);
+    if (!r || !this.dyn(r.body)) return;
+    if (!force) {
+      this.forces.delete(r.body);
+      return;
+    }
+    const c = dcos(r.angle);
+    const s = dsin(r.angle);
+    const local: Vec2 = [r.x + at[0] * c - at[1] * s, r.y + at[0] * s + at[1] * c];
+    this.forces.set(r.body, { f: [force[0] * N, force[1] * N], local });
   }
 
   private chamberForce(ch: ChamberState, h: number): void {
@@ -181,8 +213,8 @@ export class Runtime {
     if (p.b < 0) return;
     const base = this.world(p.a, p.base);
     const A = this.body(p.a);
-    const ca = Math.cos(A.angle);
-    const sa = Math.sin(A.angle);
+    const ca = dcos(A.angle);
+    const sa = dsin(A.angle);
     const ux = p.axis[0] * ca - p.axis[1] * sa;
     const uy = p.axis[0] * sa + p.axis[1] * ca;
     const B = this.body(p.b);
@@ -200,11 +232,11 @@ export class Runtime {
     const inBore = perp < p.bore / 2 + BORE_MARGIN && s > -BACK_MARGIN && s < p.length;
     if (ch.fired && !ch.vented && !inBore) {
       ch.vented = true;
-      ch.exitSpeed = Math.hypot(B.vx, B.vy);
-      this.events.push({ kind: "chamber-vented", chamber: p.id, exitSpeed: ch.exitSpeed, time: this.time });
+      ch.exitSpeed = dhypot(B.vx, B.vy);
+      this.events.push({ kind: "vent-opened", chamber: p.id, vent: 0, by: "wall", time: this.time });
     }
-    if (ch.vented) ch.gas *= Math.exp(-h / VENT_TAU);
-    ch.gas *= Math.exp(-h / LEAK_TAU);
+    if (ch.vented) ch.gas *= dexp(-h / VENT_TAU);
+    ch.gas *= dexp(-h / LEAK_TAU);
     const gap = Math.max(s, MIN_GAP);
     ch.pressure = ch.gas / (gap * p.bore);
     if (!ch.vented && ch.gas > 1e-9) {
@@ -241,7 +273,7 @@ export class Runtime {
     const c = this.world(s.p.body, s.p.center);
     const v1 = this.pointVel(otherBody, c[0], c[1]);
     const v0 = this.pointVel(s.p.body, c[0], c[1]);
-    const speed = Math.hypot(v1[0] - v0[0], v1[1] - v0[1]);
+    const speed = dhypot(v1[0] - v0[0], v1[1] - v0[1]);
     if (speed + 1e-9 >= s.p.minSpeed) this.pending.push({ sensor: sensorId, part: otherPart, speed });
   }
 
@@ -262,8 +294,8 @@ export class Runtime {
   dragStart(body: number, point: Vec2): boolean {
     if (!this.dyn(body)) return false;
     const s = this.body(body);
-    const c = Math.cos(-s.angle);
-    const n = Math.sin(-s.angle);
+    const c = dcos(-s.angle);
+    const n = dsin(-s.angle);
     const dx = point[0] - s.x;
     const dy = point[1] - s.y;
     this.drag = { body, local: [dx * c - dy * n, dx * n + dy * c], target: [point[0], point[1]] };
@@ -305,7 +337,7 @@ export class Runtime {
     let jx = (k22 * bx - k12 * by) / det;
     let jy = (k11 * by - k12 * bx) / det;
     const maxJ = (DRAG_FORCE_PER_GRAM * m + DRAG_FORCE_BASE) * h;
-    const jl = Math.hypot(jx, jy);
+    const jl = dhypot(jx, jy);
     if (jl > maxJ) {
       jx *= maxJ / jl;
       jy *= maxJ / jl;
@@ -325,14 +357,14 @@ export class Runtime {
     const B = this.body(a.b);
     const pa = this.world(a.a, this.localOf(a.a, a.anchor));
     const pb = this.world(a.b, this.localOf(a.b, a.anchor));
-    return { angle: B.angle - A.angle, speed: B.w - A.w, gap: Math.hypot(pb[0] - pa[0], pb[1] - pa[1]) };
+    return { angle: B.angle - A.angle, speed: B.w - A.w, gap: dhypot(pb[0] - pa[0], pb[1] - pa[1]) };
   }
 
   sliderTranslation(id: Id): number {
     const s = this.plan.sliders.find((x) => x.id === id)!;
     const A = this.body(s.a);
-    const ca = Math.cos(A.angle);
-    const sa = Math.sin(A.angle);
+    const ca = dcos(A.angle);
+    const sa = dsin(A.angle);
     const ux = s.axis[0] * ca - s.axis[1] * sa;
     const uy = s.axis[0] * sa + s.axis[1] * ca;
     const pa = this.world(s.a, this.localOf(s.a, s.anchor));
@@ -344,8 +376,8 @@ export class Runtime {
     const r = this.plan.partRel.get(partId);
     if (!r) return null;
     const s = this.body(r.body);
-    const c = Math.cos(s.angle);
-    const n = Math.sin(s.angle);
+    const c = dcos(s.angle);
+    const n = dsin(s.angle);
     return { x: s.x + r.x * c - r.y * n, y: s.y + r.x * n + r.y * c, angle: s.angle + r.angle };
   }
 
@@ -360,17 +392,44 @@ export class Runtime {
       const s = this.axleAngle(i);
       links[a.id] = { kind: "axle", angle: s.angle, speed: s.speed, gap: s.gap };
     });
-    for (const s of this.plan.sliders)
-      links[s.id] = { kind: "slider", translation: this.sliderTranslation(s.id) };
+    for (const s of this.plan.sliders) {
+      const st: LinkState = { kind: "slider", translation: this.sliderTranslation(s.id) };
+      const f = this.jointForce(s.id);
+      if (f) {
+        const A = this.body(s.a);
+        const ca = dcos(A.angle);
+        const sa = dsin(A.angle);
+        const ux = s.axis[0] * ca - s.axis[1] * sa;
+        const uy = s.axis[0] * sa + s.axis[1] * ca;
+        st.force = (f[0] * ux + f[1] * uy) / N;
+      }
+      links[s.id] = st;
+    }
     for (const s of this.plan.springs) {
       const pa = this.world(s.a, s.localA);
       const pb = this.world(s.b, s.localB);
-      links[s.id] = { kind: "spring", length: Math.hypot(pb[0] - pa[0], pb[1] - pa[1]) };
+      links[s.id] = { kind: "spring", length: dhypot(pb[0] - pa[0], pb[1] - pa[1]) };
     }
     for (const c of this.chambers)
-      links[c.p.id] = { kind: "chamber", gas: c.gas, pressure: c.pressure, fired: c.fired, vented: c.vented };
+      links[c.p.id] = {
+        kind: "chamber",
+        gas: c.gas,
+        pressure: c.pressure,
+        fired: c.fired,
+        burning: c.burning,
+      };
     for (const s of this.sensors.values()) links[s.p.id] = { kind: "sensor", count: s.count };
     return { time: this.time, steps: this.steps, parts, links, events: this.events.slice() };
+  }
+
+  /** Eventos que o adaptador colhe do motor (impactos), somados aos do passo. */
+  pushEvents(list: EngineEvent[]): void {
+    for (const e of list) this.events.push(e);
+  }
+
+  /** Abre ou fecha a válvula de um respiro (gás 2.0, item 5.6; a câmara provisória não tem respiro). */
+  setVent(id: Id, vent: number, open: boolean): void {
+    void [id, vent, open];
   }
 
   sensorCount(id: Id): number {

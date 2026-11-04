@@ -222,6 +222,18 @@ export function createPlanckAdapter(): EngineAdapter {
       b.setAngularVelocity(omega);
     },
 
+    setForce(partId: Id, force: Vec2 | null, at?: Vec2) {
+      rt?.setForce(partId, force, at);
+    },
+
+    ignite(linkId: Id) {
+      return rt ? rt.ignite(linkId) : false;
+    },
+
+    setVent(linkId: Id, vent: number, open: boolean) {
+      rt?.setVent(linkId, vent, open);
+    },
+
     dispose() {
       world = null;
       rt = null;

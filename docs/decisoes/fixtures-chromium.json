@@ -1,0 +1,29 @@
+{
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+  "results": {
+    "calibracao/bala": {
+      "hash": "20103ec8b4211e99",
+      "pass": true,
+      "stepMedian": 1.0399999999906868,
+      "stepP95": 1.0399999999906868
+    },
+    "calibracao/corrente": {
+      "hash": "007c1ccfc0ee15e4",
+      "pass": true,
+      "stepMedian": 0.17999999998137356,
+      "stepP95": 0.3400000000372529
+    },
+    "calibracao/pilha": {
+      "hash": "7801499766c01642",
+      "pass": true,
+      "stepMedian": 0.4399999999906868,
+      "stepP95": 0.6199999999720603
+    },
+    "calibracao/pinhao": {
+      "hash": "753fcbe7b0464bd4",
+      "pass": true,
+      "stepMedian": 0.1,
+      "stepP95": 0.2300000000279397
+    }
+  }
+}

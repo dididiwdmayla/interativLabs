@@ -45,7 +45,7 @@ export default defineConfig([
     // Código numérico (polígonos, laços de passo): índices calculados dentro do
     // próprio laço. Com noUncheckedIndexedAccess, cada acesso já passa por `!`
     // explícito, e um helper com checagem custaria caro no passo de física.
-    files: ["src/geometry/**", "src/engine/**", "src/bench/**"],
+    files: ["src/geometry/**", "src/engine/**", "src/bench/**", "src/sim/**", "scripts/**"],
     rules: { "@typescript-eslint/no-non-null-assertion": "off" },
   },
   {

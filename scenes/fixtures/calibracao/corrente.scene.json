@@ -1,0 +1,1231 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Corrente de 40 elos",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Corrente",
+      "visible": true,
+      "locked": false,
+      "thickness": 10
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Elo 1",
+      "layer": "L1",
+      "x": 4,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Elo 2",
+      "layer": "L1",
+      "x": 12,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 5,
+      "name": "Elo 3",
+      "layer": "L1",
+      "x": 20,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p7",
+      "ref": 7,
+      "name": "Elo 4",
+      "layer": "L1",
+      "x": 28,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p9",
+      "ref": 9,
+      "name": "Elo 5",
+      "layer": "L1",
+      "x": 36,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p11",
+      "ref": 11,
+      "name": "Elo 6",
+      "layer": "L1",
+      "x": 44,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p13",
+      "ref": 13,
+      "name": "Elo 7",
+      "layer": "L1",
+      "x": 52,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p15",
+      "ref": 15,
+      "name": "Elo 8",
+      "layer": "L1",
+      "x": 60,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p17",
+      "ref": 17,
+      "name": "Elo 9",
+      "layer": "L1",
+      "x": 68,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p19",
+      "ref": 19,
+      "name": "Elo 10",
+      "layer": "L1",
+      "x": 76,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p21",
+      "ref": 21,
+      "name": "Elo 11",
+      "layer": "L1",
+      "x": 84,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p23",
+      "ref": 23,
+      "name": "Elo 12",
+      "layer": "L1",
+      "x": 92,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p25",
+      "ref": 25,
+      "name": "Elo 13",
+      "layer": "L1",
+      "x": 100,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p27",
+      "ref": 27,
+      "name": "Elo 14",
+      "layer": "L1",
+      "x": 108,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p29",
+      "ref": 29,
+      "name": "Elo 15",
+      "layer": "L1",
+      "x": 116,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p31",
+      "ref": 31,
+      "name": "Elo 16",
+      "layer": "L1",
+      "x": 124,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p33",
+      "ref": 33,
+      "name": "Elo 17",
+      "layer": "L1",
+      "x": 132,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p35",
+      "ref": 35,
+      "name": "Elo 18",
+      "layer": "L1",
+      "x": 140,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p37",
+      "ref": 37,
+      "name": "Elo 19",
+      "layer": "L1",
+      "x": 148,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p39",
+      "ref": 39,
+      "name": "Elo 20",
+      "layer": "L1",
+      "x": 156,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p41",
+      "ref": 41,
+      "name": "Elo 21",
+      "layer": "L1",
+      "x": 164,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p43",
+      "ref": 43,
+      "name": "Elo 22",
+      "layer": "L1",
+      "x": 172,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p45",
+      "ref": 45,
+      "name": "Elo 23",
+      "layer": "L1",
+      "x": 180,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p47",
+      "ref": 47,
+      "name": "Elo 24",
+      "layer": "L1",
+      "x": 188,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p49",
+      "ref": 49,
+      "name": "Elo 25",
+      "layer": "L1",
+      "x": 196,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p51",
+      "ref": 51,
+      "name": "Elo 26",
+      "layer": "L1",
+      "x": 204,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p53",
+      "ref": 53,
+      "name": "Elo 27",
+      "layer": "L1",
+      "x": 212,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p55",
+      "ref": 55,
+      "name": "Elo 28",
+      "layer": "L1",
+      "x": 220,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p57",
+      "ref": 57,
+      "name": "Elo 29",
+      "layer": "L1",
+      "x": 228,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p59",
+      "ref": 59,
+      "name": "Elo 30",
+      "layer": "L1",
+      "x": 236,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p61",
+      "ref": 61,
+      "name": "Elo 31",
+      "layer": "L1",
+      "x": 244,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p63",
+      "ref": 63,
+      "name": "Elo 32",
+      "layer": "L1",
+      "x": 252,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p65",
+      "ref": 65,
+      "name": "Elo 33",
+      "layer": "L1",
+      "x": 260,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p67",
+      "ref": 67,
+      "name": "Elo 34",
+      "layer": "L1",
+      "x": 268,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p69",
+      "ref": 69,
+      "name": "Elo 35",
+      "layer": "L1",
+      "x": 276,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p71",
+      "ref": 71,
+      "name": "Elo 36",
+      "layer": "L1",
+      "x": 284,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p73",
+      "ref": 73,
+      "name": "Elo 37",
+      "layer": "L1",
+      "x": 292,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p75",
+      "ref": 75,
+      "name": "Elo 38",
+      "layer": "L1",
+      "x": 300,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p77",
+      "ref": 77,
+      "name": "Elo 39",
+      "layer": "L1",
+      "x": 308,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p79",
+      "ref": 79,
+      "name": "Elo 40",
+      "layer": "L1",
+      "x": 316,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k2",
+      "ref": 2,
+      "kind": "axle",
+      "a": null,
+      "b": "p1",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k4",
+      "ref": 4,
+      "kind": "axle",
+      "a": "p1",
+      "b": "p3",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k6",
+      "ref": 6,
+      "kind": "axle",
+      "a": "p3",
+      "b": "p5",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k8",
+      "ref": 8,
+      "kind": "axle",
+      "a": "p5",
+      "b": "p7",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k10",
+      "ref": 10,
+      "kind": "axle",
+      "a": "p7",
+      "b": "p9",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k12",
+      "ref": 12,
+      "kind": "axle",
+      "a": "p9",
+      "b": "p11",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k14",
+      "ref": 14,
+      "kind": "axle",
+      "a": "p11",
+      "b": "p13",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k16",
+      "ref": 16,
+      "kind": "axle",
+      "a": "p13",
+      "b": "p15",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k18",
+      "ref": 18,
+      "kind": "axle",
+      "a": "p15",
+      "b": "p17",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k20",
+      "ref": 20,
+      "kind": "axle",
+      "a": "p17",
+      "b": "p19",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k22",
+      "ref": 22,
+      "kind": "axle",
+      "a": "p19",
+      "b": "p21",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k24",
+      "ref": 24,
+      "kind": "axle",
+      "a": "p21",
+      "b": "p23",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k26",
+      "ref": 26,
+      "kind": "axle",
+      "a": "p23",
+      "b": "p25",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k28",
+      "ref": 28,
+      "kind": "axle",
+      "a": "p25",
+      "b": "p27",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k30",
+      "ref": 30,
+      "kind": "axle",
+      "a": "p27",
+      "b": "p29",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k32",
+      "ref": 32,
+      "kind": "axle",
+      "a": "p29",
+      "b": "p31",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k34",
+      "ref": 34,
+      "kind": "axle",
+      "a": "p31",
+      "b": "p33",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k36",
+      "ref": 36,
+      "kind": "axle",
+      "a": "p33",
+      "b": "p35",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k38",
+      "ref": 38,
+      "kind": "axle",
+      "a": "p35",
+      "b": "p37",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k40",
+      "ref": 40,
+      "kind": "axle",
+      "a": "p37",
+      "b": "p39",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k42",
+      "ref": 42,
+      "kind": "axle",
+      "a": "p39",
+      "b": "p41",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k44",
+      "ref": 44,
+      "kind": "axle",
+      "a": "p41",
+      "b": "p43",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k46",
+      "ref": 46,
+      "kind": "axle",
+      "a": "p43",
+      "b": "p45",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k48",
+      "ref": 48,
+      "kind": "axle",
+      "a": "p45",
+      "b": "p47",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k50",
+      "ref": 50,
+      "kind": "axle",
+      "a": "p47",
+      "b": "p49",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k52",
+      "ref": 52,
+      "kind": "axle",
+      "a": "p49",
+      "b": "p51",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k54",
+      "ref": 54,
+      "kind": "axle",
+      "a": "p51",
+      "b": "p53",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k56",
+      "ref": 56,
+      "kind": "axle",
+      "a": "p53",
+      "b": "p55",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k58",
+      "ref": 58,
+      "kind": "axle",
+      "a": "p55",
+      "b": "p57",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k60",
+      "ref": 60,
+      "kind": "axle",
+      "a": "p57",
+      "b": "p59",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k62",
+      "ref": 62,
+      "kind": "axle",
+      "a": "p59",
+      "b": "p61",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k64",
+      "ref": 64,
+      "kind": "axle",
+      "a": "p61",
+      "b": "p63",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k66",
+      "ref": 66,
+      "kind": "axle",
+      "a": "p63",
+      "b": "p65",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k68",
+      "ref": 68,
+      "kind": "axle",
+      "a": "p65",
+      "b": "p67",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k70",
+      "ref": 70,
+      "kind": "axle",
+      "a": "p67",
+      "b": "p69",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k72",
+      "ref": 72,
+      "kind": "axle",
+      "a": "p69",
+      "b": "p71",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k74",
+      "ref": 74,
+      "kind": "axle",
+      "a": "p71",
+      "b": "p73",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k76",
+      "ref": 76,
+      "kind": "axle",
+      "a": "p73",
+      "b": "p75",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k78",
+      "ref": 78,
+      "kind": "axle",
+      "a": "p75",
+      "b": "p77",
+      "at": [-4, 0]
+    },
+    {
+      "id": "k80",
+      "ref": 80,
+      "kind": "axle",
+      "a": "p77",
+      "b": "p79",
+      "at": [-4, 0]
+    }
+  ]
+}

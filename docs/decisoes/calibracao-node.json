@@ -1,0 +1,383 @@
+{
+  "createdAt": "2026-11-04T12:57:06.142Z",
+  "rows": [
+    {
+      "ajuste": "padrão do Box2D (valores em metros lidos como mm)",
+      "tuning": {
+        "subSteps": 4,
+        "contactHertz": 30,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3,
+        "jointHertz": 60,
+        "jointDampingRatio": 2,
+        "restitutionThreshold": 1,
+        "hitEventThreshold": 1,
+        "lengthUnits": 1
+      },
+      "pilha": {
+        "passa": false,
+        "valor": "38338,7721 mm",
+        "penetracao": 10.793119430541992,
+        "mediana": 0.7782760000000053,
+        "p95": 2.2467870000000403
+      },
+      "corrente": {
+        "passa": false,
+        "valor": "11,1875",
+        "penetracao": 0,
+        "mediana": 0.07769199999984266,
+        "p95": 0.18576200000006793
+      },
+      "pinhao": {
+        "passa": false,
+        "valor": "6,01604 · 0,1369 mm",
+        "penetracao": 0.13692346215248108,
+        "mediana": 0.038627000000815315,
+        "p95": 0.0956530000003113
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 1.880000114440918,
+        "mediana": 0.02142100000037317,
+        "p95": 0.3779969999995956
+      }
+    },
+    {
+      "ajuste": "velocidades em mm/s (empurrão 3 000, quique 1 000, impacto 100)",
+      "tuning": {
+        "subSteps": 4,
+        "contactHertz": 30,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3000,
+        "jointHertz": 60,
+        "jointDampingRatio": 2,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 1
+      },
+      "pilha": {
+        "passa": false,
+        "valor": "35605,6097 mm",
+        "penetracao": 7.789496421813965,
+        "mediana": 0.4005600000000413,
+        "p95": 0.8863150000006499
+      },
+      "corrente": {
+        "passa": false,
+        "valor": "11,1875",
+        "penetracao": 0,
+        "mediana": 0.08587199999965378,
+        "p95": 0.18778999999994994
+      },
+      "pinhao": {
+        "passa": false,
+        "valor": "5,99766 · 0,1377 mm",
+        "penetracao": 0.13768774271011353,
+        "mediana": 0.0386289999987639,
+        "p95": 0.0892600000006496
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 1.880000114440918,
+        "mediana": 0.019770999999309424,
+        "p95": 0.6241939999999886
+      }
+    },
+    {
+      "ajuste": "+ lengthUnits 5 (folga 0,025 mm, especulativa 0,1 mm)",
+      "tuning": {
+        "subSteps": 4,
+        "contactHertz": 30,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3000,
+        "jointHertz": 60,
+        "jointDampingRatio": 2,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 5
+      },
+      "pilha": {
+        "passa": false,
+        "valor": "34516,7011 mm",
+        "penetracao": 7.668470859527588,
+        "mediana": 0.33294500000010885,
+        "p95": 0.9433420000004844
+      },
+      "corrente": {
+        "passa": false,
+        "valor": "11,1875",
+        "penetracao": 0,
+        "mediana": 0.08497499999975844,
+        "p95": 0.18233199999849603
+      },
+      "pinhao": {
+        "passa": true,
+        "valor": "5,99627 · 0,0292 mm",
+        "penetracao": 0.029219575226306915,
+        "mediana": 0.05734699999993609,
+        "p95": 0.12086099999942235
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 1.9000000953674316,
+        "mediana": 0.03902100000050268,
+        "p95": 1.3525559999998222
+      }
+    },
+    {
+      "ajuste": "+ contato 60 Hz",
+      "tuning": {
+        "subSteps": 4,
+        "contactHertz": 60,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3000,
+        "jointHertz": 60,
+        "jointDampingRatio": 2,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 5
+      },
+      "pilha": {
+        "passa": false,
+        "valor": "30225,2621 mm",
+        "penetracao": 6.544171333312988,
+        "mediana": 0.2937710000005609,
+        "p95": 0.7849139999998442
+      },
+      "corrente": {
+        "passa": false,
+        "valor": "11,1875",
+        "penetracao": 0,
+        "mediana": 0.1160890000010113,
+        "p95": 0.21392399999967893
+      },
+      "pinhao": {
+        "passa": true,
+        "valor": "6,01603 · 0,0246 mm",
+        "penetracao": 0.02458079159259796,
+        "mediana": 0.058254999999917345,
+        "p95": 0.136105999999927
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 1.1048431396484375,
+        "mediana": 0.024998999999297666,
+        "p95": 0.9296370000010938
+      }
+    },
+    {
+      "ajuste": "+ contato 240 Hz, 8 subpassos",
+      "tuning": {
+        "subSteps": 8,
+        "contactHertz": 240,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3000,
+        "jointHertz": 60,
+        "jointDampingRatio": 2,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 5
+      },
+      "pilha": {
+        "passa": false,
+        "valor": "2,0932 mm",
+        "penetracao": 0.20601177215576172,
+        "mediana": 0.2569249999978638,
+        "p95": 0.5594510000009905
+      },
+      "corrente": {
+        "passa": false,
+        "valor": "10,6423",
+        "penetracao": 0,
+        "mediana": 0.09815099999832455,
+        "p95": 0.1599820000010368
+      },
+      "pinhao": {
+        "passa": true,
+        "valor": "6,03153 · 0,0014 mm",
+        "penetracao": 0.0014394521713256836,
+        "mediana": 0.04912100000001374,
+        "p95": 0.08414000000266242
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 0.21651601791381836,
+        "mediana": 0.02673300000242307,
+        "p95": 1.3612619999985327
+      }
+    },
+    {
+      "ajuste": "+ contato 480 Hz, 12 subpassos, juntas 720 Hz (ζ 1)",
+      "tuning": {
+        "subSteps": 12,
+        "contactHertz": 480,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3000,
+        "jointHertz": 720,
+        "jointDampingRatio": 1,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 5
+      },
+      "pilha": {
+        "passa": true,
+        "valor": "0,9300 mm",
+        "penetracao": 0.091552734375,
+        "mediana": 0.3223680000010063,
+        "p95": 0.6353320000016538
+      },
+      "corrente": {
+        "passa": false,
+        "valor": "0,5950",
+        "penetracao": 1.1564826965332031,
+        "mediana": 0.16540700000041397,
+        "p95": 0.3056109999997716
+      },
+      "pinhao": {
+        "passa": true,
+        "valor": "6,01982 · 0,0025 mm",
+        "penetracao": 0.0024847090244293213,
+        "mediana": 0.06047400000170455,
+        "p95": 0.10769900000013877
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 0.14278864860534668,
+        "mediana": 0.028023999999277294,
+        "p95": 1.6868679999970482
+      }
+    },
+    {
+      "ajuste": "+ juntas sem amortecimento (ζ 0)",
+      "tuning": {
+        "subSteps": 12,
+        "contactHertz": 480,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3000,
+        "jointHertz": 720,
+        "jointDampingRatio": 0,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 5
+      },
+      "pilha": {
+        "passa": true,
+        "valor": "0,9300 mm",
+        "penetracao": 0.091552734375,
+        "mediana": 0.33945699999821954,
+        "p95": 0.7453700000005483
+      },
+      "corrente": {
+        "passa": true,
+        "valor": "0,4101",
+        "penetracao": 1.505974292755127,
+        "mediana": 0.1297019999983604,
+        "p95": 0.2976349999989907
+      },
+      "pinhao": {
+        "passa": true,
+        "valor": "6,01439 · 0,0021 mm",
+        "penetracao": 0.0021348835434764624,
+        "mediana": 0.06301100000200677,
+        "p95": 0.11894500000198605
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 0.14278864860534668,
+        "mediana": 0.060244000000238884,
+        "p95": 0.12504499999704421
+      }
+    },
+    {
+      "ajuste": "+ 16 subpassos, juntas 960 Hz",
+      "tuning": {
+        "subSteps": 16,
+        "contactHertz": 480,
+        "contactDampingRatio": 10,
+        "contactSpeed": 3000,
+        "jointHertz": 960,
+        "jointDampingRatio": 0,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 5
+      },
+      "pilha": {
+        "passa": true,
+        "valor": "0,5230 mm",
+        "penetracao": 0.05149555206298828,
+        "mediana": 0.44683699999950477,
+        "p95": 0.8992739999994228
+      },
+      "corrente": {
+        "passa": false,
+        "valor": "0,8219",
+        "penetracao": 2.8989243507385254,
+        "mediana": 0.14049599999998463,
+        "p95": 0.2859629999984463
+      },
+      "pinhao": {
+        "passa": true,
+        "valor": "6,01713 · 0,0014 mm",
+        "penetracao": 0.0013801753520965576,
+        "mediana": 0.1276819999984582,
+        "p95": 0.23379999999815482
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 0.10670924186706543,
+        "mediana": 0.05194599999958882,
+        "p95": 1.157959000000119
+      }
+    },
+    {
+      "ajuste": "calibrado: + amortecimento do contato 3 (era 10)",
+      "tuning": {
+        "subSteps": 16,
+        "contactHertz": 480,
+        "contactDampingRatio": 3,
+        "contactSpeed": 3000,
+        "jointHertz": 960,
+        "jointDampingRatio": 0,
+        "restitutionThreshold": 1000,
+        "hitEventThreshold": 100,
+        "lengthUnits": 5
+      },
+      "pilha": {
+        "passa": true,
+        "valor": "0,6697 mm",
+        "penetracao": 0.06322860717773438,
+        "mediana": 0.43050399999992806,
+        "p95": 0.9228410000032454
+      },
+      "corrente": {
+        "passa": true,
+        "valor": "0,2096",
+        "penetracao": 2.4120447635650635,
+        "mediana": 0.12706700000126148,
+        "p95": 0.22439200000371784
+      },
+      "pinhao": {
+        "passa": true,
+        "valor": "6,02351 · 0,0022 mm",
+        "penetracao": 0.0021912865340709686,
+        "mediana": 0.07178600000042934,
+        "p95": 0.11655800000153249
+      },
+      "bala": {
+        "passa": true,
+        "valor": "100 de 100",
+        "penetracao": 0.10392165184020996,
+        "mediana": 0.04116799999610521,
+        "p95": 0.17185699999390636
+      }
+    }
+  ]
+}
