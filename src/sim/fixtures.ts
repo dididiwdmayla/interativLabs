@@ -26,6 +26,7 @@ export const GROUPS: { id: string; label: string }[] = [
   { id: "rasgos", label: "Furos e rasgos" },
   { id: "gas", label: "Gás" },
   { id: "calibracao", label: "Calibração" },
+  { id: "desempenho", label: "Desempenho" },
 ];
 
 export interface FixtureEntry {

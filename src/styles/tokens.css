@@ -14,8 +14,10 @@
   --color-ink-2: #a3a5b6;
   --color-ink-3: #7d7f93;
   --color-ink-faint: #5d6076;
+  --color-wall: #2a3050; /* parede da chapa e face das camadas veladas */
   --color-shadow: #0b0d24;
-  --shadow-opacity: 0.55;
+  --shadow-opacity: 0.7;
+  --shadow-opacity-veiled: 0.25;
 
   /* Acentos: cor é estado, não material */
   --color-gold: #d4aa5f; /* a mão da pessoa */
@@ -51,6 +53,13 @@
 
   /* Traço (px de tela; não escala com o zoom) */
   --stroke-outline: 1.5px;
+  --stroke-outline-close: 2px; /* de 3× para cima */
+  --stroke-wall: 1px;
+  --stroke-hardware: 1px;
+  --stroke-cable: 1px;
+  --opacity-bevel-light: 0.7;
+  --opacity-bevel-faint: 0.35;
+  --opacity-hatch-veiled: 0.42; /* ink-2 sobre wall ≈ ink-faint */
   --stroke-shadow-line: 3px;
   --stroke-bevel: 0.75px;
   --stroke-callout: 0.75px;

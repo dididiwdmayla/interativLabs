@@ -1,17 +1,21 @@
-import { Suspense, lazy, useEffect, useState } from "react";
-import { Panel, type LayerSummary } from "./Panel";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { useUiStore } from "@/editor/useUiStore";
+import type { StageNodes } from "@/render/nodes";
+import { prepareScene } from "@/render/prepare";
+import { ExampleMenu } from "./ExampleMenu";
+import { Panel } from "./Panel";
+import { DEFAULT_EXAMPLE, openExample } from "./scenes/examples";
+import { useSimStore } from "./sim/simStore";
+import { useSimulation } from "./sim/useSimulation";
 import { Stage } from "./Stage";
 import { ToolBar } from "./ToolBar";
 import { TopBar } from "./TopBar";
 
-// A bancada de motores é carregada sob demanda: o código do comparativo não
-// entra no pacote principal.
+// A bancada de motores, o laboratório e a página de desempenho são
+// carregados sob demanda: não entram no pacote principal.
 const BenchPage = lazy(() => import("./bench/BenchPage"));
-// O laboratório (cenas de teste no motor do app) também.
 const LabPage = lazy(() => import("./lab/LabPage"));
-
-// Cena vazia provisória; o modelo da cena entra no item 2 e o editor no item 7.
-const LAYERS: LayerSummary[] = [{ id: "L1", name: "Fundo", parts: 0 }];
+const PerfPage = lazy(() => import("./perf/PerfPage"));
 
 function useHashRoute(): string {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -21,6 +25,52 @@ function useHashRoute(): string {
     return () => window.removeEventListener("hashchange", on);
   }, []);
   return hash;
+}
+
+function Workbench() {
+  const current = useUiStore((s) => s.current);
+  const mode = useUiStore((s) => s.mode);
+  const selection = useUiStore((s) => s.selection);
+  const select = useUiStore((s) => s.select);
+  const activeLayer = useUiStore((s) => s.activeLayer);
+  const xray = useUiStore((s) => s.xray);
+  const [nodes, setNodes] = useState<StageNodes | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const model = useMemo(() => (current ? prepareScene(current.scene) : null), [current]);
+
+  // a cena padrão aparece montada, no Editar, ao abrir o app
+  useEffect(() => {
+    if (!useUiStore.getState().current) openExample(DEFAULT_EXAMPLE).catch((e: Error) => setError(e.message));
+  }, []);
+
+  useSimulation(mode === "simulate", nodes);
+
+  // gancho dos testes automatizados (tests/e2e): estados da interface e da simulação
+  useEffect(() => {
+    (window as unknown as { __IL__?: unknown }).__IL__ = { ui: useUiStore, sim: useSimStore, openExample };
+  }, []);
+
+  const title = current?.scene.meta.title ?? (error ? "Erro ao abrir" : "Carregando…");
+  return (
+    <div className="shell" data-mode={mode}>
+      <TopBar title={title} />
+      <Stage
+        model={model}
+        figure={current?.figure ?? 1}
+        serial={current?.serial ?? 0}
+        mode={mode}
+        selection={selection}
+        activeLayer={activeLayer}
+        layerMode={xray ? "xray" : mode === "simulate" ? "all" : "focus"}
+        onSelect={select}
+        onNodes={setNodes}
+      />
+      <ToolBar />
+      <Panel model={model} />
+      <ExampleMenu />
+      {error && <p className="shell__error">{error}</p>}
+    </div>
+  );
 }
 
 export function App() {
@@ -39,12 +89,12 @@ export function App() {
       </Suspense>
     );
   }
-  return (
-    <div className="shell">
-      <TopBar title="Projeto sem nome" />
-      <Stage figure={1} title="Projeto sem nome" />
-      <ToolBar />
-      <Panel layers={LAYERS} activeLayer="L1" />
-    </div>
-  );
+  if (route === "#perf") {
+    return (
+      <Suspense fallback={<p className="route-missing">Carregando a medição…</p>}>
+        <PerfPage />
+      </Suspense>
+    );
+  }
+  return <Workbench />;
 }

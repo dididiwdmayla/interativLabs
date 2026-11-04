@@ -10,11 +10,21 @@ interface TopBarProps {
 export function TopBar({ title }: TopBarProps) {
   const uid = useId();
   const mode = useUiStore((s) => s.mode);
+  const menuOpen = useUiStore((s) => s.menuOpen);
+  const setMenuOpen = useUiStore((s) => s.setMenuOpen);
   return (
     <header className="topbar">
       <div className="topbar__side">
-        <button type="button" className="iconbtn" aria-label="Menu" title="Menu">
-          <Icon name="menu" uid={`${uid}m`} />
+        <button
+          type="button"
+          className="iconbtn topbar__menu"
+          aria-label="Menu de exemplos"
+          title="Exemplos"
+          aria-expanded={menuOpen}
+          aria-haspopup="dialog"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <Icon name={menuOpen ? "close" : "menu"} uid={`${uid}m`} />
         </button>
       </div>
       <h1 className="topbar__title" title={title}>

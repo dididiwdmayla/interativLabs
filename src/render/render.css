@@ -1,0 +1,370 @@
+/*
+ * Pele da cena (Prancha índigo). Traço com espessura fixa na tela
+ * (vector-effect), cores só pelos tokens. Os estados das camadas trocam por
+ * classe no grupo da camada; nunca por opacity no grupo inteiro.
+ */
+
+.scene .world path,
+.scene .world circle,
+.scene .world rect,
+.scene .world line,
+.scene .world polygon {
+  vector-effect: non-scaling-stroke;
+}
+
+.scene .world .hatch,
+.scene .hatch {
+  vector-effect: none;
+  fill: none;
+  stroke: var(--color-ink-2);
+}
+
+.scene .hatch--body {
+  stroke: var(--color-ink-faint);
+}
+
+/* ---------- peças ---------- */
+
+.part__shadow {
+  fill: var(--color-shadow);
+  fill-opacity: var(--shadow-opacity);
+}
+
+.part__wall {
+  fill: var(--color-wall);
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-wall);
+  fill-rule: evenodd;
+  stroke-linejoin: round;
+}
+
+.part__face {
+  fill: var(--color-stage);
+  fill-rule: evenodd;
+}
+
+.part__hatch {
+  fill-rule: evenodd;
+  stroke: none;
+}
+
+.part__tone {
+  fill: var(--color-ink-2);
+}
+
+.part__light {
+  fill: var(--color-ink);
+  fill-opacity: var(--opacity-bevel-light);
+  fill-rule: evenodd;
+}
+
+.part__faint {
+  fill: var(--color-ink);
+  fill-opacity: var(--opacity-bevel-faint);
+  fill-rule: evenodd;
+}
+
+.part__innerline {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+}
+
+.part__outline {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-outline);
+  stroke-linejoin: round;
+  fill-rule: evenodd;
+}
+
+.scene.is-close .part__outline {
+  stroke-width: var(--stroke-outline-close);
+}
+
+.part__select {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: var(--stroke-select);
+  stroke-linejoin: round;
+}
+
+.scene.is-heavy .part--dynamic .part__wallg {
+  display: none;
+}
+
+.part.is-tiny .part__wall {
+  display: none;
+}
+
+/* ---------- estados das camadas ---------- */
+
+/* veladas (abaixo da ativa): face em wall, traço em ink-faint, sem parede nem chanfro */
+.layer--below .part__face {
+  fill: var(--color-wall);
+}
+
+.layer--below .part__outline {
+  stroke: var(--color-ink-faint);
+}
+
+.layer--below .part__hatch {
+  opacity: var(--opacity-hatch-veiled);
+}
+
+.layer--below .part__wall,
+.layer--below .part__light,
+.layer--below .part__faint,
+.layer--below .part__innerline {
+  display: none;
+}
+
+.layer--below .part__shadow {
+  fill-opacity: var(--shadow-opacity-veiled);
+}
+
+/* acima da ativa: só o contorno, para não esconder a ativa */
+.layer--above .part__shadow,
+.layer--above .part__wall,
+.layer--above .part__face,
+.layer--above .part__hatch,
+.layer--above .part__light,
+.layer--above .part__faint,
+.layer--above .part__innerline,
+.layer--above .gas {
+  display: none;
+}
+
+.layer--above .part__outline {
+  stroke: var(--color-ink-faint);
+}
+
+/* raio-x: só contornos; a ativa cheia, as outras em linha oculta */
+.layer--xray .part__shadow,
+.layer--xray .part__wall,
+.layer--xray .part__face,
+.layer--xray .part__hatch,
+.layer--xray .part__light,
+.layer--xray .part__faint,
+.layer--xray .part__innerline,
+.layer--xray-active .part__shadow,
+.layer--xray-active .part__wall,
+.layer--xray-active .part__face,
+.layer--xray-active .part__hatch,
+.layer--xray-active .part__light,
+.layer--xray-active .part__faint,
+.layer--xray-active .part__innerline {
+  display: none;
+}
+
+.layer--xray .part__outline {
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+  stroke-dasharray: var(--dash-hidden);
+}
+
+/* ligações em camadas veladas: apagadas, exceto as que atravessam a ativa */
+.layer--below .link:not(.link--strong),
+.layer--above .link:not(.link--strong),
+.layer--xray .link:not(.link--strong),
+.layer--below .follower:not(.link--strong),
+.layer--above .follower:not(.link--strong) {
+  opacity: 0.4;
+}
+
+/* ---------- ligações ---------- */
+
+.hw-seat {
+  fill: var(--color-stage);
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-construction);
+}
+
+.hw-shadow {
+  fill: var(--color-shadow);
+  fill-opacity: var(--shadow-opacity);
+}
+
+.hw-symbol circle,
+.hw-symbol path {
+  fill: var(--color-stage);
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-hardware);
+}
+
+.link.is-selected .hw-symbol circle,
+.link.is-selected .hw-symbol path {
+  stroke: var(--color-gold);
+}
+
+.centerline {
+  fill: none;
+  stroke: var(--color-ink-3);
+  stroke-width: var(--stroke-center);
+  stroke-dasharray: var(--dash-center);
+}
+
+.motor-arrow {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-hardware);
+}
+
+.mount rect {
+  fill: var(--color-stage);
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-hardware);
+}
+
+.mount path {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-construction);
+}
+
+.pin-ring {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+  stroke-dasharray: var(--dash-hidden);
+}
+
+.sensor-zone {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+  stroke-dasharray: 3 2;
+}
+
+.sensor-ticks {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+}
+
+.link--sensor.is-hit .sensor-zone,
+.link--sensor.is-hit .sensor-ticks {
+  stroke: var(--color-ember);
+}
+
+.slider-guide {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+}
+
+.slider-stop,
+.chamber-cap {
+  fill: var(--color-wall);
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+}
+
+.chamber-bore {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+}
+
+.gas {
+  fill: var(--color-ember);
+  fill-opacity: 0.06;
+  stroke: none;
+}
+
+.scene[data-mode="edit"] .gas,
+.scene[data-mode="edit"] .gauge {
+  display: none;
+}
+
+.gauge {
+  fill: var(--color-ember);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.rod-bar {
+  fill: var(--color-stage);
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-outline);
+}
+
+.rod-line {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-construction);
+}
+
+.rod-eye {
+  fill: var(--color-stage);
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-hardware);
+}
+
+.link--cable {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-cable);
+  stroke-linecap: round;
+}
+
+.link--rod.is-selected .rod-bar,
+.link--cable.is-selected,
+.link--slider.is-selected .slider-guide,
+.link--chamber.is-selected .chamber-bore,
+.link--mount.is-selected rect {
+  stroke: var(--color-gold);
+}
+
+.ground {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-bevel);
+}
+
+/* ---------- chamadas, arrasto ---------- */
+
+.callout__line {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-callout);
+}
+
+.callout__dot {
+  fill: var(--color-ink);
+}
+
+.callout__num {
+  fill: var(--color-ink);
+  font-family: var(--font-callout);
+  font-style: italic;
+  text-anchor: middle;
+}
+
+.callout__sub {
+  fill: var(--color-ink-2);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+}
+
+.callout.is-selected .callout__line {
+  stroke: var(--color-gold);
+}
+
+.callout.is-selected .callout__num,
+.callout.is-selected .callout__dot {
+  fill: var(--color-gold);
+}
+
+.drag__wire {
+  stroke: var(--color-gold);
+  stroke-width: var(--stroke-callout);
+}
+
+.drag__ring {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: var(--stroke-select);
+}

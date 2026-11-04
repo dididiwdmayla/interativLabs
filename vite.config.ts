@@ -45,7 +45,7 @@ export default defineConfig(({ command }) => ({
     },
   },
   test: {
-    include: ["src/**/*.test.ts", "scenes/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "scenes/**/*.test.ts"],
     environment: "node",
     testTimeout: 120_000,
   },

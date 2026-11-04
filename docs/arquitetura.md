@@ -251,15 +251,20 @@ No zoom 1, **5 px de tela por mm**. É a escala do protótipo (1 px do v0 = 0,2 
 
 ## 5. Renderização
 
-- Assets são acessados por `assets` de `@/assets/registry`, gerado por `npm run assets`: id, grupo, fontes 1x/2x sob `BASE_URL`, dimensões, âncora normalizada, mm/px, repetição e variantes tingidas com suas fontes.
+Implementada na Fase 1 · Parte D (`src/render/`). A pele é a da Prancha índigo (`docs/identidade/identidade.md`); os assets vêm de `assets` (`@/assets/registry`).
 
-- Uma `<g>` por camada, na ordem da profundidade. Dentro dela, uma `<g>` por peça, com `transform` atualizado a cada quadro.
-- A forma da peça vira um `path` com regra `evenodd` (furos e rasgos funcionam sem decomposição no desenho).
-- Material = textura que repete (`pattern` em mm reais, via `scale` do registry) + borda e chanfro desenhados como contornos deslocados + sombra estática projetada na camada de baixo. Nada disso é recalculado durante a simulação.
-- Ferragens (cabeça de parafuso, pino, rolamento, sensor) são assets posicionados no ponto da ligação, girando com a peça.
-- Molas são desenhadas por segmentos (uma espira repetida ao longo do eixo), esticando e comprimindo com o comprimento real.
-- Efeitos (clarão, fumaça, faíscas de impacto) ficam numa camada própria e são limitados por quantidade.
-- A visão de camadas tem três estados: todas, ativa em destaque (as outras esmaecidas) e raio-x (só contornos). A vista explodida em perspectiva entra numa fase própria.
+- **Modelo de desenho** (`prepare.ts`): a cena vira peças com contorno (`shapeOutline`, sem decomposição convexa), camada, ordem, material, ângulo da hachura (vizinhas do mesmo material alternam 45°/135°), massa calculada e se é móvel; e ligações com o lugar onde são desenhadas (a peça que as carrega, a camada e a faixa de camadas). Montado uma vez por cena.
+- **Estrutura**: uma `<g>` por camada, na ordem do array; dentro dela, uma `<g>` por peça com a forma em `path` `evenodd` (furos e rasgos sem decomposição). A cena é dividida em **folhas** `<svg>` compostas à parte (`will-change: transform`): por camada, uma com o que fica parado e outra com o que se move, mais a folha das definições (padrões e imagens, referenciados por `url(#…)`) e a das chamadas. As folhas paradas ficam em cache durante a simulação.
+- **Poses fora do React** (`nodes.ts`): os componentes montam a estrutura e registram os nós; o `StageNodes` escreve `transform` (peça, parede, sombra, cópias de pino e sensor) e o desenho das ligações que mudam de forma (mola, haste, cabo, gás, fio do arrasto) direto nos nós. Nenhum elemento é recriado por quadro. Depois de cada montagem, o React pede para reaplicar o quadro atual.
+- **Vista** (`view.ts`): 5 px por mm no zoom 1, zoom de 0,15× a 8×; a matriz do mundo vai para o grupo de cada folha durante o gesto; o papel `paper-stage` é o fundo do contêiner, em escala de tela, deslocado com o pan; vinheta estática à parte. O que é medido em px de tela (chanfro, parede, degrau da hachura, chamadas, ferragens pequenas) é refeito no fim do gesto.
+- **Pele** (`skin.ts`, `hatch.ts`): parede (cópia deslocada no mundo, 2 px; 3 px de 3× para cima), sombra dura sobre a camada de baixo (3 px no enquadramento, acompanhando o zoom até 6 px), face na cor do palco, hachura recortada no contorno interno do chanfro, chanfro em dois tons e contorno. Chanfro e faixa do corpo fixo são offsets da forma com Clipper2 (`offsetShapes`). Hachuras de aço, alumínio, latão, polímero, borracha e o pautado em `pattern` dentro do grupo da peça, com degrau 2ᵏ do zoom; madeira pelo `hatch-wood`. Peça abaixo de 24 px na tela: tom liso, sem chanfro nem parede.
+- **Estados de camada** por classe no grupo: ativa à frente; as de baixo veladas (face em `wall`, traço `ink-faint`); as de cima só em contorno; todas plenas no Simular; raio-x só com contornos (linha oculta fora da ativa). Ligações que atravessam a camada ativa ficam fortes.
+- **Ligações** (`LinkArt.tsx`, `geometry.ts`): ferragens do lote 01 por `<use>` (variante `gold` na selecionada; símbolo procedural abaixo de 10 px), mola com `spring-end` nas pontas e N `spring-coil` num grupo com `scaleX` (N do comprimento livre, ajustado para a escala ficar entre 0,6 e 1,6 na pose desenhada; espiras encostadas no sólido), haste, cabo (curva com a flecha da parábola quando frouxo), trilho, suporte elástico, câmara em corte com o gás em brasa (opacidade pela pressão) e o kPa, símbolo de apoio.
+- **Chamadas** (`callouts.ts`): número fora das peças, linha curva sem cruzar; no Simular, só a peça móvel selecionada, acompanhando a pose.
+- **Toque** (`hit.ts`): a peça mais alta sob o dedo (camada, depois ordem), com tolerância de borda.
+- **Orçamento de pintura**: com mais de 40 peças móveis, a parede delas sai no Simular (`docs/decisoes/desempenho.md`).
+- **Simular** (`src/sim/session.ts`, `src/ui/sim/`): a `SimSession` (sem DOM) roda num Web Worker; o thread principal pede os passos do quadro pelo acumulador, espelha a gravação dos últimos 10 s e desenha. A linha do tempo volta a um passo recriando o mundo e reexecutando as entradas gravadas.
+- Efeitos (pontilhado do gás, leque do escape, faíscas) e falhas de tinta (`tex-ink-wear`) entram na Fase 2. A vista explodida em perspectiva entra numa fase própria.
 
 ## 6. Editor
 

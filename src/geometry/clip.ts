@@ -1,6 +1,9 @@
 import {
   ClipType,
+  ClipperOffset,
+  EndType,
   FillRule,
+  JoinType,
   PolyTree64,
   booleanOpWithPolyTree,
   type Path64,
@@ -178,4 +181,23 @@ export function cut(
 
 function isRing(x: PolyWithHoles | PolyWithHoles[] | Ring): x is Ring {
   return Array.isArray(x) && (x.length === 0 || Array.isArray(x[0]));
+}
+
+/**
+ * Desloca o contorno de formas com furos (positivo = para fora, negativo =
+ * para dentro), com junção arredondada. Furos crescem quando a forma
+ * encolhe. Usado no chanfro e nas faixas do renderizador (src/render).
+ * Devolve [] quando a forma some no deslocamento.
+ */
+export function offsetShapes(shapes: PolyWithHoles[], delta: number): PolyWithHoles[] {
+  if (shapes.length === 0) return [];
+  const co = new ClipperOffset(2, 0.002 * CLIP_SCALE);
+  co.addPaths(shapesToPaths(shapes), JoinType.Round, EndType.Polygon);
+  const tree = new PolyTree64();
+  try {
+    co.execute(delta * CLIP_SCALE, tree);
+  } catch {
+    return [];
+  }
+  return treeToShapes(tree);
 }
