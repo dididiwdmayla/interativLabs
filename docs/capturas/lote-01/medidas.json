@@ -1,0 +1,875 @@
+{
+  "library": {
+    "aom": "3.15.1",
+    "archive": "3.8.9",
+    "cairo": "1.18.6",
+    "cgif": "0.5.4",
+    "exif": "0.6.26",
+    "expat": "2.8.5",
+    "ffi": "3.8.0",
+    "fontconfig": "2.18.3",
+    "freetype": "2.14.3",
+    "fribidi": "1.0.17",
+    "glib": "2.90.0",
+    "harfbuzz": "14.5.0",
+    "heif": "1.23.5",
+    "highway": "1.4.0",
+    "imagequant": "2.4.1",
+    "lcms": "2.19.1",
+    "mozjpeg": "0826579",
+    "pango": "1.58.2",
+    "pixman": "0.46.4",
+    "png": "1.6.58",
+    "proxy-libintl": "0.5",
+    "rsvg": "2.63.2",
+    "tiff": "4.7.2",
+    "uhdr": "2.0.2",
+    "vips": "8.18.7",
+    "webp": "1.6.0",
+    "xml2": "2.15.4",
+    "zlib-ng": "2.3.3",
+    "sharp": "0.35.5"
+  },
+  "assetsBytes": 4858436,
+  "outputs": [
+    {
+      "id": "paper-stage",
+      "source": "paper-stage",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 1, "weighted": 1 },
+      "masterCoverage": { "binary": 1, "weighted": 1 },
+      "mean": [29.9095458984375, 35.74440383911133, 71.77608489990234],
+      "seam": { "seam": 0, "internal": 1.0441985307607633, "ratio": 0 },
+      "files": [
+        {
+          "token": null,
+          "src": { "x1": "assets/palco/paper-stage.webp", "x2": "assets/palco/paper-stage@2x.webp" },
+          "bytes": { "x1": 6188, "x2": 49790 }
+        }
+      ],
+      "delivered": {
+        "width": 512,
+        "height": 512,
+        "coverage": { "binary": 1, "weighted": 1 },
+        "mean": [29.9864501953125, 35.84162521362305, 72.53001022338867],
+        "seam": { "seam": 0.295654296875, "internal": 0.21761720661081213, "ratio": 1.3585979779795163 }
+      }
+    },
+    {
+      "id": "paper-chrome",
+      "source": "paper-stage",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 1, "weighted": 1 },
+      "masterCoverage": { "binary": 1, "weighted": 1 },
+      "mean": [23.056640625, 26.095046997070312, 55.10212326049805],
+      "seam": { "seam": 0, "internal": 0.5316790377323874, "ratio": 0 },
+      "files": [
+        {
+          "token": null,
+          "src": { "x1": "assets/palco/paper-chrome.webp", "x2": "assets/palco/paper-chrome@2x.webp" },
+          "bytes": { "x1": 2484, "x2": 11240 }
+        }
+      ],
+      "delivered": {
+        "width": 512,
+        "height": 512,
+        "coverage": { "binary": 1, "weighted": 1 },
+        "mean": [23.22559356689453, 25.727493286132812, 54.47357940673828],
+        "seam": { "seam": 0.1513671875, "internal": 0.059560757093933464, "ratio": 2.54139125970609 }
+      }
+    },
+    {
+      "id": "paper-surface",
+      "source": "paper-stage",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 1, "weighted": 1 },
+      "masterCoverage": { "binary": 1, "weighted": 1 },
+      "mean": [37.93040084838867, 43.03312683105469, 73.88032150268555],
+      "seam": { "seam": 0, "internal": 0.6688660026296478, "ratio": 0 },
+      "files": [
+        {
+          "token": null,
+          "src": { "x1": "assets/palco/paper-surface.webp", "x2": "assets/palco/paper-surface@2x.webp" },
+          "bytes": { "x1": 3260, "x2": 17654 }
+        }
+      ],
+      "delivered": {
+        "width": 512,
+        "height": 512,
+        "coverage": { "binary": 1, "weighted": 1 },
+        "mean": [37.10698699951172, 43.734012603759766, 73.74709701538086],
+        "seam": { "seam": 0.28857421875, "internal": 0.10530344147504893, "ratio": 2.740406341025199 }
+      }
+    },
+    {
+      "id": "hw-screw-slot",
+      "source": "hw-screw-slot",
+      "sourceSize": [1254, 1254],
+      "factor": 0.9832535885167464,
+      "axesDifference": 0.00005206193527729939,
+      "measuredCorrection": {
+        "x": 619.9096213857594,
+        "y": 623.9527965719046,
+        "rx": 469.27671524451483,
+        "ry": 477.24722364010864,
+        "factor": 0.9832989947331693,
+        "difference": 0.016701005266830757
+      },
+      "axes": [938.5356211255636, 938.5844856503078],
+      "circle": {
+        "x": 619.921095174735,
+        "y": 613.4870609137424,
+        "radius": 469.28002506942204,
+        "residual": 1.754696010396577
+      },
+      "crop": { "left": 108, "top": 102, "width": 1022, "height": 1022 },
+      "anchor": [0.5009012672942612, 0.5004765762365386],
+      "mmPerPx": 0.02552114272971297,
+      "diameter1x": 235.09919064143256,
+      "coverage": { "binary": 0.51251220703125, "weighted": 0.27818501790366146 },
+      "masterCoverage": { "binary": 0.23759503877861973, "weighted": 0.1783539469830954 },
+      "files": [
+        {
+          "token": "ink",
+          "src": {
+            "x1": "assets/ferragens/hw-screw-slot.webp",
+            "x2": "assets/ferragens/hw-screw-slot@2x.webp"
+          },
+          "bytes": { "x1": 39728, "x2": 121866 }
+        },
+        {
+          "token": "gold",
+          "src": {
+            "x1": "assets/ferragens/hw-screw-slot-gold.webp",
+            "x2": "assets/ferragens/hw-screw-slot-gold@2x.webp"
+          },
+          "bytes": { "x1": 39728, "x2": 121866 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.51251220703125, "weighted": 0.27818501790366146 }
+      }
+    },
+    {
+      "id": "hw-screw-hex",
+      "source": "hw-screw-hex",
+      "sourceSize": [1254, 1254],
+      "factor": 0.9792663476874003,
+      "axesDifference": 0.00029456372666858107,
+      "measuredCorrection": {
+        "x": 618.934785797526,
+        "y": 623.6472626400888,
+        "rx": 496.7598154375801,
+        "ry": 507.0724804611027,
+        "factor": 0.9796623452841596,
+        "difference": 0.02033765471584041
+      },
+      "axes": [993.5082816149853, 993.2156301130767],
+      "circle": {
+        "x": 618.9348758301936,
+        "y": 610.7245369868256,
+        "radius": 496.68097226872254,
+        "residual": 2.4835316861212204
+      },
+      "crop": { "left": 75, "top": 67, "width": 1086, "height": 1086 },
+      "anchor": [0.5008608433058873, 0.5006671611296737],
+      "mmPerPx": 0.025623213311087877,
+      "diameter1x": 234.16266832558557,
+      "coverage": { "binary": 0.572662353515625, "weighted": 0.2452589446423401 },
+      "masterCoverage": { "binary": 0.27316351630126495, "weighted": 0.18487482455362694 },
+      "files": [
+        {
+          "token": "ink",
+          "src": {
+            "x1": "assets/ferragens/hw-screw-hex.webp",
+            "x2": "assets/ferragens/hw-screw-hex@2x.webp"
+          },
+          "bytes": { "x1": 42474, "x2": 145130 }
+        },
+        {
+          "token": "gold",
+          "src": {
+            "x1": "assets/ferragens/hw-screw-hex-gold.webp",
+            "x2": "assets/ferragens/hw-screw-hex-gold@2x.webp"
+          },
+          "bytes": { "x1": 42474, "x2": 145130 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.572662353515625, "weighted": 0.2452589446423401 }
+      }
+    },
+    {
+      "id": "hw-axle",
+      "source": "hw-axle",
+      "sourceSize": [1254, 1254],
+      "factor": 0.9784688995215312,
+      "axesDifference": 0.0003186258104353977,
+      "measuredCorrection": {
+        "x": 618.2355918879325,
+        "y": 623.5871524926007,
+        "rx": 495.5778345849258,
+        "ry": 506.60451037677194,
+        "factor": 0.978234153928781,
+        "difference": 0.02176584607121906
+      },
+      "axes": [991.1320751573776, 991.4479760722581],
+      "circle": {
+        "x": 618.2563622508079,
+        "y": 610.1774583929152,
+        "radius": 495.6450262873692,
+        "residual": 2.5514612208352525
+      },
+      "crop": { "left": 76, "top": 68, "width": 1083, "height": 1083 },
+      "anchor": [0.5006983954301089, 0.5006255386822855],
+      "mmPerPx": 0.034141117337045356,
+      "diameter1x": 234.3215636741764,
+      "coverage": { "binary": 0.459625244140625, "weighted": 0.24672785740274522 },
+      "masterCoverage": { "binary": 0.22498149462390207, "weighted": 0.18212118818054843 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/ferragens/hw-axle.webp", "x2": "assets/ferragens/hw-axle@2x.webp" },
+          "bytes": { "x1": 36584, "x2": 120010 }
+        },
+        {
+          "token": "gold",
+          "src": {
+            "x1": "assets/ferragens/hw-axle-gold.webp",
+            "x2": "assets/ferragens/hw-axle-gold@2x.webp"
+          },
+          "bytes": { "x1": 36584, "x2": 120010 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.459625244140625, "weighted": 0.24672785740274522 }
+      }
+    },
+    {
+      "id": "hw-pin",
+      "source": "hw-pin",
+      "sourceSize": [1254, 1254],
+      "factor": 0.9784688995215312,
+      "axesDifference": 0.0003273392950753828,
+      "measuredCorrection": {
+        "x": 616.8106194489042,
+        "y": 622.8875855566239,
+        "rx": 495.76356634654053,
+        "ry": 506.46761638946873,
+        "factor": 0.9788652824059398,
+        "difference": 0.02113471759406013
+      },
+      "axes": [991.5043915558625, 991.1798332072665],
+      "circle": {
+        "x": 616.8243299523868,
+        "y": 609.4902084786497,
+        "radius": 495.6710635019053,
+        "residual": 2.6792886572049976
+      },
+      "crop": { "left": 75, "top": 68, "width": 1082, "height": 1082 },
+      "anchor": [0.5007618576269749, 0.5004530577436689],
+      "mmPerPx": 0.01705390050465899,
+      "diameter1x": 234.55044779387754,
+      "coverage": { "binary": 0.5509490966796875, "weighted": 0.30026927274817616 },
+      "masterCoverage": { "binary": 0.28288805964454417, "weighted": 0.222374981040728 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/ferragens/hw-pin.webp", "x2": "assets/ferragens/hw-pin@2x.webp" },
+          "bytes": { "x1": 41040, "x2": 137090 }
+        },
+        {
+          "token": "gold",
+          "src": { "x1": "assets/ferragens/hw-pin-gold.webp", "x2": "assets/ferragens/hw-pin-gold@2x.webp" },
+          "bytes": { "x1": 41040, "x2": 137090 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.5509490966796875, "weighted": 0.30026927274817616 }
+      }
+    },
+    {
+      "id": "hw-rivet",
+      "source": "hw-rivet",
+      "sourceSize": [1254, 1254],
+      "factor": 0.9824561403508771,
+      "axesDifference": 0.00011472088288011656,
+      "measuredCorrection": {
+        "x": 620.8674423639985,
+        "y": 608.8759745245276,
+        "rx": 428.695676499891,
+        "ry": 436.3933038441137,
+        "factor": 0.9823608032561096,
+        "difference": 0.017639196743890407
+      },
+      "axes": [857.3845872271802, 857.4829584292258],
+      "circle": {
+        "x": 620.8659635326264,
+        "y": 598.2007688775199,
+        "radius": 428.7168823099214,
+        "residual": 1.088425758120012
+      },
+      "crop": { "left": 155, "top": 133, "width": 930, "height": 930 },
+      "anchor": [0.5009311435834692, 0.5002158805134622],
+      "mmPerPx": 0.021184216495198707,
+      "diameter1x": 236.02477821793522,
+      "coverage": { "binary": 0.4701995849609375, "weighted": 0.22860472436050797 },
+      "masterCoverage": { "binary": 0.1757610097448929, "weighted": 0.1243194857108771 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/ferragens/hw-rivet.webp", "x2": "assets/ferragens/hw-rivet@2x.webp" },
+          "bytes": { "x1": 37238, "x2": 119498 }
+        },
+        {
+          "token": "gold",
+          "src": {
+            "x1": "assets/ferragens/hw-rivet-gold.webp",
+            "x2": "assets/ferragens/hw-rivet-gold@2x.webp"
+          },
+          "bytes": { "x1": 37238, "x2": 119498 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.4701995849609375, "weighted": 0.22860472436050797 }
+      }
+    },
+    {
+      "id": "hw-bearing",
+      "source": "hw-bearing",
+      "sourceSize": [1254, 1254],
+      "factor": 0.9696969696969697,
+      "axesDifference": 0.00011643911389035307,
+      "measuredCorrection": {
+        "x": 618.275944080666,
+        "y": 620.6511202821706,
+        "rx": 495.1367770231127,
+        "ry": 510.6697641371969,
+        "factor": 0.9695831079008016,
+        "difference": 0.03041689209919841
+      },
+      "axes": [990.2716604342904, 990.3869802166754],
+      "circle": {
+        "x": 618.2965741568502,
+        "y": 601.8505428941337,
+        "radius": 495.1646673651955,
+        "residual": 1.827561228544035
+      },
+      "anchorCircle": {
+        "x": 617.2247744727438,
+        "y": 595.8886116756588,
+        "radius": 195.5126156232827,
+        "residual": 0.7867506834924612
+      },
+      "crop": { "left": 71, "top": 50, "width": 1091, "height": 1091 },
+      "anchor": [0.5006643212399118, 0.5003561976862134],
+      "mmPerPx": 0.04303334860983612,
+      "diameter1x": 232.37791905681036,
+      "coverage": { "binary": 0.4897308349609375, "weighted": 0.26465460085402137 },
+      "masterCoverage": { "binary": 0.2730865695484179, "weighted": 0.20644772890241808 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/ferragens/hw-bearing.webp", "x2": "assets/ferragens/hw-bearing@2x.webp" },
+          "bytes": { "x1": 34862, "x2": 117656 }
+        },
+        {
+          "token": "gold",
+          "src": {
+            "x1": "assets/ferragens/hw-bearing-gold.webp",
+            "x2": "assets/ferragens/hw-bearing-gold@2x.webp"
+          },
+          "bytes": { "x1": 34862, "x2": 117656 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.4897308349609375, "weighted": 0.26465460085402137 }
+      }
+    },
+    {
+      "id": "hw-sensor",
+      "source": "hw-sensor",
+      "sourceSize": [1254, 1254],
+      "factor": 0.9417862838915471,
+      "axesDifference": 0.006679593098339462,
+      "measuredCorrection": {
+        "factor": 0.9417,
+        "difference": 0.006390253693620172,
+        "faces": [767.4855, 772.3517758886773, 767.4162521000305]
+      },
+      "axes": [800.8035293115123, 808.6749830120775],
+      "circle": {
+        "x": 624.4453599322138,
+        "y": 587.3358438156743,
+        "radius": 402.4241583027419,
+        "residual": 17.369923111693495
+      },
+      "faces": [768, 772.5401775038149, 767.3799234659705],
+      "anchorCircle": {
+        "x": 621.7624867223443,
+        "y": 584.240287884717,
+        "radius": 265.51384014052235,
+        "residual": 5.853161057231941
+      },
+      "crop": { "left": 141, "top": 103, "width": 961, "height": 961 },
+      "anchor": [0.5002731391491616, 0.5007703307853454],
+      "mmPerPx": 0.029277578747898176,
+      "diameter1x": 204.93497948257547,
+      "coverage": { "binary": 0.4631805419921875, "weighted": 0.24507787367879186 },
+      "masterCoverage": { "binary": 0.20042912122992707, "weighted": 0.14889940083029596 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/ferragens/hw-sensor.webp", "x2": "assets/ferragens/hw-sensor@2x.webp" },
+          "bytes": { "x1": 34222, "x2": 110954 }
+        },
+        {
+          "token": "gold",
+          "src": {
+            "x1": "assets/ferragens/hw-sensor-gold.webp",
+            "x2": "assets/ferragens/hw-sensor-gold@2x.webp"
+          },
+          "bytes": { "x1": 34222, "x2": 110954 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.4631805419921875, "weighted": 0.24507787367879186 }
+      }
+    },
+    {
+      "id": "spring-coil",
+      "source": "spring-coil",
+      "sourceSize": [1536, 1024],
+      "factor": 1,
+      "axesDifference": null,
+      "period": { "period": 255.97397681816258, "correlation": 0.9989205297966709 },
+      "crop": { "left": 323, "top": 0, "width": 256, "height": 1024 },
+      "anchor": [0, 0.5],
+      "mmPerPx": 0.04411764705882353,
+      "diameter1x": 136,
+      "coverage": { "binary": 0.24261474609375, "weighted": 0.10095358455882213 },
+      "masterCoverage": { "binary": 0.1331628163655599, "weighted": 0.09857685363370156 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/molas/spring-coil.webp", "x2": "assets/molas/spring-coil@2x.webp" },
+          "bytes": { "x1": 5070, "x2": 15708 }
+        },
+        {
+          "token": "gold",
+          "src": {
+            "x1": "assets/molas/spring-coil-gold.webp",
+            "x2": "assets/molas/spring-coil-gold@2x.webp"
+          },
+          "bytes": { "x1": 5070, "x2": 15708 }
+        }
+      ],
+      "delivered": {
+        "width": 64,
+        "height": 256,
+        "coverage": { "binary": 0.24261474609375, "weighted": 0.10095358455882213 }
+      }
+    },
+    {
+      "id": "spring-end",
+      "source": "spring-end",
+      "sourceSize": [1536, 1024],
+      "factor": 1,
+      "axesDifference": null,
+      "phase": { "cut": 707, "correlation": 0.6314093143294025 },
+      "eye": {
+        "x": 451.9623191244541,
+        "y": 505.01867849455795,
+        "radius": 343.4466118420886,
+        "residual": 0.7070469275965731
+      },
+      "crop": { "left": 85, "top": 0, "width": 622, "height": 1024 },
+      "anchor": [0.5899715741550708, 0.49318230321734174],
+      "mmPerPx": 0.04411764705882353,
+      "diameter1x": 136,
+      "coverage": { "binary": 0.2421875, "weighted": 0.1459079625439909 },
+      "masterCoverage": { "binary": 0.17945353190104166, "weighted": 0.1512675740360341 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/molas/spring-end.webp", "x2": "assets/molas/spring-end@2x.webp" },
+          "bytes": { "x1": 11194, "x2": 33222 }
+        },
+        {
+          "token": "gold",
+          "src": { "x1": "assets/molas/spring-end-gold.webp", "x2": "assets/molas/spring-end-gold@2x.webp" },
+          "bytes": { "x1": 11194, "x2": 33222 }
+        }
+      ],
+      "delivered": {
+        "width": 156,
+        "height": 256,
+        "coverage": { "binary": 0.2421875, "weighted": 0.1459079625439909 }
+      }
+    },
+    {
+      "id": "tex-ink-wear",
+      "source": "tex-ink-wear",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.2514190673828125, "weighted": 0.030045991785379568 },
+      "masterCoverage": { "binary": 0.061456290428841424, "weighted": 0.02520764401088689 },
+      "seam": { "seam": 0, "internal": 3.5393526077688158, "ratio": 0 },
+      "files": [
+        {
+          "token": "stage",
+          "src": {
+            "x1": "assets/materiais/tex-ink-wear.webp",
+            "x2": "assets/materiais/tex-ink-wear@2x.webp"
+          },
+          "bytes": { "x1": 31946, "x2": 90258 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.2514190673828125, "weighted": 0.030045991785379568 },
+        "seam": { "seam": 0, "internal": 3.5393526077688158, "ratio": 0 }
+      }
+    },
+    {
+      "id": "hatch-wood",
+      "source": "hatch-wood",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.4149017333984375, "weighted": 0.09566841873465322 },
+      "masterCoverage": { "binary": 0.1559551699314983, "weighted": 0.0870387527837864 },
+      "seam": { "seam": 0, "internal": 13.927619485293613, "ratio": 0 },
+      "files": [
+        {
+          "token": "ink-2",
+          "src": { "x1": "assets/materiais/hatch-wood.webp", "x2": "assets/materiais/hatch-wood@2x.webp" },
+          "bytes": { "x1": 36626, "x2": 107946 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.4149017333984375, "weighted": 0.09566841873465322 },
+        "seam": { "seam": 0, "internal": 13.927619485293613, "ratio": 0 }
+      }
+    },
+    {
+      "id": "fx-gas-1",
+      "source": "fx-gas",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "components": { "count": 9399, "kept": 2350 },
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.118377685546875, "weighted": 0.03565177169500406 },
+      "masterCoverage": { "binary": 0.18699396381340477, "weighted": 0.13004240637670547 },
+      "seam": { "seam": 7.513183593750007, "internal": 8.348006663605142, "ratio": 0.8999973163060927 },
+      "files": [
+        {
+          "token": "ink-2",
+          "src": { "x1": "assets/efeitos/fx-gas-1.webp", "x2": "assets/efeitos/fx-gas-1@2x.webp" },
+          "bytes": { "x1": 20102, "x2": 45368 }
+        },
+        {
+          "token": "ember",
+          "src": {
+            "x1": "assets/efeitos/fx-gas-1-ember.webp",
+            "x2": "assets/efeitos/fx-gas-1-ember@2x.webp"
+          },
+          "bytes": { "x1": 20100, "x2": 45368 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.118377685546875, "weighted": 0.03565177169500406 },
+        "seam": { "seam": 7.513183593750007, "internal": 8.348006663605142, "ratio": 0.8999973163060927 }
+      }
+    },
+    {
+      "id": "fx-gas-2",
+      "source": "fx-gas",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "components": { "count": 9399, "kept": 4700 },
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.242279052734375, "weighted": 0.07353132659312808 },
+      "masterCoverage": { "binary": 0.18699396381340477, "weighted": 0.13004240637670547 },
+      "seam": { "seam": 12.701660156250005, "internal": 17.023776424632977, "ratio": 0.7461129563397592 },
+      "files": [
+        {
+          "token": "ink-2",
+          "src": { "x1": "assets/efeitos/fx-gas-2.webp", "x2": "assets/efeitos/fx-gas-2@2x.webp" },
+          "bytes": { "x1": 32158, "x2": 83366 }
+        },
+        {
+          "token": "ember",
+          "src": {
+            "x1": "assets/efeitos/fx-gas-2-ember.webp",
+            "x2": "assets/efeitos/fx-gas-2-ember@2x.webp"
+          },
+          "bytes": { "x1": 32158, "x2": 83366 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.242279052734375, "weighted": 0.07353132659312808 },
+        "seam": { "seam": 12.701660156250005, "internal": 17.023776424632977, "ratio": 0.7461129563397592 }
+      }
+    },
+    {
+      "id": "fx-gas-3",
+      "source": "fx-gas",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "components": { "count": 9399, "kept": 9399 },
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.47540283203125, "weighted": 0.14429171693091503 },
+      "masterCoverage": { "binary": 0.18699396381340477, "weighted": 0.13004240637670547 },
+      "seam": { "seam": 18.227050781250004, "internal": 32.81900850183436, "ratio": 0.5553809092139769 },
+      "files": [
+        {
+          "token": "ink-2",
+          "src": { "x1": "assets/efeitos/fx-gas-3.webp", "x2": "assets/efeitos/fx-gas-3@2x.webp" },
+          "bytes": { "x1": 45852, "x2": 139666 }
+        },
+        {
+          "token": "ember",
+          "src": {
+            "x1": "assets/efeitos/fx-gas-3-ember.webp",
+            "x2": "assets/efeitos/fx-gas-3-ember@2x.webp"
+          },
+          "bytes": { "x1": 45852, "x2": 139666 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 256,
+        "coverage": { "binary": 0.47540283203125, "weighted": 0.14429171693091503 },
+        "seam": { "seam": 18.227050781250004, "internal": 32.81900850183436, "ratio": 0.5553809092139769 }
+      }
+    },
+    {
+      "id": "fx-exhaust",
+      "source": "fx-exhaust",
+      "sourceSize": [1254, 1254],
+      "factor": 1,
+      "axesDifference": null,
+      "crop": { "left": -39, "top": 113, "width": 1288, "height": 1028 },
+      "anchor": [0.06, 0.5],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.06989123774509803, "weighted": 0.04028461108708152 },
+      "masterCoverage": { "binary": 0.038226638075542635, "weighted": 0.0328118884690795 },
+      "files": [
+        {
+          "token": null,
+          "src": { "x1": "assets/efeitos/fx-exhaust.webp", "x2": "assets/efeitos/fx-exhaust@2x.webp" },
+          "bytes": { "x1": 16290, "x2": 39044 }
+        }
+      ],
+      "delivered": {
+        "width": 256,
+        "height": 204,
+        "coverage": { "binary": 0.06989123774509803, "weighted": 0.04028461108708152 }
+      }
+    },
+    {
+      "id": "fx-spark-1",
+      "source": "fx-spark",
+      "sourceSize": [1536, 1024],
+      "factor": 1,
+      "axesDifference": null,
+      "rayCenter": {
+        "x": -23.834916826054105,
+        "y": 513.2043982906423,
+        "residual": 1.108546412884111,
+        "rays": 3
+      },
+      "columnRange": [216, 399],
+      "crop": { "left": -33, "top": 395, "width": 225, "height": 224 },
+      "anchor": [0.04073370299531509, 0.5276982066546532],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.05712890625, "weighted": 0.02825233609068636 },
+      "masterCoverage": { "binary": 0.0042285919189453125, "weighted": 0.0033445620069316746 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/efeitos/fx-spark-1.webp", "x2": "assets/efeitos/fx-spark-1@2x.webp" },
+          "bytes": { "x1": 550, "x2": 1166 }
+        }
+      ],
+      "delivered": {
+        "width": 64,
+        "height": 64,
+        "coverage": { "binary": 0.05712890625, "weighted": 0.02825233609068636 }
+      }
+    },
+    {
+      "id": "fx-spark-2",
+      "source": "fx-spark",
+      "sourceSize": [1536, 1024],
+      "factor": 1,
+      "axesDifference": null,
+      "rayCenter": {
+        "x": 36.84212022211231,
+        "y": 519.768951053655,
+        "residual": 4.185562275101161,
+        "rays": 4
+      },
+      "columnRange": [677, 860],
+      "crop": { "left": -11, "top": 352, "width": 205, "height": 293 },
+      "anchor": [0.23337619620542588, 0.5725902766336347],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.057348901098901096, "weighted": 0.029912734324499052 },
+      "masterCoverage": { "binary": 0.0042285919189453125, "weighted": 0.0033445620069316746 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/efeitos/fx-spark-2.webp", "x2": "assets/efeitos/fx-spark-2@2x.webp" },
+          "bytes": { "x1": 822, "x2": 1766 }
+        }
+      ],
+      "delivered": {
+        "width": 64,
+        "height": 91,
+        "coverage": { "binary": 0.057348901098901096, "weighted": 0.029912734324499052 }
+      }
+    },
+    {
+      "id": "fx-spark-3",
+      "source": "fx-spark",
+      "sourceSize": [1536, 1024],
+      "factor": 1,
+      "axesDifference": null,
+      "rayCenter": {
+        "x": 99.37451847963136,
+        "y": 510.35504282029837,
+        "residual": 2.627541345753661,
+        "rays": 6
+      },
+      "columnRange": [1147, 1407],
+      "crop": { "left": -11, "top": 365, "width": 282, "height": 289 },
+      "anchor": [0.3913990017008204, 0.5029586256757729],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.07149621212121213, "weighted": 0.03013220439691039 },
+      "masterCoverage": { "binary": 0.0042285919189453125, "weighted": 0.0033445620069316746 },
+      "files": [
+        {
+          "token": "ink",
+          "src": { "x1": "assets/efeitos/fx-spark-3.webp", "x2": "assets/efeitos/fx-spark-3@2x.webp" },
+          "bytes": { "x1": 834, "x2": 1686 }
+        }
+      ],
+      "delivered": {
+        "width": 64,
+        "height": 66,
+        "coverage": { "binary": 0.07149621212121213, "weighted": 0.03013220439691039 }
+      }
+    },
+    {
+      "id": "scene-entry",
+      "source": "scene-entry",
+      "sourceSize": [1024, 1536],
+      "factor": 1,
+      "axesDifference": null,
+      "crop": { "left": -15, "top": 29, "width": 1059, "height": 1519 },
+      "anchor": [0.5, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 0.5014555304836512, "weighted": 0.49619091058596493 },
+      "masterCoverage": { "binary": 0.5105628967285156, "weighted": 0.5034759272166496 },
+      "files": [
+        {
+          "token": null,
+          "src": { "x1": "assets/entrada/scene-entry.webp", "x2": "assets/entrada/scene-entry@2x.webp" },
+          "bytes": { "x1": 257912, "x2": 977330 }
+        }
+      ],
+      "delivered": {
+        "width": 512,
+        "height": 734,
+        "coverage": { "binary": 0.5014555304836512, "weighted": 0.49619091058596493 }
+      }
+    },
+    {
+      "id": "mask-develop",
+      "source": "mask-develop",
+      "sourceSize": [1536, 1024],
+      "factor": 1,
+      "axesDifference": null,
+      "levels": [40, 220],
+      "initialTransition": 0.045572916666666664,
+      "transition": 0.061848958333333336,
+      "extrema": [0, 255],
+      "anchor": [0, 0],
+      "mmPerPx": null,
+      "diameter1x": null,
+      "coverage": { "binary": 1, "weighted": 1 },
+      "masterCoverage": { "binary": 1, "weighted": 1 },
+      "files": [
+        {
+          "token": null,
+          "src": { "x1": "assets/entrada/mask-develop.webp", "x2": "assets/entrada/mask-develop@2x.webp" },
+          "bytes": { "x1": 14496, "x2": 49034 }
+        }
+      ],
+      "delivered": {
+        "width": 768,
+        "height": 512,
+        "coverage": { "binary": 1, "weighted": 1 },
+        "transition": 0.061197916666666664
+      }
+    }
+  ]
+}
