@@ -3,7 +3,7 @@ import { shapeGeometry } from "@/geometry/shape";
 import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
-import { NOMINAL_THICKNESS_MM } from "@/model/units";
+import { GAS_RT, KPA_MM2, N } from "@/model/units";
 
 /**
  * Plano de compilação comum a todos os motores, em unidades da cena.
@@ -16,7 +16,7 @@ import { NOMINAL_THICKNESS_MM } from "@/model/units";
  *   Assim o ângulo de um eixo é a diferença dos ângulos dos corpos, o eixo de
  *   um trilho é o mesmo nos dois corpos, e nenhum motor precisa de ângulo de
  *   referência.
- * - Massa e inércia vêm da geometria (densidade × área × espessura nominal),
+ * - Massa e inércia vêm da geometria (densidade × área × espessura da camada),
  *   não das peças convexas: sobreposições da decomposição não contam.
  */
 
@@ -133,13 +133,13 @@ export interface Plan {
   warnings: string[];
 }
 
-/** Densidade do pino (aço), como no protótipo. */
-const PIN_DENSITY = 7.8;
+/** Densidade do pino (aço), g/mm³. */
+const PIN_DENSITY = MATERIALS.steel.density;
 const PIN_FRICTION = 0.2;
 const PIN_RESTITUTION = 0.05;
 
-/** g por mm² de área para a densidade dada (g/cm³) e a espessura nominal. */
-const massPerArea = (density: number) => density * NOMINAL_THICKNESS_MM * 1e-3;
+/** g por mm² de área: densidade (g/mm³) × espessura da camada (mm). */
+const massPerArea = (density: number, thickness: number) => density * thickness;
 
 export function layerBitsSpan(order: Map<Id, number>, from: Id, to: Id): number {
   const a = order.get(from) ?? 0;
@@ -152,6 +152,8 @@ export function layerBitsSpan(order: Map<Id, number>, from: Id, to: Id): number 
 export function buildPlan(scene: Scene): Plan {
   const warnings: string[] = [];
   const order = new Map(scene.layers.map((l, i) => [l.id, i] as const));
+  const thickness = new Map(scene.layers.map((l) => [l.id, l.thickness] as const));
+  const thick = (layer: Id) => thickness.get(layer) ?? 0;
   const parts = scene.parts.filter((p) => order.has(p.layer));
   const byId = new Map(parts.map((p) => [p.id, p] as const));
 
@@ -242,12 +244,12 @@ export function buildPlan(scene: Scene): Plan {
       for (const p of group) {
         const g = geo.get(p.id)!;
         if (!g.ok) continue;
-        const k = massPerArea(MATERIALS[p.material].density);
+        const k = massPerArea(MATERIALS[p.material].density, thick(p.layer));
         const c = transform(g.value.mass.centroid, p.x, p.y, p.angle);
         items.push({ m: k * g.value.mass.area, c, j: k * g.value.mass.inertia });
         for (const pin of pinsByHost.get(p.id) ?? []) {
           if (pin.kind !== "pin") continue;
-          const pm = massPerArea(PIN_DENSITY) * Math.PI * pin.r * pin.r;
+          const pm = massPerArea(PIN_DENSITY, thick(p.layer)) * Math.PI * pin.r * pin.r;
           items.push({ m: pm, c: transform(pin.at, p.x, p.y, p.angle), j: (pm * pin.r * pin.r) / 2 });
         }
       }
@@ -349,9 +351,11 @@ export function buildPlan(scene: Scene): Plan {
           a,
           b,
           anchor: worldOf(l.b, l.at),
-          ...(l.motor ? { motor: { ...l.motor } } : {}),
+          ...(l.motor ? { motor: { speed: l.motor.speed, maxTorque: l.motor.maxTorque * N } } : {}),
           ...(l.limit ? { limit: { ...l.limit } } : {}),
-          ...(l.torsion ? { torsion: { ...l.torsion } } : {}),
+          ...(l.torsion
+            ? { torsion: { k: l.torsion.k * N, rest: l.torsion.rest, damping: l.torsion.damping * N } }
+            : {}),
         });
         break;
       }
@@ -372,7 +376,9 @@ export function buildPlan(scene: Scene): Plan {
           axis: [Math.cos(ang), Math.sin(ang)],
           lower: l.travel[0],
           upper: l.travel[1],
-          ...(l.spring ? { spring: { ...l.spring } } : {}),
+          ...(l.spring
+            ? { spring: { k: l.spring.k * N, rest: l.spring.rest, damping: l.spring.damping * N } }
+            : {}),
         });
         break;
       }
@@ -390,18 +396,19 @@ export function buildPlan(scene: Scene): Plan {
           b,
           localA: toLocal(a, worldOf(l.a, l.atA)),
           localB: toLocal(b, worldOf(l.b, l.atB)),
-          k: l.k,
-          damping: l.damping,
+          k: l.k * N,
+          damping: l.damping * N,
           freeLength: l.freeLength,
         });
         break;
       }
       case "chamber": {
-        const a = bodyIdx(l.a);
-        const bi = l.b === null ? -1 : bodyIdx(l.b);
+        const a = bodyIdx(l.body);
+        const wall = l.walls[0]?.part ?? null;
+        const bi = wall === null ? -1 : bodyIdx(wall);
         const b = bi > 0 && !bodies[bi]!.static ? bi : -1;
         if (a < 0) break;
-        const ang = angleOf(l.a) + l.dir;
+        const ang = angleOf(l.body) + l.dir;
         const axis: Vec2 = [Math.cos(ang), Math.sin(ang)];
         let rear = 0;
         if (b > 0) {
@@ -413,17 +420,18 @@ export function buildPlan(scene: Scene): Plan {
             else for (const q of f.piece.points) mn = Math.min(mn, q[0] * axis[0] + q[1] * axis[1]);
           }
           rear = Number.isFinite(mn) ? -mn : 0;
-        } else if (l.b !== null) warnings.push(`Câmara ${l.ref}: o projétil precisa ser uma peça móvel`);
+        } else if (wall !== null) warnings.push(`Câmara ${l.ref}: o projétil precisa ser uma peça móvel`);
         plan.chambers.push({
           id: l.id,
           a,
           b: b > 0 ? b : -1,
-          base: toLocal(a, worldOf(l.a, l.at)),
+          base: toLocal(a, worldOf(l.body, l.at)),
           axis,
           bore: l.bore,
           length: l.length,
-          charge: l.charge,
-          burn: l.burn,
+          // Provisório até o gás 2.0: carga n·R·T (F = carga / s), queima em s.
+          charge: (l.gas.charge?.amount ?? 0) * GAS_RT * KPA_MM2,
+          burn: (l.gas.charge?.burnMs ?? 0) / 1000,
           rearOffset: rear,
         });
         break;
@@ -453,7 +461,7 @@ export function buildPlan(scene: Scene): Plan {
             center: c,
             r: l.r,
             minSpeed: l.minSpeed,
-            triggers: l.triggers.slice(),
+            triggers: l.actions.filter((x) => x.do === "ignite").map((x) => x.target),
           });
         }
         break;

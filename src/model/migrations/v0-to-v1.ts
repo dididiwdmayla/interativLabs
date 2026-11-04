@@ -1,10 +1,11 @@
 import { V0_MATERIALS, type MaterialId } from "../materials";
-import type { Layer, Link, Part, Scene, Shape, Vec2 } from "../types";
+import type { LinkV1 as Link, Part, SceneV1 as Scene, Shape, Vec2 } from "../types";
 import { DEG, MM_PER_PX, V0_MM_PER_UNIT, rpmToRadPerSec } from "../units";
 import type { V0Link, V0Part, V0Scene, V0Shape, V0Vec } from "../v0";
 
 /**
- * Migração v0 (protótipo, px) → v1 (mm).
+ * Migração v0 (protótipo, px) → v1 (mm). Depois a cena segue para a v2
+ * (src/model/migrations/v1-to-v2.ts).
  *
  * Comprimento: 1 px = 0,2 mm. O motor do protótipo usava 50 px por unidade,
  * ou seja, 10 mm por unidade, com massa em g (densidade × área em cm² ×
@@ -74,7 +75,7 @@ export function migrateV0ToV1(v0: V0Scene, opts: MigrateOptions = {}): Scene {
   let ref = 0;
   const nextRef = () => ++ref;
 
-  const layers: Layer[] = v0.layers.map((l) => ({
+  const layers: Scene["layers"] = v0.layers.map((l) => ({
     id: l.id,
     name: l.name,
     visible: l.visible !== false,

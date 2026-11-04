@@ -13,13 +13,13 @@ const pkg = (name: string) => JSON.parse(readFileSync(`node_modules/${name}/pack
 const NOW = "2026-11-04T00:00:00.000Z";
 function scene(parts: Scene["parts"], links: Scene["links"]): Scene {
   return {
-    version: 1,
+    version: 2,
     meta: { title: "t", createdAt: NOW, updatedAt: NOW },
     settings: { gravity: { on: true, g: 100 }, snap: { grid: 1, on: true } },
     layers: [
-      { id: "L1", name: "a", visible: true, locked: false },
-      { id: "L2", name: "b", visible: true, locked: false },
-      { id: "L3", name: "c", visible: true, locked: false },
+      { id: "L1", name: "a", visible: true, locked: false, thickness: 10 },
+      { id: "L2", name: "b", visible: true, locked: false, thickness: 10 },
+      { id: "L3", name: "c", visible: true, locked: false, thickness: 10 },
     ],
     parts,
     links,
@@ -90,8 +90,8 @@ describe("adaptadores", () => {
     const composite = p.bodies[bodyOf("p1")]!;
     expect(composite.static).toBe(false);
     expect(composite.position[0]).toBeCloseTo(5, 9);
-    // 2 caixas de aço de 100 mm² × 10 mm
-    expect(composite.mass).toBeCloseTo(2 * 7.8 * 100 * 10 * 1e-3, 9);
+    // 2 caixas de aço de 100 mm² × 10 mm (0,00785 g/mm³)
+    expect(composite.mass).toBeCloseTo(2 * 0.00785 * 100 * 10, 9);
     expect(p.bodies[bodyOf("p3")]!.static).toBe(true);
     expect(p.bodies[bodyOf("p4")]!.static).toBe(true);
     expect(bodyOf("p3")).not.toBe(bodyOf("p4"));
