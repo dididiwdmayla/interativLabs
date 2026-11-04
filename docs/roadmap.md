@@ -25,7 +25,7 @@ Saída: as três cenas de exemplo com acabamento de apresentação em 390 e 1440
 
 ## Fase 3 — Editor 2.0
 
-Furos e rasgos (pino correndo em rasgo), booleanos entre peças, encaixes de CAD (centro, vértice, ponto médio, concêntrico, tangente), cotas e medidas, seleção múltipla, grupos, repetição linear e circular, alinhar e distribuir, travar camada, renomear e reordenar com arrasto.
+Booleanos entre peças (furos e rasgos com pino correndo já entram na Fase 1), encaixes de CAD (centro, vértice, ponto médio, concêntrico, tangente), cotas e medidas, seleção múltipla, grupos, repetição linear e circular, alinhar e distribuir, travar camada, renomear e reordenar com arrasto.
 
 Saída: dá para desenhar um mecanismo de relojoaria simples só com o editor, sem digitar coordenada.
 

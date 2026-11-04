@@ -1,6 +1,6 @@
 # Fase 1 — Fundação
 
-Branch: `fase-1`. A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt: **A** (itens 1–2, feita), **B** (3–4), **C** (5–6), **D** (7–9), **E** (10–11). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
+Branch: `fase-1`. A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt: **A** (itens 1–2, feita), **B** (3–4, feita), **C** (item 5: motor definitivo e ligações 2.0), **D** (item 6: simulação e palco), **E1** (item 10: pipeline de assets, feita), **E2** (itens 7–9: editor, ferramentas das ligações 2.0 e projetos), **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
 
 Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual já usa os tokens, a paleta e as fontes da Prancha índigo (`docs/identidade/identidade.md`), mas sem hachuras, texturas nem ferragens: isso é da Fase 2. Alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 completa a pele, não refaz a estrutura.
 
@@ -56,21 +56,18 @@ Medir, por motor: comportamento passa ou falha; tempo de passo (mediana e p95) n
 
 **Aceite:** `docs/decisoes/motor.md` com a tabela completa (Node, computador e celular do Will), a escala interna proposta e uma recomendação. **Pare aqui e peça a revisão do coordenador** antes do item 5.
 
-## Item 5 — Motor definitivo
+## Item 5 — Motor definitivo e ligações 2.0 (Parte C)
 
-Com o motor aprovado:
+Motor: Box2D v3 (`docs/arquitetura.md` §4). Formato: v2 (`docs/arquitetura.md` §3.1). Os subitens e os critérios de aceite completos estão no prompt da Parte C; em resumo:
 
-- Camadas como filtros, pinos e sensores com faixa de camadas.
-- Parafusos como corpo composto.
-- Eixo com motor, batente e mola de torção; trilho com batentes e mola de retorno; mola entre pontos; câmara; sensor com velocidade mínima e lista de ações.
-- Passo fixo de 1/240 s, determinístico.
-- Arrasto pelo toque com força limitada pela massa.
-
-**Aceite:** testes de cena em `scenes/fixtures/`, rodando no Node:
-- lançador: com o gatilho solto, o retém segura o percussor por 3 s; puxando, o sensor dispara uma vez e o projétil sai do cano;
-- trava: puxando a maçaneta, a lingueta sai do batente; soltando, volta;
-- catraca: a favor, o conjunto gira na razão das engrenagens (erro abaixo de 2%); contra, trava em menos de um passo de dente;
-- duas execuções de cada cena dão o mesmo hash de poses.
+- 5.1 Formato v2, migração `v1 → v2`, espessura por camada e densidades reais.
+- 5.2 Adaptador definitivo do Box2D v3, calibrado para gravidade real em mm (pilha e corrente passam), determinístico entre Node e navegador.
+- 5.3 Fixações: parafuso, eixo com atrito, haste, cabo, suporte elástico, trilho com atrito.
+- 5.4 Molas 2.0: presa, apoiada, só tração, comprimento sólido, guia.
+- 5.5 Furos e rasgos como guias (`joint` e `contact`).
+- 5.6 Gás 2.0: paredes móveis, vedação, respiros, portas, sensores com ações.
+- 5.7 Cenas de teste e exemplos (inclui a catraca corrigida e uma cena de recuo do fundo).
+- 5.8 Verificação.
 
 ## Item 6 — Simulação e palco
 

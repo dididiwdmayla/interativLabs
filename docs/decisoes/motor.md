@@ -1,6 +1,6 @@
 # Comparativo de motores de física (Fase 1 · item 4)
 
-Data: 2026-11-04. Situação: **medido no Node e no Chromium; falta o celular do Will.** A escolha do motor é do Will com o coordenador, depois da rodada no celular. Nada no código escolhe o motor: os quatro ficam atrás do mesmo `EngineAdapter` (`src/engine/`).
+Data: 2026-11-04. **Decisão (coordenador geral, 04/11): Box2D v3 (`box2d3-wasm`), 1 mm por unidade, 40 m/s.** A rodada no celular do Will confirma quando a Vercel estiver ligada. Situação da medição: Node e Chromium; falta o celular. A escolha do motor é do Will com o coordenador, depois da rodada no celular. Nada no código escolhe o motor: os quatro ficam atrás do mesmo `EngineAdapter` (`src/engine/`).
 
 ## Candidatos (versões confirmadas no npm nesta data)
 
