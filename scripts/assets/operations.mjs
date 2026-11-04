@@ -256,7 +256,7 @@ export function phaseCut(input, reference, { min, max, strip = 8, top = 0, botto
       bb = 0;
     for (let y = top; y < bottom; y++)
       for (let dx = 0; dx < strip; dx++) {
-        const a = input.data[(y * input.width + cut - strip + dx) * 4 + 3];
+        const a = input.data[(y * input.width + cut + dx) * 4 + 3];
         const b = reference.data[(y * reference.width + dx) * 4 + 3];
         ab += a * b;
         aa += a * a;
@@ -446,4 +446,82 @@ export function coverage(input, threshold = 8) {
     alpha += input.data[i] / 255;
   }
   return { binary: covered / (input.width * input.height), weighted: alpha / (input.width * input.height) };
+}
+
+export function hexFaces(points, factor = 1) {
+  return [Math.PI / 2, Math.PI / 6, (5 * Math.PI) / 6].map((angle) => {
+    const distances = points.map(([x, y]) => x * Math.cos(angle) + y * factor * Math.sin(angle));
+    return Math.max(...distances) - Math.min(...distances);
+  });
+}
+
+export function fitHexProportion(points) {
+  let best = { factor: 1, difference: Infinity };
+  for (let i = 8500; i <= 10500; i++) {
+    const factor = i / 10000;
+    const faces = hexFaces(points, factor);
+    const difference = (Math.max(...faces) - Math.min(...faces)) / Math.max(...faces);
+    if (difference < best.difference) best = { factor, difference, faces };
+  }
+  return best;
+}
+
+export function radialBoundary(
+  input,
+  { center, radius, angles = [0, 360], threshold = 128, edge = "outer" },
+) {
+  const points = [];
+  for (let degrees = angles[0]; degrees < angles[1]; degrees += 0.5) {
+    const angle = (degrees * Math.PI) / 180;
+    let found = null;
+    for (let r = radius[0]; r <= radius[1]; r += 0.5) {
+      const x = Math.round(center[0] + r * Math.cos(angle));
+      const y = Math.round(center[1] + r * Math.sin(angle));
+      if (x < 0 || y < 0 || x >= input.width || y >= input.height) continue;
+      if (input.data[(y * input.width + x) * 4 + 3] > threshold) {
+        found = [x, y];
+        if (edge === "inner") break;
+      }
+    }
+    if (found) points.push(found);
+  }
+  return points;
+}
+
+export function frontCrossing(input, range, band) {
+  const signal = horizontalSignal(input, band[0], band[1]);
+  let peak = range[0];
+  for (let x = range[0]; x <= range[1]; x++) if (signal[x] > signal[peak]) peak = x;
+  let left = peak,
+    right = peak;
+  while (left > range[0] && signal[left - 1] >= signal[peak] * 0.9) left--;
+  while (right < range[1] && signal[right + 1] >= signal[peak] * 0.9) right++;
+  return Math.round((left + right) / 2);
+}
+
+export function splitColumns(input, threshold, minGap = 1) {
+  const ranges = [];
+  let start = -1;
+  for (let x = 0; x <= input.width; x++) {
+    let occupied = false;
+    if (x < input.width)
+      for (let y = 0; y < input.height; y++) {
+        if (input.data[(y * input.width + x) * 4 + 3] > threshold) {
+          occupied = true;
+          break;
+        }
+      }
+    if (occupied && start < 0) start = x;
+    if (!occupied && start >= 0) {
+      ranges.push([start, x]);
+      start = -1;
+    }
+  }
+  const grouped = [];
+  for (const range of ranges) {
+    const previous = grouped.at(-1);
+    if (previous && range[0] - previous[1] < minGap) previous[1] = range[1];
+    else grouped.push([...range]);
+  }
+  return grouped;
 }
