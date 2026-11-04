@@ -35,8 +35,17 @@ export function SimControls() {
       >
         <Icon name="step" uid={`${uid}s`} />
       </button>
-      <span className="toolbar__sep" aria-hidden="true" />
-      <div className="simctl__speeds" role="group" aria-label="Velocidade">
+      <span className="toolbar__sep only-desktop" aria-hidden="true" />
+      <button
+        type="button"
+        className="simctl__speed simctl__cycle only-mobile"
+        aria-label={`Velocidade ${speedLabel(st.speed)}; toque para trocar`}
+        disabled={!ctl}
+        onClick={() => ctl?.setSpeed(SPEEDS[(SPEEDS.indexOf(st.speed) + 1) % SPEEDS.length] ?? 0.25)}
+      >
+        {speedLabel(st.speed)}
+      </button>
+      <div className="simctl__speeds only-desktop-flex" role="group" aria-label="Velocidade">
         {SPEEDS.map((s) => (
           <button
             key={s}
@@ -50,7 +59,7 @@ export function SimControls() {
           </button>
         ))}
       </div>
-      <span className="toolbar__sep" aria-hidden="true" />
+      <span className="toolbar__sep only-desktop" aria-hidden="true" />
       <button
         type="button"
         className="tool"
