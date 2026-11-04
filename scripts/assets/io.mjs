@@ -36,8 +36,8 @@ export async function resize(input, width, height) {
   return image(info.width, info.height, new Uint8Array(data));
 }
 
-export async function encode(input, path, { lossless = true, quality = 90, effort = 6 } = {}) {
-  await pipeline(input).webp({ lossless, quality, effort }).toFile(path);
+export async function encode(input, path, { lossless = true, quality = 90, effort = 6, exact = true } = {}) {
+  await pipeline(input).webp({ lossless, quality, effort, exact }).toFile(path);
 }
 
 export async function png(input) {

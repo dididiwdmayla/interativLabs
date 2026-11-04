@@ -8,7 +8,7 @@ Fator aplicado inclui o arredondamento da altura para pixels inteiros. Diferenç
 
 | ID              | Fator vertical | Diferença | Âncora (x; y)      | mm/px 1x   | Bytes 1x                   | Bytes 2x                     |
 | --------------- | -------------- | --------- | ------------------ | ---------- | -------------------------- | ---------------------------- |
-| `paper-stage`   | 1.0000000      | —         | 0.000000; 0.000000 | null       | base: 6348                 | base: 50854                  |
+| `paper-stage`   | 1.0000000      | —         | 0.000000; 0.000000 | null       | base: 6188                 | base: 49790                  |
 | `paper-chrome`  | 1.0000000      | —         | 0.000000; 0.000000 | null       | base: 2484                 | base: 11240                  |
 | `paper-surface` | 1.0000000      | —         | 0.000000; 0.000000 | null       | base: 3260                 | base: 17654                  |
 | `hw-screw-slot` | 0.9832536      | 0.005%    | 0.500901; 0.500477 | 0.02552114 | ink: 39728; gold: 39728    | ink: 121866; gold: 121866    |
@@ -25,11 +25,11 @@ Fator aplicado inclui o arredondamento da altura para pixels inteiros. Diferenç
 | `fx-gas-1`      | 1.0000000      | —         | 0.000000; 0.000000 | null       | ink-2: 20102; ember: 20100 | ink-2: 45368; ember: 45368   |
 | `fx-gas-2`      | 1.0000000      | —         | 0.000000; 0.000000 | null       | ink-2: 32158; ember: 32158 | ink-2: 83366; ember: 83366   |
 | `fx-gas-3`      | 1.0000000      | —         | 0.000000; 0.000000 | null       | ink-2: 45852; ember: 45852 | ink-2: 139666; ember: 139666 |
-| `fx-exhaust`    | 1.0000000      | —         | 0.060000; 0.500000 | null       | base: 16410                | base: 40256                  |
-| `fx-spark-1`    | 1.0000000      | —         | 0.500000; 0.500000 | null       | ink: 576                   | ink: 1276                    |
-| `fx-spark-2`    | 1.0000000      | —         | 0.500000; 0.500000 | null       | ink: 822                   | ink: 1766                    |
-| `fx-spark-3`    | 1.0000000      | —         | 0.500000; 0.500000 | null       | ink: 834                   | ink: 1686                    |
-| `scene-entry`   | 1.0000000      | —         | 0.500000; 0.000000 | null       | base: 257456               | base: 976552                 |
+| `fx-exhaust`    | 1.0000000      | —         | 0.060000; 0.500000 | null       | base: 16290                | base: 39044                  |
+| `fx-spark-1`    | 1.0000000      | —         | 0.040734; 0.527698 | null       | ink: 550                   | ink: 1166                    |
+| `fx-spark-2`    | 1.0000000      | —         | 0.233376; 0.572590 | null       | ink: 822                   | ink: 1766                    |
+| `fx-spark-3`    | 1.0000000      | —         | 0.391399; 0.502959 | null       | ink: 834                   | ink: 1686                    |
+| `scene-entry`   | 1.0000000      | —         | 0.500000; 0.000000 | null       | base: 257912               | base: 977330                 |
 | `mask-develop`  | 1.0000000      | —         | 0.000000; 0.000000 | null       | base: 14496                | base: 49034                  |
 
 ## Mola e máscara
@@ -57,7 +57,7 @@ Médias em RGB sRGB, arredondadas para hex, depois da compressão WebP qualidade
 
 | Saída           | Média RGB final        | Média hex | Salto na emenda | Salto interno | Razão    |
 | --------------- | ---------------------- | --------- | --------------- | ------------- | -------- |
-| `paper-stage`   | 29.995, 35.849, 72.538 | #1E2449   | 0.275391        | 0.221885      | 1.241141 |
+| `paper-stage`   | 29.986, 35.842, 72.530 | #1E2449   | 0.295654        | 0.217617      | 1.358598 |
 | `paper-chrome`  | 23.226, 25.727, 54.474 | #171A36   | 0.151367        | 0.059561      | 2.541391 |
 | `paper-surface` | 37.107, 43.734, 73.747 | #252C4A   | 0.288574        | 0.105303      | 2.740406 |
 | `tex-ink-wear`  | —                      | —         | 0.000000        | 3.539353      | 0.000000 |
@@ -70,25 +70,25 @@ Nos papéis, os saltos absolutos permanecem abaixo de um nível RGB, mas a compr
 
 ## Tamanhos e folhas de contato
 
-Total de `public/assets/`: **4859894 bytes** (4.635 MiB), somando todos os WebP 1x/2x e variantes.
+Total de `public/assets/`: **4858436 bytes** (4.633 MiB), somando todos os WebP 1x/2x e variantes.
 
 Todas as folhas são WebP sem perda, compostas pelo sharp sobre o paper-stage processado. Cada uma fica abaixo de 3 MiB.
 
 | Folha                                                      | Dimensões | Bytes   |
 | ---------------------------------------------------------- | --------- | ------- |
-| [textura-paper-stage.webp](textura-paper-stage.webp)       | 1876×1628 | 92348   |
-| [textura-tex-ink-wear.webp](textura-tex-ink-wear.webp)     | 1200×860  | 122100  |
-| [textura-hatch-wood.webp](textura-hatch-wood.webp)         | 1200×860  | 276004  |
-| [textura-fx-gas-1.webp](textura-fx-gas-1.webp)             | 1200×860  | 201396  |
-| [textura-fx-gas-2.webp](textura-fx-gas-2.webp)             | 1200×860  | 294554  |
-| [textura-fx-gas-3.webp](textura-fx-gas-3.webp)             | 1200×860  | 403430  |
-| [papeis-derivados.webp](papeis-derivados.webp)             | 1200×920  | 97344   |
-| [mola.webp](mola.webp)                                     | 1200×1050 | 339718  |
-| [ferragens-1.webp](ferragens-1.webp)                       | 1200×1504 | 1124500 |
-| [ferragens-2.webp](ferragens-2.webp)                       | 1200×1144 | 766924  |
-| [desgaste-sobre-hachura.webp](desgaste-sobre-hachura.webp) | 1200×780  | 202822  |
-| [efeitos.webp](efeitos.webp)                               | 1200×850  | 100164  |
-| [entrada.webp](entrada.webp)                               | 1200×1100 | 473292  |
-| [mascara-histograma.webp](mascara-histograma.webp)         | 1200×940  | 86562   |
+| [textura-paper-stage.webp](textura-paper-stage.webp)       | 1876×1628 | 72908   |
+| [textura-tex-ink-wear.webp](textura-tex-ink-wear.webp)     | 1200×860  | 120446  |
+| [textura-hatch-wood.webp](textura-hatch-wood.webp)         | 1200×860  | 276218  |
+| [textura-fx-gas-1.webp](textura-fx-gas-1.webp)             | 1200×860  | 199524  |
+| [textura-fx-gas-2.webp](textura-fx-gas-2.webp)             | 1200×860  | 292836  |
+| [textura-fx-gas-3.webp](textura-fx-gas-3.webp)             | 1200×860  | 402170  |
+| [papeis-derivados.webp](papeis-derivados.webp)             | 1200×920  | 96020   |
+| [mola.webp](mola.webp)                                     | 1200×1050 | 285400  |
+| [ferragens-1.webp](ferragens-1.webp)                       | 1200×1504 | 1121066 |
+| [ferragens-2.webp](ferragens-2.webp)                       | 1200×1144 | 764088  |
+| [desgaste-sobre-hachura.webp](desgaste-sobre-hachura.webp) | 1200×780  | 200550  |
+| [efeitos.webp](efeitos.webp)                               | 1200×850  | 98022   |
+| [entrada.webp](entrada.webp)                               | 1200×1100 | 472690  |
+| [mascara-histograma.webp](mascara-histograma.webp)         | 1200×940  | 84310   |
 
 Os números completos, fatores medidos antes do arredondamento e tamanhos por variante estão em [medidas.json](medidas.json). A conferência artística, os testes de determinismo, o tamanho do dist e os encaminhamentos ficam em [relatorio.md](relatorio.md).

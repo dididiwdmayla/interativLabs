@@ -27,6 +27,7 @@ import {
   coverage,
   meanRgb,
   tint,
+  fitRayCenter,
 } from "./operations.mjs";
 
 function marginBox(input, center = null) {
@@ -143,6 +144,7 @@ export async function processBatch(root) {
       input = adjustLab(input, colors[spec.paper.token], {
         variation: spec.paper.variation,
         luminance: spec.paper.token === "stage" ? settings.paperLuminance : null,
+        luminanceGuard: spec.paper.token === "stage" ? settings.paperLuminanceGuard : 0,
       });
     } else if (spec.coil) {
       input = coil;
@@ -178,9 +180,19 @@ export async function processBatch(root) {
         throw new Error(`fx-spark: expected three separated column groups, got ${ranges.length}`);
       const [left, right] = ranges[spec.spark.index - 1];
       input = crop(input, { left, top: 0, width: right - left, height: input.height });
+      const center = fitRayCenter(input);
+      if (Math.hypot(center.x + left - spec.anchor.measured[0], center.y - spec.anchor.measured[1]) > 0.5)
+        throw new Error(`Recalibrate spark center: ${spec.id}`);
       const box = marginBox(input);
+      const rightEdge = Math.max(
+        box.left + box.width,
+        Math.ceil(center.x) + Math.ceil(box.width * settings.padding),
+      );
+      box.left = Math.min(box.left, Math.floor(center.x) - Math.ceil(box.width * settings.padding));
+      box.width = rightEdge - box.left;
       input = crop(input, box);
-      anchor = [0.5, 0.5];
+      anchor = [(center.x - box.left) / box.width, (center.y - box.top) / box.height];
+      metrics.rayCenter = center;
       metrics.columnRange = [left, right];
       metrics.crop = box;
     } else if (spec.radial) {
@@ -192,6 +204,7 @@ export async function processBatch(root) {
         colors[spec.radial.from],
         colors[spec.radial.to],
         spec.radial.reach,
+        settings.alphaBounds,
       );
       metrics.crop = box;
     } else if (spec.alpha) {
@@ -235,8 +248,8 @@ export async function processBatch(root) {
       x2 = tint(x2, colors[spec.tints[0]]);
     }
     if (spec.alpha) {
-      x1 = normalizeAlpha(x1, spec.alpha);
-      x2 = normalizeAlpha(x2, spec.alpha);
+      x1 = normalizeAlpha(x1, { ...spec.alpha, unpremultiply: false });
+      x2 = normalizeAlpha(x2, { ...spec.alpha, unpremultiply: false });
     }
     const mmPerPx = diameter ? spec.scale.mm / ((diameter * height) / input.height) : null;
     metrics.anchor = anchor;

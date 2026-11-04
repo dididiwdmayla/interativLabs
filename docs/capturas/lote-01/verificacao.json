@@ -1,0 +1,10 @@
+{
+  "commands": { "lint": "passou", "typecheck": "passou", "test": "passou", "build": "passou" },
+  "vitest": { "passed": 130, "expectedFailures": 3 },
+  "assetTests": { "passed": 13 },
+  "distBytes": 13554041,
+  "distFiles": 97,
+  "assetFilesInDist": 70,
+  "distAssetsIdentical": true,
+  "generatedSha256": "a06f660d0b32a6111b60566ba113cd4f7f400e685c8436c7682080c959c76ee9"
+}

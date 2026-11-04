@@ -30,7 +30,7 @@
     "zlib-ng": "2.3.3",
     "sharp": "0.35.5"
   },
-  "assetsBytes": 4859894,
+  "assetsBytes": 4858436,
   "outputs": [
     {
       "id": "paper-stage",
@@ -43,21 +43,21 @@
       "diameter1x": null,
       "coverage": { "binary": 1, "weighted": 1 },
       "masterCoverage": { "binary": 1, "weighted": 1 },
-      "mean": [29.919307708740234, 35.755096435546875, 71.78816604614258],
-      "seam": { "seam": 0, "internal": 1.055473909919276, "ratio": 0 },
+      "mean": [29.9095458984375, 35.74440383911133, 71.77608489990234],
+      "seam": { "seam": 0, "internal": 1.0441985307607633, "ratio": 0 },
       "files": [
         {
           "token": null,
           "src": { "x1": "assets/palco/paper-stage.webp", "x2": "assets/palco/paper-stage@2x.webp" },
-          "bytes": { "x1": 6348, "x2": 50854 }
+          "bytes": { "x1": 6188, "x2": 49790 }
         }
       ],
       "delivered": {
         "width": 512,
         "height": 512,
         "coverage": { "binary": 1, "weighted": 1 },
-        "mean": [29.994956970214844, 35.848575592041016, 72.53831481933594],
-        "seam": { "seam": 0.275390625, "internal": 0.22188512873043054, "ratio": 1.2411405242690852 }
+        "mean": [29.9864501953125, 35.84162521362305, 72.53001022338867],
+        "seam": { "seam": 0.295654296875, "internal": 0.21761720661081213, "ratio": 1.3585979779795163 }
       }
     },
     {
@@ -712,7 +712,7 @@
         {
           "token": null,
           "src": { "x1": "assets/efeitos/fx-exhaust.webp", "x2": "assets/efeitos/fx-exhaust@2x.webp" },
-          "bytes": { "x1": 16410, "x2": 40256 }
+          "bytes": { "x1": 16290, "x2": 39044 }
         }
       ],
       "delivered": {
@@ -727,24 +727,30 @@
       "sourceSize": [1536, 1024],
       "factor": 1,
       "axesDifference": null,
+      "rayCenter": {
+        "x": -23.834916826054105,
+        "y": 513.2043982906423,
+        "residual": 1.108546412884111,
+        "rays": 3
+      },
       "columnRange": [216, 399],
-      "crop": { "left": -9, "top": 395, "width": 201, "height": 224 },
-      "anchor": [0.5, 0.5],
+      "crop": { "left": -33, "top": 395, "width": 225, "height": 224 },
+      "anchor": [0.04073370299531509, 0.5276982066546532],
       "mmPerPx": null,
       "diameter1x": null,
-      "coverage": { "binary": 0.055897887323943664, "weighted": 0.0314398646782657 },
+      "coverage": { "binary": 0.05712890625, "weighted": 0.02825233609068636 },
       "masterCoverage": { "binary": 0.0042285919189453125, "weighted": 0.0033445620069316746 },
       "files": [
         {
           "token": "ink",
           "src": { "x1": "assets/efeitos/fx-spark-1.webp", "x2": "assets/efeitos/fx-spark-1@2x.webp" },
-          "bytes": { "x1": 576, "x2": 1276 }
+          "bytes": { "x1": 550, "x2": 1166 }
         }
       ],
       "delivered": {
         "width": 64,
-        "height": 71,
-        "coverage": { "binary": 0.055897887323943664, "weighted": 0.0314398646782657 }
+        "height": 64,
+        "coverage": { "binary": 0.05712890625, "weighted": 0.02825233609068636 }
       }
     },
     {
@@ -753,9 +759,15 @@
       "sourceSize": [1536, 1024],
       "factor": 1,
       "axesDifference": null,
+      "rayCenter": {
+        "x": 36.84212022211231,
+        "y": 519.768951053655,
+        "residual": 4.185562275101161,
+        "rays": 4
+      },
       "columnRange": [677, 860],
       "crop": { "left": -11, "top": 352, "width": 205, "height": 293 },
-      "anchor": [0.5, 0.5],
+      "anchor": [0.23337619620542588, 0.5725902766336347],
       "mmPerPx": null,
       "diameter1x": null,
       "coverage": { "binary": 0.057348901098901096, "weighted": 0.029912734324499052 },
@@ -779,9 +791,15 @@
       "sourceSize": [1536, 1024],
       "factor": 1,
       "axesDifference": null,
+      "rayCenter": {
+        "x": 99.37451847963136,
+        "y": 510.35504282029837,
+        "residual": 2.627541345753661,
+        "rays": 6
+      },
       "columnRange": [1147, 1407],
       "crop": { "left": -11, "top": 365, "width": 282, "height": 289 },
-      "anchor": [0.5, 0.5],
+      "anchor": [0.3913990017008204, 0.5029586256757729],
       "mmPerPx": null,
       "diameter1x": null,
       "coverage": { "binary": 0.07149621212121213, "weighted": 0.03013220439691039 },
@@ -815,7 +833,7 @@
         {
           "token": null,
           "src": { "x1": "assets/entrada/scene-entry.webp", "x2": "assets/entrada/scene-entry@2x.webp" },
-          "bytes": { "x1": 257456, "x2": 976552 }
+          "bytes": { "x1": 257912, "x2": 977330 }
         }
       ],
       "delivered": {

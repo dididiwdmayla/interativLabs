@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { outputs, sourceIds, settings, colors } from "./config.mjs";
 import {
   image,
@@ -19,6 +20,7 @@ import {
   coverage,
   levels,
   normalizeAlpha,
+  radialTint,
 } from "./operations.mjs";
 
 function synthetic(width, height, pixel) {
@@ -27,6 +29,19 @@ function synthetic(width, height, pixel) {
     for (let x = 0; x < width; x++) output.data.set(pixel(x, y), (y * width + x) * 4);
   return output;
 }
+
+test("master PNG bytes still match the hashes recorded during ZIP extraction", async () => {
+  const document = await readFile(
+    new URL("../../docs/capturas/lote-01/originais.md", import.meta.url),
+    "utf8",
+  );
+  const rows = [...document.matchAll(/^\| `([^`]+)`\s*\|.*?`([a-f0-9]{64})`/gm)];
+  assert.equal(rows.length, sourceIds.length);
+  for (const [, id, expected] of rows) {
+    const png = await readFile(new URL(`../../art/source/lote-01/${id}.png`, import.meta.url));
+    assert.equal(createHash("sha256").update(png).digest("hex"), expected, id);
+  }
+});
 
 test("manifest table IDs and configured source IDs agree in both directions", async () => {
   const manifest = await readFile(
@@ -152,4 +167,16 @@ test("alpha normalization clears hidden RGB and levels reach both endpoints", ()
   const mask = levels(input, 60, 200);
   assert.equal(mask.data[0], 0);
   assert.equal(mask.data[12], 255);
+});
+
+test("radial Lab tint reaches ink at 60% of the drawn fan radius and preserves alpha", () => {
+  const input = synthetic(200, 100, (x, y) => [255, 255, 255, y === 0 && x <= 100 ? 255 : 0]);
+  const output = radialTint(input, [0, 0], colors.ember, colors.ink, 0.6);
+  assert.deepEqual(Array.from(output.data.subarray(0, 3)), colors.ember);
+  assert.deepEqual(Array.from(output.data.subarray(60 * 4, 60 * 4 + 3)), colors.ink);
+  for (let p = 3; p < input.data.length; p += 4) assert.equal(output.data[p], input.data[p]);
+  const midpoint = rgbToLab(Array.from(output.data.subarray(30 * 4, 30 * 4 + 3)));
+  const a = rgbToLab(colors.ember),
+    b = rgbToLab(colors.ink);
+  midpoint.forEach((v, c) => assert.ok(Math.abs(v - (a[c] + b[c]) / 2) < 1));
 });

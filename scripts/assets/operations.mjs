@@ -355,7 +355,7 @@ export function meanRgb(input) {
   return sum.map((v) => v / (input.width * input.height));
 }
 
-export function adjustLab(input, targetRgb, { variation = 1, luminance = null } = {}) {
+export function adjustLab(input, targetRgb, { variation = 1, luminance = null, luminanceGuard = 0 } = {}) {
   const labs = new Float64Array(input.width * input.height * 3);
   const mean = [0, 0, 0];
   for (let p = 0; p < input.width * input.height; p++) {
@@ -370,24 +370,23 @@ export function adjustLab(input, targetRgb, { variation = 1, luminance = null } 
   const range = luminance?.map((rgb) => rgbToLab(rgb)[0]);
   for (let p = 0; p < input.width * input.height; p++) {
     const lab = mean.map((m, c) => target[c] + (labs[p * 3 + c] - m) * variation);
-    if (range) lab[0] = clamp(lab[0], range[0], range[1]);
+    if (range) lab[0] = clamp(lab[0], range[0] + luminanceGuard, range[1] - luminanceGuard);
     output.data.set([...labToRgb(lab), 255], p * 4);
   }
   return output;
 }
 
-export function radialTint(input, anchor, from, to, reach) {
+export function radialTint(input, anchor, from, to, reach, threshold = 8) {
   const a = rgbToLab(from),
     b = rgbToLab(to);
   const output = image(input.width, input.height, Uint8Array.from(input.data));
-  const radius = Math.max(
-    ...[
-      [0, 0],
-      [input.width, 0],
-      [0, input.height],
-      [input.width, input.height],
-    ].map(([x, y]) => Math.hypot(x - anchor[0], y - anchor[1])),
-  );
+  let radius = 0;
+  for (let y = 0; y < input.height; y++)
+    for (let x = 0; x < input.width; x++) {
+      if (input.data[(y * input.width + x) * 4 + 3] > threshold)
+        radius = Math.max(radius, Math.hypot(x - anchor[0], y - anchor[1]));
+    }
+  if (!radius) throw new Error("Empty radial tint support");
   for (let y = 0; y < input.height; y++)
     for (let x = 0; x < input.width; x++) {
       const p = (y * input.width + x) * 4;
@@ -526,4 +525,49 @@ export function splitColumns(input, threshold, minGap = 1) {
     else grouped.push([...range]);
   }
   return grouped;
+}
+
+// Intersect the principal axes of disconnected rays, rather than using their
+// asymmetric bounding box. Every ray contributes one line to the fit.
+export function fitRayCenter(input) {
+  const { labels, areas } = components(input, 8);
+  const sums = areas.map(() => [0, 0, 0, 0, 0, 0]);
+  for (let p = 0; p < labels.length; p++) {
+    if (!labels[p]) continue;
+    const x = p % input.width,
+      y = Math.floor(p / input.width),
+      weight = input.data[p * 4 + 3] / 255;
+    const s = sums[labels[p]];
+    s[0] += weight;
+    s[1] += weight * x;
+    s[2] += weight * y;
+    s[3] += weight * x * x;
+    s[4] += weight * x * y;
+    s[5] += weight * y * y;
+  }
+  const normals = [];
+  for (let id = 1; id < sums.length; id++) {
+    const [w, sx, sy, sxx, sxy, syy] = sums[id];
+    const x = sx / w,
+      y = sy / w,
+      xx = sxx / w - x * x,
+      xy = sxy / w - x * y,
+      yy = syy / w - y * y;
+    const angle = 0.5 * Math.atan2(2 * xy, xx - yy);
+    const nx = -Math.sin(angle),
+      ny = Math.cos(angle);
+    normals.push([nx, ny, nx * x + ny * y]);
+  }
+  const [x, y] = leastSquares(
+    normals.map((n) => n.slice(0, 2)),
+    normals.map((n) => n[2]),
+  );
+  return {
+    x,
+    y,
+    residual: Math.sqrt(
+      normals.reduce((sum, [nx, ny, d]) => sum + (nx * x + ny * y - d) ** 2, 0) / normals.length,
+    ),
+    rays: normals.length,
+  };
 }

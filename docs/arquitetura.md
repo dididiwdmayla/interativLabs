@@ -148,6 +148,8 @@ A cena é em mm, mas os motores 2D funcionam melhor com corpos de 0,1 a 10 unida
 
 ## 5. Renderização
 
+- Assets são acessados por `assets` de `@/assets/registry`, gerado por `npm run assets`: id, grupo, fontes 1x/2x sob `BASE_URL`, dimensões, âncora normalizada, mm/px, repetição e variantes tingidas com suas fontes.
+
 - Uma `<g>` por camada, na ordem da profundidade. Dentro dela, uma `<g>` por peça, com `transform` atualizado a cada quadro.
 - A forma da peça vira um `path` com regra `evenodd` (furos e rasgos funcionam sem decomposição no desenho).
 - Material = textura que repete (`pattern` em mm reais, via `scale` do registry) + borda e chanfro desenhados como contornos deslocados + sombra estática projetada na camada de baixo. Nada disso é recalculado durante a simulação.

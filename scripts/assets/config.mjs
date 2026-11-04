@@ -19,8 +19,10 @@ export const settings = {
   contourThreshold: 128,
   padding: 0.04,
   crossfade: 0.08,
-  webp: { quality: 90, effort: 6 },
+  webp: { quality: 90, effort: 6, exact: true },
   paperLuminance: ["181C3D", "262C4D"].map((hex) => hex.match(/../g).map((v) => parseInt(v, 16))),
+  // Leave room for WebP quality-90 quantization inside the specified L range.
+  paperLuminanceGuard: 0.5,
   contact: {
     maxBytes: 3_145_728,
     zoom: 4,
@@ -158,7 +160,14 @@ export const outputs = [
     format: "CHAVE-PRETA",
     size: { axis: "width", x1: 64, x2: 128 },
     scale: null,
-    anchor: { kind: "spark-center" },
+    anchor: {
+      kind: "spark-center",
+      measured: [
+        [192.1650831739459, 513.2043982906423],
+        [713.8421202221123, 519.768951053655],
+        [1246.3745184796314, 510.35504282029837],
+      ][index - 1],
+    },
     repeat: "none",
     tints: ["ink"],
     spark: { index, emptyThreshold: 8, minGap: 32 },

@@ -25,6 +25,7 @@ Fase 1 (fundação) em andamento no branch `fase-1`. A coordenação (briefing, 
 npm ci
 npm run dev          # servidor local
 npm run build        # build estático em dist/
+npm run assets       # WebP 1x/2x, registro e folhas de contato do lote visual
 npm run lint && npm run typecheck && npm test
 npm run capture      # capturas Playwright (390×844 e 1440×900) em docs/capturas/fase-1/
 npm run check:overflow  # reprova rolagem lateral em 360, 390 e 412 px
