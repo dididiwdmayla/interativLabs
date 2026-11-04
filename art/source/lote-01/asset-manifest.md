@@ -2,7 +2,7 @@
 
 Lote 01 da Prancha índigo, escrito pelo coordenador visual em 04/11/2026 a partir de `docs/identidade/identidade.md` e do frame oficial (`docs/identidade/frame-oficial/`).
 
-São 17 imagens para gerar no ChatGPT, em 3 levas, e 23 saídas no registry. O Will gera leva por leva, na ordem, e sobe os PNGs originais neste diretório com o nome igual ao ID (`hw-screw-slot.png`). Depois de cada leva, o executor roda `npm run assets` e o coordenador visual revisa as folhas de contato em `docs/capturas/lote-01/`. Asset reprovado volta ao Will com o motivo anotado aqui, na seção "Revisões".
+São 17 imagens para gerar no ChatGPT, em 3 levas, e 23 saídas no registry. O Will gera as imagens na ordem das levas (a lista completa de prompts está neste manifesto e na cópia do projeto, `lote-01/prompts-completos.md`) e manda cada uma no chat do projeto. O coordenador visual revisa cada imagem antes de ela entrar aqui; reprovada volta ao Will com o motivo anotado na seção "Revisões". Os aprovados sobem neste diretório com o nome igual ao ID (`hw-screw-slot.png`). Depois, o executor roda `npm run assets` e o coordenador visual confere as folhas de contato em `docs/capturas/lote-01/`.
 
 Nada neste lote lembra arma de fogo. Os mecanismos são genéricos.
 

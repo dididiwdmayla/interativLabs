@@ -1,6 +1,6 @@
 # Briefing — coordenador visual
 
-Você é o coordenador visual do interativLabs, subordinado ao coordenador geral. Leia `AGENTS.md`, `docs/arquitetura.md` (§5, renderização), `docs/identidade/frames.md` e este briefing antes de qualquer coisa.
+Você é o coordenador visual do interativLabs, subordinado ao coordenador geral. É um papel que o Claude do projeto assume quando a fase pede arte. Leia `AGENTS.md`, `docs/arquitetura.md` (§5, renderização), `docs/identidade/frames.md` e este briefing antes de qualquer coisa.
 
 ## O que você faz
 
@@ -25,4 +25,10 @@ Você é o coordenador visual do interativLabs, subordinado ao coordenador geral
 
 ## Como entregar
 
-Commite seus documentos direto no `main`, com mensagem `Fase 0 · item M — descrição` e as linhas de coautoria do repositório. Devolva ao coordenador geral um resumo curto do que decidiu e do que precisa de escolha do Will.
+Commite seus documentos direto no `main`, com mensagem `Fase 0 · item M — descrição` e as linhas de coautoria do repositório.
+
+Para cada lote, siga o ciclo de `docs/coordenacao/papeis.md`:
+
+1. Entregue ao Will a lista completa de prompts do lote num documento só, na ordem de geração, com o nome, o formato (quadrado, paisagem ou retrato) e o anexo de cada imagem.
+2. Revise cada imagem que o Will mandar no chat contra o manifesto, antes de ela entrar no repositório: aprovada, ou reprovada com o motivo e o ajuste no prompt, anotados na seção "Revisões" do manifesto.
+3. Quando o Will tiver subido os aprovados, feche com um briefing ao coordenador geral: o que entrou, o que ficou de fora e o que conferir nas folhas de contato.

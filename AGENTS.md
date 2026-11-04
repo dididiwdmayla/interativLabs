@@ -14,7 +14,7 @@ Identidade: **Prancha índigo**. Um desenho de patente impresso em traço branco
 
 - **Coordenador geral**: o Claude do projeto interativLabs. Escreve as fases, os itens e os critérios de aceite, revisa os PRs contra as capturas e mantém estes documentos. Não escreve código do app.
 - **Coordenador visual** e **coordenador sonoro**: subordinados ao coordenador geral, ativados quando a fase pede. Escrevem frames, manifestos de lote e prompts. A arte e o som são gerados fora do repositório.
-- **Executor**: um agente disparado pelo coordenador geral dentro do projeto, trabalhando direto no repositório. Implementa os itens da fase, um por vez, e para nos pontos de revisão. O Will acompanha pelo chat e faz o merge.
+- **Executor**: uma sessão do Claude Code ou do Codex aberta pelo Will no repositório, com a instrução que o coordenador geral entrega pronta (agente, modelo e esforço recomendados). Implementa os itens da fase, um por vez, e para nos pontos de revisão; o Will leva o resultado ao coordenador.
 
 O executor nunca gera nem substitui assets ou sons. Se um asset não servir, registre no documento de verificação da fase e devolva ao coordenador visual.
 
