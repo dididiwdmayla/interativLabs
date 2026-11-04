@@ -1,0 +1,48 @@
+{
+  "id": "molas/pre-carga",
+  "group": "molas",
+  "title": "Pré-carga",
+  "notes": "Mola de 0,05 N/mm e 30 mm livres montada com 20 mm, empurrando um bloco contra o batente do trilho: 0,5 N desde o primeiro passo.",
+  "view": [-15, -25, 60, 50],
+  "runs": [
+    {
+      "name": "1 s",
+      "duration": 1,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "at",
+          "label": "no primeiro passo a mola já empurra com k·(livre − montada) = 0,5 N (± 1%)",
+          "q": {
+            "link": "k4",
+            "field": "force"
+          },
+          "t": 0.0042,
+          "min": 0.495,
+          "max": 0.505
+        },
+        {
+          "kind": "mean",
+          "label": "o batente do trilho segura a mesma força (0,5 N ± 1%)",
+          "q": {
+            "abs": {
+              "link": "k3",
+              "field": "force"
+            }
+          },
+          "from": 0.5,
+          "to": 1,
+          "min": 0.495,
+          "max": 0.505
+        },
+        {
+          "kind": "maxDisp",
+          "label": "o bloco não sai do batente (< 0,01 mm)",
+          "parts": ["p2"],
+          "max": 0.01
+        }
+      ]
+    }
+  ],
+  "scene": "pre-carga.scene.json"
+}

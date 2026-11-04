@@ -1,5 +1,6 @@
 import { type Piece } from "@/geometry/decompose";
 import { shapeGeometry } from "@/geometry/shape";
+import { principalAxis } from "@/geometry/slot";
 import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
@@ -114,9 +115,19 @@ export interface PlanSpring {
   /** pontos no espaço de cada corpo, mm */
   localA: Vec2;
   localB: Vec2;
+  /** g/s² */
   k: number;
+  /** g/s */
   damping: number;
   freeLength: number;
+  /** presa | apoiada (só empurra) | só puxa */
+  mode: "fixed" | "seated" | "tension";
+  /** espiras encostadas: batente rígido, mm */
+  solidLength: number;
+  /** peça-guia: o eixo da mola acompanha este corpo (direção de A para B no espaço dele) */
+  guide?: { body: number; axis: Vec2 };
+  /** massa efetiva ao longo da mola na pose desenhada, g (Infinity se as duas pontas são fixas) */
+  effMass: number;
 }
 
 export interface PlanChamber {
@@ -474,15 +485,50 @@ export function buildPlan(scene: Scene): Plan {
           warnings.push(`Mola ${l.ref}: as duas pontas estão no mesmo corpo; foi ignorada`);
           break;
         }
+        const wa = worldOf(l.a, l.atA);
+        const wb = worldOf(l.b, l.atB);
+        const dl = dhypot(wb[0] - wa[0], wb[1] - wa[1]);
+        let guide: PlanSpring["guide"];
+        if (l.guide !== undefined) {
+          const gb = bodyIdx(l.guide);
+          const gp = byId.get(l.guide);
+          // eixo da guia: eixo principal do contorno da peça-guia, apontando de A para B
+          const ax = gp && gp.shape.kind === "poly" ? principalAxis(gp.shape.outer) : null;
+          if (gb >= 0 && gp && ax && dl > 1e-9) {
+            const u = rotate(ax.u, gp.angle);
+            const sg = u[0] * (wb[0] - wa[0]) + u[1] * (wb[1] - wa[1]) < 0 ? -1 : 1;
+            guide = { body: gb, axis: [u[0] * sg, u[1] * sg] };
+          } else warnings.push(`Mola ${l.ref}: a guia precisa ser um polígono alongado; ficou sem guia`);
+        }
+        // Massa efetiva ao longo da mola: 1 / (1/mA + 1/mB + (rA×u)²/IA + (rB×u)²/IB).
+        let K = 0;
+        if (dl > 1e-9) {
+          const u: Vec2 = [(wb[0] - wa[0]) / dl, (wb[1] - wa[1]) / dl];
+          for (const [bi, w] of [
+            [a, wa],
+            [b, wb],
+          ] as const) {
+            const bd = bodies[bi]!;
+            if (bd.static) continue;
+            const rx = w[0] - bd.position[0];
+            const ry = w[1] - bd.position[1];
+            const c = rx * u[1] - ry * u[0];
+            K += 1 / bd.mass + (c * c) / bd.inertia;
+          }
+        }
         plan.springs.push({
           id: l.id,
           a,
           b,
-          localA: toLocal(a, worldOf(l.a, l.atA)),
-          localB: toLocal(b, worldOf(l.b, l.atB)),
+          localA: toLocal(a, wa),
+          localB: toLocal(b, wb),
           k: l.k * N,
           damping: l.damping * N,
           freeLength: l.freeLength,
+          mode: l.mode,
+          solidLength: l.solidLength ?? l.coil.turns * l.coil.wireD,
+          ...(guide ? { guide } : {}),
+          effMass: K > 0 ? 1 / K : Infinity,
         });
         break;
       }

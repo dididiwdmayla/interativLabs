@@ -1,0 +1,73 @@
+{
+  "id": "molas/guia",
+  "group": "molas",
+  "title": "Mola com guia",
+  "notes": "Haste fixa inclinada 30°, passando por dentro de uma mola de 0,01 N/mm; um bloco de 3,77 g desliza nela. A mola pega no bloco 6 mm acima do eixo da haste: sem a guia, a força sairia torta. Extensão estática esperada: m·g·sen 30°/k = 1,848 mm.",
+  "view": [-70, -50, 140, 100],
+  "runs": [
+    {
+      "name": "4 s",
+      "duration": 4,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "a força fica alinhada ao eixo da guia (transversal < 1% da força)",
+          "cond": {
+            "abs": {
+              "link": "k4",
+              "field": "force"
+            }
+          },
+          "condMin": 0.0001,
+          "q": {
+            "div": [
+              {
+                "link": "k4",
+                "field": "sideForce"
+              },
+              {
+                "abs": {
+                  "link": "k4",
+                  "field": "force"
+                }
+              }
+            ]
+          },
+          "min": 0,
+          "max": 0.01,
+          "minSteps": 100
+        },
+        {
+          "kind": "maxPenetration",
+          "label": "nenhum contato entre a haste e a mola (a mola não colide)",
+          "max": 1e-9
+        },
+        {
+          "kind": "decays",
+          "label": "o bloco oscila e assenta",
+          "q": {
+            "link": "k3",
+            "field": "translation"
+          },
+          "from": 0,
+          "to": 4,
+          "final": 0.02
+        },
+        {
+          "kind": "mean",
+          "label": "extensão final = m·g·sen 30°/k (1,85 mm ± 2%)",
+          "q": {
+            "link": "k3",
+            "field": "translation"
+          },
+          "from": 3.5,
+          "to": 4,
+          "min": 1.8112,
+          "max": 1.8852
+        }
+      ]
+    }
+  ],
+  "scene": "guia.scene.json"
+}

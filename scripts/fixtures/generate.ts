@@ -5,10 +5,12 @@
  */
 import { generateCalibracao } from "./calibracao";
 import { generateFixacoes } from "./fixacoes";
+import { generateMolas } from "./molas";
 
 const GROUPS: Record<string, () => void> = {
   calibracao: generateCalibracao,
   fixacoes: generateFixacoes,
+  molas: generateMolas,
 };
 
 export async function main(args: string[]) {

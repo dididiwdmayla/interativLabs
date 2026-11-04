@@ -1,0 +1,50 @@
+{
+  "id": "molas/rigida",
+  "group": "molas",
+  "title": "Mola rígida (nativa)",
+  "notes": "Bloco de 1,88 g sobre uma mola de 2 N/mm: ω·h = 4,29 (a força explícita explode acima de 2). O adaptador troca pela mola nativa do Box2D. O bloco cai 5 mm sobre a mola. Compressão estática esperada: 0,0092 mm.",
+  "view": [-25, -45, 50, 55],
+  "runs": [
+    {
+      "name": "queda",
+      "duration": 2,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "estável: o bloco não explode nem atravessa a mola",
+          "q": {
+            "link": "k4",
+            "field": "length"
+          },
+          "min": 4,
+          "max": 25.01
+        },
+        {
+          "kind": "mean",
+          "label": "assenta na compressão estática m·g/k (0,0092 mm ± 5%)",
+          "q": {
+            "link": "k4",
+            "field": "length"
+          },
+          "from": 1.5,
+          "to": 2,
+          "min": 24.9903,
+          "max": 24.9912
+        },
+        {
+          "kind": "span",
+          "label": "parado no fim (variação < 0,001 mm)",
+          "q": {
+            "link": "k4",
+            "field": "length"
+          },
+          "from": 1.5,
+          "to": 2,
+          "max": 0.001
+        }
+      ]
+    }
+  ],
+  "scene": "rigida.scene.json"
+}

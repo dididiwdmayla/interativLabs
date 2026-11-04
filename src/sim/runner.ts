@@ -97,6 +97,8 @@ function field(st: LinkState | undefined, path: string): number {
 }
 
 export function measure(q: Quantity, s: Snapshot, ctx: QCtx): number {
+  if ("div" in q) return measure(q.div[0], s, ctx) / measure(q.div[1], s, ctx);
+  if ("abs" in q) return Math.abs(measure(q.abs, s, ctx));
   if ("pv" in q) {
     const st = s.links[q.pv];
     return (st?.pressure ?? NaN) * dpow(st?.volume ?? NaN, q.gamma);
@@ -367,6 +369,30 @@ function evaluator(a: ScriptAssertion, ctx: QCtx): Evaluator {
           for (const id of ids) max = Math.max(max, field(s.links[id], a.field));
         },
         result: () => ({ pass: max <= a.max, value: fmt(max, 4) }),
+      };
+    }
+    case "while": {
+      let n = 0;
+      let lo = Infinity;
+      let hi = -Infinity;
+      return {
+        step(t, s) {
+          if (!inWin(t, a.from, a.to)) return;
+          const c = measure(a.cond, s, ctx);
+          if (!within(c, a.condMin, a.condMax)) return;
+          n++;
+          const v = measure(a.q, s, ctx);
+          lo = Math.min(lo, v);
+          hi = Math.max(hi, v);
+          if (Number.isNaN(v)) lo = hi = NaN;
+        },
+        result: () => {
+          if (n < (a.minSteps ?? 1)) return { pass: false, value: `a condição valeu em ${n} passos` };
+          return {
+            pass: within(lo, a.min, a.max) && within(hi, a.min, a.max),
+            value: `de ${fmt(lo, 6)} a ${fmt(hi, 6)} em ${n} passos`,
+          };
+        },
       };
     }
     case "maxPenetration": {

@@ -38,7 +38,11 @@ export type Quantity =
   /** P·V^γ da câmara (kPa·mm³^γ) */
   | { pv: Id; gamma: number }
   /** força do gás na parede (N) dividida por (P − p0)·A da câmara: 1 quando bate */
-  | { gasForce: Id; wall: number; p0: number };
+  | { gasForce: Id; wall: number; p0: number }
+  /** razão entre duas grandezas */
+  | { div: [Quantity, Quantity] }
+  /** valor absoluto */
+  | { abs: Quantity };
 
 interface Base {
   label: string;
@@ -88,6 +92,19 @@ export type ScriptAssertion = Base &
         within: number;
       }
     | { kind: "maxPenetration"; max: number; from?: number }
+    /** enquanto a condição vale (pelo menos `minSteps` passos), q fica entre min e max */
+    | {
+        kind: "while";
+        cond: Quantity;
+        condMin?: number;
+        condMax?: number;
+        q: Quantity;
+        min?: number;
+        max?: number;
+        minSteps?: number;
+        from?: number;
+        to?: number;
+      }
     /** nenhuma das peças se afasta mais que `max` mm da posição inicial na janela */
     | { kind: "maxDisp"; parts: Id[] | "dynamic"; max: number; from?: number; to?: number }
     /** o campo de nenhuma das ligações passa de `max` (ex.: abertura dos eixos) */

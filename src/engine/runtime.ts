@@ -1,6 +1,6 @@
 import type { Id } from "@/model/types";
 import type { Vec2 } from "@/geometry/vec";
-import type { Plan, PlanChamber, PlanSensor } from "./plan";
+import type { Plan, PlanChamber, PlanSensor, PlanSpring } from "./plan";
 import { N } from "@/model/units";
 import type { EngineEvent, LinkState, PartPose, Snapshot } from "./types";
 import { dcos, dexp, dhypot, dsin } from "@/geometry/dmath";
@@ -176,19 +176,11 @@ export class Runtime {
       if (this.dyn(s.a)) io.applyForce(s.a, -ux * F, -uy * F, A.x, A.y);
     }
     for (const s of this.plan.springs) {
-      const pa = this.world(s.a, s.localA);
-      const pb = this.world(s.b, s.localB);
-      const dx = pb[0] - pa[0];
-      const dy = pb[1] - pa[1];
-      const L = dhypot(dx, dy) || 1e-9;
-      const nx = dx / L;
-      const ny = dy / L;
-      const va = this.pointVel(s.a, pa[0], pa[1]);
-      const vb = this.pointVel(s.b, pb[0], pb[1]);
-      const vr = (vb[0] - va[0]) * nx + (vb[1] - va[1]) * ny;
-      const F = s.k * (L - s.freeLength) + s.damping * vr;
-      if (this.dyn(s.a)) io.applyForce(s.a, nx * F, ny * F, pa[0], pa[1]);
-      if (this.dyn(s.b)) io.applyForce(s.b, -nx * F, -ny * F, pb[0], pb[1]);
+      if (this.native.has(s.id)) continue;
+      const f = this.springForce(s);
+      if (f.F === 0) continue;
+      if (this.dyn(s.a)) io.applyForce(s.a, f.ux * f.F, f.uy * f.F, f.pa[0], f.pa[1]);
+      if (this.dyn(s.b)) io.applyForce(s.b, -f.ux * f.F, -f.uy * f.F, f.pb[0], f.pb[1]);
     }
     for (const ch of this.chambers) this.chamberForce(ch, h);
     for (const [b, f] of this.forces) {
@@ -196,6 +188,44 @@ export class Runtime {
       io.applyForce(b, f.f[0], f.f[1], p[0], p[1]);
     }
     this.dragImpulse(h);
+  }
+
+  /**
+   * Força de Hooke com amortecimento, g·mm/s², positiva = tração (puxa B para A).
+   * Sem guia, ao longo da reta entre as pontas; com guia, ao longo do eixo da
+   * peça-guia (o comprimento é a projeção nesse eixo). Apoiada só empurra;
+   * só tração só puxa. O batente das espiras encostadas é uma junta do motor.
+   */
+  springForce(s: PlanSpring): { F: number; L: number; ux: number; uy: number; pa: Vec2; pb: Vec2 } {
+    const pa = this.world(s.a, s.localA);
+    const pb = this.world(s.b, s.localB);
+    const dx = pb[0] - pa[0];
+    const dy = pb[1] - pa[1];
+    let ux: number;
+    let uy: number;
+    let L: number;
+    if (s.guide) {
+      const g = this.body(s.guide.body);
+      const c = dcos(g.angle);
+      const n = dsin(g.angle);
+      ux = s.guide.axis[0] * c - s.guide.axis[1] * n;
+      uy = s.guide.axis[0] * n + s.guide.axis[1] * c;
+      L = dx * ux + dy * uy;
+    } else {
+      L = dhypot(dx, dy);
+      if (L < 1e-9) return { F: 0, L, ux: 1, uy: 0, pa, pb };
+      ux = dx / L;
+      uy = dy / L;
+    }
+    const va = this.pointVel(s.a, pa[0], pa[1]);
+    const vb = this.pointVel(s.b, pb[0], pb[1]);
+    const vr = (vb[0] - va[0]) * ux + (vb[1] - va[1]) * uy;
+    let F = s.k * (L - s.freeLength) + s.damping * vr;
+    // Apoiada: só age encostada (abaixo do comprimento livre) e só empurra.
+    // Só tração: só age esticada e só puxa. O amortecimento não cola a ponta solta.
+    if (s.mode === "seated") F = L < s.freeLength ? Math.min(F, 0) : 0;
+    else if (s.mode === "tension") F = L > s.freeLength ? Math.max(F, 0) : 0;
+    return { F, L, ux, uy, pa, pb };
   }
 
   /** Força externa constante (roteiros de teste), N no mundo, no ponto local da peça. */
@@ -434,7 +464,32 @@ export class Runtime {
     for (const s of this.plan.springs) {
       const pa = this.world(s.a, s.localA);
       const pb = this.world(s.b, s.localB);
-      links[s.id] = { kind: "spring", length: dhypot(pb[0] - pa[0], pb[1] - pa[1]) };
+      const dx = pb[0] - pa[0];
+      const dy = pb[1] - pa[1];
+      const len = dhypot(dx, dy);
+      // força do motor (mola nativa e batente das espiras), positiva = empurra
+      const jf = this.jointForce(s.id);
+      const stop = jf && len > 1e-9 ? (jf[0] * dx + jf[1] * dy) / len / N : 0;
+      const st: LinkState = { kind: "spring", length: len };
+      if (this.native.has(s.id)) st.force = stop;
+      else {
+        // força da mola no estado atual (a mesma que o próximo passo aplica)
+        const f = this.springForce(s);
+        const F = -f.F / N;
+        st.force = F + stop;
+        st.stopForce = stop;
+        if (s.guide) {
+          // componente da força aplicada transversal ao eixo da guia
+          const g = this.body(s.guide.body);
+          const c = dcos(g.angle);
+          const n = dsin(g.angle);
+          const gx = s.guide.axis[0] * c - s.guide.axis[1] * n;
+          const gy = s.guide.axis[0] * n + s.guide.axis[1] * c;
+          st.sideForce = Math.abs(f.ux * gy - f.uy * gx) * Math.abs(F);
+          st.length = dx * gx + dy * gy;
+        }
+      }
+      links[s.id] = st;
     }
     for (const c of this.chambers)
       links[c.p.id] = {

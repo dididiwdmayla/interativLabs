@@ -158,3 +158,15 @@ describe("Box2D calibrado", () => {
     a.dispose();
   });
 });
+
+describe("molas", () => {
+  it("mola rígida demais para o passo explícito vira nativa", async () => {
+    const { springNeedsNative } = await import("./box2d/box2dAdapter");
+    // 2 N/mm num bloco de 1,9 g: ω·h ≈ 4,3
+    expect(springNeedsNative({ k: 2e6, damping: 0, effMass: 1.884 })).toBe(true);
+    // 0,02 N/mm em 20 g: ω·h ≈ 0,13
+    expect(springNeedsNative({ k: 2e4, damping: 380, effMass: 20 })).toBe(false);
+    // duas pontas fixas: nunca
+    expect(springNeedsNative({ k: 2e6, damping: 0, effMass: Infinity })).toBe(false);
+  });
+});

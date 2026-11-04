@@ -27,9 +27,10 @@ export interface StraightSlot {
 /** Linha de centro mínima para contar como rasgo (abaixo disso é furo redondo). */
 export const MIN_SLOT_TRAVEL = 0.1;
 
-export function straightSlot(ring: Ring, tolMm = 0.05, tolRel = 0.03): StraightSlot | null {
+/** Centroide e eixo principal (maior momento de área) de um contorno. */
+export function principalAxis(ring: Ring): { c: Vec2; u: Vec2 } | null {
   const n = ring.length;
-  if (n < 4) return null;
+  if (n < 3) return null;
   // Momentos de área (fórmula do laço), em torno da origem.
   let A = 0;
   let cx = 0;
@@ -72,8 +73,16 @@ export function straightSlot(ring: Ring, tolMm = 0.05, tolRel = 0.03): StraightS
     uy = -half + root;
   }
   const ul = Math.sqrt(ux * ux + uy * uy);
-  ux /= ul;
-  uy /= ul;
+  return { c: [cx, cy], u: [ux / ul, uy / ul] };
+}
+
+export function straightSlot(ring: Ring, tolMm = 0.05, tolRel = 0.03): StraightSlot | null {
+  const n = ring.length;
+  if (n < 4) return null;
+  const pa = principalAxis(ring);
+  if (!pa) return null;
+  const [cx, cy] = pa.c;
+  const [ux, uy] = pa.u;
   let tmin = Infinity;
   let tmax = -Infinity;
   let smin = Infinity;

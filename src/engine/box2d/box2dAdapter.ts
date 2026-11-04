@@ -2,7 +2,7 @@ import type { Box2DModule, b2BodyId, b2JointId, b2Rot, b2ShapeId, b2Vec2, b2Worl
 import { PI, datan2, dcos, dsin } from "@/geometry/dmath";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
-import { ANGULAR_DAMPING, SPEED_LIMIT, trackedBodies, unwrapAngle } from "../common";
+import { ANGULAR_DAMPING, FIXED_STEP, SPEED_LIMIT, trackedBodies, unwrapAngle } from "../common";
 import { buildPlan, type Plan } from "../plan";
 import { Runtime, type BodyIO, type BodyState } from "../runtime";
 import type { CompileOptions, CompileReport, EngineAdapter, EngineEvent, PartPose, Snapshot } from "../types";
@@ -62,6 +62,19 @@ export const CALIBRATED_TUNING: Box2dTuning = {
   hitEventThreshold: 100,
   lengthUnits: 5,
 };
+
+/**
+ * Mola rígida demais para a força explícita aplicada uma vez por passo
+ * (Euler simplético, instável a partir de ω·h = 2): ω·h > 0,5 ou
+ * amortecimento c·h/m > 0,25 vira mola nativa do Box2D (implícita).
+ */
+export function springNeedsNative(
+  s: { k: number; damping: number; effMass: number },
+  h = FIXED_STEP,
+): boolean {
+  if (!Number.isFinite(s.effMass) || s.k <= 0) return false;
+  return Math.sqrt(s.k / s.effMass) * h > 0.5 || (s.damping * h) / s.effMass > 0.25;
+}
 
 interface ShapeData {
   part: Id;
@@ -349,6 +362,38 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
           jd.maxLength = d.length / L;
         }
         joints.set(d.id, B.b2CreateDistanceJoint(w, jd));
+        jd.delete();
+      }
+      for (const sp of p.springs) {
+        // Toda mola ganha uma junta de distância: batente das espiras encostadas
+        // (mínimo = comprimento sólido) e, se for rígida demais para o passo
+        // explícito, a mola nativa (rigidez e massa efetiva viram frequência).
+        const jd = B.b2DefaultDistanceJointDef();
+        jd.base.bodyIdA = bodies[sp.a]!;
+        jd.base.bodyIdB = bodies[sp.b]!;
+        jd.base.localFrameA.p = new B.b2Vec2(sp.localA[0] / L, sp.localA[1] / L);
+        jd.base.localFrameB.p = new B.b2Vec2(sp.localB[0] / L, sp.localB[1] / L);
+        jd.base.collideConnected = true;
+        base(jd);
+        jd.length = sp.freeLength / L;
+        jd.enableSpring = true;
+        jd.enableLimit = true;
+        jd.minLength = sp.solidLength / L;
+        jd.maxLength = 1e6 / L;
+        if (!sp.guide && springNeedsNative(sp)) {
+          const omega = Math.sqrt(sp.k / sp.effMass);
+          jd.hertz = omega / (2 * PI);
+          jd.dampingRatio = sp.damping / (2 * sp.effMass * omega);
+          // o Box2D chama de positivo o impulso que afasta as pontas (compressão)
+          if (sp.mode === "seated") jd.lowerSpringForce = 0;
+          if (sp.mode === "tension") jd.upperSpringForce = 0;
+          native.add(sp.id);
+        } else {
+          jd.hertz = 0;
+          if (sp.guide && springNeedsNative(sp))
+            warnings.push("Box2D: mola com guia rígida demais para o passo explícito; pode vibrar");
+        }
+        joints.set(sp.id, B.b2CreateDistanceJoint(w, jd));
         jd.delete();
       }
       for (const m of p.mounts) {

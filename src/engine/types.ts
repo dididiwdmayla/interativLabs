@@ -56,6 +56,8 @@ export interface LinkState {
   translation?: number;
   /** força ao longo da ligação, N: trilho (reação ao longo do eixo), mola (+ empurra), haste e cabo (+ puxa) */
   force?: number;
+  /** mola: parte da força que vem do batente das espiras encostadas, N */
+  stopForce?: number;
   /** força transversal ao eixo da mola, N (mola com guia) */
   sideForce?: number;
   /** mola, haste, cabo: comprimento atual (mm) */
