@@ -84,7 +84,7 @@ docs/                    arquitetura, fases, decisões, identidade, verificaçõ
 - **Simulação determinística**: passo fixo com subpassos, a mesma cena com as mesmas entradas dá o mesmo resultado. A simulação sempre parte do estado desenhado; editar e simular são modos separados.
 - **Toda cena de exemplo tem uma cena de teste** em `scenes/fixtures/` que afirma o comportamento. Exemplo: "com o gatilho solto, o retém segura o percussor por 3 s; puxando o gatilho, o projétil sai com velocidade dentro da faixa X–Y". Mudou o motor e o teste quebrou? O motor está errado até prova em contrário.
 - **Desfazer cobre tudo**: desenho, ligações, propriedades, camadas. Arrastar é um comando só, registrado quando o dedo solta.
-- **Exemplos e presets** que acompanham o projeto são mecanismos genéricos: travas, catracas, trincos, engrenagens, cames, motores, lançadores de esfera. Não entram reproduções de modelos reais de armas, nem medidas de projetos reais.
+- **Exemplos e presets** que acompanham o projeto são mecanismos genéricos e esquemáticos: travas, catracas, trincos, engrenagens, cames, bielas, pistões, motores, lançadores de esfera (inclusive o objeto padrão, um lançador de brinquedo com ferrolho). Proporções inventadas e gás didático. Não entram reproduções de modelos reais de armas, nem medidas, molas ou pressões de projetos reais.
 
 ## Movimento e acessibilidade
 
