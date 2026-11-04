@@ -65,7 +65,7 @@ Cores dos tokens que o pipeline usa no tingimento: `ink` `#EAEAEF`, `ink-2` `#A3
 
 ## 3. Escala e tamanhos de uso
 
-- A cena é em mm. O zoom vai de 0,15× a 8×. A escala de tela no zoom 1 (px por mm) é fixada na Fase 1: o protótipo usava 5 px/mm e a casca provisória usa 2,5. Os tamanhos abaixo são calculados para o pior caso, 5 px/mm: no zoom 8×, 40 px de tela por mm.
+- A cena é em mm. O zoom vai de 0,15× a 8×. A escala de tela no zoom 1 é 5 px/mm (fixada em `docs/arquitetura.md` §4): no zoom 8×, 40 px de tela por mm.
 - **Ferragens e molas têm escala física.** O registry guarda `mmPerPx` da saída 1x, calculado depois do corte: `diâmetro real ÷ diâmetro medido em px`. Uma cabeça de 6 mm vai de 4,5 px (0,15×) a 240 px de tela (8×); a saída 2x de 512 px cobre esse máximo em tela de densidade 2.
 - **Papel, texturas e efeitos ficam em escala de tela** (`mmPerPx: null`): o papel não acompanha o zoom; `hatch-wood` e `tex-ink-wear` trocam de degrau junto com a hachura; faíscas têm tamanho fixo na tela; o gás e o escape escalam pela câmara.
 - Os diâmetros "reais" das ferragens são de referência, porque o formato v1 da cena não guarda tamanho de cabeça. O renderizador escala pelo valor da ligação quando houver (raio do pino, por exemplo).
