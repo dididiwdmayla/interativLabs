@@ -266,13 +266,44 @@ Implementada na Fase 1 · Parte D (`src/render/`). A pele é a da Prancha índig
 - **Simular** (`src/sim/session.ts`, `src/ui/sim/`): a `SimSession` (sem DOM) roda num Web Worker; o thread principal pede os passos do quadro pelo acumulador, espelha a gravação dos últimos 10 s e desenha. A linha do tempo volta a um passo recriando o mundo e reexecutando as entradas gravadas.
 - Efeitos (pontilhado do gás, leque do escape, faíscas) e falhas de tinta (`tex-ink-wear`) entram na Fase 2. A vista explodida em perspectiva entra numa fase própria.
 
-## 6. Editor
+## 6. Editor (tátil, decidido em 04/11/2026)
 
-- Toda mudança é um comando com `do`/`undo`. Um arrasto gera um comando só, ao soltar.
-- Ferramentas: selecionar, retângulo, círculo, polígono por pontos, traço livre, furo, rasgo, peça da biblioteca, e uma ferramenta por ligação.
-- Encaixes: grade, centro de círculo, vértice, ponto médio, concêntrico, tangente, alinhado ao eixo de outra ligação. O encaixe ativo aparece como marca visível.
-- Seleção: toque seleciona a peça mais alta da camada ativa; seleção múltipla por caixa (arrasto com a ferramenta de seleção num espaço vazio, no computador) e pelo botão "Selecionar mais" (no celular).
-- Painel de propriedades: folha inferior no celular (recolhida por padrão), coluna à direita no computador.
+Feito para o dedo e para a caneta, paisagem primeiro no celular. A complexidade fica disponível, mas nunca no caminho: cada ação tem um jeito óbvio de começar e uma explicação a um toque.
+
+### Tela
+
+- **Celular em paisagem** (layout principal): prancha ocupando a tela; menu (projetos e exemplos) no canto superior esquerdo; **Montar / Testar** num botão só no canto superior direito; desfazer e refazer no canto inferior esquerdo; a pílula da camada ativa no canto inferior direito; abas discretas no meio das bordas laterais abrem os menus circulares. Retrato continua funcionando, com a mesma lógica, mais enxuto. Computador e tablet usam o mesmo modelo, com o painel lateral fixo quando houver espaço.
+- **Tela cheia:** Android e iPad pelo Fullscreen API, com tentativa de travar em paisagem (Screen Orientation, só no Android). iPhone não tem tela cheia de página nem trava de orientação: o app é instalável (manifesto com `display: standalone`) e, aberto pela tela de início, roda sem as barras do navegador; uma dica explica como instalar.
+- **Canhoto:** uma opção troca os lados dos menus circulares e dos cantos.
+
+### Gestos
+
+- Um dedo na peça: seleciona; arrastar move (com encaixe). Um dedo no fundo: move a vista. Dois dedos: zoom e move. Toque longo na peça: menu da peça.
+- Toque com dois dedos: desfaz. Com três: refaz.
+- **Menus circulares de borda:** arrastar um dedo a partir do fundo da prancha até a faixa lateral (15% da largura) e segurar parado 1 s abre um menu circular naquela borda; um anel que se completa mostra o segundo passando, e soltar antes disso é só mover a vista (que volta para onde estava se o menu abrir). Escolha deslizando até o item e soltando (menu de marcação) ou tocando depois de aberto. As abas no meio das bordas abrem o mesmo menu com um toque. Direita: **Inserir** (peças, ligações, molas, gás e sensor). Esquerda: **Vista e modos** (camadas em cores, raio-x, isolar camada, enquadrar, tela cheia, testar).
+- **Caneta** (`pointerType: "pen"`): com a opção ligada, a caneta desenha e seleciona; o dedo só move a vista e dá zoom.
+
+### Peça selecionada
+
+- Alças grandes (alvo de 44 px) para mover, girar e esticar; encaixe magnético em grade, centros, bordas e eixos de outras peças, com a guia visível (e vibração curta no Android).
+- **Botão da peça:** um botãozinho flutua acima da seleção, fora do caminho do dedo. Tocar abre o cartão rápido: camada (subir, descer, qual), tamanho, material, fixa ou solta, girar 90°, espelhar, duplicar, excluir e as ligações da peça. Ligação selecionada tem o seu cartão rápido (mola macia, média ou dura e o modo; eixo livre, com atrito ou motor; e assim por diante). Os números em mm, N e kPa ficam em "detalhes".
+
+### Inserir e conectar
+
+- **Gaveta de peças prontas** (pelo menu Inserir): placa, barra, disco, bloco, alavanca, esfera, engrenagem, catraca, cremalheira, placa com furo, placa com rasgo. Arrasta para a prancha; a peça entra na camada ativa e é paramétrica (`source.generator`), então mudar o tamanho regenera a forma.
+- **Conectar por toque:** tocar onde duas peças se sobrepõem abre um menu circular só com as ligações válidas ali (parafuso, eixo, pino, rasgo…), cada uma com ícone e uma frase. Mola, haste e cabo: arrastar de uma peça à outra.
+- Desenho livre e furo/rasgo à mão: com a caneta ou com o dedo em modo desenho.
+
+### Entender
+
+- **Modo camadas em cores:** cada camada ganha uma cor ordenada (do fundo para o topo), número na peça e, opcionalmente, as camadas afastadas em 2,5D para ver o que está em cima e embaixo. Isolar camada mostra só ela.
+- **Cartões "o que é"** para cada ligação, com uma animação curta.
+- **Tutorial** sobre o objeto padrão: um roteiro curto que mostra onde tocar (puxar o gatilho, ver a mola, abrir o menu, desmontar uma peça).
+- **Rastro do movimento** no Testar: as peças em movimento deixam um rastro curto, para ver a trajetória.
+
+### Comandos
+
+- Toda mudança é um comando com desfazer e refazer (patches do Immer). Um arrasto é um comando só, registrado ao soltar.
 
 ## 7. Persistência
 

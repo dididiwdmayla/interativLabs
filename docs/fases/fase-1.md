@@ -1,6 +1,6 @@
 # Fase 1 — Fundação
 
-Branch: `fase-1`. A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt: **A** (itens 1–2, feita), **B** (3–4, feita), **C** (item 5: motor definitivo e ligações 2.0, feita), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo, com o renderizador definitivo na Prancha índigo), **E1** (item 10: pipeline de assets, feita), **E2** (itens 7–9: editor, ferramentas das ligações 2.0 e projetos), **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
+Branch: `fase-1`. A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt: **A** (itens 1–2, feita), **B** (3–4, feita), **C** (item 5: motor definitivo e ligações 2.0, feita), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo, com o renderizador definitivo na Prancha índigo), **E1** (item 10: pipeline de assets, feita), **E2a** (itens 7–9: base do editor tátil, paisagem e tela cheia, menus de borda, botão da peça, gaveta de peças, camadas e projetos) e **E2b** (item 13: conectar por toque, caneta, ajustes simples, modo camadas em cores, cartões, tutorial e rastro), **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
 
 Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual já usa os tokens, a paleta e as fontes da Prancha índigo (`docs/identidade/identidade.md`), mas sem hachuras, texturas nem ferragens: isso é da Fase 2. Alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 completa a pele, não refaz a estrutura.
 
@@ -73,30 +73,9 @@ Motor: Box2D v3 (`docs/arquitetura.md` §4). Formato: v2 (`docs/arquitetura.md` 
 
 O app principal passa a desenhar e simular a cena: o renderizador definitivo na pele da Prancha índigo (contorno, parede, chanfro, sombra entre camadas, hachuras procedurais, papel, ferragens e molas do lote 01, números de chamada), o modo Simular com câmera lenta e linha do tempo, o arrasto com o dedo, a navegação da vista, o menu de exemplos e o objeto padrão aberto ao entrar. Meta de desempenho: 150 peças e 100 ligações a 60 qps, medida no celular do Will. Subitens e aceites no prompt da Parte D.
 
-## Item 7 — Editor: comandos, seleção e camadas
+## Itens 7, 8 e 9 — Base do editor tátil (Parte E2a)
 
-- Pilha de comandos com desfazer e refazer (Ctrl+Z, Ctrl+Shift+Z, botões).
-- Selecionar, mover, girar pela alça, editar vértices, duplicar, excluir.
-- Camadas: criar, renomear, reordenar, ocultar, travar, excluir com confirmação na própria página. Destacar a camada ativa.
-
-**Aceite:** qualquer sequência de 50 edições desfeita até o início devolve a cena idêntica (teste automatizado).
-
-## Item 8 — Editor: ferramentas e propriedades
-
-- Ferramentas de desenho: retângulo, círculo, polígono por pontos, traço livre (simplificado), engrenagem.
-- Ferramentas de ligação: parafuso, eixo, pino, trilho, mola, câmara, sensor, com a mesma lógica de escolha de peças do protótipo (peça mais alta da camada ativa; a de baixo, ou o fundo).
-- Painel de propriedades por tipo, com unidades (mm, °, s), igual em conteúdo ao do protótipo e com as correções de nome que fizerem sentido.
-- Dica curta por ferramenta.
-
-**Aceite:** dá para reconstruir o lançador do protótipo do zero, só com o editor, e ele funciona na simulação. Grave isso como teste Playwright.
-
-## Item 9 — Projetos
-
-- IndexedDB: lista de projetos com nome e data, abrir, duplicar, excluir, renomear. Autosave.
-- Exportar e importar JSON (texto copiável; download pelo navegador quando disponível).
-- Os três exemplos disponíveis num menu.
-
-**Aceite:** fechar e reabrir a aba mantém o projeto; importar uma cena v0 do protótipo funciona.
+O modelo de interação está em `docs/arquitetura.md` §6. A Parte E2a entrega: comandos com desfazer e refazer (botões e gestos), o layout tátil em paisagem e retrato com tela cheia e app instalável, os menus circulares de borda, seleção e manipulação com encaixe e o botão da peça, a gaveta de peças prontas, a gestão de camadas e os projetos salvos. Leva junto as correções da revisão da Parte D. Subitens e aceites no prompt da Parte E2a.
 
 ## Item 10 — Pipeline de assets
 
@@ -111,3 +90,7 @@ O app principal passa a desenhar e simular a cena: o renderizador definitivo na 
 ## Item 12 — Objeto padrão (Parte C2)
 
 O app abre com um mecanismo montado, que a pessoa opera e edita a partir dele: um lançador de esferas de brinquedo com ferrolho que recua pelo gás (recuo do fundo), percussor, retém, gatilho e carregador. Proporções inventadas, gás didático, nenhuma reprodução de arma real. Mostra as ligações 2.0 juntas: mola de retorno numa haste-guia, molas apoiadas, rasgo como guia, pino entre camadas, câmara com duas paredes, sensor. Cena de teste com o ciclo completo. Subitens e aceites no prompt da Parte C2.
+
+## Item 13 — Conectar e entender (Parte E2b)
+
+Conectar por toque e por arrasto, desenho livre e furo/rasgo com caneta, ajustes simples com predefinições, modo camadas em cores com afastamento 2,5D e isolamento, cartões "o que é", tutorial sobre o objeto padrão e rastro do movimento no Testar. Prompt depois da revisão da E2a.
