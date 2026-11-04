@@ -13,12 +13,15 @@ import type { Id, Scene } from "@/model/types";
  * garante o mesmo estado (src/sim/session.test.ts confere pelo hash).
  */
 
+/** Entrada ainda sem passo (fila até o próximo passo). */
+export type PendingInput = { kind: "start"; part: Id; p: Vec2 } | { kind: "move"; p: Vec2 } | { kind: "end" };
+
 export type SimInput =
   | { step: number; kind: "start"; part: Id; p: Vec2 }
   | { step: number; kind: "move"; p: Vec2 }
   | { step: number; kind: "end" };
 
-type Pending = SimInput extends infer T ? (T extends SimInput ? Omit<T, "step"> : never) : never;
+type Pending = PendingInput;
 
 export type SimEventKind = "sensor" | "chamber-fired" | "impact";
 
@@ -88,6 +91,20 @@ export class Recorder {
       d[c0 + i * 3 + 1] = st?.walls?.[0]?.travel ?? 0;
       d[c0 + i * 3 + 2] = st?.walls?.[1]?.travel ?? 0;
     }
+    this.latest = step;
+    this.oldest = Math.max(this.oldest, step - this.capacity);
+  }
+
+  /** Copia o quadro do passo para `out` a partir de `offset` (stride floats). */
+  copyFrame(step: number, out: Float32Array, offset: number): void {
+    const o = this.slot(step);
+    out.set(this.data.subarray(o, o + this.stride), offset);
+  }
+
+  /** Grava um quadro já montado (o espelho da gravação no thread principal). */
+  recordRaw(step: number, src: Float32Array, offset: number): void {
+    const o = this.slot(step);
+    this.data.set(src.subarray(offset, offset + this.stride), o);
     this.latest = step;
     this.oldest = Math.max(this.oldest, step - this.capacity);
   }
@@ -232,6 +249,15 @@ export class SimSession {
     if (this.events.length && this.events[0]!.step < this.rec.oldest)
       this.events = this.events.filter((e) => e.step >= this.rec.oldest);
     return s;
+  }
+
+  /** Entradas vindas de fora (worker), na ordem, para o próximo passo. */
+  enqueue(list: PendingInput[]): void {
+    for (const q of list) {
+      if (q.kind === "start") this.dragStart(q.part, q.p);
+      else if (q.kind === "move") this.dragMove(q.p);
+      else this.dragEnd();
+    }
   }
 
   /** Quadro gravado do passo (null se já saiu da gravação). */

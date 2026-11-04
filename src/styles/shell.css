@@ -220,14 +220,40 @@
   display: block;
 }
 
-.stage__vignette-in {
-  stop-color: var(--color-stage);
-  stop-opacity: 0;
+/* vinheta estática das bordas, por cima do papel e por baixo da cena */
+.stage__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(75% 75% at 50% 48%, transparent 60%, var(--color-stage-low) 100%);
+  pointer-events: none;
 }
 
-.stage__vignette-out {
-  stop-color: var(--color-stage-low);
-  stop-opacity: 1;
+/* folhas da cena: cada <svg> é uma camada composta à parte; o recorte é o
+   fio interno da moldura (8 + 3 px) */
+.stage__sheets {
+  position: absolute;
+  inset: calc(var(--frame-inset) + 3px);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.stage__sheet {
+  position: absolute;
+  left: calc(-1 * (var(--frame-inset) + 3px));
+  top: calc(-1 * (var(--frame-inset) + 3px));
+  display: block;
+  will-change: transform;
+}
+
+.stage__sheet--defs {
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  will-change: auto;
+}
+
+.stage__chrome {
+  pointer-events: none;
 }
 
 .stage__cross {

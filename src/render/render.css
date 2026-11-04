@@ -89,6 +89,10 @@
   stroke-linejoin: round;
 }
 
+.scene.is-heavy .part--dynamic .part__wallg {
+  display: none;
+}
+
 .part.is-tiny .part__wall {
   display: none;
 }

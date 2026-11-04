@@ -1,6 +1,6 @@
 import type { PartPose } from "@/engine/types";
 import { ringBounds, type PolyWithHoles } from "@/geometry/polygon";
-import { shapeGeometry } from "@/geometry/shape";
+import { shapeOutline } from "@/geometry/outline";
 import { transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Layer, Link, Part, Scene } from "@/model/types";
@@ -132,7 +132,7 @@ export function prepareScene(scene: Scene): SceneModel {
 
   for (const part of scene.parts) {
     const li = layerIndex.get(part.layer) ?? 0;
-    const g = shapeGeometry(part.shape);
+    const g = shapeOutline(part.shape);
     if (!g.ok) continue;
     const lm = layers[li]!;
     const outline = g.value.outline;

@@ -1,7 +1,7 @@
 import type { PartPose } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
 import type { ChamberLink, Scene } from "@/model/types";
-import { shapeGeometry } from "@/geometry/shape";
+import { shapeOutline } from "@/geometry/outline";
 import { assets } from "@/assets/registry";
 import { worldOf } from "./prepare";
 
@@ -105,7 +105,7 @@ export function chamberGeo(scene: Scene, link: ChamberLink): ChamberGeo {
   const base = body ? worldOf(body, link.at) : link.at;
   const ext = link.walls.map((w) => {
     const p = byId.get(w.part);
-    const g = p ? shapeGeometry(p.shape) : null;
+    const g = p ? shapeOutline(p.shape) : null;
     let mn = Infinity;
     let mx = -Infinity;
     if (p && g?.ok)

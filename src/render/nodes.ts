@@ -71,6 +71,8 @@ export interface WriteContext {
   shadowMm: number;
   /** px de tela em mm (texto e marcas) */
   px: number;
+  /** escreve a parede das peças móveis (falso no Simular de cena pesada) */
+  walls?: boolean;
 }
 
 const f = (n: number) => (Math.round(n * 1000) / 1000).toString();
@@ -88,7 +90,7 @@ export class StageNodes {
   rods = new Map<Id, TwoNodes>();
   cables = new Map<Id, TwoNodes>();
   chambers = new Map<Id, ChamberNodes>();
-  world: SVGGElement | null = null;
+  world: HTMLElement | null = null;
   /** fio e anel do arrasto */
   drag: { g?: SVGGElement | null; wire?: SVGLineElement | null; ring?: SVGCircleElement | null } = {};
   dragState: { part: Id; local: Vec2; finger: Vec2 } | null = null;
@@ -104,8 +106,18 @@ export class StageNodes {
     this.ctx = ctx;
   }
 
-  setWorld(el: SVGGElement | null): void {
+  /** contêiner das folhas (procura de nós por data-link) */
+  setRoot(el: HTMLElement | null): void {
     this.world = el;
+  }
+
+  /** grupos do mundo de cada folha: a vista escreve a mesma matriz em todos */
+  worlds = new Map<string, SVGGElement>();
+  refWorld(key: string) {
+    return (el: SVGGElement | null) => {
+      if (el) this.worlds.set(key, el);
+      else this.worlds.delete(key);
+    };
   }
 
   /** ref de um nó da peça */
@@ -198,7 +210,8 @@ export class StageNodes {
       if (!n || !p) continue;
       const t = poseTransform(p);
       n.g?.setAttribute("transform", t);
-      n.wall?.setAttribute("transform", poseTransform(p, wallMm, wallMm));
+      if (all || this.ctx.walls !== false)
+        n.wall?.setAttribute("transform", poseTransform(p, wallMm, wallMm));
       n.shadow?.setAttribute("transform", poseTransform(p, shadowMm, shadowMm));
       for (const fl of n.followers) fl.setAttribute("transform", t);
     }

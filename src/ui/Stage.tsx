@@ -76,7 +76,7 @@ export function Stage({
   bare = false,
 }: StageProps) {
   const box = useRef<HTMLDivElement>(null);
-  const world = useRef<SVGGElement>(null);
+  const sheets = useRef<HTMLDivElement>(null);
   const { width, height } = useElementSize(box);
   const uid = useId().replace(/:/g, "");
   const tool = useUiStore((s) => s.tool);
@@ -94,9 +94,10 @@ export function Stage({
 
   const writeView = useCallback(() => {
     const v = view.current;
-    world.current?.setAttribute("transform", viewMatrix(v));
+    const m = viewMatrix(v);
+    if (nodes) for (const g of nodes.worlds.values()) g.setAttribute("transform", m);
     if (box.current) box.current.style.backgroundPosition = `${v.tx}px ${v.ty}px`;
-  }, []);
+  }, [nodes]);
 
   /** fim do gesto: o que é medido em px de tela é refeito */
   const settle = useCallback(() => {
@@ -115,14 +116,14 @@ export function Stage({
   // enquadra ao abrir a cena e na primeira medida do palco
   const fitted = useRef<string>("");
   useLayoutEffect(() => {
-    const key = `${serial}:${width > 0 && height > 0}`;
+    const key = `${serial}:${width > 0 && height > 0}:${model !== null}`;
     if (fitted.current === key || width <= 0) return;
     fitted.current = key;
     fit();
-  }, [serial, width, height, fit]);
+  }, [serial, width, height, model, fit]);
 
   useLayoutEffect(() => {
-    nodes?.setWorld(world.current);
+    nodes?.setRoot(sheets.current);
     writeView();
   });
 
@@ -261,7 +262,6 @@ export function Stage({
   const inset = 8;
   const gap = 3;
   const title = model?.scene.meta.title ?? "";
-  const close = zoom >= 3;
 
   return (
     <main
@@ -274,49 +274,28 @@ export function Stage({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
+      <div className="stage__vignette" aria-hidden="true" />
       {ready && (
-        <svg
-          className={`stage__svg scene${close ? " is-close" : ""}`}
-          width={width}
-          height={height}
-          viewBox={`0 0 ${width} ${height}`}
-          role="img"
-          data-mode={mode}
-          aria-label={`Prancha: ${title}`}
-        >
-          <defs>
-            <clipPath id={`${uid}clip`}>
-              <rect
-                x={inset + gap}
-                y={inset + gap}
-                width={width - 2 * (inset + gap)}
-                height={height - 2 * (inset + gap)}
-              />
-            </clipPath>
-            <radialGradient id={`${uid}v`} cx="50%" cy="48%" r="75%">
-              <stop offset="60%" className="stage__vignette-in" />
-              <stop offset="100%" className="stage__vignette-out" />
-            </radialGradient>
-          </defs>
-          <rect width={width} height={height} fill={`url(#${uid}v)`} />
-          <g clipPath={`url(#${uid}clip)`}>
-            <g className="world" ref={world}>
-              {model && nodes && (
-                <SceneSvg
-                  model={model}
-                  nodes={nodes}
-                  uid={uid}
-                  zoom={zoom}
-                  fitZoom={fitZoom}
-                  mode={mode}
-                  layerMode={layerMode}
-                  active={activeLayer}
-                  selection={selection}
-                  callouts={!bare}
-                />
-              )}
-            </g>
-          </g>
+        <div className="stage__sheets" ref={sheets} role="img" aria-label={`Prancha: ${title}`}>
+          {model && nodes && (
+            <SceneSvg
+              model={model}
+              nodes={nodes}
+              uid={uid}
+              zoom={zoom}
+              fitZoom={fitZoom}
+              mode={mode}
+              layerMode={layerMode}
+              active={activeLayer}
+              selection={selection}
+              callouts={!bare}
+              size={{ width, height }}
+            />
+          )}
+        </div>
+      )}
+      {ready && (
+        <svg className="stage__svg stage__chrome" width={width} height={height} aria-hidden="true">
           <rect
             className="stage__frame stage__frame--outer"
             x={inset}

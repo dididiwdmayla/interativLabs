@@ -38,6 +38,8 @@ export interface SceneSvgProps {
   selection: Selection;
   /** chamadas visíveis (desligadas nas capturas do perf, por exemplo) */
   callouts?: boolean;
+  /** tamanho do palco, px */
+  size: { width: number; height: number };
 }
 
 type LayerState = "full" | "active" | "below" | "above" | "xray" | "xray-active";
@@ -49,6 +51,9 @@ function layerState(i: number, p: SceneSvgProps): LayerState {
 }
 
 const ANGLES = [45, 135] as const;
+
+/** Acima de tantas peças móveis, a parede delas não é desenhada no Simular. */
+export const WALL_BUDGET = 40;
 
 function imageFor(a: Asset, uid: string, tint?: string): ReactNode {
   const t = tint ? a.tints.find((x) => x.token === tint) : undefined;
@@ -183,7 +188,7 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
 }
 
 export function SceneSvg(props: SceneSvgProps) {
-  const { model, nodes, uid, zoom, fitZoom, mode, selection } = props;
+  const { model, nodes, uid, zoom, fitZoom, mode, selection, size } = props;
   const px = mmPerPx(zoom);
   const step = hatchStep(zoom);
   // um cache por cena (a chave é o id da peça)
@@ -280,130 +285,160 @@ export function SceneSvg(props: SceneSvgProps) {
 
   // depois de cada montagem, reaplica o quadro atual (as poses não passam pelo React)
   useLayoutEffect(() => {
-    nodes.setContext(writeCtx);
+    nodes.setContext({ ...writeCtx, walls: !heavy });
     nodes.write(nodes.frame, true);
   });
 
+  // Folhas: por camada, uma com o que fica parado e outra com o que se move,
+  // cada uma num <svg> composto à parte (will-change). Durante a simulação
+  // só as folhas que se movem são repintadas; as placas fixas ficam em cache.
+  const sheets: { key: string; layer: number; kind: "static" | "dynamic"; items: ReactNode[] }[] = [];
+  for (const L of model.layers) {
+    const st = layerState(L.index, props);
+    const strong = (lm: LinkModel) => lm.span[0] <= props.active && props.active <= lm.span[1];
+    const items: Record<"static" | "dynamic", ReactNode[]> = { static: [], dynamic: [] };
+    const kindOf = (m: PartModel | undefined) => (m?.dynamic ? "dynamic" : "static");
+    if (L.index > 0)
+      for (const m of L.parts)
+        items[kindOf(m)].push(
+          <g key={`s-${m.part.id}`} ref={nodes.refPart(m.part.id, "shadow")}>
+            <path className="part__shadow" d={m.d} />
+          </g>,
+        );
+    for (const lm of model.links) {
+      if (lm.link.kind !== "chamber" || lm.layer !== L.index) continue;
+      const geo = geos.get(lm.link.id)!;
+      items.dynamic.push(
+        <polygon key={`gas-${lm.link.id}`} className="gas" ref={nodes.refChamber(lm.link.id, geo, "gas")} />,
+      );
+    }
+    for (const m of L.parts)
+      items[kindOf(m)].push(
+        <PartArt
+          key={m.part.id}
+          m={m}
+          skin={skins.get(m, zoom)}
+          uid={uid}
+          nodes={nodes}
+          selected={selection?.kind === "part" && selection.id === m.part.id}
+          carried={carriedBy.get(m.part.id) ?? []}
+          ctx={ctx}
+        />,
+      );
+    for (const lm of followersAt.get(L.index) ?? [])
+      items[kindOf(model.parts.get(lm.carrier ?? ""))].push(
+        <g
+          key={`f-${lm.link.id}`}
+          className={`follower${strong(lm) ? " link--strong" : ""}`}
+          ref={nodes.refFollower(lm.carrier ?? "")}
+        >
+          <CarriedArt ctx={ctx} lm={lm} follower />
+        </g>,
+      );
+    for (const lm of worldAt.get(L.index) ?? []) {
+      const k = lm.link.kind;
+      if (lm.carrier === null && k !== "spring" && k !== "rod" && k !== "cable")
+        items.static.push(<CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />);
+      else items.dynamic.push(<TwoEndArt key={lm.link.id} ctx={ctx} lm={lm} />);
+    }
+    for (const lm of model.links)
+      if (lm.ground && lm.layer === L.index)
+        items.static.push(<Ground key={`g-${lm.link.id}`} p={lm.ground} px={px} />);
+    for (const kind of ["static", "dynamic"] as const)
+      if (items[kind].length)
+        sheets.push({
+          key: `${L.layer.id}-${kind}`,
+          layer: L.index,
+          kind,
+          items: [
+            <g key="layer" className={`layer layer--${st}`} data-layer={L.index}>
+              {items[kind]}
+            </g>,
+          ],
+        });
+  }
+
+  // orçamento de pintura (docs/decisoes/desempenho.md): com muitas peças
+  // móveis, a parede delas sai no Simular (fica no Editar e nas fixas)
+  const heavy = mode === "simulate" && model.partList.filter((m) => m.dynamic).length > WALL_BUDGET;
+  const svg = (key: string, cls: string, children: ReactNode) => (
+    <svg
+      key={key}
+      className={`stage__sheet scene${zoom >= 3 ? " is-close" : ""}${heavy ? " is-heavy" : ""} ${cls}`}
+      width={size.width}
+      height={size.height}
+      viewBox={`0 0 ${size.width} ${size.height}`}
+      data-mode={mode}
+      aria-hidden="true"
+    >
+      <g className="world" ref={nodes.refWorld(key)}>
+        {children}
+      </g>
+    </svg>
+  );
+
   return (
     <>
-      <Defs uid={uid} step={step} woods={woods} />
-      {model.layers.map((L) => {
-        const st = layerState(L.index, props);
-        const strong = (lm: LinkModel) => lm.span[0] <= props.active && props.active <= lm.span[1];
-        return (
-          <g key={L.layer.id} className={`layer layer--${st}`} data-layer={L.index}>
-            {L.index > 0 && (
-              <g className="layer__shadows">
-                {L.parts.map((m) => (
-                  <g key={m.part.id} ref={nodes.refPart(m.part.id, "shadow")}>
-                    <path className="part__shadow" d={m.d} />
-                  </g>
-                ))}
-              </g>
-            )}
-            {model.links.map((lm) => {
-              if (lm.link.kind !== "chamber" || lm.layer !== L.index) return null;
-              const geo = geos.get(lm.link.id)!;
-              const id = lm.link.id;
-              return <polygon key={id} className="gas" ref={nodes.refChamber(id, geo, "gas")} />;
-            })}
-            {L.parts.map((m) => (
-              <PartArt
-                key={m.part.id}
-                m={m}
-                skin={skins.get(m, zoom)}
-                uid={uid}
-                nodes={nodes}
-                selected={selection?.kind === "part" && selection.id === m.part.id}
-                carried={carriedBy.get(m.part.id) ?? []}
-                ctx={ctx}
+      {svg("defs", "stage__sheet--defs", <Defs uid={uid} step={step} woods={woods} />)}
+      {sheets.map((sh) => svg(sh.key, `stage__sheet--${sh.kind}`, sh.items))}
+      {svg(
+        "overlay",
+        "stage__sheet--overlay",
+        <g className="overlay">
+          {model.links.map((lm) =>
+            lm.link.kind === "chamber" ? (
+              <text
+                key={`kpa-${lm.link.id}`}
+                className="gauge"
+                style={{ fontSize: `${12 * px}px` }}
+                ref={nodes.refChamber(lm.link.id, geos.get(lm.link.id)!, "label")}
               />
-            ))}
-            {(followersAt.get(L.index) ?? []).map((lm) => (
-              <g
-                key={`f-${lm.link.id}`}
-                className={`follower${strong(lm) ? " link--strong" : ""}`}
-                ref={(el) => {
-                  const set = nodes.part(lm.carrier!).followers;
-                  if (el) set.add(el);
-                  else for (const x of set) if (!x.isConnected) set.delete(x);
-                }}
-              >
-                <CarriedArt ctx={ctx} lm={lm} follower />
-              </g>
-            ))}
-            {(worldAt.get(L.index) ?? []).map((lm) =>
-              lm.carrier === null &&
-              lm.link.kind !== "spring" &&
-              lm.link.kind !== "rod" &&
-              lm.link.kind !== "cable" ? (
-                <CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />
-              ) : (
-                <TwoEndArt key={lm.link.id} ctx={ctx} lm={lm} />
+            ) : null,
+          )}
+          <g className="callouts">
+            {callouts.map((c) =>
+              c.hidden ? null : (
+                <g key={c.id} className={`callout${selection?.id === c.id ? " is-selected" : ""}`}>
+                  <path
+                    className="callout__line"
+                    d={c.d}
+                    ref={model.parts.has(c.id) ? nodes.refPartCallout(c.id, c.label, "line") : undefined}
+                  />
+                  <circle
+                    className="callout__dot"
+                    cx={c.p[0]}
+                    cy={c.p[1]}
+                    r={px}
+                    ref={model.parts.has(c.id) ? nodes.refPartCallout(c.id, c.label, "dot") : undefined}
+                  />
+                  <text
+                    className="callout__num"
+                    x={c.label[0]}
+                    y={c.label[1] + (c.sub ? -2 * px : 4.5 * px)}
+                    style={{ fontSize: `${13 * px}px` }}
+                  >
+                    {c.ref}
+                  </text>
+                  {c.sub && (
+                    <text
+                      className="callout__sub"
+                      x={c.label[0]}
+                      y={c.label[1] + 11 * px}
+                      style={{ fontSize: `${11 * px}px` }}
+                    >
+                      {c.sub}
+                    </text>
+                  )}
+                </g>
               ),
             )}
-            {model.links.map((lm) =>
-              lm.ground && lm.layer === L.index ? (
-                <Ground key={`g-${lm.link.id}`} p={lm.ground} px={px} />
-              ) : null,
-            )}
           </g>
-        );
-      })}
-      <g className="overlay">
-        {model.links.map((lm) =>
-          lm.link.kind === "chamber" ? (
-            <text
-              key={`kpa-${lm.link.id}`}
-              className="gauge"
-              style={{ fontSize: `${12 * px}px` }}
-              ref={nodes.refChamber(lm.link.id, geos.get(lm.link.id)!, "label")}
-            />
-          ) : null,
-        )}
-        <g className="callouts">
-          {callouts.map((c) =>
-            c.hidden ? null : (
-              <g key={c.id} className={`callout${selection?.id === c.id ? " is-selected" : ""}`}>
-                <path
-                  className="callout__line"
-                  d={c.d}
-                  ref={model.parts.has(c.id) ? nodes.refPartCallout(c.id, c.label, "line") : undefined}
-                />
-                <circle
-                  className="callout__dot"
-                  cx={c.p[0]}
-                  cy={c.p[1]}
-                  r={px}
-                  ref={model.parts.has(c.id) ? nodes.refPartCallout(c.id, c.label, "dot") : undefined}
-                />
-                <text
-                  className="callout__num"
-                  x={c.label[0]}
-                  y={c.label[1] + (c.sub ? -2 * px : 4.5 * px)}
-                  style={{ fontSize: `${13 * px}px` }}
-                >
-                  {c.ref}
-                </text>
-                {c.sub && (
-                  <text
-                    className="callout__sub"
-                    x={c.label[0]}
-                    y={c.label[1] + 11 * px}
-                    style={{ fontSize: `${11 * px}px` }}
-                  >
-                    {c.sub}
-                  </text>
-                )}
-              </g>
-            ),
-          )}
-        </g>
-        <g className="drag" visibility="hidden" ref={nodes.refDrag("g")}>
-          <line className="drag__wire" ref={nodes.refDrag("wire")} />
-          <circle className="drag__ring" r={6 * px} ref={nodes.refDrag("ring")} />
-        </g>
-      </g>
+          <g className="drag" visibility="hidden" ref={nodes.refDrag("g")}>
+            <line className="drag__wire" ref={nodes.refDrag("wire")} />
+            <circle className="drag__ring" r={6 * px} ref={nodes.refDrag("ring")} />
+          </g>
+        </g>,
+      )}
     </>
   );
 }

@@ -1,5 +1,4 @@
 import { useUiStore } from "@/editor/useUiStore";
-import { loadScene } from "@/model/scene";
 import type { Scene } from "@/model/types";
 import index from "../../../scenes/examples/index.json";
 
@@ -53,7 +52,9 @@ export const EXAMPLES: ExampleEntry[] = INDEX.order
 export async function loadExample(id: string): Promise<Scene> {
   const loader = files[`../../../scenes/examples/${id}.json`];
   if (!loader) throw new Error(`Exemplo ${id} não encontrado`);
-  const r = loadScene(await loader());
+  // o schema (Zod) e as migrações vêm sob demanda, junto com a cena
+  const [raw, { loadScene }] = await Promise.all([loader(), import("@/model/scene")]);
+  const r = loadScene(raw);
   if (!r.ok) throw new Error(`Exemplo ${id} inválido: ${r.issues.map((x) => x.message).join("; ")}`);
   return r.scene;
 }
