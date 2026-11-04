@@ -1,0 +1,331 @@
+{
+  "id": "06-pinhao-cremalheira",
+  "title": "Pinhão e cremalheira",
+  "notes": "Pinhão de 12 dentes, módulo 1, motor a ½ volta/s que inverte o sentido 50 vezes (trechos de 0,4 s). Cremalheira num trilho com amortecimento leve, sem gravidade.",
+  "runs": [
+    {
+      "name": "50 inversões",
+      "duration": 20.4,
+      "inputs": [
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 0.4,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 0.8,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 1.2,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 1.6,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 2,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 2.4,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 2.8,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 3.2,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 3.6,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 4,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 4.4,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 4.8,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 5.2,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 5.6,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 6,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 6.4,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 6.8,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 7.2,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 7.6,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 8,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 8.4,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 8.8,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 9.2,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 9.6,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 10,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 10.4,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 10.8,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 11.2,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 11.6,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 12,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 12.4,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 12.8,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 13.2,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 13.6,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 14,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 14.4,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 14.8,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 15.2,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 15.6,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 16,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 16.4,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 16.8,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 17.2,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 17.6,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 18,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 18.4,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 18.8,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 19.2,
+          "speed": 3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 19.6,
+          "speed": -3.1416
+        },
+        {
+          "kind": "motor",
+          "link": "k3",
+          "t": 20,
+          "speed": 3.1416
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "rackFollows",
+          "label": "deslocamento da cremalheira = raio primitivo × ângulo (erro < 2%) e não trava",
+          "axle": "k3",
+          "slider": "k4",
+          "radius": 6,
+          "motor": "k3",
+          "maxError": 0.02,
+          "minTurn": 0.9
+        },
+        {
+          "kind": "maxPenetration",
+          "label": "penetração entre dentes menor que 0,1 mm",
+          "max": 0.1
+        }
+      ]
+    }
+  ],
+  "scene": "06-pinhao-cremalheira.scene.json"
+}

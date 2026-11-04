@@ -1,0 +1,743 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "Escalas misturadas",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 100
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Barra",
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Barra",
+      "layer": "L1",
+      "x": 150,
+      "y": 5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -150,
+            -5
+          ],
+          [
+            150,
+            -5
+          ],
+          [
+            150,
+            5
+          ],
+          [
+            -150,
+            5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Peça 1",
+      "layer": "L1",
+      "x": 7.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Peça 2",
+      "layer": "L1",
+      "x": 22.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Peça 3",
+      "layer": "L1",
+      "x": 37.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 5,
+      "name": "Peça 4",
+      "layer": "L1",
+      "x": 52.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p6",
+      "ref": 6,
+      "name": "Peça 5",
+      "layer": "L1",
+      "x": 67.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p7",
+      "ref": 7,
+      "name": "Peça 6",
+      "layer": "L1",
+      "x": 82.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p8",
+      "ref": 8,
+      "name": "Peça 7",
+      "layer": "L1",
+      "x": 97.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p9",
+      "ref": 9,
+      "name": "Peça 8",
+      "layer": "L1",
+      "x": 112.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p10",
+      "ref": 10,
+      "name": "Peça 9",
+      "layer": "L1",
+      "x": 127.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p11",
+      "ref": 11,
+      "name": "Peça 10",
+      "layer": "L1",
+      "x": 142.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p12",
+      "ref": 12,
+      "name": "Peça 11",
+      "layer": "L1",
+      "x": 157.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p13",
+      "ref": 13,
+      "name": "Peça 12",
+      "layer": "L1",
+      "x": 172.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p14",
+      "ref": 14,
+      "name": "Peça 13",
+      "layer": "L1",
+      "x": 187.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p15",
+      "ref": 15,
+      "name": "Peça 14",
+      "layer": "L1",
+      "x": 202.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p16",
+      "ref": 16,
+      "name": "Peça 15",
+      "layer": "L1",
+      "x": 217.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p17",
+      "ref": 17,
+      "name": "Peça 16",
+      "layer": "L1",
+      "x": 232.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p18",
+      "ref": 18,
+      "name": "Peça 17",
+      "layer": "L1",
+      "x": 247.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p19",
+      "ref": 19,
+      "name": "Peça 18",
+      "layer": "L1",
+      "x": 262.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p20",
+      "ref": 20,
+      "name": "Peça 19",
+      "layer": "L1",
+      "x": 277.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p21",
+      "ref": 21,
+      "name": "Peça 20",
+      "layer": "L1",
+      "x": 292.5,
+      "y": -0.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": []
+}

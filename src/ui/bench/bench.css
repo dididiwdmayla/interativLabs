@@ -1,0 +1,338 @@
+/*
+ * Página /#bench. Mobile-first (390 px). Só tokens da Prancha índigo.
+ * A página rola na vertical; a tabela rola na horizontal dentro do próprio contêiner.
+ */
+
+.bench {
+  height: 100%;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-stage);
+  color: var(--color-ink);
+  padding: var(--space-6) var(--space-4) var(--space-10);
+}
+
+.bench > * {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bench__head {
+  padding-bottom: var(--space-4);
+  border-bottom: var(--stroke-frame-thin) solid var(--color-ink-3);
+  box-shadow: 0 3px 0 -2px var(--color-ink-3);
+  margin-bottom: var(--space-5);
+}
+
+.bench__kicker {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-label);
+  line-height: var(--leading-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+.bench__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-screen);
+  line-height: var(--leading-screen);
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+}
+
+.bench__lede {
+  margin: var(--space-3) 0 0;
+  max-width: 62ch;
+  color: var(--color-ink-2);
+}
+
+/* ---------- aparelho ---------- */
+
+.bench__device dl {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: var(--space-3) var(--space-5);
+  margin: 0 0 var(--space-5);
+}
+
+.bench__device dl > div:first-child {
+  grid-column: 1 / -1;
+}
+
+.bench__device dt {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-label);
+  line-height: var(--leading-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+.bench__device dd {
+  margin: 0;
+}
+
+.bench__ua {
+  font-size: 13px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+  color: var(--color-ink);
+}
+
+.bench__num,
+.bench__table,
+.bench__status {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ---------- progresso ---------- */
+
+.bench__progress {
+  margin-bottom: var(--space-5);
+}
+
+.bench__bar {
+  position: relative;
+  height: 4px;
+  background: var(--color-surface);
+  border: var(--stroke-frame-thin) solid var(--color-ink-faint);
+  overflow: hidden;
+}
+
+.bench__bar > span {
+  position: absolute;
+  inset: 0;
+  background: var(--color-ink);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-develop);
+}
+
+.bench__status {
+  margin: var(--space-2) 0 var(--space-3);
+  min-height: var(--leading-body);
+  color: var(--color-ink);
+}
+
+.bench__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.bench__actions .btn {
+  flex: 1 1 auto;
+  white-space: nowrap;
+  font-family: var(--font-title);
+}
+
+.bench__actions .btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.bench__note {
+  margin: var(--space-3) 0 0;
+  color: var(--color-ink-2);
+}
+
+.bench__manual textarea {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-chrome);
+  color: var(--color-ink);
+  border: 1px solid var(--color-ink-3);
+  border-radius: var(--radius-1);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 18px;
+  resize: vertical;
+}
+
+/* ---------- tabela ---------- */
+
+.bench__tablewrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: var(--stroke-frame-thin) solid var(--color-ink-3);
+  background: var(--color-chrome);
+}
+
+.bench__table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+}
+
+.bench__table th,
+.bench__table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: var(--stroke-frame-thin) solid var(--color-ink-faint);
+}
+
+.bench__table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: var(--leading-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  border-bottom: var(--stroke-frame-thin) solid var(--color-ink-3);
+  white-space: nowrap;
+}
+
+.bench__table tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 128px;
+  max-width: 152px;
+  background: var(--color-chrome);
+  font-weight: 400;
+  border-right: var(--stroke-frame-thin) solid var(--color-ink-faint);
+}
+
+.bench__table thead th:first-child {
+  left: 0;
+  z-index: 2;
+}
+
+.bench__scene {
+  display: block;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.bench__sceneid {
+  display: block;
+  font-family: var(--font-callout);
+  font-style: italic;
+  font-size: var(--text-callout);
+  color: var(--color-ink-2);
+}
+
+.bench__cell {
+  min-width: 132px;
+}
+
+.bench__cell span {
+  display: block;
+}
+
+.bench__verdict {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: var(--leading-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.bench__cell--fail .bench__verdict {
+  color: var(--color-ember);
+}
+
+.bench__metric {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+
+.bench__metric b {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.bench__cell--wait,
+.bench__empty {
+  color: var(--color-ink-2);
+}
+
+/* ---------- falhas ---------- */
+
+.bench__h2 {
+  margin: var(--space-6) 0 var(--space-3);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--text-panel-title);
+  line-height: var(--leading-panel-title);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.bench__fails ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--stroke-frame-thin) solid var(--color-ink-faint);
+}
+
+.bench__fails li {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-bottom: var(--stroke-frame-thin) solid var(--color-ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.bench__failwho {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ember);
+}
+
+.bench__fails b {
+  font-weight: 600;
+}
+
+.bench__foot {
+  margin-top: var(--space-6);
+  color: var(--color-ink-2);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.bench__foot p {
+  max-width: 72ch;
+  margin: 0;
+}
+
+@media (min-width: 1024px) {
+  .bench {
+    padding: var(--space-10) var(--space-8);
+  }
+
+  .bench__device dl {
+    grid-template-columns: minmax(0, 3fr) repeat(3, minmax(0, 1fr));
+  }
+
+  .bench__device dl > div:first-child {
+    grid-column: auto;
+  }
+
+  .bench__actions .btn {
+    flex: 0 0 auto;
+  }
+}

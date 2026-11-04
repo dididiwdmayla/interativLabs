@@ -1,0 +1,21 @@
+{
+  "id": "05-corrente",
+  "title": "Corrente",
+  "notes": "40 elos de 8 mm (aço) ligados por eixos, presa pela ponta esquerda, solta na horizontal, gravidade real.",
+  "runs": [
+    {
+      "name": "5 s",
+      "duration": 5,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "jointGap",
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "links": "axles",
+          "max": 0.5
+        }
+      ]
+    }
+  ],
+  "scene": "05-corrente.scene.json"
+}

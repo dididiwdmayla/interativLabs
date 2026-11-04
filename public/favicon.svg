@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Favicon não lê CSS: cores fixas = --color-chrome e --color-ink (tokens.css) -->
+  <rect width="32" height="32" rx="2" fill="#171A37"/>
+  <rect x="3" y="3" width="26" height="26" fill="none" stroke="#7D7F93" stroke-width="1"/>
+  <circle cx="16" cy="16" r="8.5" fill="none" stroke="#EAEAEF" stroke-width="2"/>
+  <circle cx="16" cy="16" r="3" fill="none" stroke="#EAEAEF" stroke-width="1.5"/>
+  <path d="M16 5.5V9M16 23V26.5M5.5 16H9M23 16H26.5" stroke="#EAEAEF" stroke-width="1.5"/>
+</svg>

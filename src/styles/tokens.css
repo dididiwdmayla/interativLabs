@@ -1,0 +1,118 @@
+/*
+ * Tokens da Prancha índigo (docs/identidade/identidade.md).
+ * Fonte única de cor, tipografia, espaço, raio, traço e movimento.
+ * Componentes só usam var(--…); nenhum hex fora deste arquivo.
+ */
+
+:root {
+  /* Cor — eixo índigo → branco frio (matiz 232–234°) */
+  --color-chrome: #171a37;
+  --color-stage: #1e2448;
+  --color-surface: #262b4a;
+  --color-raised: #2e3456;
+  --color-ink: #eaeaef;
+  --color-ink-2: #a3a5b6;
+  --color-ink-3: #7d7f93;
+  --color-ink-faint: #5d6076;
+  --color-shadow: #0b0d24;
+  --shadow-opacity: 0.55;
+
+  /* Acentos: cor é estado, não material */
+  --color-gold: #d4aa5f; /* a mão da pessoa */
+  --color-ember: #ee7b4f; /* energia e alerta */
+
+  /* Textura do palco (limites medidos) e vinheta estática */
+  --color-stage-low: #181c3d;
+  --color-stage-high: #262c4d;
+
+  /* Tipografia */
+  --font-title: "Old Standard TT", "Times New Roman", serif;
+  --font-callout: "Old Standard TT", "Times New Roman", serif;
+  --font-ui: "Archivo Variable", "Archivo", system-ui, sans-serif;
+  --font-fig: "Pinyon Script", "Old Standard TT", serif;
+
+  --tracking-title: 0.12em;
+  --tracking-label: 0.08em;
+
+  /* Escala no celular (tamanho / altura de linha) */
+  --text-screen: 28px;
+  --leading-screen: 32px;
+  --text-panel-title: 13px;
+  --leading-panel-title: 20px;
+  --text-body: 15px;
+  --leading-body: 22px;
+  --text-label: 11px;
+  --leading-label: 16px;
+  --text-value: 15px;
+  --leading-value: 20px;
+  --text-callout: 13px;
+  --text-fig: 24px;
+  --text-button: 14px;
+
+  /* Traço (px de tela; não escala com o zoom) */
+  --stroke-outline: 1.5px;
+  --stroke-shadow-line: 3px;
+  --stroke-bevel: 0.75px;
+  --stroke-callout: 0.75px;
+  --stroke-center: 0.75px;
+  --stroke-construction: 0.5px;
+  --stroke-frame-thin: 0.75px;
+  --stroke-frame-thick: 1.5px;
+  --stroke-select: 2px;
+  --stroke-icon: 1.5px;
+  --dash-center: 8 2 1 2;
+  --dash-hidden: 4 3;
+
+  /* Espaço (base 4) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Raio: cantos retos, nada de pílula */
+  --radius-1: 2px;
+
+  /* Tamanhos de interface */
+  --touch-min: 44px;
+  --bar-top: 52px;
+  --bar-tools: 64px;
+  --rail-width: 72px;
+  --panel-width: 320px;
+  --frame-inset: 8px;
+  --focus-ring: 2px;
+  --focus-offset: 2px;
+
+  /* Movimento — quem balança é a física, não a interface */
+  --ease-develop: cubic-bezier(0.3, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-press: cubic-bezier(0.5, 0, 0.1, 1);
+  --ease-plate: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-fade: cubic-bezier(0.55, 0, 0.75, 0.2);
+  --dur-tick: 90ms;
+  --dur-quick: 180ms;
+  --dur-base: 320ms;
+  --dur-plate: 480ms;
+  --dur-develop: 640ms;
+  --dur-reduced: 120ms;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --text-body: 14px;
+    --leading-body: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-tick: 0ms;
+    --dur-quick: var(--dur-reduced);
+    --dur-base: var(--dur-reduced);
+    --dur-plate: var(--dur-reduced);
+    --dur-develop: var(--dur-reduced);
+  }
+}

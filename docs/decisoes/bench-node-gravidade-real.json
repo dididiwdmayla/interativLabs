@@ -1,0 +1,536 @@
+{
+  "createdAt": "2026-11-04T08:55:33.530Z",
+  "environment": {
+    "kind": "node",
+    "userAgent": "Node v22.23.4 (linux x64) · Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "hardwareConcurrency": 4,
+    "timerResolutionUs": 0.377
+  },
+  "unitMm": 1,
+  "engines": [
+    {
+      "id": "planck",
+      "name": "Planck",
+      "version": "1.5.1",
+      "iterations": "10 de velocidade + 4 de posição por passo"
+    },
+    {
+      "id": "rapier-det",
+      "name": "Rapier 2D (determinístico)",
+      "version": "0.21.0",
+      "iterations": "4 iterações de solver + 1 PGS internas, CCD com até 1 subpassos"
+    },
+    {
+      "id": "rapier",
+      "name": "Rapier 2D (padrão)",
+      "version": "0.21.0",
+      "iterations": "4 iterações de solver + 1 PGS internas, CCD com até 1 subpassos"
+    },
+    {
+      "id": "box2d",
+      "name": "Box2D v3 (WASM)",
+      "version": "6.0.0",
+      "iterations": "4 subpassos do solver suave por passo, contínuo contra estáticos"
+    }
+  ],
+  "results": [
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "planck",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "39193,115 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 2.3284159999998337,
+      "stepP95": 7.0894190000001345,
+      "timing": "passo",
+      "maxDepth": 10.171159675713449,
+      "jitter": 4373.604979140265,
+      "hash": "c411fc49293afc42",
+      "hashRepeat": "c411fc49293afc42",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 4618.080495
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "planck",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "em 5 s, nenhum eixo abre mais que 0,5 mm"
+      ],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": false,
+          "value": "1,895 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.12557600000036473,
+      "stepP95": 0.31279799999992974,
+      "timing": "passo",
+      "maxDepth": 0.40159896214849766,
+      "jitter": null,
+      "hash": "b9748d781054e6cb",
+      "hashRepeat": "b9748d781054e6cb",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 508.57590400000026
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "planck",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.23915200000010373,
+      "stepP95": 0.613296999999875,
+      "timing": "passo",
+      "maxDepth": 0.010456466823372184,
+      "jitter": 2.212670666166192e-15,
+      "hash": "c82fbc85882ff364",
+      "hashRepeat": "c82fbc85882ff364",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 427.401758
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "planck",
+      "unitMm": 10,
+      "pass": false,
+      "failed": [
+        "tremor abaixo de 0,05 mm"
+      ],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": false,
+          "value": "0,0511 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.18850600000041595,
+      "stepP95": 0.3891990000001897,
+      "timing": "passo",
+      "maxDepth": 0.12000119816990495,
+      "jitter": 0.0510847419359596,
+      "hash": "5d16e89a223ff823",
+      "hashRepeat": "5d16e89a223ff823",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 321.61304500000006
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "rapier-det",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "1049,624 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 1.2142140000005384,
+      "stepP95": 1.7599879999997938,
+      "timing": "passo",
+      "maxDepth": 11.614625930786133,
+      "jitter": 65.96307111036796,
+      "hash": "da6384230d0f79d4",
+      "hashRepeat": "da6384230d0f79d4",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 3065.630962
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "rapier-det",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "em 5 s, nenhum eixo abre mais que 0,5 mm"
+      ],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": false,
+          "value": "0,851 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.07199899999977788,
+      "stepP95": 0.14610700000048382,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "bd47078a56536d79",
+      "hashRepeat": "bd47078a56536d79",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 326.9115720000009
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier-det",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.03498100000069826,
+      "stepP95": 0.05374399999891466,
+      "timing": "passo",
+      "maxDepth": 0.050258249044418335,
+      "jitter": 0,
+      "hash": "54dbb69d1fcb41e4",
+      "hashRepeat": "54dbb69d1fcb41e4",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 89.09572800000024
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier-det",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.03191999999944528,
+      "stepP95": 0.053899999998975545,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 2.18986208875105e-9,
+      "hash": "402838f54833229c",
+      "hashRepeat": "402838f54833229c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 85.51601599999958
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "1049,624 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 1.1979329999994661,
+      "stepP95": 2.120926999999938,
+      "timing": "passo",
+      "maxDepth": 11.614625930786133,
+      "jitter": 65.96307111036796,
+      "hash": "da6384230d0f79d4",
+      "hashRepeat": "da6384230d0f79d4",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 2932.119793
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "em 5 s, nenhum eixo abre mais que 0,5 mm"
+      ],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": false,
+          "value": "0,851 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.060589999999137945,
+      "stepP95": 0.11406200000055833,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "bd47078a56536d79",
+      "hashRepeat": "bd47078a56536d79",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 279.12362400000166
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.037213000001429464,
+      "stepP95": 0.05767100000048231,
+      "timing": "passo",
+      "maxDepth": 0.050258249044418335,
+      "jitter": 0,
+      "hash": "54dbb69d1fcb41e4",
+      "hashRepeat": "54dbb69d1fcb41e4",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 100.02631099999962
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "rapier",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.037582999999358435,
+      "stepP95": 0.07169299999986833,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": 2.18986208875105e-9,
+      "hash": "402838f54833229c",
+      "hashRepeat": "402838f54833229c",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 122.27314400000068
+    },
+    {
+      "scene": "04-pilha",
+      "title": "Pilha",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar"
+      ],
+      "assertions": [
+        {
+          "label": "após 3 s, nenhuma caixa saiu mais de 1 mm do lugar",
+          "pass": false,
+          "value": "38338,668 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.4509269999998651,
+      "stepP95": 0.6974179999997432,
+      "timing": "passo",
+      "maxDepth": 10.793119430541992,
+      "jitter": 4164.7179458358805,
+      "hash": "0cf6028d4cf90052",
+      "hashRepeat": "0cf6028d4cf90052",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 3853.381819
+    },
+    {
+      "scene": "05-corrente",
+      "title": "Corrente",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": false,
+      "failed": [
+        "em 5 s, nenhum eixo abre mais que 0,5 mm"
+      ],
+      "assertions": [
+        {
+          "label": "em 5 s, nenhum eixo abre mais que 0,5 mm",
+          "pass": false,
+          "value": "11,188 mm",
+          "run": "5 s"
+        }
+      ],
+      "steps": 1200,
+      "stepMedian": 0.07357500000216532,
+      "stepP95": 0.13180900000224938,
+      "timing": "passo",
+      "maxDepth": 0,
+      "jitter": null,
+      "hash": "134e160c5224a3b5",
+      "hashRepeat": "134e160c5224a3b5",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 796.2779119999977
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "box2d",
+      "unitMm": 1,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.024118000001180917,
+      "stepP95": 0.039315000001806766,
+      "timing": "passo",
+      "maxDepth": 0.08636930584907532,
+      "jitter": 0,
+      "hash": "c931133e7e992511",
+      "hashRepeat": "c931133e7e992511",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 274.0205449999994
+    },
+    {
+      "scene": "08-escalas",
+      "title": "Escalas misturadas",
+      "engine": "box2d",
+      "unitMm": 10,
+      "pass": true,
+      "failed": [],
+      "assertions": [
+        {
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "pass": true,
+          "value": "20 de 20 ok",
+          "run": "todas"
+        },
+        {
+          "label": "tremor abaixo de 0,05 mm",
+          "pass": true,
+          "value": "0,0000 mm",
+          "run": "3 s"
+        }
+      ],
+      "steps": 720,
+      "stepMedian": 0.021841000001586508,
+      "stepP95": 0.0407149999991816,
+      "timing": "passo",
+      "maxDepth": 0.08628159761428833,
+      "jitter": 0,
+      "hash": "3343f850f21f4149",
+      "hashRepeat": "3343f850f21f4149",
+      "deterministic": true,
+      "warnings": [],
+      "wallMs": 225.31726100000014
+    }
+  ]
+}

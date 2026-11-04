@@ -1,0 +1,52 @@
+{
+  "planck": {
+    "files": [
+      "engine-planck-D_qvq2fX.js"
+    ],
+    "js": 210792,
+    "wasm": 0,
+    "gzip": 46887
+  },
+  "rapier-det": {
+    "files": [
+      "engine-rapier-det-UK-Q2nAx.js"
+    ],
+    "js": 3448226,
+    "wasm": 0,
+    "gzip": 1293664
+  },
+  "rapier": {
+    "files": [
+      "engine-rapier-wSHeMs0Z.js"
+    ],
+    "js": 3405754,
+    "wasm": 0,
+    "gzip": 1281312
+  },
+  "box2d": {
+    "files": [
+      "engine-box2d-CYOp_u1P.js",
+      "Box2D.compat-BhZEdXxH.wasm"
+    ],
+    "js": 30787,
+    "wasm": 611964,
+    "gzip": 224102
+  },
+  "comum (bancada, geometria, runtime)": {
+    "files": [
+      "runtime-Bjii5qAN.js",
+      "bench.worker-Ckt0JoGK.js"
+    ],
+    "js": 302089,
+    "wasm": 0,
+    "gzip": 74414
+  },
+  "app principal": {
+    "files": [
+      "index-CalgmcdK.js"
+    ],
+    "js": 236902,
+    "wasm": 0,
+    "gzip": 73502
+  }
+}

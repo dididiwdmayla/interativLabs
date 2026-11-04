@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "meta": {
+    "title": "Bala de prova",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": false,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Prova",
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Parede",
+      "layer": "L1",
+      "x": 0.5,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [
+            -0.5,
+            -100
+          ],
+          [
+            0.5,
+            -100
+          ],
+          [
+            0.5,
+            100
+          ],
+          [
+            -0.5,
+            100
+          ]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Esfera",
+      "layer": "L1",
+      "x": -50,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 2.5,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": true
+    }
+  ],
+  "links": []
+}

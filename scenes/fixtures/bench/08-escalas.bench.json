@@ -1,0 +1,335 @@
+{
+  "id": "08-escalas",
+  "title": "Escalas misturadas",
+  "notes": "Barra fixa de 300 mm com 20 peças de 1 mm apoiadas, gravidade real. Também roda a 1 e a 10 mm por unidade.",
+  "runs": [
+    {
+      "name": "3 s",
+      "duration": 3,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p2",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p3",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p4",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p5",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p6",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p7",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p8",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p9",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p10",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p11",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p12",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p13",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p14",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p15",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p16",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p17",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p18",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p19",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p20",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "neverCrosses",
+          "label": "em 3 s, nenhuma peça de 1 mm atravessa a barra",
+          "part": "p21",
+          "point": [
+            0,
+            0
+          ],
+          "normal": [
+            0,
+            1
+          ]
+        },
+        {
+          "kind": "jitter",
+          "label": "tremor abaixo de 0,05 mm",
+          "parts": [
+            "p2",
+            "p3",
+            "p4",
+            "p5",
+            "p6",
+            "p7",
+            "p8",
+            "p9",
+            "p10",
+            "p11",
+            "p12",
+            "p13",
+            "p14",
+            "p15",
+            "p16",
+            "p17",
+            "p18",
+            "p19",
+            "p20",
+            "p21"
+          ],
+          "from": 2,
+          "to": 3,
+          "max": 0.05
+        }
+      ]
+    }
+  ],
+  "still": {
+    "run": 0,
+    "parts": [
+      "p2",
+      "p3",
+      "p4",
+      "p5",
+      "p6",
+      "p7",
+      "p8",
+      "p9",
+      "p10",
+      "p11",
+      "p12",
+      "p13",
+      "p14",
+      "p15",
+      "p16",
+      "p17",
+      "p18",
+      "p19",
+      "p20",
+      "p21"
+    ],
+    "from": 2,
+    "to": 3
+  },
+  "extraScales": [
+    1,
+    10
+  ],
+  "scene": "08-escalas.scene.json"
+}
