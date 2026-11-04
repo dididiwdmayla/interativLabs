@@ -2,7 +2,7 @@
 
 Lote 01 da Prancha índigo, escrito pelo coordenador visual em 04/11/2026 a partir de `docs/identidade/identidade.md` e do frame oficial (`docs/identidade/frame-oficial/`).
 
-São 17 imagens para gerar no ChatGPT, em 3 levas, e 23 saídas no registry. O Will gera as imagens na ordem das levas (a lista completa de prompts está neste manifesto e na cópia do projeto, `lote-01/prompts-completos.md`) e manda cada uma no chat do projeto. O coordenador visual revisa cada imagem antes de ela entrar aqui; reprovada volta ao Will com o motivo anotado na seção "Revisões". Os aprovados sobem neste diretório com o nome igual ao ID (`hw-screw-slot.png`). Depois, o executor roda `npm run assets` e o coordenador visual confere as folhas de contato em `docs/capturas/lote-01/`.
+São 17 imagens para gerar no ChatGPT, em 3 levas, e 23 saídas no registry. O Will gera as imagens com `prompts.md` (os prompts estão lá, não aqui) e traz para o chat do coordenador visual, por grupo ou de uma vez. O coordenador visual revisa antes de as imagens entrarem neste diretório; as reprovadas voltam com o motivo anotado na seção "Revisões" e com o prompt corrigido. As aprovadas sobem aqui com o nome igual ao ID (`hw-screw-slot.png`). Depois o executor roda `npm run assets`, e o coordenador visual confere as folhas de contato em `docs/capturas/lote-01/`.
 
 Nada neste lote lembra arma de fogo. Os mecanismos são genéricos.
 
@@ -85,7 +85,7 @@ Cores dos tokens que o pipeline usa no tingimento: `ink` `#EAEAEF`, `ink-2` `#A3
    - `fx-spark`: separar as três faíscas pelas colunas vazias, em `fx-spark-1`, `-2` e `-3`.
    - `fx-gas`: o mestre é o pontilhado denso (`fx-gas-3`). Gerar `fx-gas-2` e `fx-gas-1` por rarefação determinística: manter 50% e 25% dos componentes conexos, sorteados com semente fixa (o mesmo resultado a cada execução).
 9. **Tingimento radial** (`fx-exhaust`). A cor de cada pixel vai de `ember` na âncora até `ink` a partir de 60% do raio do leque, interpolada em Lab. O alfa não muda.
-10. **TRANSPARENTE** (`scene-entry`). Alfa ≥ 248 vira 255; alfa ≤ 4 vira 0 e zera o RGB.
+10. **TRANSPARENTE** (`scene-entry`). Alfa ≥ 248 vira 255; alfa ≤ 4 vira 0 e zera o RGB. Se a transparência falhar no gerador, o original vem sobre verde puro (`#00FF00`, fallback de `prompts.md`): recortar o verde por distância de cor, com borda suavizada de 1 px e remoção da franja verde, antes dos mesmos passos.
 11. **MÁSCARA** (`mask-develop`). Níveis com ponto preto em ~60 e branco em ~200, para a borda chegar a 0 e a 255.
 12. **Saída.** `public/assets/<grupo>/<id>.webp` (1x) e `<id>@2x.webp` (2x), nas larguras das tabelas. OPACO em WebP com perda, qualidade 90. CHAVE-PRETA, TRANSPARENTE e MÁSCARA em WebP sem perda (traço fino não aguenta compressão com perda no alfa). Variantes tingidas ganham sufixo: `hw-screw-slot-gold.webp`.
 13. **Registry.** Para cada saída: `id`, `group`, `src` 1x e 2x, `width`, `height`, `anchor` (0–1), `mmPerPx` (ou `null`), `repeat` (`none`, `x` ou `xy`), `tints` (lista das variantes).
@@ -100,7 +100,7 @@ Cores dos tokens que o pipeline usa no tingimento: `ink` `#EAEAEF`, `ink-2` `#A3
 | 2 | Madeira, as ferragens restantes e os efeitos da simulação | `hatch-wood`, `hw-rivet`, `hw-bearing`, `hw-sensor`, `fx-gas`, `fx-exhaust`, `fx-spark` |
 | 3 | A tela de entrada | `scene-entry`, `mask-develop` |
 
-Para cada imagem: abra uma conversa nova no ChatGPT, anexe `docs/identidade/frame-oficial/a-editor-celular.webp` (ou o PNG original, se o ChatGPT recusar WebP) e cole o prompt inteiro. Se vier fundo que não é preto puro, moldura, texto ou mais de um objeto onde se pediu um, peça de novo.
+Os prompts de geração estão em `prompts.md`, neste diretório, organizados em seis grupos, um por conversa do ChatGPT. Cada grupo abre com a imagem (a) do frame oficial anexada e um texto de abertura. A leva de cada imagem está indicada no próprio prompt.
 
 ---
 
@@ -126,104 +126,6 @@ Regras de uso e de conferência:
 - **spring-coil, spring-end.** A mola é uma `spring-end` em cada ponta (a da direita espelhada) e N cópias de `spring-coil` entre elas, cada uma com `translate` e `scaleX`. N vem do comprimento livre; o `scaleX` fica entre 0,6 e 1,6, e fora disso N muda no fim do gesto, nunca durante a simulação. O olhal se sobrepõe a 20% da primeira espira para esconder a emenda. Conferir: emenda invisível em 1×5; frente grossa, costas finas; mesma espessura de fio na ponta e na espira.
 - **tex-ink-wear.** Tingido com a cor do palco: os pontinhos "apagam" o traço onde caem. Vai por cima da hachura, recortado na forma, em todas as peças. Conferir: em 3×3 não aparece padrão; cobertura entre 3% e 5% da área; sobre uma hachura de teste, a linha parece impressa, não quebrada.
 
-### paper-stage
-
-```
-Attached: a-editor-celular. Use it only as the reference for the paper: the deep indigo cyanotype-copy paper behind the drawing. Ignore everything drawn on it.
-
-A seamless tileable texture, 1024x1024, of that same deep indigo copy paper, seen perfectly flat and straight on, evenly lit. Fine paper fibre, faint soft vertical streaks like a wet-processed copy, and gentle low-contrast mottling. All tones stay in a narrow range of deep violet-indigo, from #181C3D to #262C4D, averaging about #1E2448.
-
-The texture must tile seamlessly on all four edges: streaks and fibres continue across the left/right and top/bottom borders with no visible seam. Uniform overall: no darker corners, no vignette, no lighter centre, no single feature that stands out and would repeat visibly.
-
-Avoid: any lines, drawings, grid, border, frame, text, numbers, stains, creases, tears, coffee marks, sepia, cyan or Prussian blue, watermark, signature, logo.
-```
-
-### hw-screw-slot
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, parallel hatching, cross-hatching, bright bevel edges, light from the top left. Do not copy its background, colours, layout or objects.
-
-A single slotted cheese-head machine screw seen exactly from above, as a vintage patent engraving: a perfectly round head, perfectly centred, head diameter about 75% of the image width. A straight slot runs horizontally through the centre, about one fifth of the head diameter wide; the lower wall of the slot is dense hatching, the upper wall a bright clean edge. The head face is shaded with fine parallel hatch lines at 45 degrees, slightly denser toward the lower right. A bright chamfer ring runs just inside the crisp outer outline, and a thin dark line separates the ring from the face.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF); tone comes only from line density, never from grey fills or soft gradients. One object only.
-
-Avoid: drop shadow, perspective, a visible screw shank, text, numbers, reference numerals, leader lines, centre lines, logo, watermark, signature.
-```
-
-### hw-screw-hex
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, parallel hatching, cross-hatching, bright bevel edges, light from the top left. Do not copy its background, colours, layout or objects.
-
-A single hex socket cap screw seen exactly from above, as a vintage patent engraving: a perfectly round head, perfectly centred, head diameter about 75% of the image width. In the centre, a regular hexagonal socket about 40% of the head diameter across the corners, with two flat sides horizontal; the inside of the socket is deep, rendered with dense cross-hatching, its upper-left inner walls bright, its lower-right inner walls darker. The head face is shaded with fine parallel hatch lines at 45 degrees. A bright chamfer ring runs just inside the crisp outer outline, and a thin dark line separates the ring from the face.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF); tone comes only from line density, never from grey fills or soft gradients. One object only.
-
-Avoid: drop shadow, perspective, a visible screw shank, text, numbers, reference numerals, leader lines, centre lines, logo, watermark, signature.
-```
-
-### hw-axle
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, parallel hatching, cross-hatching, bright bevel edges, light from the top left. Do not copy its background, colours, layout or objects.
-
-A shaft running through a bushing, seen end-on from above in cross-section, as a vintage patent engraving, perfectly centred. From the centre outward: a solid circle (the cut shaft) filled with dense, even cross-hatching at 45 and 135 degrees, with a crisp outline; a thin empty black gap ring; then a wider concentric ring (the bushing), shaded with lines at 45 degrees alternating solid and dashed, with a bright bevel band along its outer edge and a thin inner bevel line. The shaft diameter is half the bushing's outer diameter; the bushing's outer diameter is about 75% of the image width. Light from the top left: the lower-right edges are slightly heavier.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF); tone comes only from line density, never from grey fills or soft gradients. One object only.
-
-Avoid: centre lines, cross marks, drop shadow, perspective, text, numbers, reference numerals, leader lines, logo, watermark, signature.
-```
-
-### hw-pin
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, cross-hatching, bright bevel edges, light from the top left. Do not copy its background, colours, layout or objects.
-
-A single steel dowel pin seen end-on, in cross-section, as a vintage patent engraving: a perfectly round solid disc, perfectly centred, diameter about 75% of the image width, filled with fine, even cross-hatching at 45 and 135 degrees. A crisp outer outline, and a thin bright bevel ring just inside it, separated from the hatching by a thin dark line. Light from the top left: the lower-right part of the outline slightly heavier.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF); tone comes only from line density, never from grey fills or soft gradients. One object only.
-
-Avoid: centre lines, cross marks, drop shadow, perspective, text, numbers, reference numerals, leader lines, logo, watermark, signature.
-```
-
-### spring-coil
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, hatching, the coil-by-coil spring, bright highlights, light from the top left. Do not copy its background, colours, layout or objects.
-
-A straight helical compression spring seen exactly from the side, lying horizontally across the whole image, as a vintage patent engraving. Exactly 6 identical coils with perfectly even pitch. The wire enters at the left edge and leaves at the right edge at the same height and the same angle, cut off flush by the image borders: no closed ends, no hooks. The front half of each coil is a thick round wire with engraved tube shading: a bright highlight line along its upper side and fine short hatch strokes along its lower side. The back half of each coil is drawn thinner and fainter, passing behind. The spring's outer diameter is about 45% of the image height, centred vertically; all coils have exactly the same shape.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF); tone comes only from line density, never from grey fills or soft gradients.
-
-Avoid: perspective, tilt, uneven coils, end coils, drop shadow, text, numbers, reference numerals, leader lines, logo, watermark, signature.
-```
-
-### spring-end
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, hatching, the coil-by-coil spring, bright highlights, light from the top left. Do not copy its background, colours, layout or objects.
-
-The end of a helical spring seen exactly from the side, lying horizontally, as a vintage patent engraving. At the left, a round eye loop of the same wire, seen side-on, centred at about one fifth of the image width, the attachment point of the spring. Then two tightly closed coils touching each other, then one open coil that leaves through the right edge at mid-height, cut off flush by the border. The wire is a thick round wire with engraved tube shading on the front half of each coil (bright highlight along the upper side, fine short hatch strokes along the lower side); the back half of each coil is thinner and fainter. The spring's outer diameter is about 45% of the image height, centred vertically.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF); tone comes only from line density, never from grey fills or soft gradients.
-
-Avoid: perspective, tilt, a second spring end, drop shadow, text, numbers, reference numerals, leader lines, logo, watermark, signature.
-```
-
-### tex-ink-wear
-
-```
-Attached: a-editor-celular. Use it only to understand the printing style: an engraving printed in white ink. Do not copy its background, colours, layout or objects.
-
-A seamless tileable texture, 1024x1024: the tiny imperfections of a hand-printed engraving, isolated. On a pure black background, sparse tiny white specks of different sizes (1 to 5 pixels), very short fine scratches (at most 20 pixels long) and small dry-brush breaks, like the places where ink failed to print. Very sparse and even: white covers only about 4% of the image, spread uniformly, with no clusters, no lines, no larger shapes and no direction.
-
-The texture must tile seamlessly on all four edges with no visible seam.
-
-Pure black background (#000000), perfectly flat: no paper, no gradient, no vignette, no frame. White marks only (#FFFFFF).
-
-Avoid: drawings, hatching, grid, text, numbers, logo, watermark, signature.
-```
-
 ---
 
 ## Leva 2
@@ -248,94 +150,6 @@ Regras de uso e de conferência:
 - **fx-exhaust.** Um elemento por câmara, criado na compilação da cena e animado só por opacidade e escala (160 ms). Conferir: raios afinando até a ponta; a brasa fica na raiz depois do tingimento radial.
 - **fx-spark.** Um conjunto fixo de 12 elementos reaproveitados, sorteando entre as três faíscas e girando ao acaso. Conferir: as três são diferentes entre si e legíveis em 24 px.
 
-### hatch-wood
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: fine white engraved lines of varying weight. Do not copy its background, colours, layout or objects.
-
-A seamless tileable texture, 1024x1024: engraved wood grain as in a 19th-century patent drawing, white lines on pure black. About 45 long grain lines running nearly horizontally across the whole tile, slightly wavy, with irregular spacing (between 15 and 30 pixels) and irregular thickness (2 to 4 pixels), some lines tapering and ending, a few short splits. One small knot, off-centre, made of three or four elliptical rings, with the nearby grain lines flowing around it; a second, smaller and fainter knot far from the first.
-
-The texture must tile seamlessly on all four edges: every grain line that leaves the right edge re-enters at the left edge at the same height, and top and bottom match as well. Even density over the whole tile.
-
-Pure black background (#000000), perfectly flat: no paper, no gradient, no lighting, no vignette, no frame. White lines only (#FFFFFF).
-
-Avoid: planks, board edges, nails, cracks across the whole tile, grey fills, text, numbers, logo, watermark, signature.
-```
-
-### hw-rivet
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, stippling, fine curved hatching, bright highlights, light from the top left. Do not copy its background, colours, layout or objects.
-
-A single round-head rivet seen exactly from above, as a vintage patent engraving: a perfectly round domed head, perfectly centred, diameter about 75% of the image width. The dome is shown only with engraved stippling and fine concentric curved hatching: a small bright highlight toward the upper left, dots and hatching getting denser toward the lower right. A crisp outer outline, slightly heavier on the lower right.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines and dots only (#FFFFFF); tone comes only from dot and line density, never from grey fills or soft gradients. One object only.
-
-Avoid: drop shadow, perspective, a visible shank, text, numbers, reference numerals, leader lines, centre lines, logo, watermark, signature.
-```
-
-### hw-bearing
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, hatching, cross-hatching, bright bevel edges, light from the top left. Do not copy its background, colours, layout or objects.
-
-A single small deep-groove ball bearing seen exactly from above, as a vintage patent engraving, perfectly centred, outer diameter about 80% of the image width. An outer ring and an inner ring, both shaded with fine parallel hatching at 45 degrees and with bright bevel edges; between them, nine identical, evenly spaced balls, each with a small bright highlight toward the upper left and fine curved hatching toward the lower right, held by a thin cage line. The bore in the middle is empty black, about one third of the outer diameter.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF); tone comes only from line density, never from grey fills or soft gradients. One object only.
-
-Avoid: drop shadow, perspective, a shaft through the bore, text, numbers, reference numerals, leader lines, centre lines, logo, watermark, signature.
-```
-
-### hw-sensor
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: line weight, hatching, stippling, bright bevel edges, light from the top left. Do not copy its background, colours, layout or objects.
-
-A small industrial contact sensor seen exactly from above, as a vintage patent engraving, perfectly centred: a regular hexagonal body like a nut, about 70% of the image width across the flats, its faces shaded with fine parallel hatching; inside it a round collar with a bright bevel; in the centre a small round plunger with a domed top, rendered with stippling and a small bright highlight toward the upper left. Crisp outlines, slightly heavier on the lower right.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines and dots only (#FFFFFF); tone comes only from line and dot density, never from grey fills or soft gradients. One object only.
-
-Avoid: wires, cables, a trigger, anything resembling a weapon part, drop shadow, perspective, text, numbers, reference numerals, leader lines, logo, watermark, signature.
-```
-
-### fx-gas
-
-```
-Attached: a-editor-celular. Use it only as the style reference for engraved stippling: small hand-made dots of varied size. Do not copy its background, colours, layout or objects.
-
-A seamless tileable texture, 1024x1024: dense, irregular engraved stippling, white dots on pure black, like the stipple shading of an old engraving. Dots of varied size, from 2 to 8 pixels, some slightly irregular in shape, spread evenly over the whole tile and covering about 25% of the area. No clusters, no empty patches, no lines, no direction, no gradient.
-
-The texture must tile seamlessly on all four edges with no visible seam.
-
-Pure black background (#000000), perfectly flat: no paper, no vignette, no frame. White dots only (#FFFFFF).
-
-Avoid: smoke, clouds, fire, sparks, glow, blur, text, numbers, logo, watermark, signature.
-```
-
-### fx-exhaust
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: fine, clean, tapering white lines. Do not copy its background, colours, layout or objects.
-
-A small burst of engraved rays, as drawn in old engravings to show a puff of air escaping from a valve: 9 fine straight rays fanning out from a single point at the middle of the left edge toward the right, spread over about 60 degrees, symmetric around the horizontal. Rays of different lengths, the longest reaching about 85% of the image width; each ray is thickest at the root (about 6 pixels) and tapers to a hair-thin point. Between the longer rays, a few very short rays near the root.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF), no glow.
-
-Avoid: fire, flames, smoke, explosion clouds, sparks, glow, blur, colour, a nozzle or any object, text, numbers, logo, watermark, signature.
-```
-
-### fx-spark
-
-```
-Attached: a-editor-celular. Use it only as the style reference for the engraving technique: fine, clean, tapering white lines. Do not copy its background, colours, layout or objects.
-
-Three small impact sparks in a row, side by side, each centred in its own third of the image and separated from the others by wide empty black space. Each spark is made of 3 to 6 short, straight, tapering white strokes radiating from a tiny empty centre, with irregular lengths and angles, like the impact marks of old engravings. The three sparks differ from each other: one with 3 strokes, one with 4, one with 6. Each spark fits in a circle about 25% of the image height.
-
-Pure black background (#000000), perfectly flat: no paper, no texture, no vignette, no frame. White lines only (#FFFFFF), no glow.
-
-Avoid: stars, asterisks, glow, blur, fire, colour, text, numbers, logo, watermark, signature.
-```
-
 ---
 
 ## Leva 3
@@ -349,30 +163,6 @@ Regras de uso e de conferência:
 
 - **scene-entry.** A figura principal da tela de entrada (frame oficial f), sobre o papel do palco, com "Fig. 1" composto pelo código embaixo. No celular ocupa a largura útil (358 px em 390); no computador, até 512 px. Conferir: faces das pranchas opacas (nada de traço atravessando uma prancha por baixo); eixo e pino atravessando as três; nenhum número, texto ou chamada (as chamadas são procedurais, sobre a imagem).
 - **mask-develop.** Revelação da entrada e das trocas de tela: a máscara gira 45° e corre do canto superior esquerdo para o inferior direito, só por `transform`. Com `prefers-reduced-motion`, não é usada (vira opacidade). Conferir: a faixa de transição ocupa cerca de 15% da largura; branco e preto chegam a 255 e 0 depois dos níveis.
-
-### scene-entry
-
-```
-Attached: a-editor-celular. Use it as the style reference for the engraving technique: white line engraving with parallel hatching, cross-hatching, bright bevel edges, light from the top left, compression springs drawn coil by coil.
-
-An exploded oblique view of a generic layered mechanism, as a vintage patent engraving, on a fully transparent background. Three thin flat rectangular plates with rounded corners and a small hole near each corner float one above the other, evenly spaced, seen from above at the same oblique angle, filling about 90% of the image width. The lowest plate carries a spur gear; the middle plate carries a short lever and a small compression spring drawn coil by coil; the top plate carries a ratchet wheel with a pivoting pawl. One vertical axle, drawn as a hatched cylinder with a dash-dot centre line, passes through all three plates and the gear and ratchet on it; one thin pin passes through the plates near the right edge. Each plate shows its thickness as a narrow hatched edge.
-
-Plate faces and part faces are filled with opaque deep indigo #232A4C so that nothing behind them shows through; all lines are off-white #EAEAEF, secondary hatching #A3A5B6. Each plate casts a hard-edged flat shadow in #0B0D24 at 70% opacity onto the plate below, offset down and to the right. Everything outside the drawing is fully transparent.
-
-Avoid: background paper, frame, border, reference numerals, leader lines, "Fig." caption, any text, numbers, logo, watermark, signature; soft shadows, glow, blur, 3D render look, photographic metal; anything resembling a firearm.
-```
-
-### mask-develop
-
-```
-Attached: a-editor-celular. Use it only for the feel of ink printed on paper; do not draw anything from it, and keep the result in pure greyscale.
-
-A grayscale transition mask, 1536x1024. The left part of the image is pure white (#FFFFFF), the right part pure black (#000000). They meet along an irregular, roughly vertical frontier in the middle third of the image, shaped like ink soaking into paper: feathered and fibrous, with small tendrils and soft blooms reaching into the black, never a straight or smooth edge. The soft transition band is about 15% of the image width. The white area and the black area are completely flat, with no texture and no specks.
-
-Avoid: colour, drawings, lines, engraving, hatching, paper texture, frame, text, numbers, logo, watermark, signature.
-```
-
-Se o anexo fizer o gerador desenhar gravura na máscara, gere de novo sem ele.
 
 ---
 
