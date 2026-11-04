@@ -27,7 +27,14 @@ export type IconName =
   | "undo"
   | "redo"
   | "layers"
-  | "chevron";
+  | "chevron"
+  | "fit"
+  | "pause"
+  | "play"
+  | "step"
+  | "restart"
+  | "xray"
+  | "close";
 
 /** Linhas a 45° cobrindo a grade inteira; recortadas pela forma de cada ícone. */
 function hatchLines(spacing: number, offset = 0): string {
@@ -217,6 +224,40 @@ const ICONS: Record<IconName, (c: DrawCtx) => ReactNode> = {
     </>
   ),
   chevron: () => <path d="M6 14.5L12 9L18 14.5" />,
+  // enquadrar: quatro cantos de moldura em volta de uma cruz de centro
+  fit: () => (
+    <>
+      <path d="M3.75 8.5V3.75H8.5M15.5 3.75H20.25V8.5M20.25 15.5V20.25H15.5M8.5 20.25H3.75V15.5" />
+      <path d="M12 8.5V15.5M8.5 12H15.5" className="thin" />
+    </>
+  ),
+  pause: () => (
+    <>
+      <rect x="6.5" y="5" width="3.5" height="14" className="fillInk" />
+      <rect x="14" y="5" width="3.5" height="14" className="fillInk" />
+    </>
+  ),
+  play: () => <path d="M7 4.5L19 12L7 19.5Z" className="fillInk" />,
+  step: () => (
+    <>
+      <path d="M5.5 5L15 12L5.5 19Z" className="fillInk" />
+      <path d="M18 5V19" />
+    </>
+  ),
+  restart: () => (
+    <>
+      <path d="M6.4 8.2A7 7 0 1 1 5 12.5" />
+      <path d="M3 4.5L8.6 5.2L6.4 10.4Z" className="fillInk" />
+    </>
+  ),
+  // raio-x: duas pranchas só em contorno, a de trás em linha oculta
+  xray: () => (
+    <>
+      <rect x="7.75" y="3.75" width="12.5" height="10.5" className="dashed" />
+      <rect x="3.75" y="9.75" width="12.5" height="10.5" />
+    </>
+  ),
+  close: () => <path d="M6 6L18 18M18 6L6 18" />,
 };
 
 interface IconProps {
