@@ -52,7 +52,7 @@ function Properties({ model }: { model: SceneModel }) {
       <>
         <dl className="fields">
           <Field label="Nome" value={p.name || "Sem nome"} />
-          <Field label="Nº de chamada" value={String(p.ref)} />
+          <Field label="Chamada" value={String(p.ref)} />
           <Field label="Camada" value={`${m.layer + 1} · ${model.layers[m.layer]?.layer.name ?? ""}`} />
           <Field label="Material" value={MATERIALS[p.material].label} />
           <Field label="Massa" value={num(m.mass, m.mass < 10 ? 2 : 1)} unit="g" />
@@ -89,7 +89,7 @@ function Properties({ model }: { model: SceneModel }) {
     <>
       <dl className="fields">
         <Field label="Tipo" value={LINK_LABEL[l.kind]} />
-        <Field label="Nº de chamada" value={String(l.ref)} />
+        <Field label="Chamada" value={String(l.ref)} />
         <Field label="Peças" value={linkParts(l).map(partRef).join(" · ")} />
         <Field label="Camadas" value={span} />
         {l.kind === "spring" && (
