@@ -1,0 +1,116 @@
+{
+  "id": "gas/recuo",
+  "group": "gas",
+  "title": "Cilindro de dois pistões (cena de teste)",
+  "notes": "Corpo fixo; a câmara fica entre um pistão leve (7,7 g), livre no furo, e um bloco pesado (28 g) num trilho com mola de retorno pré-carregada contra o batente. Respiro de Ø 6 mm a 40 mm do fundo. A 0,1 s a carga acende (gás adiabático, queima de 8 ms).",
+  "view": [-50, -40, 170, 80],
+  "runs": [
+    {
+      "name": "disparo",
+      "duration": 1.3,
+      "inputs": [
+        {
+          "kind": "ignite",
+          "link": "k6",
+          "t": 0.1
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "span",
+          "label": "os dois se afastam: o bloco recua",
+          "q": {
+            "link": "k5",
+            "field": "translation"
+          },
+          "from": 0.1,
+          "to": 0.4,
+          "min": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "e o pistão avança pelo furo",
+          "q": {
+            "part": "p3",
+            "along": [1, 0]
+          },
+          "t": 0.2,
+          "min": 30
+        },
+        {
+          "kind": "while",
+          "label": "vedada, os impulsos nas duas paredes são iguais e opostos (±2%)",
+          "cond": {
+            "link": "k6",
+            "field": "vents.0.exposed"
+          },
+          "condMax": 0,
+          "q": {
+            "div": [
+              {
+                "sum": [
+                  {
+                    "link": "k6",
+                    "field": "walls.0.impulse"
+                  },
+                  {
+                    "link": "k6",
+                    "field": "walls.1.impulse"
+                  }
+                ]
+              },
+              {
+                "sum": [
+                  {
+                    "abs": {
+                      "link": "k6",
+                      "field": "walls.0.impulse"
+                    }
+                  },
+                  {
+                    "const": 1e-12
+                  }
+                ]
+              }
+            ]
+          },
+          "min": -0.02,
+          "max": 0.02,
+          "from": 0.1
+        },
+        {
+          "kind": "at",
+          "label": "a mola devolve o bloco à posição inicial (±0,2 mm) em até 1 s",
+          "q": {
+            "part": "p4",
+            "disp": true
+          },
+          "t": 1.1,
+          "max": 0.2
+        },
+        {
+          "kind": "dropsAfter",
+          "label": "quando o pistão passa o respiro, a pressão cai abaixo de 5% do pico em até 20 ms",
+          "q": {
+            "diff": [
+              {
+                "link": "k6",
+                "field": "pressure"
+              },
+              {
+                "const": 101.325
+              }
+            ]
+          },
+          "event": "vent-opened",
+          "match": {
+            "chamber": "k6"
+          },
+          "fraction": 0.05,
+          "within": 0.02
+        }
+      ]
+    }
+  ],
+  "scene": "recuo.scene.json"
+}

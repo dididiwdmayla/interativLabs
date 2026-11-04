@@ -5,6 +5,7 @@
  */
 import { generateCalibracao } from "./calibracao";
 import { generateFixacoes } from "./fixacoes";
+import { generateGas } from "./gas";
 import { generateMolas } from "./molas";
 import { generateRasgos } from "./rasgos";
 
@@ -13,6 +14,7 @@ const GROUPS: Record<string, () => void> = {
   fixacoes: generateFixacoes,
   molas: generateMolas,
   rasgos: generateRasgos,
+  gas: generateGas,
 };
 
 export async function main(args: string[]) {

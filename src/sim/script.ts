@@ -41,6 +41,10 @@ export type Quantity =
   | { gasForce: Id; wall: number; p0: number }
   /** ângulo (rad) de um ponto local da peça em torno de um centro no mundo */
   | { around: { part: Id; at: Vec2; center: Vec2 } }
+  /** soma e diferença de duas grandezas, e uma constante */
+  | { sum: [Quantity, Quantity] }
+  | { diff: [Quantity, Quantity] }
+  | { const: number }
   /** razão entre duas grandezas */
   | { div: [Quantity, Quantity] }
   /** valor absoluto */

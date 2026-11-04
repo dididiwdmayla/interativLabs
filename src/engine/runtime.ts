@@ -1,9 +1,10 @@
 import type { Id } from "@/model/types";
 import type { Vec2 } from "@/geometry/vec";
-import type { Plan, PlanChamber, PlanSensor, PlanSpring } from "./plan";
+import { ChamberSim, exchange, type ChamberGeometry, type PlanChamber } from "./chamber";
+import type { Plan, PlanSensor, PlanSpring } from "./plan";
 import { N } from "@/model/units";
 import type { EngineEvent, LinkState, PartPose, Snapshot } from "./types";
-import { PI, dcos, dexp, dhypot, dsin } from "@/geometry/dmath";
+import { PI, dcos, dhypot, dsin } from "@/geometry/dmath";
 
 /**
  * Parte comum da simulação, igual em todos os motores e em unidades da cena
@@ -31,6 +32,11 @@ export interface RuntimeOptions {
   jointForce?: (linkId: Id) => Vec2 | null;
   /** torque do motor (ou do atrito) de um eixo, g·mm²/s² */
   jointTorque?: (linkId: Id) => number | null;
+  /**
+   * Força do gás resolvida pelo motor: a cada passo, rigidez (g/s²) e força
+   * atual (g·mm/s², para fora) da câmara de índice `chamber`, com a geometria.
+   */
+  gasSpring?: (chamber: number, stiffness: number, force: number, g: ChamberGeometry) => boolean;
 }
 
 export interface BodyIO {
@@ -56,25 +62,6 @@ const DRAG_DAMPING = 0.9;
 const DRAG_G_REF = 100;
 const DRAG_FORCE_PER_GRAM = 6000;
 const DRAG_FORCE_BASE = 4000;
-
-/** Câmara (docs/arquitetura.md §4). Valores do protótipo convertidos para mm. */
-const VENT_TAU = 0.004;
-const LEAK_TAU = 1.5;
-const BORE_MARGIN = 1.5;
-const BACK_MARGIN = 3;
-const MIN_GAP = 0.5;
-
-interface ChamberState {
-  p: PlanChamber;
-  gas: number;
-  t: number;
-  burning: boolean;
-  fired: boolean;
-  vented: boolean;
-  pressure: number;
-  s: number;
-  exitSpeed: number | null;
-}
 
 interface SensorState {
   p: PlanSensor;
@@ -120,8 +107,10 @@ export class Runtime {
   private io: BodyIO;
   private st: BodyState[];
   private fresh: boolean[];
-  private chambers: ChamberState[];
-  private chamberById = new Map<Id, ChamberState>();
+  private chambers: ChamberSim[];
+  private chamberById = new Map<Id, ChamberSim>();
+  private chamberGeo: ChamberGeometry[] = [];
+  private gasSpring: RuntimeOptions["gasSpring"];
   private sensors = new Map<Id, SensorState>();
   private pending: { sensor: Id; part: Id; speed: number }[] = [];
   private events: EngineEvent[] = [];
@@ -141,17 +130,8 @@ export class Runtime {
     this.jointTorque = options.jointTorque ?? (() => null);
     this.st = plan.bodies.map((b) => ({ x: b.position[0], y: b.position[1], angle: 0, vx: 0, vy: 0, w: 0 }));
     this.fresh = plan.bodies.map(() => false);
-    this.chambers = plan.chambers.map((p) => ({
-      p,
-      gas: 0,
-      t: 0,
-      burning: false,
-      fired: false,
-      vented: false,
-      pressure: 0,
-      s: 0,
-      exitSpeed: null,
-    }));
+    this.gasSpring = options.gasSpring;
+    this.chambers = plan.chambers.map((p) => new ChamberSim(p));
     for (const c of this.chambers) this.chamberById.set(c.p.id, c);
     for (const s of plan.sensors) this.sensors.set(s.id, { p: s, count: 0 });
   }
@@ -223,7 +203,7 @@ export class Runtime {
       if (this.dyn(s.a)) io.applyForce(s.a, f.ux * f.F, f.uy * f.F, f.pa[0], f.pa[1]);
       if (this.dyn(s.b)) io.applyForce(s.b, -f.ux * f.F, -f.uy * f.F, f.pb[0], f.pb[1]);
     }
-    for (const ch of this.chambers) this.chamberForce(ch, h);
+    this.chambersStep(h);
     for (const [b, f] of this.forces) {
       const p = this.world(b, f.local);
       io.applyForce(b, f.f[0], f.f[1], p[0], p[1]);
@@ -283,56 +263,76 @@ export class Runtime {
     this.forces.set(r.body, { f: [force[0] * N, force[1] * N], local });
   }
 
-  private chamberForce(ch: ChamberState, h: number): void {
-    const p = ch.p;
-    if (p.b < 0) return;
-    const base = this.world(p.a, p.base);
-    const A = this.body(p.a);
-    const ca = dcos(A.angle);
-    const sa = dsin(A.angle);
-    const ux = p.axis[0] * ca - p.axis[1] * sa;
-    const uy = p.axis[0] * sa + p.axis[1] * ca;
-    const B = this.body(p.b);
-    const rx = B.x - base[0];
-    const ry = B.y - base[1];
-    const s = rx * ux + ry * uy - p.rearOffset;
-    const perp = Math.abs(rx * uy - ry * ux);
-    ch.s = s;
-    if (ch.burning) {
-      const dtb = Math.min(h, p.burn - ch.t);
-      if (dtb > 0) ch.gas += (p.charge * dtb) / p.burn;
-      ch.t += h;
-      if (ch.t >= p.burn) ch.burning = false;
+  /** Geometria da câmara lida dos corpos: fundo, eixo e posição de cada face. */
+  private chamberGeometry(p: PlanChamber): ChamberGeometry {
+    const base = this.world(p.body, p.base);
+    const A = this.body(p.body);
+    const c = dcos(A.angle);
+    const n = dsin(A.angle);
+    const axis: Vec2 = [p.axis[0] * c - p.axis[1] * n, p.axis[0] * n + p.axis[1] * c];
+    const faces = p.walls.map((w) => this.world(w.body, w.face));
+    const s = faces.map((f) => (f[0] - base[0]) * axis[0] + (f[1] - base[1]) * axis[1]);
+    return { base, axis, s, faces };
+  }
+
+  /** Gás de todas as câmaras: volume, queima, escape, portas e forças. */
+  private chambersStep(h: number): void {
+    if (!this.chambers.length) return;
+    this.chamberGeo = this.chambers.map((ch) => this.chamberGeometry(ch.p));
+    this.chambers.forEach((ch, i) => ch.update(this.chamberGeo[i]!, h, this.time, this.events));
+    this.chambers.forEach((ch, i) => {
+      ch.ports(this.chamberGeo[i]!, this.time, this.events);
+      ch.p.ports.forEach((pt, k) => {
+        const other = this.chambers[pt.to];
+        if (other) exchange(ch, other, ch.portExposed[k]! * pt.area, h);
+      });
+    });
+    this.chambers.forEach((ch, ci) => {
+      const g = this.chamberGeo[ci]!;
+      const F = ch.gasForce();
+      // O motor pode resolver a força do gás como mola linearizada dentro do solver.
+      if (this.gasSpring?.(ci, ch.stiffness(h), F, g)) return;
+      let rx = 0;
+      let ry = 0;
+      ch.p.walls.forEach((w, i) => {
+        const fx = w.side * F * g.axis[0];
+        const fy = w.side * F * g.axis[1];
+        if (this.dyn(w.body)) this.io.applyForce(w.body, fx, fy, g.faces[i]![0], g.faces[i]![1]);
+        rx -= fx;
+        ry -= fy;
+        ch.record(i, F, h);
+      });
+      if (this.dyn(ch.p.body) && (rx !== 0 || ry !== 0))
+        this.io.applyForce(ch.p.body, rx, ry, g.base[0], g.base[1]);
+    });
+  }
+
+  /** Força do gás que o motor aplicou no passo (mola nativa), g·mm/s² para fora. */
+  recordGasForce(chamber: number, force: number, h: number): void {
+    const ch = this.chambers[chamber];
+    if (!ch) return;
+    ch.p.walls.forEach((_, i) => ch.record(i, force, h));
+  }
+
+  /** Massa efetiva inversa ao longo do eixo entre dois pontos de dois corpos, 1/g. */
+  invMassAlong(a: number, pa: Vec2, b: number, pb: Vec2, u: Vec2): number {
+    let K = 0;
+    for (const [i, p] of [
+      [a, pa],
+      [b, pb],
+    ] as const) {
+      if (!this.dyn(i)) continue;
+      const s = this.body(i);
+      const bd = this.plan.bodies[i]!;
+      const c = (p[0] - s.x) * u[1] - (p[1] - s.y) * u[0];
+      K += 1 / bd.mass + (c * c) / bd.inertia;
     }
-    const inBore = perp < p.bore / 2 + BORE_MARGIN && s > -BACK_MARGIN && s < p.length;
-    if (ch.fired && !ch.vented && !inBore) {
-      ch.vented = true;
-      ch.exitSpeed = dhypot(B.vx, B.vy);
-      this.events.push({ kind: "vent-opened", chamber: p.id, vent: 0, by: "wall", time: this.time });
-    }
-    if (ch.vented) ch.gas *= dexp(-h / VENT_TAU);
-    ch.gas *= dexp(-h / LEAK_TAU);
-    const gap = Math.max(s, MIN_GAP);
-    ch.pressure = ch.gas / (gap * p.bore);
-    if (!ch.vented && ch.gas > 1e-9) {
-      const F = ch.gas / gap;
-      this.io.applyForce(p.b, ux * F, uy * F, B.x, B.y);
-      if (this.dyn(p.a)) this.io.applyForce(p.a, -ux * F, -uy * F, base[0], base[1]);
-    }
+    return K;
   }
 
   ignite(id: Id): boolean {
     const ch = this.chamberById.get(id);
-    if (!ch || ch.fired || ch.p.b < 0) return false;
-    ch.fired = true;
-    ch.burning = true;
-    ch.t = 0;
-    if (ch.p.burn <= 0) {
-      ch.gas = ch.p.charge;
-      ch.burning = false;
-    }
-    this.events.push({ kind: "chamber-fired", chamber: id, time: this.time });
-    return true;
+    return ch ? ch.ignite(this.time, this.events) : false;
   }
 
   /**
@@ -362,7 +362,10 @@ export class Runtime {
       const s = this.sensors.get(e.sensor)!;
       s.count++;
       this.events.push({ kind: "sensor", sensor: e.sensor, part: e.part, speed: e.speed, time: this.time });
-      for (const t of s.p.triggers) this.ignite(t);
+      for (const a of s.p.actions) {
+        if (a.do === "ignite") this.ignite(a.target);
+        else if (a.vent !== undefined) this.setVent(a.target, a.vent, a.do === "open");
+      }
     }
   }
 
@@ -510,15 +513,24 @@ export class Runtime {
     }
     for (const s of this.plan.sliders) {
       const st: LinkState = { kind: "slider", translation: this.sliderTranslation(s.id) };
+      const A = this.body(s.a);
+      const ca = dcos(A.angle);
+      const sa = dsin(A.angle);
+      const ux = s.axis[0] * ca - s.axis[1] * sa;
+      const uy = s.axis[0] * sa + s.axis[1] * ca;
+      // força ao longo do eixo sobre a peça do trilho: reação da junta (batentes, atrito) + mola de retorno
+      let F = 0;
       const f = this.jointForce(s.id);
-      if (f) {
-        const A = this.body(s.a);
-        const ca = dcos(A.angle);
-        const sa = dsin(A.angle);
-        const ux = s.axis[0] * ca - s.axis[1] * sa;
-        const uy = s.axis[0] * sa + s.axis[1] * ca;
-        st.force = (f[0] * ux + f[1] * uy) / N;
+      if (f) F += (f[0] * ux + f[1] * uy) / N;
+      if (s.spring) {
+        const pa = this.world(s.a, this.localOf(s.a, s.anchor));
+        const pb = this.world(s.b, this.localOf(s.b, s.anchor));
+        const va = this.pointVel(s.a, pa[0], pa[1]);
+        const vb = this.pointVel(s.b, pb[0], pb[1]);
+        const v = (vb[0] - va[0]) * ux + (vb[1] - va[1]) * uy;
+        F += (-s.spring.k * ((st.translation ?? 0) - s.spring.rest) - s.spring.damping * v) / N;
       }
+      if (f || s.spring) st.force = F;
       links[s.id] = st;
     }
     for (const s of this.plan.springs) {
@@ -551,14 +563,7 @@ export class Runtime {
       }
       links[s.id] = st;
     }
-    for (const c of this.chambers)
-      links[c.p.id] = {
-        kind: "chamber",
-        gas: c.gas,
-        pressure: c.pressure,
-        fired: c.fired,
-        burning: c.burning,
-      };
+    for (const c of this.chambers) links[c.p.id] = c.state();
     for (const s of this.sensors.values()) links[s.p.id] = { kind: "sensor", count: s.count };
     return { time: this.time, steps: this.steps, parts, links, events: this.events.slice() };
   }
@@ -568,9 +573,9 @@ export class Runtime {
     for (const e of list) this.events.push(e);
   }
 
-  /** Abre ou fecha a válvula de um respiro (gás 2.0, item 5.6; a câmara provisória não tem respiro). */
+  /** Abre ou fecha a válvula de um respiro. */
   setVent(id: Id, vent: number, open: boolean): void {
-    void [id, vent, open];
+    this.chamberById.get(id)?.setVent(vent, open, this.time, this.events);
   }
 
   sensorCount(id: Id): number {

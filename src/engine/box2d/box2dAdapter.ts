@@ -105,6 +105,9 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
   const v1: b2Vec2 = new B.b2Vec2(0, 0);
   const v2: b2Vec2 = new B.b2Vec2(0, 0);
   let impacts: EngineEvent[] = [];
+  /** mola nativa do gás de cada câmara: junta de distância entre as duas faces (ou fundo e face) */
+  let gasJoints: ({ joint: b2JointId; a: number; b: number; la: Vec2; lb: Vec2; active: boolean } | null)[] =
+    [];
   /** arrasto: corpo cinemático no dedo + junta de motor com mola (resolvida junto com os contatos) */
   let drag: { body: b2BodyId; joint: b2JointId } | null = null;
 
@@ -440,12 +443,59 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         joints.set(m.id, B.b2CreateWeldJoint(w, jd));
         jd.delete();
       }
+      gasJoints = p.chambers.map((ch) => {
+        const front = ch.walls.find((wl) => wl.side > 0);
+        const rear = ch.walls.find((wl) => wl.side < 0);
+        if (!front) return null;
+        const a = rear ? rear.body : ch.body;
+        const la = rear ? rear.face : ch.base;
+        if (a === front.body) return null;
+        const jd = B.b2DefaultDistanceJointDef();
+        jd.base.bodyIdA = bodies[a]!;
+        jd.base.bodyIdB = bodies[front.body]!;
+        jd.base.localFrameA.p = new B.b2Vec2(la[0] / L, la[1] / L);
+        jd.base.localFrameB.p = new B.b2Vec2(front.face[0] / L, front.face[1] / L);
+        jd.base.collideConnected = true;
+        base(jd);
+        jd.length = Math.max(front.s0 - (rear ? rear.s0 : 0), 0.05) / L;
+        jd.enableSpring = true;
+        jd.hertz = 0;
+        jd.enableLimit = false;
+        const joint = B.b2CreateDistanceJoint(w, jd);
+        jd.delete();
+        return { joint, a, b: front.body, la, lb: front.face, active: false };
+      });
       const axleIds = new Set(p.axles.map((a) => a.id));
       const jointTorque = (id: Id): number | null => {
         const j = joints.get(id);
         return j && axleIds.has(id) ? B.b2RevoluteJoint_GetCurrentMotorTorque(j) * L * L : null;
       };
-      rt = new Runtime(p, io, { native, jointForce, jointTorque });
+      const gasSpring = (ci: number, k: number, F: number, g: { base: Vec2; axis: Vec2 }): boolean => {
+        const gj = gasJoints[ci];
+        if (!gj || !rt) return false;
+        // Força do gás linearizada no passo: F(L) ≈ F − k·(L' − L), uma mola nativa
+        // de rigidez k e comprimento livre L + F/k, implícita no solver.
+        const pa = rt.world(gj.a, gj.la);
+        const pb = rt.world(gj.b, gj.lb);
+        const len = (pb[0] - pa[0]) * g.axis[0] + (pb[1] - pa[1]) * g.axis[1];
+        const K = rt.invMassAlong(gj.a, pa, gj.b, pb, g.axis);
+        // Gás macio para o passo (ω·h < 0,5, por exemplo com a câmara aberta): força explícita.
+        if (!(k > 0 && K > 0) || Math.sqrt(k * K) * FIXED_STEP < 0.5) {
+          if (gj.active) {
+            // sem mola, o impulso acumulado ainda entraria no "warm start": SetRestLength zera
+            B.b2DistanceJoint_SetSpringHertz(gj.joint, 0);
+            B.b2DistanceJoint_SetRestLength(gj.joint, Math.max(len, 0.05) / L);
+          }
+          gj.active = false;
+          return false;
+        }
+        gj.active = true;
+        B.b2DistanceJoint_SetSpringHertz(gj.joint, Math.sqrt(k * K) / (2 * PI));
+        B.b2DistanceJoint_SetSpringDampingRatio(gj.joint, 0);
+        B.b2DistanceJoint_SetRestLength(gj.joint, (len + F / k) / L);
+        return true;
+      };
+      rt = new Runtime(p, io, { native, jointForce, jointTorque, gasSpring });
       return {
         warnings,
         bodies: p.bodies.length,
@@ -486,6 +536,18 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       ce.delete();
       rt.afterStep(dt);
       rt.pushEvents(impacts);
+      gasJoints.forEach((gj, ci) => {
+        if (!gj || !rt || !gj.active) return;
+        const f = B.b2Joint_GetConstraintForce(gj.joint);
+        const pa = rt.world(gj.a, gj.la);
+        const pb = rt.world(gj.b, gj.lb);
+        const dx = pb[0] - pa[0];
+        const dy = pb[1] - pa[1];
+        const l = Math.sqrt(dx * dx + dy * dy);
+        rt.recordGasForce(ci, l > 0 ? ((f.x * dx + f.y * dy) * L) / l : 0, dt);
+        f.delete();
+      });
+
       for (const i of tracked) angleOf(i);
     },
 
@@ -595,6 +657,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
 
     dispose() {
       drag = null;
+      gasJoints = [];
       if (worldId) B.b2DestroyWorld(worldId);
       worldId = null;
       rt = null;

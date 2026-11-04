@@ -35,8 +35,8 @@ export function trackedBodies(plan: Plan): number[] {
     if (a.guide) s.add(a.guide.body);
   }
   for (const a of plan.chambers) {
-    s.add(a.a);
-    if (a.b > 0) s.add(a.b);
+    s.add(a.body);
+    for (const w of a.walls) s.add(w.body);
   }
   s.delete(0);
   return [...s].filter((i) => i >= 0 && !plan.bodies[i]!.static).sort((a, b) => a - b);

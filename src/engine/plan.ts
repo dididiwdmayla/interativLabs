@@ -4,8 +4,9 @@ import { principalAxis, straightSlot } from "@/geometry/slot";
 import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
-import { GAS_RT, KPA_MM2, N } from "@/model/units";
-import { dcos, dhypot, dsin } from "@/geometry/dmath";
+import type { PlanChamber } from "./chamber";
+import { N } from "@/model/units";
+import { PI, dcos, dhypot, dsin } from "@/geometry/dmath";
 
 /**
  * Plano de compilação comum a todos os motores, em unidades da cena.
@@ -130,21 +131,7 @@ export interface PlanSpring {
   effMass: number;
 }
 
-export interface PlanChamber {
-  id: Id;
-  a: number;
-  /** projétil: corpo, ou −1 se não houver */
-  b: number;
-  /** fundo e direção no espaço do corpo a */
-  base: Vec2;
-  axis: Vec2;
-  bore: number;
-  length: number;
-  charge: number;
-  burn: number;
-  /** distância do centro de massa do projétil até a face traseira, ao longo do eixo */
-  rearOffset: number;
-}
+export type { PlanChamber, PlanWall } from "./chamber";
 
 /** Pino num rasgo reto em modo junta: ponto sobre a linha de centro, com batentes. */
 export interface PlanSlot {
@@ -182,7 +169,7 @@ export interface PlanSensor {
   center: Vec2;
   r: number;
   minSpeed: number;
-  triggers: Id[];
+  actions: { do: "ignite" | "open" | "close"; target: Id; vent?: number }[];
 }
 
 export interface Plan {
@@ -566,36 +553,74 @@ export function buildPlan(scene: Scene): Plan {
         break;
       }
       case "chamber": {
-        const a = bodyIdx(l.body);
-        const wall = l.walls[0]?.part ?? null;
-        const bi = wall === null ? -1 : bodyIdx(wall);
-        const b = bi > 0 && !bodies[bi]!.static ? bi : -1;
-        if (a < 0) break;
+        const body = bodyIdx(l.body);
+        if (body < 0) break;
         const ang = angleOf(l.body) + l.dir;
-        const axis: Vec2 = [dcos(ang), dsin(ang)];
-        let rear = 0;
-        if (b > 0) {
+        const u: Vec2 = [dcos(ang), dsin(ang)];
+        const baseW = worldOf(l.body, l.at);
+        const proj = (q: Vec2) => (q[0] - baseW[0]) * u[0] + (q[1] - baseW[1]) * u[1];
+        // extremos de cada parede ao longo do eixo, pela geometria da peça
+        const ext = l.walls.map((w) => {
+          const part = byId.get(w.part);
+          const g = geo.get(w.part);
+          const bi = bodyIdx(w.part);
+          if (!part || !g || !g.ok || bi < 0 || bodies[bi]!.static) return null;
           let mn = Infinity;
-          for (const f of bodies[b]!.fixtures) {
-            if (f.sensor) continue;
-            if (f.piece.kind === "circle")
-              mn = Math.min(mn, f.piece.c[0] * axis[0] + f.piece.c[1] * axis[1] - f.piece.r);
-            else for (const q of f.piece.points) mn = Math.min(mn, q[0] * axis[0] + q[1] * axis[1]);
+          let mx = -Infinity;
+          for (const pc of g.value.pieces) {
+            const pts = pc.kind === "circle" ? [] : pc.points;
+            if (pc.kind === "circle") {
+              const c = proj(transform(pc.c, part.x, part.y, part.angle));
+              mn = Math.min(mn, c - pc.r);
+              mx = Math.max(mx, c + pc.r);
+            }
+            for (const q of pts) {
+              const t = proj(transform(q, part.x, part.y, part.angle));
+              mn = Math.min(mn, t);
+              mx = Math.max(mx, t);
+            }
           }
-          rear = Number.isFinite(mn) ? -mn : 0;
-        } else if (wall !== null) warnings.push(`Câmara ${l.ref}: o projétil precisa ser uma peça móvel`);
+          return { w, bi, mn, mx, mid: (mn + mx) / 2 };
+        });
+        if (ext.some((e) => e === null) || ext.length === 0) {
+          warnings.push(`Câmara ${l.ref}: as paredes precisam ser peças móveis; ficou de fora`);
+          break;
+        }
+        const ok = ext as NonNullable<(typeof ext)[number]>[];
+        const frontIdx = ok.length === 2 && ok[1]!.mid > ok[0]!.mid ? 1 : 0;
+        const walls = ok.map((e, i) => {
+          const side: 1 | -1 = ok.length === 1 || i === frontIdx ? 1 : -1;
+          const s0 = side > 0 ? e.mn : e.mx;
+          const faceW: Vec2 = [baseW[0] + u[0] * s0, baseW[1] + u[1] * s0];
+          return { part: e.w.part, body: e.bi, side, face: toLocal(e.bi, faceW), s0, seal: e.w.seal };
+        });
+        if (walls.length === 1 && walls[0]!.s0 < 0)
+          warnings.push(`Câmara ${l.ref}: a parede está atrás do fundo; o gás começa sem volume`);
+        if (walls.length === 2 && walls[0]!.side === walls[1]!.side)
+          warnings.push(`Câmara ${l.ref}: as duas paredes estão do mesmo lado`);
+        const area = (PI * l.bore * l.bore) / 4;
         plan.chambers.push({
           id: l.id,
-          a,
-          b: b > 0 ? b : -1,
-          base: toLocal(a, worldOf(l.body, l.at)),
-          axis,
-          bore: l.bore,
+          ref: l.ref,
+          body,
+          base: toLocal(body, baseW),
+          axis: u,
+          area,
           length: l.length,
-          // Provisório até o gás 2.0: carga n·R·T (F = carga / s), queima em s.
-          charge: (l.gas.charge?.amount ?? 0) * GAS_RT * KPA_MM2,
+          walls,
+          vents: l.vents.map((v) => ({ at: v.at, d: v.d, area: (PI * v.d * v.d) / 4, open: v.open })),
+          ports: l.ports.map((pt) => ({
+            to: -1,
+            toId: pt.to,
+            at: pt.at,
+            d: pt.d,
+            area: (PI * pt.d * pt.d) / 4,
+          })),
+          model: l.gas.model,
+          gamma: l.gas.gamma,
+          p0: l.gas.p0,
+          charge: l.gas.charge?.amount ?? 0,
           burn: (l.gas.charge?.burnMs ?? 0) / 1000,
-          rearOffset: rear,
         });
         break;
       }
@@ -679,13 +704,18 @@ export function buildPlan(scene: Scene): Plan {
             center: c,
             r: l.r,
             minSpeed: l.minSpeed,
-            triggers: l.actions.filter((x) => x.do === "ignite").map((x) => x.target),
+            actions: l.actions.map((x) => ({ ...x })),
           });
         }
         break;
       }
     }
   }
+  for (const ch of plan.chambers)
+    for (const pt of ch.ports) {
+      pt.to = plan.chambers.findIndex((c) => c.id === pt.toId);
+      if (pt.to < 0) warnings.push(`Câmara ${ch.ref}: a porta leva a uma câmara que ficou de fora`);
+    }
   if (bodies.some((b) => !b.static && b.fixtures.length === 0))
     warnings.push(
       `Há corpo sem forma de colisão (${bodies.filter((b) => !b.static && !b.fixtures.length).length})`,

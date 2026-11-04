@@ -99,6 +99,9 @@ function field(st: LinkState | undefined, path: string): number {
 export function measure(q: Quantity, s: Snapshot, ctx: QCtx): number {
   if ("div" in q) return measure(q.div[0], s, ctx) / measure(q.div[1], s, ctx);
   if ("abs" in q) return Math.abs(measure(q.abs, s, ctx));
+  if ("sum" in q) return measure(q.sum[0], s, ctx) + measure(q.sum[1], s, ctx);
+  if ("diff" in q) return measure(q.diff[0], s, ctx) - measure(q.diff[1], s, ctx);
+  if ("const" in q) return q.const;
   if ("around" in q) {
     const p = localToWorld(s, q.around.part, q.around.at);
     return p ? datan2(p[1] - q.around.center[1], p[0] - q.around.center[0]) : NaN;

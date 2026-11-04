@@ -1,0 +1,222 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Sensor",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Bancada",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Suporte do sensor",
+      "layer": "L1",
+      "x": -20,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -15],
+          [4, -15],
+          [4, 15],
+          [-4, 15]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Piso",
+      "layer": "L1",
+      "x": 0,
+      "y": 45,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-15, -5],
+          [15, -5],
+          [15, 5],
+          [-15, 5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Esfera 1",
+      "layer": "L1",
+      "x": 0,
+      "y": -17,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Esfera 2",
+      "layer": "L1",
+      "x": 0,
+      "y": -67,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 5,
+      "name": "Cilindro",
+      "layer": "L1",
+      "x": 30,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -9],
+          [70, -9],
+          [70, -5],
+          [0, -5],
+          [0, 5],
+          [70, 5],
+          [70, 9],
+          [-4, 9]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p6",
+      "ref": 6,
+      "name": "Pistão",
+      "layer": "L1",
+      "x": 44,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -4.9],
+          [4, -4.9],
+          [4, 4.9],
+          [-4, 4.9]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k7",
+      "ref": 7,
+      "kind": "slider",
+      "a": "p5",
+      "b": "p6",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-9.5, 50],
+      "spring": {
+        "k": 0.2,
+        "rest": 0,
+        "damping": 0.0005
+      }
+    },
+    {
+      "id": "k8",
+      "ref": 8,
+      "kind": "chamber",
+      "body": "p5",
+      "at": [0, 0],
+      "dir": 0,
+      "bore": 10,
+      "length": 70,
+      "walls": [
+        {
+          "part": "p6",
+          "seal": 200
+        }
+      ],
+      "vents": [
+        {
+          "at": 4,
+          "d": 3,
+          "open": false
+        }
+      ],
+      "ports": [],
+      "gas": {
+        "model": "isothermal",
+        "gamma": 1.4,
+        "p0": 101.325,
+        "charge": {
+          "amount": 0.05,
+          "burnMs": 2
+        }
+      }
+    },
+    {
+      "id": "k9",
+      "ref": 9,
+      "kind": "sensor",
+      "host": "p1",
+      "at": [20, 0],
+      "r": 4,
+      "layers": ["L1", "L1"],
+      "minSpeed": 300,
+      "actions": [
+        {
+          "do": "open",
+          "target": "k8",
+          "vent": 0
+        }
+      ]
+    }
+  ]
+}
