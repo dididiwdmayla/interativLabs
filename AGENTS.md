@@ -12,11 +12,13 @@ Identidade: **Prancha índigo**. Um desenho de patente impresso em traço branco
 
 ## Papéis
 
-- **Coordenador geral**: o Claude do projeto interativLabs. Escreve as fases, os itens e os critérios de aceite, revisa os PRs contra as capturas e mantém estes documentos. Não escreve código do app.
-- **Coordenador visual** e **coordenador sonoro**: subordinados ao coordenador geral, ativados quando a fase pede. Escrevem frames, manifestos de lote e prompts. A arte e o som são gerados fora do repositório.
-- **Executor**: uma sessão do Claude Code ou do Codex aberta pelo Will no repositório, com a instrução que o coordenador geral entrega pronta (agente, modelo e esforço recomendados). Implementa os itens da fase, um por vez, e para nos pontos de revisão; o Will leva o resultado ao coordenador.
+- **Coordenador geral**: o Claude do Project interativLabs. Planeja fases, escreve todos os prompts de execução, revisa os relatórios conferindo no repositório e mantém este arquivo, `docs/arquitetura.md`, `docs/roadmap.md` e `docs/fases/`. Não escreve código do app.
+- **Coordenadores especializados** (visual, sonoro): conversas próprias no mesmo Project. Escrevem os prompts de geração e o manifesto de cada lote. A arte e o som são gerados fora do repositório.
+- **Executor**: uma sessão do Claude Code na web ou do Codex, aberta pelo Will com o prompt do coordenador. Executa só o que o prompt pede, um commit por item, e termina com o relatório pedido. Não escreve o próximo prompt nem reabre decisões fechadas.
 
-O executor nunca gera nem substitui assets ou sons. Se um asset não servir, registre no documento de verificação da fase e devolva ao coordenador visual.
+O executor nunca gera nem substitui assets ou sons. Se um asset não servir, registre no relatório e devolva ao coordenador visual.
+
+O Will trabalha só pelo navegador e pelo celular: nada do que for entregue pode exigir instalar algo no computador dele.
 
 ## Stack
 
