@@ -75,6 +75,7 @@ Cores dos tokens que o pipeline usa no tingimento: `ink` `#EAEAEF`, `ink-2` `#A3
 1. **Mestres.** Abrir cada PNG como RGB (L nas máscaras, RGBA nos transparentes). Os PNGs deste diretório são os mestres: nunca recomprimir.
 2. **CHAVE-PRETA → transparência.** Alfa = luminância normalizada, com ponto preto em 12 e branco em 235 (o "preto" do gerador costuma ter ruído até ~10). RGB = cor de tingimento do asset (padrão `ink`). Remover componentes soltos menores que 6 px de área, exceto em `tex-ink-wear`, `fx-gas` e `hw-rivet`, onde o pontinho é o desenho.
 3. **Corte de margem.** Caixa de alfa > 8 com respiro uniforme de 4% do lado maior. Ferragens: caixa quadrada centrada na âncora. Texturas que repetem e a espira não são cortadas por margem (ver 6 e 7).
+3a. **Proporção.** Antes da âncora, corrigir a escala vertical das ferragens para que o ajuste de círculo (ou, no `hw-sensor`, o hexágono) dê eixos iguais, com um fator por asset em `config.mjs`. O gerador devolveu as imagens quadradas cerca de 2% mais altas que largas.
 4. **Âncora.** Normalizada 0–1 no espaço da imagem final. Ferragens redondas: centro do círculo ajustado ao contorno externo (ajuste por mínimos quadrados nos pixels de borda), não o centro da caixa. As âncoras de cada asset estão nas tabelas.
 5. **Papel (OPACO).** Conferir a emenda; se aparecer, deslocar meio ladrilho e fazer crossfade de ~8% nas bordas, como no interativMind. Ajustar a média para o token (`stage` `#1E2448`) em Lab, preservando a variação, e limitar a luminância ao intervalo `#181C3D`–`#262C4D`. Derivar do mesmo mestre:
    - `paper-chrome`: média `#171A37`, variação × 0,5;
@@ -168,4 +169,11 @@ Regras de uso e de conferência:
 
 ## Revisões
 
-Nenhuma ainda. Cada reprovação entra aqui com a data, o ID, o motivo e o ajuste no prompt.
+Cada reprovação entra aqui com a data, o ID, o motivo e o ajuste no prompt. A revisão completa, com os prompts corrigidos, fica em `prompts.md`.
+
+- **04/11 · `spring-coil` e `spring-end`.** A metade de trás das espiras saiu com a mesma espessura da da frente, e a mola ficou parecendo um zigue-zague, com contorno branco em volta do fio. Os prompts v2 descrevem cada espira como dois traços: a frente grossa com sombreado de tubo e as costas com um terço da espessura, inclinadas ao contrário.
+- **04/11 · `tex-ink-wear`.** A cobertura saiu em 0,3%, para 3–5% pedidos. O prompt v2 pede cerca de 1 500 marcas e dez marcas por área de 100×100 px.
+- **04/11 · ajustes de pipeline**, sem geração nova:
+  - as ferragens redondas saíram cerca de 2% mais altas que largas e levam um fator de escala vertical por asset;
+  - o `hw-sensor` leva um fator de cerca de 0,934 para o hexágono ficar regular;
+  - as frações de rarefação do `fx-gas` e os níveis do `mask-develop` ficam em aberto até a conferência na folha de contato (detalhes em `prompts.md`).

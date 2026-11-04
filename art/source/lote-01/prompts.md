@@ -4,9 +4,99 @@
 
 O manifesto (`art/source/lote-01/asset-manifest.md`) guarda formato, escala, âncoras e processamento de cada imagem. Este documento guarda só o que você cola no ChatGPT.
 
-## Revisão do lote
+## Revisão 1 — 04/11
 
-Nenhuma imagem gerada ainda. Quando você trouxer as imagens, a revisão entra aqui no alto, com uma tabela de ID, status e motivo, e os prompts corrigidos.
+As 17 imagens chegaram. Ficam aprovadas 14 e voltam 3 para geração. As duas molas voltam juntas, porque precisam casar uma com a outra.
+
+Gere as três numa conversa nova, com a abertura de sempre e a `a-editor-celular.png` anexada. A ordem é `spring-coil`, `spring-end` e `tex-ink-wear`. Salve com o sufixo `-v2` (`spring-coil-v2.png`). Os nomes finais quem acerta é o pipeline.
+
+| ID | Status | Motivo |
+| --- | --- | --- |
+| `paper-stage` | Aprovada | Média (33, 39, 68) contra (30, 36, 72) do token. O pipeline ajusta em Lab, como já previsto. Sem vinheta: os blocos variam menos de 1 nível. Emenda invisível no 3×3. |
+| `hw-screw-slot` | Aprovada | Redonda, fenda horizontal, chanfro legível. |
+| `hw-screw-hex` | Aprovada | Ver o ajuste de proporção abaixo. |
+| `hw-axle` | Aprovada | Eixo e bucha distintos. Ver o ajuste de proporção. |
+| `hw-pin` | Aprovada | Hachura cruzada uniforme, sem cruz de centro. |
+| `hw-rivet` | Aprovada | A cúpula saiu mais esférica que no frame (e), mas lê bem como rebite. |
+| `hw-bearing` | Aprovada | Nove esferas iguais e igualmente espaçadas. Furo vazio. |
+| `hw-sensor` | Aprovada | O hexágono saiu cerca de 7% mais alto que um regular. Corrige no pipeline. Não lembra peça de arma. |
+| `spring-coil` | **Regenerar** | Saiu como zigue-zague de tubo: a metade de trás tem a mesma espessura da da frente, e o fio tem contorno branco em volta. A identidade e o frame (e, peça 6) pedem frente grossa e costas finas, para ler como hélice. |
+| `spring-end` | **Regenerar** | Mesmo motivo, e precisa casar com a nova espira. |
+| `tex-ink-wear` | **Regenerar** | Cobertura de 0,3% contra os 3–5% pedidos. Sobre a peça, o efeito some. O formato das marcas está bom; falta quantidade. O prompt novo pede por contagem. |
+| `hatch-wood` | Aprovada | Emenda perfeita: as linhas casam na borda com erro mediano de 0,5 px. No 3×3 o nó forma uma grade leve, que o deslocamento por `ref` de cada peça já quebra. |
+| `fx-gas` | Aprovada | Cobertura de 17% contra cerca de 25%. Lê denso e sem aglomerados, com emenda invisível. |
+| `fx-exhaust` | Aprovada | Raios de cerca de 5 px na raiz, afinando até a ponta. O leque tem 50° (o pedido era 60°), sem problema. |
+| `fx-spark` | Aprovada | Três, quatro e seis traços, diferentes entre si. A primeira faísca é um leque para um lado só, o que é plausível para faísca de impacto. |
+| `scene-entry` | Aprovada | Transparência real: 48% do fundo com alfa 0 e só 2% de borda parcial. Faces opacas, eixo e pino atravessando as três pranchas, catraca com lingueta, mola espira por espira. Nenhum texto. |
+| `mask-develop` | Aprovada | Fronteira entre 44% e 54% da largura, dentro do terço central. A faixa de transição tem 9% (pedido: cerca de 15%), o que deixa a revelação um pouco mais nítida. Preto e branco chegam a 0 e a 255. |
+
+### spring-coil (v2)
+
+CHAVE-PRETA · paisagem · espira que repete · leva 1
+
+```
+A straight helical compression spring seen exactly from the side, lying horizontally across the whole image, drawn like the coil spring in the attached reference image: a real round-wire helix that reads as a cylinder, never a zigzag, a wave or a ribbon.
+
+Exactly 6 identical coils with perfectly even pitch, about half the spring's outer diameter. Each coil is drawn as two different strokes:
+- the front half: a thick round wire slanting up and to the right from the bottom edge of the spring to the top edge, with engraved tube shading: a bright highlight line along its upper-left side and fine short hatch strokes along its lower-right side;
+- the back half: a much thinner and fainter line, about one third of the front's thickness, slanting the other way, visible in the gaps between the front strokes and passing behind them.
+Front and back halves meet at the top and bottom edges of the spring, where the wire turns.
+
+The wire enters at the left edge and leaves at the right edge at the same height and the same angle, cut off flush by the image borders: no closed ends, no hooks. The spring's outer diameter is about 45% of the image height, centred vertically; all coils have exactly the same shape.
+
+Background: perfectly flat, uniform pure black (#000000), with no paper texture, no gradient, no vignette and no other color. White lines only (#FFFFFF). The black will be converted into transparency.
+
+No white outline or halo around the wire, no perspective, no tilt, no uneven coils, no end coils, no drop shadow.
+
+Landscape 3:2, highest resolution available.
+
+No text, letters, numbers, reference numerals, leader lines, logos or watermarks. Use the reference only for style; do not edit it or copy its composition.
+```
+
+### spring-end (v2)
+
+CHAVE-PRETA · paisagem · ponta da mola com olhal · gerar logo depois do spring-coil v2 · leva 1
+
+```
+The end of the same helical spring as spring-coil (the previous image in this conversation): exactly the same wire thickness, outer diameter and pitch, and the same two kinds of stroke, a thick front half with engraved tube shading slanting up and to the right, and a much thinner, fainter back half slanting the other way. Seen exactly from the side, lying horizontally.
+
+At the left, a round eye loop of the same wire, seen side-on, centred at about one fifth of the image width, its outer diameter about the same as the spring's outer diameter: the attachment point of the spring. Then two tightly closed coils touching each other, then one open coil that leaves through the right edge at mid-height, cut off flush by the border, at the same height and angle as the wire of spring-coil. The spring's outer diameter is about 45% of the image height, centred vertically.
+
+Background: perfectly flat, uniform pure black (#000000), with no paper texture, no gradient, no vignette and no other color. White lines only (#FFFFFF). The black will be converted into transparency.
+
+Only one spring end. No white outline or halo around the wire, no perspective, no tilt, no second eye, no drop shadow.
+
+Landscape 3:2, highest resolution available.
+
+No text, letters, numbers, reference numerals, leader lines, logos or watermarks. Use the reference only for style; do not edit it or copy its composition.
+```
+
+### tex-ink-wear (v2)
+
+CHAVE-PRETA · quadrado · seamless · falhas de tinta sobre as peças · leva 1
+
+```
+Seamless, tileable texture of the tiny imperfections of a hand-printed engraving, isolated, like the places where the ink of the attached reference failed to print: about 1,500 separate small white marks spread evenly over the whole tile. A mix of specks of different sizes (2 to 6 pixels), very short fine scratches (5 to 20 pixels long, in random directions) and small dry-brush breaks. Much denser than a starry sky: any 100 by 100 pixel area holds about ten marks, and white covers about 4% of the image. No clusters, no empty patches, no long lines, no larger shapes and no direction.
+
+It must tile perfectly: the left edge continues into the right edge and the top edge into the bottom edge, with no visible seam.
+
+Background: perfectly flat, uniform pure black (#000000), with no paper texture, no gradient, no vignette and no other color. White marks only (#FFFFFF). The black will be converted into transparency.
+
+No drawings, no hatching, no grid, no frame.
+
+Square 1:1, full-bleed, highest resolution available.
+
+No text, letters, numbers, logos or watermarks. Use the reference only for style; do not edit it or copy its composition.
+```
+
+### Ajustes que ficam para o código
+
+Vão para o manifesto e o pipeline. Nenhum pede geração nova.
+
+- **Proporção.** As imagens quadradas vieram em 1254×1254, e as ferragens redondas saíram cerca de 2% mais altas que largas: pino 998×1020, sextavado 1000×1021, eixo 999×1020, rolamento 997×1026. Corrigir a escala vertical para o círculo ajustado dar eixos iguais, com um fator por asset em `config.mjs`. No `hw-sensor`, o fator deve deixar o hexágono regular (cerca de 0,934 na vertical).
+- **Âncora.** O centro do `hw-rivet` está 18 px acima do centro da imagem. A âncora sai do ajuste de círculo, não do centro da caixa, como o manifesto já manda.
+- **fx-gas.** O mestre tem 17% de cobertura, não 25%. Se a queima parecer rala na folha de contato, suba as frações de rarefação de 50% e 25% para 60% e 30%.
+- **mask-develop.** Com os níveis padrão (60 e 200), a faixa estreita ainda mais. Confira na folha de contato e afrouxe para 40 e 220, se a borda ficar dura.
 
 ## Como gerar
 
