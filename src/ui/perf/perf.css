@@ -38,6 +38,16 @@
   gap: var(--space-2);
 }
 
+.perf__speeds {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.perf__speed[aria-pressed="true"] {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
 .perf__progress {
   font-variant-numeric: tabular-nums;
   color: var(--color-gold);

@@ -236,11 +236,15 @@ Cada camada `i` tem o bit `1 << i`. Uma peça usa categoria e máscara iguais ao
 - Portas: a diferença de `n/V` entre as duas câmaras decai com taxa `K·A·R·T·(1/V₁ + 1/V₂)`, exata no passo; o gás leva a temperatura de quem cede.
 - **Força no solver.** Como força explícita, uma vez por passo, o gás é rígido demais: um pistão de gramas sob centenas de kPa atravessaria a câmara num passo. No Box2D a força do gás entra como mola de distância entre as faces, relinearizada a cada passo: rigidez `k = γ·P·A/L` (γ = 1 no isotérmico) e comprimento livre `L + F/k`, implícita no solver. Com a câmara aberta a rigidez efetiva cai para `k·τ/(τ + h)`; quando `ω·h < 0,5` a força volta a ser explícita (e a junta tem o impulso zerado). O estado termodinâmico (P, V, n, U) é sempre o exato; o trabalho e o impulso de cada parede vêm da força que o motor de fato aplicou.
 - Snapshot por câmara: pressão, volume, gás e, por parede, força, impulso, trabalho, curso e vedação. É o dado dos gráficos da Fase 5.
-- Plausível e didático, não balística real. Com 240 passos por segundo, um disparo de gás dura de 2 a 10 passos: a câmera lenta (0,05×) mostra cada um.
+- Plausível e didático, não balística real. Com 240 passos por segundo, um disparo de gás dura de 2 a 10 passos: o Lento (1/20) mostra cada um.
 
 ### Passo de tempo
 
 Passo fixo de 1/240 s, com acumulador. Câmera lenta reduz o tempo simulado por quadro, não o passo. A linha do tempo grava snapshots (poses e estado das ligações) para voltar e repetir.
+
+**Velocidades (Parte F).** A física é sempre em tempo real e em unidades reais; a interface escolhe quanto tempo simulado cabe em cada segundo de tela: **Lento** (1/20), **Normal** (¼, o padrão ao entrar em Testar e ao abrir uma cena no laboratório) e **Real** (1×). Real em peça de milímetros parece acelerado porque é: um pêndulo de 50 mm tem período de 0,45 s. A régua e o relógio continuam em tempo simulado. A primeira vez que a pessoa escolhe Real, uma frase explica isso (uma vez por aparelho, `localStorage`).
+
+**Desenho entre passos (Parte F).** `src/sim/pacing.ts`: o `Pacer` guarda a posição de desenho em passos (fracionária) e pede ao worker sempre um passo adiante (`ceil(t) + 1`); o desenho mistura o passo anterior com o seguinte (`Recorder.blend`: posição e pressão lineares, ângulo pelo menor arco; molas, cabos, gás e chamadas saem das poses misturadas). Em Lento a cena anda em todo quadro (antes, um passo a cada ~5 quadros). Os eventos (sensor) aparecem no quadro em que o desenho chega ao passo deles. A linha do tempo e o "continuar daqui" usam passos inteiros. Custo da mistura: 0,004–0,026 ms por quadro na cena de 150 peças (`docs/decisoes/perf-parte-f.json`).
 
 ### Escala de tela
 
@@ -264,7 +268,7 @@ Implementada na Fase 1 · Parte D (`src/render/`). A pele é a da Prancha índig
 - **Chamadas** (`callouts.ts`): número fora das peças, linha curva sem cruzar; no Simular, só a peça móvel selecionada, acompanhando a pose.
 - **Toque** (`hit.ts`): a peça mais alta sob o dedo (camada, depois ordem), com tolerância de borda.
 - **Orçamento de pintura**: com mais de 40 peças móveis, a parede delas sai no Simular (`docs/decisoes/desempenho.md`).
-- **Simular** (`src/sim/session.ts`, `src/ui/sim/`): a `SimSession` (sem DOM) roda num Web Worker; o thread principal pede os passos do quadro pelo acumulador, espelha a gravação dos últimos 10 s e desenha. A linha do tempo volta a um passo recriando o mundo e reexecutando as entradas gravadas.
+- **Simular** (`src/sim/session.ts`, `src/ui/sim/`): a `SimSession` (sem DOM) roda num Web Worker; o thread principal pede os passos do quadro pelo `Pacer`, espelha a gravação dos últimos 10 s e desenha a cada quadro a mistura de dois passos (§4, "Desenho entre passos"). A linha do tempo volta a um passo recriando o mundo e reexecutando as entradas gravadas.
 - Efeitos (pontilhado do gás, leque do escape, faíscas) e falhas de tinta (`tex-ink-wear`) entram na Fase 2. A vista explodida em perspectiva entra numa fase própria.
 
 ## 6. Editor (tátil, decidido em 04/11/2026)

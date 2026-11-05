@@ -77,3 +77,32 @@ test.describe("velocidades", () => {
     });
   }
 });
+
+/**
+ * /#perf em Lento, Normal e Real (150 peças, 100 ligações), com o custo da
+ * interpolação por quadro. Grava docs/decisoes/perf-parte-f.json.
+ */
+test.describe("desempenho com interpolação", () => {
+  test.use({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  test("lento, normal e real", async ({ page }) => {
+    test.setTimeout(240_000);
+    const out: Record<string, unknown> = {};
+    for (const [name, label] of [
+      ["lento", "Lento"],
+      ["normal", "Normal"],
+      ["real", "Real"],
+    ] as const) {
+      await page.goto("/#perf");
+      await page.locator(".stage__sheet--static").first().waitFor();
+      await page.getByRole("button", { name: label, exact: true }).click();
+      await page.getByRole("button", { name: /Rodar/ }).click();
+      await page.waitForFunction(() => (window as unknown as { __PERF__?: unknown }).__PERF__, null, {
+        timeout: 60_000,
+      });
+      out[name] = await page.evaluate(() => (window as unknown as { __PERF__?: unknown }).__PERF__);
+      await page.evaluate(() => delete (window as unknown as { __PERF__?: unknown }).__PERF__);
+    }
+    const { writeFileSync } = await import("node:fs");
+    writeFileSync("docs/decisoes/perf-parte-f.json", JSON.stringify(out, null, 2) + "\n");
+  });
+});

@@ -4,6 +4,7 @@ import type { Id } from "@/model/types";
 import { partAt } from "@/render/hit";
 import type { StageNodes } from "@/render/nodes";
 import { localOf } from "@/render/prepare";
+import { Pacer, blendAt } from "@/sim/pacing";
 import { Recorder, type FrameView, type PendingInput, type SimEvent } from "@/sim/session";
 import type { SimReply, SimRequest } from "./sim.worker";
 import { useSimStore, type SimControl, type Speed, type TimelineState } from "./simStore";
@@ -12,13 +13,16 @@ import { useSimStore, type SimControl, type Speed, type TimelineState } from "./
  * Controlador do modo Simular, carregado sob demanda. A física roda num
  * Web Worker (src/ui/sim/sim.worker.ts) com a SimSession; aqui ficam o
  * laço de quadros com acumulador (câmera lenta reduz o tempo simulado por
- * quadro, não o passo), o espelho da gravação dos últimos 10 s, o
+ * quadro, não o passo; `Pacer`), o espelho da gravação dos últimos 10 s, o
  * arrasto, a linha do tempo e o desenho. Um pedido de passos por vez: o
  * worker calcula enquanto o thread principal desenha.
+ *
+ * O desenho mistura o passo anterior com o atual a cada quadro (posição
+ * linear, ângulo pelo menor arco, pressão linear; molas, cabos e chamadas
+ * saem das poses misturadas): em Lento a cena anda em todo quadro, não a
+ * cada quinto. Os eventos aparecem no quadro em que o desenho chega ao
+ * passo deles.
  */
-
-/** no máximo isto de passos por pedido (1× a 6 qps); o resto do tempo é descartado */
-const MAX_STEPS = 40;
 /** "recalculando" aparece se a reexecução passar disto */
 const RECALC_NOTICE_MS = 150;
 const CAPACITY = Math.round(10 / FIXED_STEP);
@@ -28,8 +32,10 @@ export interface FrameStats {
   interval: number;
   /** física no worker (passos + snapshots) recebida neste quadro, ms */
   physics: number;
-  /** escrita no SVG, ms */
+  /** escrita no SVG, ms (inclui a mistura) */
   draw: number;
+  /** mistura dos dois passos (interpolação), ms */
+  mix: number;
   steps: number;
 }
 
@@ -47,7 +53,13 @@ class Controller implements SimControl {
   private events: SimEvent[] = [];
   private raf = 0;
   private last = 0;
-  private acc = 0;
+  private pacer = new Pacer(FIXED_STEP);
+  /** quadro misturado (buffer reaproveitado) */
+  private mix: Float32Array;
+  /** posição do último desenho (passos), para não redesenhar o mesmo quadro */
+  private drawnAt = -1;
+  /** eventos que já chegaram mas o desenho ainda não alcançou */
+  private due: SimEvent[] = [];
   /** muda a cada reinício ou volta: respostas antigas são ignoradas */
   private epoch = 0;
   private inflight = false;
@@ -58,6 +70,7 @@ class Controller implements SimControl {
   private finger: Vec2 = [0, 0];
   private dirty = true;
   private recvPhysics = 0;
+  private mixMs = 0;
   private recvSteps = 0;
   private flash = new Map<Id, number>();
   private opts: ControllerOptions;
@@ -74,6 +87,7 @@ class Controller implements SimControl {
     this.opts = opts;
     this.rec = new Recorder(ready.partIds, ready.chamberIds, CAPACITY);
     this.rec.recordRaw(0, ready.frame, 0);
+    this.mix = new Float32Array(this.rec.stride);
     worker.onmessage = (e: MessageEvent<SimReply>) => this.onReply(e.data);
     nodes.resetPeaks();
     document.addEventListener("visibilitychange", this.onVisibility);
@@ -102,7 +116,7 @@ class Controller implements SimControl {
       if (m.count) this.step = m.from + m.count - 1;
       if (m.events.length) {
         this.events.push(...m.events);
-        this.sensorFlash(m.events);
+        this.due.push(...m.events);
       }
       if ((this.events[0]?.step ?? Infinity) < this.rec.oldest)
         this.events = this.events.filter((e) => e.step >= this.rec.oldest);
@@ -118,7 +132,8 @@ class Controller implements SimControl {
       this.step = m.step;
       this.events = this.events.filter((e) => e.step <= m.step);
       this.shownStep = null;
-      this.acc = 0;
+      this.pacer.reset(m.step);
+      this.due = [];
       this.dirty = true;
       useSimStore.getState().set({ recalculating: false, scrubbed: false, paused: false });
     }
@@ -128,11 +143,8 @@ class Controller implements SimControl {
   private send(force = 0) {
     if (this.inflight || this.rewinding) return;
     let n = force;
-    if (!force && !this.state.paused && this.shownStep === null) {
-      n = Math.max(0, Math.min(MAX_STEPS, Math.floor(this.acc / this.h + 1e-9)));
-      this.acc -= n * this.h;
-      if (this.acc > MAX_STEPS * this.h || this.acc < 0) this.acc = 0;
-    }
+    if (force) this.pacer.push(force);
+    else if (!this.state.paused && this.shownStep === null) n = this.pacer.take();
     if (n === 0 && this.queue.length === 0) return;
     const inputs = this.queue;
     this.queue = [];
@@ -158,6 +170,35 @@ class Controller implements SimControl {
   private drawCurrent() {
     const f = this.view(this.shownStep ?? this.step);
     if (f) this.draw(f);
+    this.drawnAt = -1;
+  }
+
+  /** Posição do desenho agora (passos, fracionária). */
+  private displayPos(): number {
+    if (this.shownStep !== null) return this.shownStep;
+    if (this.state.paused || this.rewinding) return this.step;
+    return Math.min(this.step, this.pacer.display());
+  }
+
+  /** Desenha a posição atual, misturando dois passos; false se nada mudou. */
+  private drawBlend(): boolean {
+    const d = this.displayPos();
+    if (d === this.drawnAt) return false;
+    const { step, alpha } = blendAt(d, this.rec.oldest, this.step);
+    const m0 = performance.now();
+    const f = this.rec.blend(step, alpha, this.h, this.mix);
+    this.mixMs = performance.now() - m0;
+    if (!f) return false;
+    this.draw(f);
+    this.drawnAt = d;
+    if (this.due.length) {
+      const reached = this.due.filter((e) => e.step <= d + 1e-6);
+      if (reached.length) {
+        this.due = this.due.filter((e) => e.step > d + 1e-6);
+        this.sensorFlash(reached);
+      }
+    }
+    return true;
   }
 
   private draw(f: FrameView) {
@@ -175,16 +216,22 @@ class Controller implements SimControl {
     const dt = Math.min(0.1, interval / 1000);
     this.last = now;
     if (!this.rewinding && !this.state.paused && this.shownStep === null) {
-      this.acc += dt * this.state.speed;
+      this.pacer.advance(dt, this.state.speed);
       this.send();
     }
     const t1 = performance.now();
-    if (this.dirty) {
-      this.dirty = false;
-      this.drawCurrent();
-    } else if (this.dragging) this.nodes.writeDrag();
+    this.mixMs = 0;
+    if (this.dirty) this.drawnAt = -1;
+    this.dirty = false;
+    if (!this.drawBlend() && this.dragging) this.nodes.writeDrag();
     const t2 = performance.now();
-    this.opts.onStats?.({ interval, physics: this.recvPhysics, draw: t2 - t1, steps: this.recvSteps });
+    this.opts.onStats?.({
+      interval,
+      physics: this.recvPhysics,
+      draw: t2 - t1,
+      mix: this.mixMs,
+      steps: this.recvSteps,
+    });
     this.recvPhysics = 0;
     this.recvSteps = 0;
     this.raf = requestAnimationFrame(this.frame);
@@ -216,7 +263,8 @@ class Controller implements SimControl {
       return;
     }
     this.shownStep = null;
-    this.acc = 0;
+    // continua do passo mostrado, sem pular o acumulado
+    this.pacer.reset(this.step);
     st.set({ paused: !st.paused, scrubbed: false });
     this.dirty = true;
   }
@@ -260,7 +308,8 @@ class Controller implements SimControl {
     this.rec.truncate(0);
     this.rec.oldest = 0;
     this.shownStep = null;
-    this.acc = 0;
+    this.pacer.reset(0);
+    this.due = [];
     this.nodes.resetPeaks();
     this.state.set({ scrubbed: false, recalculating: false });
     this.post({ t: "restart", id: this.epoch });

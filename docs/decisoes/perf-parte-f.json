@@ -1,0 +1,71 @@
+{
+  "lento": {
+    "frames": 540,
+    "fpsMedian": 59.88023952095874,
+    "fpsP5": 59.523809523812105,
+    "intervalP95": 16.799999999999272,
+    "physicsMedian": 0,
+    "physicsP95": 2.199999999953434,
+    "drawMedian": 0.6999999999534339,
+    "drawP95": 3,
+    "mixMean": 0.003888888889061356,
+    "mixP95": 0,
+    "speed": 0.05,
+    "stepsPerFrame": 0.2,
+    "long": 1,
+    "device": {
+      "navegador": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+      "densidade": 1,
+      "tela": "1440×900",
+      "janela": "1440×900",
+      "núcleos": 4,
+      "memória": "16 GB"
+    }
+  },
+  "normal": {
+    "frames": 540,
+    "fpsMedian": 59.880239520962,
+    "fpsP5": 59.88023952095548,
+    "intervalP95": 16.700000000000728,
+    "physicsMedian": 1.6999999999534339,
+    "physicsP95": 3.199999999953434,
+    "drawMedian": 0.6999999999534339,
+    "drawP95": 3,
+    "mixMean": 0.005555555556849059,
+    "mixP95": 0.09999999986030161,
+    "speed": 0.25,
+    "stepsPerFrame": 1.0018518518518518,
+    "long": 1,
+    "device": {
+      "navegador": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+      "densidade": 1,
+      "tela": "1440×900",
+      "janela": "1440×900",
+      "núcleos": 4,
+      "memória": "16 GB"
+    }
+  },
+  "real": {
+    "frames": 538,
+    "fpsMedian": 59.880239520968516,
+    "fpsP5": 59.523809523812105,
+    "intervalP95": 16.799999999999272,
+    "physicsMedian": 6.399999999906868,
+    "physicsP95": 12.600000000093132,
+    "drawMedian": 0.6999999999534339,
+    "drawP95": 4,
+    "mixMean": 0.026394052042792028,
+    "mixP95": 0.09999999986030161,
+    "speed": 1,
+    "stepsPerFrame": 4.029739776951673,
+    "long": 3,
+    "device": {
+      "navegador": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+      "densidade": 1,
+      "tela": "1440×900",
+      "janela": "1440×900",
+      "núcleos": 4,
+      "memória": "16 GB"
+    }
+  }
+}

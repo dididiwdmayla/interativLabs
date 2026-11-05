@@ -3,6 +3,7 @@ import { FIXED_STEP } from "@/engine/common";
 import type { EngineAdapter, Snapshot } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Link, Scene } from "@/model/types";
+import { Pacer, lerpSnapshot } from "@/sim/pacing";
 import { applyInputs, applyRunChanges } from "@/sim/runner";
 import type { ScriptRun } from "@/sim/script";
 import {
@@ -18,7 +19,9 @@ import {
 /**
  * Palco do laboratório: a cena rodando no Box2D, desenhada em SVG. A
  * estrutura é montada uma vez; a cada quadro só mudam o `transform` das
- * peças e o desenho das ligações (molas, hastes, cabos, gás).
+ * peças e o desenho das ligações (molas, hastes, cabos, gás). O desenho
+ * mistura o passo anterior com o atual (como no app), para a câmera lenta
+ * andar a cada quadro.
  */
 
 export interface StageControl {
@@ -43,8 +46,6 @@ interface Props {
 type Two = Extract<Link, { kind: "rod" | "cable" | "spring" }>;
 
 const H = FIXED_STEP;
-/** no máximo 40 passos por quadro (1× a 6 quadros/s); o resto do tempo é descartado */
-const MAX_STEPS = 40;
 
 export function LabStage({ scene, run, make, paused, speed, view, resetKey, onTime, controlRef }: Props) {
   const compiled = useMemo(() => applyRunChanges(scene, run), [scene, run]);
@@ -68,7 +69,6 @@ export function LabStage({ scene, run, make, paused, speed, view, resetKey, onTi
   const labelEls = useRef(new Map<Id, SVGTextElement>());
   const adapter = useRef<EngineAdapter | null>(null);
   const simTime = useRef(0);
-  const acc = useRef(0);
   const dragging = useRef<Id | null>(null);
   const pausedRef = useRef(paused);
   const speedRef = useRef(speed);
@@ -80,7 +80,7 @@ export function LabStage({ scene, run, make, paused, speed, view, resetKey, onTi
   // compila e roda o laço
   useEffect(() => {
     const peak = new Map<Id, number>();
-    const draw = (s: Snapshot) => {
+    const draw = (s: Snapshot, events = true) => {
       for (const [id, el] of partEls.current) {
         const p = s.parts[id];
         if (p) el.setAttribute("transform", poseTransform(p));
@@ -121,7 +121,7 @@ export function LabStage({ scene, run, make, paused, speed, view, resetKey, onTi
       for (const l of compiled.links) {
         if (l.kind !== "sensor") continue;
         const el = linkEls.current.get(l.id);
-        if (el && s.events.some((e) => e.kind === "sensor" && e.sensor === l.id)) {
+        if (el && events && s.events.some((e) => e.kind === "sensor" && e.sensor === l.id)) {
           el.classList.add("lab__sensor--hit");
           window.setTimeout(() => el.classList.remove("lab__sensor--hit"), 400);
         }
@@ -132,8 +132,13 @@ export function LabStage({ scene, run, make, paused, speed, view, resetKey, onTi
     a.compile(compiled, { unitMm: 1 });
     adapter.current = a;
     simTime.current = 0;
-    acc.current = 0;
-    draw(a.snapshot());
+    // passos síncronos: sem passo adiante; o desenho fica entre o anterior e o último
+    const pacer = new Pacer(H, { lookahead: 0 });
+    let cur = a.snapshot();
+    let prev = cur;
+    /** eventos dos passos do lote (o desenho mostra os do quadro em que chega a eles) */
+    let pending: Snapshot["events"] = [];
+    draw(cur);
     onTime(0);
     let raf = 0;
     let last = performance.now();
@@ -147,29 +152,34 @@ export function LabStage({ scene, run, make, paused, speed, view, resetKey, onTi
     controlRef.current = {
       seek(t: number) {
         stepTo(t);
-        draw(a.snapshot());
+        cur = prev = a.snapshot();
+        pacer.reset(Math.round(simTime.current / H));
+        draw(cur);
         onTime(simTime.current);
       },
       time: () => simTime.current,
     };
     const frame = (now: number) => {
-      const dt = Math.min(0.1, (now - last) / 1000);
+      const dt = (now - last) / 1000;
       last = now;
       if (!pausedRef.current) {
-        acc.current += dt * speedRef.current;
-        let n = 0;
-        while (acc.current >= H && n < MAX_STEPS) {
+        pacer.advance(dt, speedRef.current);
+        const n = pacer.take();
+        for (let i = 0; i < n; i++) {
           applyInputs(a, run.inputs, simTime.current, H);
           a.step(H);
           simTime.current += H;
-          acc.current -= H;
-          n++;
+          const s = a.snapshot();
+          if (s.events.length) pending = pending.concat(s.events);
+          prev = cur;
+          cur = s;
         }
-        if (n === MAX_STEPS) acc.current = 0;
-        if (n) {
-          draw(a.snapshot());
-          onTime(simTime.current);
-        }
+        // entre o passo anterior e o último calculado
+        const alpha = Math.max(0, Math.min(1, pacer.display() - (pacer.requested - 1)));
+        const shown = lerpSnapshot(prev, cur, alpha);
+        draw({ ...shown, events: pending }, true);
+        pending = [];
+        if (n) onTime(simTime.current);
       }
       raf = requestAnimationFrame(frame);
     };
