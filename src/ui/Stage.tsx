@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
 import { toolById } from "@/editor/tools";
+import { MultiTap } from "@/editor/gestures";
 import { useUiStore } from "@/editor/useUiStore";
 import type { Vec2 } from "@/geometry/vec";
 import { linkAt, partAt } from "@/render/hit";
@@ -129,6 +130,9 @@ export function Stage({
 
   // ——— gestos ———
   const pointers = useRef(new Map<number, Pointer>());
+  const multi = useRef(new MultiTap());
+  /** vista no começo de um toque com vários dedos (volta para ela se for desfazer) */
+  const multiView = useRef<View | null>(null);
   const gesture = useRef<{
     kind: "none" | "pan" | "pinch" | "drag";
     start?: View;
@@ -159,6 +163,10 @@ export function Stage({
     const [x, y] = local(e);
     box.current?.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { id: e.pointerId, x, y, x0: x, y0: y, t0: performance.now() });
+    if (e.pointerType === "touch") {
+      if (pointers.current.size === 1) multiView.current = { ...view.current };
+      multi.current.down(e.pointerId, x, y, e.timeStamp);
+    }
     if (pointers.current.size === 2) {
       if (gesture.current.kind === "drag") ctl?.dragEnd();
       beginPinch();
@@ -179,6 +187,7 @@ export function Stage({
     const [x, y] = local(e);
     p.x = x;
     p.y = y;
+    if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
     if (g.kind === "drag") {
       ctl?.dragMove(toWorld(view.current, x, y));
@@ -203,6 +212,24 @@ export function Stage({
     const p = pointers.current.get(e.pointerId);
     pointers.current.delete(e.pointerId);
     if (!p) return;
+    if (e.pointerType === "touch") {
+      const n =
+        e.type === "pointerup"
+          ? multi.current.up(e.pointerId, e.timeStamp)
+          : (multi.current.cancel(e.pointerId), 0);
+      if (n && editing) {
+        // toque de dois dedos desfaz, de três refaz; a vista volta para onde estava
+        if (multiView.current) {
+          view.current = multiView.current;
+          writeView();
+        }
+        gesture.current = { kind: "none" };
+        if (n === 2) useUiStore.getState().undo();
+        else useUiStore.getState().redo();
+        settle();
+        return;
+      }
+    }
     const g = gesture.current;
     if (g.kind === "drag") {
       ctl?.dragEnd();

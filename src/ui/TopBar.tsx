@@ -12,6 +12,10 @@ export function TopBar({ title }: TopBarProps) {
   const mode = useUiStore((s) => s.mode);
   const menuOpen = useUiStore((s) => s.menuOpen);
   const setMenuOpen = useUiStore((s) => s.setMenuOpen);
+  const canUndo = useUiStore((s) => s.mode === "edit" && s.history.past.length > 0);
+  const canRedo = useUiStore((s) => s.mode === "edit" && s.history.future.length > 0);
+  const undo = useUiStore((s) => s.undo);
+  const redo = useUiStore((s) => s.redo);
   return (
     <header className="topbar">
       <div className="topbar__side">
@@ -32,7 +36,14 @@ export function TopBar({ title }: TopBarProps) {
         <span className="topbar__name">{title}</span>
       </h1>
       <div className="topbar__side topbar__side--end">
-        <button type="button" className="iconbtn" aria-label="Desfazer" title="Desfazer (Ctrl+Z)" disabled>
+        <button
+          type="button"
+          className="iconbtn"
+          aria-label="Desfazer"
+          title="Desfazer (Ctrl+Z)"
+          disabled={!canUndo}
+          onClick={undo}
+        >
           <Icon name="undo" uid={`${uid}u`} />
         </button>
         <button
@@ -40,7 +51,8 @@ export function TopBar({ title }: TopBarProps) {
           className="iconbtn"
           aria-label="Refazer"
           title="Refazer (Ctrl+Shift+Z)"
-          disabled
+          disabled={!canRedo}
+          onClick={redo}
         >
           <Icon name="redo" uid={`${uid}r`} />
         </button>

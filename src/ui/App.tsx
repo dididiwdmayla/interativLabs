@@ -9,7 +9,9 @@ import { useSimStore } from "./sim/simStore";
 import { useSimulation } from "./sim/useSimulation";
 import { Stage } from "./Stage";
 import { ToolBar } from "./ToolBar";
+import { Toast } from "./Toast";
 import { TopBar } from "./TopBar";
+import { useShortcuts } from "./useShortcuts";
 
 // A bancada de motores, o laboratório e a página de desempenho são
 // carregados sob demanda: não entram no pacote principal.
@@ -44,6 +46,7 @@ function Workbench() {
   }, []);
 
   useSimulation(mode === "simulate", nodes);
+  useShortcuts();
 
   // gancho dos testes automatizados (tests/e2e): estados da interface e da simulação
   useEffect(() => {
@@ -68,6 +71,7 @@ function Workbench() {
       <ToolBar />
       <Panel model={model} />
       <ExampleMenu />
+      <Toast />
       {error && <p className="shell__error">{error}</p>}
     </div>
   );

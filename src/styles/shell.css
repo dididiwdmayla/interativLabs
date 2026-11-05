@@ -1149,3 +1149,60 @@
     opacity: 0;
   }
 }
+
+/* ---------- aviso curto ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 64px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: min(92vw, 520px);
+  padding: 0 0 0 var(--space-4);
+  min-height: var(--touch-min);
+  background: var(--color-surface);
+  border: 1px solid var(--color-ink-3);
+  border-radius: var(--radius-1);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  transform: translateX(-50%);
+  animation: toast-in var(--dur-quick) var(--ease-develop);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+
+.toast--warn .toast__text {
+  color: var(--color-ember);
+}
+
+.toast__text {
+  padding: var(--space-2) 0;
+}
+
+.toast__undo {
+  align-self: stretch;
+  min-width: var(--touch-min);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-left: 1px solid var(--color-ink-faint);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.toast__undo:active {
+  background: var(--color-raised);
+}
