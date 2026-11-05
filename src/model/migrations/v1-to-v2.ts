@@ -1,5 +1,5 @@
 import { transform } from "@/geometry/vec";
-import type { Link, LinkV1, Scene, SceneV1, Vec2 } from "../types";
+import type { LinkV1, SceneV2, SceneV1, Vec2 } from "../types";
 import { GAS_RT, KPA_MM2, N, V1_THICKNESS_MM } from "../units";
 import { dhypot } from "@/geometry/dmath";
 
@@ -33,21 +33,21 @@ function coilFor(freeLength: number, drawn: number) {
   return { coil: { outerD: 6, wireD, turns }, solidLength: turns * wireD };
 }
 
-export function migrateV1ToV2(v1: SceneV1): Scene {
+export function migrateV1ToV2(v1: SceneV1): SceneV2 {
   const byId = new Map(v1.parts.map((p) => [p.id, p] as const));
   const world = (id: string | null, at: Vec2): Vec2 => {
     const p = id === null ? undefined : byId.get(id);
     return p ? transform(at, p.x, p.y, p.angle) : at;
   };
 
-  const links: Link[] = v1.links.map((l: LinkV1): Link => {
+  const links: SceneV2["links"] = v1.links.map((l: LinkV1): SceneV2["links"][number] => {
     switch (l.kind) {
       case "screw":
       case "pin":
         return { ...l };
       case "axle": {
         const { motor, torsion, ...rest } = l;
-        const out: Link = { ...rest };
+        const out: SceneV2["links"][number] = { ...rest };
         if (motor) out.motor = { speed: motor.speed, maxTorque: force(motor.maxTorque) };
         if (torsion)
           out.torsion = { k: force(torsion.k), rest: torsion.rest, damping: force(torsion.damping) };
@@ -55,7 +55,7 @@ export function migrateV1ToV2(v1: SceneV1): Scene {
       }
       case "slider": {
         const { spring, ...rest } = l;
-        const out: Link = { ...rest };
+        const out: SceneV2["links"][number] = { ...rest };
         if (spring) out.spring = { k: force(spring.k), rest: spring.rest, damping: force(spring.damping) };
         return out;
       }

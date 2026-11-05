@@ -2,12 +2,14 @@ import { z } from "zod";
 import ptBR from "zod/v4/locales/pt-BR.js";
 import { migrateV0ToV1, type MigrateOptions } from "./migrations/v0-to-v1";
 import { migrateV1ToV2 } from "./migrations/v1-to-v2";
+import { migrateV2ToV3 } from "./migrations/v2-to-v3";
+import { SceneV2Schema } from "./schema-v2";
 import { SceneSchema } from "./schema";
 import { SceneV1Schema } from "./schema-v1";
 import type { Scene, SceneV1 } from "./types";
 import { looksLikeV0 } from "./v0";
 
-export const CURRENT_VERSION = 2;
+export const CURRENT_VERSION = 3;
 
 const localeError = ptBR().localeError;
 
@@ -33,7 +35,7 @@ function toIssues(err: z.ZodError): SceneIssue[] {
   return err.issues.map((i) => ({ path: formatPath(i.path), message: i.message }));
 }
 
-/** Valida uma cena v2 já em objeto (sem migrar). */
+/** Valida uma cena v3 já em objeto (sem migrar). */
 export function validateScene(data: unknown): LoadResult {
   const r = SceneSchema.safeParse(data, { error: localeError });
   return r.success
@@ -50,12 +52,12 @@ export function validateSceneV1(
 }
 
 function fromV1(v1: SceneV1, from: number): LoadResult {
-  const r = validateScene(migrateV1ToV2(v1));
+  const r = validateScene(migrateV2ToV3(migrateV1ToV2(v1)));
   return r.ok ? { ...r, migratedFrom: from } : r;
 }
 
 /**
- * Abre uma cena de qualquer versão conhecida: v0 (protótipo) → v1 → v2.
+ * Abre uma cena de qualquer versão conhecida: v0 (protótipo) → v1 → v2 → v3.
  * Cada etapa passa pelo schema da sua versão; erros apontam o caminho do
  * campo na versão em que falharam.
  */
@@ -85,6 +87,12 @@ export function loadScene(data: unknown, opts: MigrateOptions = {}): LoadResult 
           },
         ],
       };
+    }
+    if (v === 2) {
+      const old = SceneV2Schema.safeParse(data, { error: localeError });
+      if (!old.success) return { ok: false, issues: toIssues(old.error) };
+      const r = validateScene(migrateV2ToV3(old.data));
+      return r.ok ? { ...r, migratedFrom: 2 } : r;
     }
     if (v === 1) {
       const r = validateSceneV1(data);

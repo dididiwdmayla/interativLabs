@@ -56,6 +56,8 @@ function meta(
   const idx = path.find((p) => typeof p === "number");
   const xy = idx === undefined ? "" : idx === 0 ? " x" : " y";
   switch (k) {
+    case "breakForce":
+      return { label: "Força de soltura", unit: "N" };
     case "ref":
       return { label: "Número de chamada", unit: "" };
     case "at":
@@ -157,6 +159,7 @@ const GROUP_LABEL: Record<string, string> = {
   torsion: "Mola de torção",
   spring: "Mola de retorno",
   friction: "Atrito",
+  breakForce: "Fusível",
   solidLength: "Comprimento sólido",
   charge: "Carga de gás",
 };
@@ -168,6 +171,7 @@ const DEFAULTS: Record<string, () => unknown> = {
   torsion: () => ({ k: 10, rest: 0, damping: 0.1 }),
   spring: () => ({ k: 0.1, rest: 0, damping: 0.001 }),
   friction: () => 1,
+  breakForce: () => 1,
   solidLength: () => 0,
   charge: () => ({ amount: 0.2, burnMs: 4 }),
 };
@@ -180,6 +184,7 @@ const SKIP = new Set([
   "host",
   "pin",
   "guide",
+  "profile",
   "body",
   "layers",
   "walls",

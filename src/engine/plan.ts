@@ -169,7 +169,7 @@ export interface PlanSensor {
   center: Vec2;
   r: number;
   minSpeed: number;
-  actions: { do: "ignite" | "open" | "close"; target: Id; vent?: number }[];
+  actions: { do: "ignite" | "open" | "close" | "release"; target: Id; vent?: number }[];
 }
 
 export interface Plan {

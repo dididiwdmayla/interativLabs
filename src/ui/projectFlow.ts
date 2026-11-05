@@ -52,7 +52,7 @@ export function blankScene(title: string): Scene {
   const ids = createIdGenerator();
   const now = new Date().toISOString();
   return {
-    version: 2,
+    version: 3,
     meta: { title, createdAt: now, updatedAt: now },
     settings: { gravity: { on: true, g: G_REAL }, snap: { grid: 2, on: true } },
     layers: ["Fundo", "Meio", "Frente"].map((name) => ({

@@ -7,7 +7,7 @@ import { GENERATORS, buildPart, clampParams, defaults, mirroredShape, paramsOf, 
 import { run } from "@/editor/history";
 
 const blank: Scene = {
-  version: 2,
+  version: 3,
   meta: { title: "t", createdAt: "", updatedAt: "" },
   settings: { gravity: { on: true, g: 9810 }, snap: { grid: 2, on: true } },
   layers: [

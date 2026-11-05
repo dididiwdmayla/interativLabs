@@ -22,7 +22,7 @@ const DRAG_PX = 6;
 function sample(g: Generator): Scene {
   const layer = { id: "L", name: "", visible: true, locked: false, thickness: 3 };
   const base: Scene = {
-    version: 2,
+    version: 3,
     meta: { title: g.name, createdAt: "", updatedAt: "" },
     settings: { gravity: { on: true, g: 9810 }, snap: { grid: 1, on: false } },
     layers: [layer],
