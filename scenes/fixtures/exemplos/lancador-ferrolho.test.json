@@ -1,0 +1,761 @@
+{
+  "id": "exemplos/lancador-ferrolho",
+  "group": "exemplos",
+  "title": "Lançador de ferrolho",
+  "notes": "Puxe o gatilho e veja em 0,05×: o gás empurra o êmbolo e a esfera para a frente e o ferrolho para trás, a mola de retorno se comprime na haste-guia e, na volta, a próxima esfera sobe do carregador e entra na câmara. Brinquedo esquemático: proporções inventadas, esferas de aço de 6 mm e gás didático.",
+  "view": [-120, -20, 210, 95],
+  "labRun": 1,
+  "runs": [
+    {
+      "name": "repouso",
+      "duration": 3,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "maxDisp",
+          "label": "parado, nenhuma peça se move mais que 0,2 mm depois de 0,5 s",
+          "parts": "dynamic",
+          "from": 0.5,
+          "to": 3,
+          "max": 0.2
+        },
+        {
+          "kind": "range",
+          "label": "o retém segura o percussor armado",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "from": 0.5,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "events",
+          "label": "e o sensor não dispara",
+          "event": "sensor",
+          "max": 0
+        },
+        {
+          "kind": "range",
+          "label": "o carregador mantém a próxima esfera encostada na luva (sem folga)",
+          "q": {
+            "part": "p9",
+            "field": "y"
+          },
+          "from": 0.5,
+          "min": 5.35,
+          "max": 5.85
+        },
+        {
+          "kind": "at",
+          "label": "a esfera 1 fica na câmara",
+          "q": {
+            "part": "p8",
+            "field": "x"
+          },
+          "t": 3,
+          "min": 9.15,
+          "max": 10.15
+        },
+        {
+          "kind": "at",
+          "label": "a esfera 1 fica na câmara (assentada)",
+          "q": {
+            "part": "p8",
+            "field": "y"
+          },
+          "t": 3,
+          "min": 1.0959,
+          "max": 1.4959
+        }
+      ]
+    },
+    {
+      "name": "disparo, com o gatilho segurado",
+      "duration": 1.8,
+      "inputs": [
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 0.3,
+          "t1": 0.42,
+          "release": 1.8
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "o sensor dispara exatamente 1 vez",
+          "event": "sensor",
+          "match": {
+            "sensor": "k32"
+          },
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "events",
+          "label": "desconexão: com o gatilho segurado por mais de 1 s, não há segundo disparo",
+          "event": "chamber-fired",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "while",
+          "label": "a esfera sai pela boca a 5–20 m/s",
+          "cond": {
+            "part": "p8",
+            "field": "x"
+          },
+          "condMin": 84,
+          "condMax": 234,
+          "q": {
+            "part": "p8",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "max": 20000
+        },
+        {
+          "kind": "span",
+          "label": "o ferrolho recua pelo menos 18 mm (rearma o percussor e abre o carregador)",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "min": 18
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "o ferrolho volta ao batente da frente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "dropsAfter",
+          "label": "o gás não fica preso (abaixo de 5% do pico em 20 ms)",
+          "q": {
+            "diff": [
+              {
+                "link": "k26",
+                "field": "pressure"
+              },
+              {
+                "const": 101.325
+              }
+            ]
+          },
+          "event": "wall-unsealed",
+          "match": {
+            "part": "p5"
+          },
+          "fraction": 0.05,
+          "within": 0.02
+        },
+        {
+          "kind": "at",
+          "label": "com o gatilho ainda puxado, o percussor está preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 1.45,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "e o gatilho continua puxado",
+          "q": {
+            "link": "k33",
+            "field": "angle"
+          },
+          "t": 1.45,
+          "min": 0.2
+        },
+        {
+          "kind": "at",
+          "label": "soltando o gatilho, o percussor continua preso",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 1.8,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "a esfera 2 está na câmara",
+          "q": {
+            "part": "p9",
+            "field": "x"
+          },
+          "t": 1.8,
+          "min": 9.15,
+          "max": 10.15
+        },
+        {
+          "kind": "at",
+          "label": "a esfera 2 está na câmara (assentada)",
+          "q": {
+            "part": "p9",
+            "field": "y"
+          },
+          "t": 1.8,
+          "min": 1.0959,
+          "max": 1.4959
+        }
+      ]
+    },
+    {
+      "name": "seis ciclos e o carregador vazio",
+      "duration": 4.5,
+      "inputs": [
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 0.3,
+          "t1": 0.42,
+          "release": 0.6
+        },
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 0.8999999999999999,
+          "t1": 1.02,
+          "release": 1.2
+        },
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 1.5,
+          "t1": 1.62,
+          "release": 1.8
+        },
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 2.0999999999999996,
+          "t1": 2.2199999999999998,
+          "release": 2.3999999999999995
+        },
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 2.6999999999999997,
+          "t1": 2.82,
+          "release": 2.9999999999999996
+        },
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 3.3,
+          "t1": 3.42,
+          "release": 3.5999999999999996
+        },
+        {
+          "kind": "drag",
+          "part": "p17",
+          "from": [14.6, 33],
+          "to": [-2, 32],
+          "t0": 3.8999999999999995,
+          "t1": 4.02,
+          "release": 4.199999999999999
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "sete puxões, sete acendimentos do sensor",
+          "event": "sensor",
+          "match": {
+            "sensor": "k32"
+          },
+          "min": 7,
+          "max": 7
+        },
+        {
+          "kind": "events",
+          "label": "e sete cargas",
+          "event": "chamber-fired",
+          "min": 7,
+          "max": 7
+        },
+        {
+          "kind": "while",
+          "label": "a esfera 1 sai pela boca a 5–20 m/s",
+          "cond": {
+            "part": "p8",
+            "field": "x"
+          },
+          "condMin": 84,
+          "condMax": 234,
+          "q": {
+            "part": "p8",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "max": 20000
+        },
+        {
+          "kind": "while",
+          "label": "a esfera 2 sai pela boca a 5–20 m/s",
+          "cond": {
+            "part": "p9",
+            "field": "x"
+          },
+          "condMin": 84,
+          "condMax": 234,
+          "q": {
+            "part": "p9",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "max": 20000
+        },
+        {
+          "kind": "while",
+          "label": "a esfera 3 sai pela boca a 5–20 m/s",
+          "cond": {
+            "part": "p10",
+            "field": "x"
+          },
+          "condMin": 84,
+          "condMax": 234,
+          "q": {
+            "part": "p10",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "max": 20000
+        },
+        {
+          "kind": "while",
+          "label": "a esfera 4 sai pela boca a 5–20 m/s",
+          "cond": {
+            "part": "p11",
+            "field": "x"
+          },
+          "condMin": 84,
+          "condMax": 234,
+          "q": {
+            "part": "p11",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "max": 20000
+        },
+        {
+          "kind": "while",
+          "label": "a esfera 5 sai pela boca a 5–20 m/s",
+          "cond": {
+            "part": "p12",
+            "field": "x"
+          },
+          "condMin": 84,
+          "condMax": 234,
+          "q": {
+            "part": "p12",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "max": 20000
+        },
+        {
+          "kind": "while",
+          "label": "a esfera 6 sai pela boca a 5–20 m/s",
+          "cond": {
+            "part": "p13",
+            "field": "x"
+          },
+          "condMin": 84,
+          "condMax": 234,
+          "q": {
+            "part": "p13",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "max": 20000
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "ciclo 1: o ferrolho recua e volta ao batente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "from": 0.3,
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 1: termina com o percussor preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 0.8799999999999999,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 1: termina com o ferrolho no batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 0.8799999999999999,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "ciclo 2: o ferrolho recua e volta ao batente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "from": 0.8999999999999999,
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 2: termina com o percussor preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 1.48,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 2: termina com o ferrolho no batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 1.48,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "ciclo 3: o ferrolho recua e volta ao batente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "from": 1.5,
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 3: termina com o percussor preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 2.08,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 3: termina com o ferrolho no batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 2.08,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "ciclo 4: o ferrolho recua e volta ao batente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "from": 2.0999999999999996,
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 4: termina com o percussor preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 2.6799999999999997,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 4: termina com o ferrolho no batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 2.6799999999999997,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "ciclo 5: o ferrolho recua e volta ao batente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "from": 2.6999999999999997,
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 5: termina com o percussor preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 3.28,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 5: termina com o ferrolho no batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 3.28,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "ciclo 6: o ferrolho recua e volta ao batente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "from": 3.3,
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 6: termina com o percussor preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 3.88,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 6: termina com o ferrolho no batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 3.88,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "ciclo 7: o ferrolho recua e volta ao batente em até 0,3 s",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "event": "chamber-fired",
+          "from": 3.8999999999999995,
+          "min": -0.2,
+          "max": 0.2,
+          "within": 0.3
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 7: termina com o percussor preso no retém",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 4.4799999999999995,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "ciclo 7: termina com o ferrolho no batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 4.4799999999999995,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "dropsAfter",
+          "label": "carregador vazio: o gás não fica preso (abaixo de 5% do pico em 20 ms)",
+          "q": {
+            "diff": [
+              {
+                "link": "k26",
+                "field": "pressure"
+              },
+              {
+                "const": 101.325
+              }
+            ]
+          },
+          "event": "wall-unsealed",
+          "match": {
+            "part": "p5"
+          },
+          "from": 3.8999999999999995,
+          "fraction": 0.05,
+          "within": 0.02
+        }
+      ]
+    },
+    {
+      "name": "arrasto manual",
+      "duration": 2.5,
+      "inputs": [
+        {
+          "kind": "drag",
+          "part": "p5",
+          "from": [-65, -5],
+          "to": [-110, -5],
+          "t0": 0.3,
+          "t1": 0.6,
+          "release": 0.75
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "o dedo leva o ferrolho até o fim do curso",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "max": -21.5,
+          "from": 0.6,
+          "to": 0.75
+        },
+        {
+          "kind": "events",
+          "label": "o percussor não acende a carga",
+          "event": "sensor",
+          "max": 0
+        },
+        {
+          "kind": "at",
+          "label": "soltando, a esfera 2 entra na câmara",
+          "q": {
+            "part": "p9",
+            "field": "x"
+          },
+          "t": 2.5,
+          "min": 9.15,
+          "max": 10.15
+        },
+        {
+          "kind": "at",
+          "label": "soltando, a esfera 2 entra na câmara (assentada)",
+          "q": {
+            "part": "p9",
+            "field": "y"
+          },
+          "t": 2.5,
+          "min": 1.0959,
+          "max": 1.4959
+        },
+        {
+          "kind": "at",
+          "label": "e o ferrolho volta ao batente",
+          "q": {
+            "link": "k22",
+            "field": "translation"
+          },
+          "t": 2.5,
+          "min": -0.2,
+          "max": 0.2
+        },
+        {
+          "kind": "at",
+          "label": "com o percussor preso",
+          "q": {
+            "link": "k29",
+            "field": "translation"
+          },
+          "t": 2.5,
+          "min": -0.5,
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "a esfera que estava na câmara sai rolando pela boca (não há extrator)",
+          "q": {
+            "part": "p8",
+            "field": "x"
+          },
+          "t": 2.5,
+          "min": 84
+        }
+      ]
+    }
+  ],
+  "scene": "../../examples/lancador-ferrolho.json"
+}
