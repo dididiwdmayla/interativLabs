@@ -409,7 +409,7 @@ export function Stage({
     const el = partBtn.current;
     if (!el || !selModel || !pose) return;
     const pos = partButtonPos(selModel, pose, view.current, width, height, fingerY);
-    el.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
+    el.style.transform = `translate(${Math.round(pos[0])}px, ${Math.round(pos[1])}px)`;
   };
   useLayoutEffect(() => {
     onView.current = selModel ? () => placePartButton(selModel.part) : null;

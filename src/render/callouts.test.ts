@@ -51,7 +51,14 @@ describe("chamadas sem cruzar peças", () => {
     expect(outside).toBe(true);
   });
 
-  for (const id of ["engrenagens", "trava", "lancador", "biela-manivela", "cilindro-dois-pistoes"])
+  for (const id of [
+    "engrenagens",
+    "trava",
+    "lancador",
+    "biela-manivela",
+    "cilindro-dois-pistoes",
+    "lancador-ferrolho",
+  ])
     it(`${id}: toda chamada visível tem caminho limpo ou fica fora da cena`, () => {
       const r = loadScene(JSON.parse(readFileSync(`scenes/examples/${id}.json`, "utf8")));
       if (!r.ok) throw new Error("cena inválida");

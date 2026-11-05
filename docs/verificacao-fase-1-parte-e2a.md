@@ -1,6 +1,6 @@
 # Verificação — Fase 1 · Parte E2a (base do editor tátil)
 
-Data: 05/11/2026. Branch `ccr-d09ef9b0-93ffqw` (o branch de trabalho desta sessão; o prompt pedia `fase-1-parte-e2a`). Máquina: Node 22 e Chromium headless, sem GPU. A Parte C2 ainda não estava no `main` ao fechar esta parte: o objeto padrão continua o exemplo `default` do índice (`cilindro-dois-pistoes`); quando o `lancador-ferrolho` entrar, "Meu primeiro mecanismo" passa a ser cópia dele sem mudar código.
+Data: 05/11/2026. Branch `ccr-d09ef9b0-93ffqw` (o branch de trabalho desta sessão; o prompt pedia `fase-1-parte-e2a`). Máquina: Node 22 e Chromium headless, sem GPU. A Parte C2 entrou no `main` durante esta parte e foi trazida por merge antes do PR: o objeto padrão é o `lancador-ferrolho` (o `default` de `scenes/examples/index.json`, com as entradas dos dois lados mantidas), e "Meu primeiro mecanismo" é cópia dele, sem mudança de código. O campo novo da C2 (`gas.charge.shots`) ganhou rótulo no formulário de detalhes.
 
 ## Itens
 
@@ -36,9 +36,9 @@ Os sites (MDN, web.dev, developer.chrome.com) estão fora da rede liberada desta
 
 ## Testes
 
-`npm run lint`, `npm run typecheck`, `npm test` (26 arquivos, 489 testes + 4 falhas esperadas preexistentes; 13 do pipeline de assets) e `npm run build` limpos, sem avisos. Novos:
+`npm run lint`, `npm run typecheck`, `npm test` (26 arquivos, 554 testes + 4 falhas esperadas preexistentes, já com as cenas da C2; 13 do pipeline de assets) e `npm run build` limpos, sem avisos. Novos:
 
-- `src/editor/commands.test.ts`: **50 edições aleatórias** de todos os tipos desta parte (inserir de cada gerador, mover, girar, girar 90°, escalar, mudar parâmetro, espelhar, duplicar, excluir peça e ligação, mudar de camada, nova camada, campos de camada, reordenar, excluir camada, material, fixa/solta, nome, campos de ligação) em cinco exemplos, cada uma validada pelo schema; desfeitas, a cena volta ao hash do início; refeitas, ao hash do fim. Limite de 200, refazer limpo ao editar, nomes legíveis, exclusão em cascata e aviso de pino.
+- `src/editor/commands.test.ts`: **50 edições aleatórias** de todos os tipos desta parte (inserir de cada gerador, mover, girar, girar 90°, escalar, mudar parâmetro, espelhar, duplicar, excluir peça e ligação, mudar de camada, nova camada, campos de camada, reordenar, excluir camada, material, fixa/solta, nome, campos de ligação) em seis exemplos (inclusive o lançador de ferrolho), cada uma validada pelo schema; desfeitas, a cena volta ao hash do início; refeitas, ao hash do fim. Limite de 200, refazer limpo ao editar, nomes legíveis, exclusão em cascata e aviso de pino.
 - `src/editor/gestures.test.ts`, `radial.test.ts` (nada fora da tela nem sob o entalhe em 844×390, 640×360, 390×844 e 1440×900, dos dois lados, com 2 a 9 itens), `snap.test.ts`, `linkFields.test.ts` (rótulos em português, campos opcionais ligados continuam válidos, graus).
 - `src/parts/parts.test.ts`: os onze geradores com forma válida e decomposição no padrão e nos limites de cada parâmetro, área analítica, espelhada, nome com número, número de chamada, fixa só na camada 1, refazer a forma pelos parâmetros.
 - `src/render/callouts.test.ts`: o lado livre é escolhido; sem caminho limpo o número vai para fora da cena; em todos os exemplos, toda chamada visível tem caminho limpo ou fica fora da cena.
@@ -52,7 +52,7 @@ Playwright:
 
 ## Medidas
 
-- **Pacote principal:** 121,4 KB gzip (era 108,4 KB na Parte D). Sob demanda: detalhes da ligação 2,5 KB, schema e migrações 34,3 KB (já eram), simulação como antes.
+- **Pacote principal:** 123,3 KB gzip depois do merge da C2 (121,4 KB antes dele; era 108,4 KB na Parte D). Sob demanda: detalhes da ligação 2,5 KB, schema e migrações 34,3 KB (já eram), simulação como antes.
 - **Desempenho** (`/#perf`, 150 peças e 100 ligações, 1× com arrasto, Chromium da sessão): 390×844 59,9 qps (p5 59,9); 844×390 59,9 (p5 59,5); 1440×900 59,9 (p5 30,0). Em 1440×900 o `main` dá o mesmo p5 de 30 nesta máquina, com a física no worker em p95 de 22 ms: é da máquina desta sessão, não desta parte (o desenho por quadro segue em 0,8–0,9 ms de mediana). Fica valendo a rodada no celular do Will.
 
 ## Capturas
@@ -77,7 +77,8 @@ Abaixo do frame:
 3. **Cartão em retrato** (`cartao-390x844`) ocupa 62% da altura; a peça sobe para a parte livre, mas fica colada no nome do projeto.
 4. **Botão da peça**: ícone de "detalhes" (três cotas) num anel de ouro; legível, mas genérico. O frame não tem esse elemento; um desenho próprio (talvez o número de chamada com a linha) caberia melhor.
 5. **Dica no topo** em Archivo de 12 px, `ink-2`: legível, mas em paisagem fica longa numa linha só.
-6. Os pontos já registrados na Parte D continuam: gás sem o pontilhado (Fase 2), madeira com nós em grade, sem `tex-ink-wear`.
+6. **Chamadas do lançador de ferrolho** (o objeto padrão da C2): com mais de vinte ligações num desenho comprido, os números se amontoam no canto de cima à esquerda e algumas linhas ficam longas. A escolha por menos cruzamentos ajuda, mas a cena pede um critério de prioridade (mostrar só as da camada ativa, por exemplo), que vale discutir com a E2b.
+7. Os pontos já registrados na Parte D continuam: gás sem o pontilhado (Fase 2), madeira com nós em grade, sem `tex-ink-wear`.
 
 ## O que ficou de fora e por quê
 

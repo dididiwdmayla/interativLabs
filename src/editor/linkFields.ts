@@ -134,6 +134,8 @@ function meta(
       return { label: "Carga", unit: "mmol" };
     case "gas.charge.burnMs":
       return { label: "Queima", unit: "ms" };
+    case "gas.charge.shots":
+      return { label: "Cargas (acendimentos)", unit: "" };
     default:
       return { label: k, unit: "" };
   }
@@ -198,7 +200,7 @@ function walk(kind: Link["kind"], schema: AnyZod, path: (string | number)[], out
         kind: "number",
         toView: m.angle ? toDeg : id,
         fromView: m.angle ? fromDeg : id,
-        integer: path[path.length - 1] === "ref" || path[path.length - 1] === "hole",
+        integer: ["ref", "hole", "shots"].includes(String(path[path.length - 1])),
       });
       return;
     }
