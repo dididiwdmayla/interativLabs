@@ -7,6 +7,8 @@
 :root {
   /* Cor — eixo índigo → branco frio (matiz 232–234°) */
   --color-chrome: #171a37;
+  /* controles que flutuam sobre a prancha (cantos, abas, faixa do Testar): o chrome translúcido */
+  --color-chrome-float: rgb(23 26 55 / 0.84);
   --color-stage: #1e2448;
   --color-surface: #262b4a;
   --color-raised: #2e3456;

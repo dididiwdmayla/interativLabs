@@ -54,6 +54,74 @@ export function fitView(box: Box, w: number, h: number, pad: [number, number, nu
   };
 }
 
+/** Retângulo de tela, px. */
+export interface ScreenRect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/**
+ * Enquadra a caixa (mm) na área de w × h px desviando dos controles que
+ * flutuam sobre a prancha (cantos, título, abas, faixa do Testar): a maior
+ * escala em que a caixa, com `gap` px de folga, não encosta em nenhum
+ * obstáculo nem passa da borda `edge` (cima, direita, baixo, esquerda: as
+ * áreas seguras). Prova alguns centros perto do meio da tela. Só desconta o
+ * espaço que os controles cobrem: uma caixa estreita sobe entre os cantos,
+ * uma larga passa entre as abas.
+ */
+export function fitAround(
+  box: Box,
+  w: number,
+  h: number,
+  obstacles: ScreenRect[],
+  edge: [number, number, number, number],
+  gap = 8,
+): View {
+  const [top, right, bottom, left] = edge;
+  const ax0 = left;
+  const ay0 = top;
+  const ax1 = w - right;
+  const ay1 = h - bottom;
+  const obs = obstacles.map((o) => ({ x0: o.x0 - gap, y0: o.y0 - gap, x1: o.x1 + gap, y1: o.y1 + gap }));
+  const aspect = box[2] / Math.max(1e-6, box[3]);
+  const free = (cx: number, cy: number, hw: number) => {
+    const hh = hw / aspect;
+    const x0 = cx - hw;
+    const x1 = cx + hw;
+    const y0 = cy - hh;
+    const y1 = cy + hh;
+    if (x0 < ax0 || x1 > ax1 || y0 < ay0 || y1 > ay1) return false;
+    return obs.every((o) => o.x1 <= x0 || o.x0 >= x1 || o.y1 <= y0 || o.y0 >= y1);
+  };
+  const mx = (ax0 + ax1) / 2;
+  const my = (ay0 + ay1) / 2;
+  let best = { hw: 0, cx: mx, cy: my };
+  for (const fy of [0, -0.03, 0.03, -0.06, 0.06, -0.1, 0.1])
+    for (const fx of [0, -0.03, 0.03]) {
+      const cx = mx + fx * w;
+      const cy = my + fy * h;
+      let lo = 0;
+      let hi = (ax1 - ax0) / 2;
+      if (!free(cx, cy, 1)) continue;
+      for (let i = 0; i < 24; i++) {
+        const mid = (lo + hi) / 2;
+        if (free(cx, cy, mid)) lo = mid;
+        else hi = mid;
+      }
+      if (lo > best.hw + 0.5) best = { hw: lo, cx, cy };
+    }
+  if (best.hw <= 0) return fitView(box, w, h, [top, right, bottom, left]);
+  const zoom = clampZoom((2 * best.hw) / box[2] / PX_PER_MM);
+  const s = PX_PER_MM * zoom;
+  return {
+    zoom,
+    tx: best.cx - (box[0] + box[2] / 2) * s,
+    ty: best.cy - (box[1] + box[3] / 2) * s,
+  };
+}
+
 /** Zoom multiplicado por `factor` em torno do ponto de tela (sx, sy). */
 export function zoomAt(v: View, factor: number, sx: number, sy: number): View {
   const zoom = clampZoom(v.zoom * factor);

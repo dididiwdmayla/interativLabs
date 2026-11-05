@@ -340,6 +340,17 @@
   border-color: var(--color-ink-faint);
 }
 
+/* controles que flutuam sobre a prancha: fundo chrome translúcido (a peça
+   embaixo continua visível, e o controle se lê sobre a hachura) */
+.corner .tool,
+.corner__btn,
+.corner .pill,
+.testbar .tool,
+.testbar .simctl__speed,
+.edgetab__mark {
+  background: var(--color-chrome-float);
+}
+
 /* nome do projeto e dica: no topo, entre os cantos, fora do desenho */
 .corner--top {
   top: calc(var(--sa-top) + var(--corner-gap) + 2px);

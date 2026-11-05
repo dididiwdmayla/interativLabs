@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import type { StageNodes } from "@/render/nodes";
+import type { ScreenRect } from "@/render/view";
 import { prepareScene } from "@/render/prepare";
 import { CardSheet } from "./card/SelectionCard";
 import { Corners } from "./Corners";
@@ -49,7 +50,22 @@ function useHashRoute(): string {
   return hash;
 }
 
-/** px reservados pelos cantos e pelas abas (o enquadramento não põe peça embaixo deles) */
+/**
+ * Controles que flutuam sobre a prancha (cantos, título, dica, abas das
+ * bordas, faixa do Testar): o enquadramento mede e desvia deles.
+ */
+const FLOATING = [
+  ".corner--tl > *",
+  ".corner--tr > *",
+  ".corner--bl > *",
+  ".corner--br > *",
+  ".corner__title",
+  ".corner__hint",
+  ".edgetab__mark",
+  ".testbar > *",
+].join(",");
+
+/** px reservados pelos cantos e pelas abas quando não dá para medir (o enquadramento não põe peça embaixo deles) */
 const CORNER = 60;
 const TAB = 40;
 const TESTBAR = 84;
@@ -107,6 +123,28 @@ function Workbench() {
     };
   }, [sa, hint, portrait]);
 
+  // controles que flutuam sobre a prancha: o enquadramento desvia só deles
+  const obstacles = useCallback(
+    (stage: DOMRect) => {
+      const root = bench.current;
+      const rects: ScreenRect[] = [];
+      if (root)
+        for (const el of root.querySelectorAll<HTMLElement>(FLOATING)) {
+          const r = el.getBoundingClientRect();
+          if (r.width < 1 || r.height < 1) continue;
+          rects.push({
+            x0: r.left - stage.left,
+            y0: r.top - stage.top,
+            x1: r.right - stage.left,
+            y1: r.bottom - stage.top,
+          });
+        }
+      const edge: [number, number, number, number] = [sa.top + 6, sa.right + 6, sa.bottom + 6, sa.left + 6];
+      return { rects, edge };
+    },
+    [sa],
+  );
+
   const onFirstTouch = useCallback(() => {
     const ui = useUiStore.getState();
     if (ui.hint && ui.mode === "edit") ui.setHint(false);
@@ -126,6 +164,7 @@ function Workbench() {
           onSelect={select}
           onNodes={setNodes}
           fitPad={fitPad}
+          obstacles={obstacles}
           onFirstTouch={onFirstTouch}
         />
         <Corners model={model} wide={wide} />
