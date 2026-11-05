@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { OVERFLOW_WIDTHS } from "./viewports";
+import { OVERFLOW_LANDSCAPE, OVERFLOW_WIDTHS } from "./viewports";
 
 /**
  * Reprova rolagem lateral da página em 360, 390 e 412 px.
@@ -7,15 +7,18 @@ import { OVERFLOW_WIDTHS } from "./viewports";
  */
 const ROUTES = ["/", "/#bench", "/#lab", "/#lab/exemplos/cilindro-dois-pistoes", "/#perf"];
 
-for (const width of OVERFLOW_WIDTHS) {
+const SIZES = [...OVERFLOW_WIDTHS.map((width) => ({ width, height: 800 })), OVERFLOW_LANDSCAPE];
+
+for (const { width, height } of SIZES) {
   for (const route of ROUTES) {
-    test(`sem rolagem lateral em ${width} px (${route})`, async ({ page }) => {
-      await page.setViewportSize({ width, height: 800 });
+    test(`sem rolagem lateral em ${width}×${height} (${route})`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
       await page.goto(route);
       await page.evaluate(() => document.fonts.ready);
       if (route === "/#bench") await page.getByRole("heading", { name: "Bancada de motores" }).waitFor();
       if (route.startsWith("/#lab")) await page.locator(".lab__svg").waitFor();
       if (route === "/" || route === "/#perf") await page.locator(".stage__sheet--static").first().waitFor();
+      if (route === "/") await page.waitForTimeout(300);
       const m = await page.evaluate(() => ({
         doc: document.documentElement.scrollWidth,
         body: document.body.scrollWidth,
@@ -31,7 +34,7 @@ for (const width of OVERFLOW_WIDTHS) {
         for (const el of Array.from(document.querySelectorAll("body *"))) {
           const r = el.getBoundingClientRect();
           if (r.width === 0 || r.height === 0) continue;
-          if (el.closest(".toolbar__scroll, .bench__tablewrap, .lab__stage, .stage__sheets")) continue;
+          if (el.closest(".bench__tablewrap, .lab__stage, .stage__sheets, .holdring")) continue;
           const cs = getComputedStyle(el);
           if (cs.visibility === "hidden") continue;
           if (r.right > window.innerWidth + 0.5 || r.left < -0.5) out.push(`${el.tagName}.${el.className}`);
@@ -51,6 +54,59 @@ for (const width of OVERFLOW_WIDTHS) {
         return out;
       });
       expect(small, "alvos de toque menores que 44 px").toEqual([]);
+    });
+  }
+}
+
+/** As folhas e o menu de borda abertos também não fazem rolagem lateral e têm alvos de 44 px. */
+const SHEETS = ["main", "drawer", "layers", "card", "edge"] as const;
+for (const { width, height } of [{ width: 360, height: 800 }, OVERFLOW_LANDSCAPE]) {
+  for (const sheet of SHEETS) {
+    test(`folha ${sheet} em ${width}×${height}`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+      await page.evaluate(() => document.fonts.ready);
+      await page.locator(".stage__sheet--static").first().waitFor();
+      await page.evaluate((sh) => {
+        const ui = (
+          window as unknown as {
+            __IL__: {
+              ui: {
+                getState(): {
+                  current: { scene: { parts: { id: string }[] } } | null;
+                  select(s: { kind: "part"; id: string }): void;
+                  setSheet(s: string): void;
+                  setEdgeMenu(m: { side: "left" | "right"; cy: number; hover: null }): void;
+                };
+              };
+            };
+          }
+        ).__IL__.ui.getState();
+        const p = ui.current?.scene.parts.at(-1);
+        if (p) ui.select({ kind: "part", id: p.id });
+        if (sh === "edge") ui.setEdgeMenu({ side: "left", cy: 200, hover: null });
+        else ui.setSheet(sh);
+      }, sheet);
+      await page.waitForTimeout(400);
+      const m = await page.evaluate(() => ({
+        doc: document.documentElement.scrollWidth,
+        inner: window.innerWidth,
+        small: Array.from(document.querySelectorAll("button, a[href], [role=button], input[type=range]"))
+          .map((el) => ({ el, r: el.getBoundingClientRect() }))
+          .filter(({ r }) => r.width > 0 && r.height > 0)
+          .filter(({ el, r }) =>
+            el.matches("input[type=range]") ? r.height < 24 : r.width < 44 || r.height < 44,
+          )
+          .map(({ el, r }) => `${el.getAttribute("aria-label") ?? el.textContent} ${r.width}x${r.height}`),
+        escaped: Array.from(document.querySelectorAll(".sheet *, .edgemenu *"))
+          .map((el) => ({ el, r: el.getBoundingClientRect() }))
+          .filter(({ r }) => r.width > 0 && (r.right > window.innerWidth + 0.5 || r.left < -0.5))
+          .filter(({ el }) => !el.closest(".tiles"))
+          .map(({ el }) => `${el.tagName}.${el.className}`),
+      }));
+      expect(m.doc).toBeLessThanOrEqual(m.inner);
+      expect(m.small, "alvos de toque menores que 44 px").toEqual([]);
+      expect(m.escaped, "fora da janela").toEqual([]);
     });
   }
 }

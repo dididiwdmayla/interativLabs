@@ -91,7 +91,14 @@ type Gesture =
   | { kind: "drag" }
   | { kind: "pan"; start: View; tap: boolean }
   | { kind: "pinch"; start: View; d0: number; m0: Vec2 }
-  | { kind: "press"; target: NonNullable<Selection>; start: View; timer: number }
+  | {
+      kind: "press";
+      target: NonNullable<Selection>;
+      start: View;
+      timer: number;
+      /** arrastar move a peça (camada ativa ou já escolhida); senão, move a vista */
+      movable: boolean;
+    }
   | {
       kind: "move";
       id: string;
@@ -289,7 +296,9 @@ export function Stage({
     const timer = window.setTimeout(() => {
       const g = gesture.current;
       const h = hold.current;
-      if (g.kind !== "pan" || !h || pointers.current.size !== 1) return;
+      const panning = g.kind === "pan" || (g.kind === "press" && !g.movable);
+      if (!panning || !h || pointers.current.size !== 1) return;
+      if (g.kind === "press") window.clearTimeout(g.timer);
       clearHold();
       useUiStore.getState().setEdgeMenu({ side: h.side, cy: h.ay, hover: null });
       // a vista volta, com animação curta, para onde estava antes do gesto
@@ -438,6 +447,7 @@ export function Stage({
       },
       center: () => toWorld(view.current, width / 2, height / 2),
       fit,
+      panBy: (dx, dy) => animateView(panBy(view.current, dx, dy)),
       insertPreview: (shape, cx, cy) => {
         const r = rect();
         if (!shape || cx === undefined || cy === undefined || !r || !model) {
@@ -477,6 +487,8 @@ export function Stage({
       },
     });
     return () => stageApi.set(null);
+    // animateView, snapTo e overlay só usam refs e o writeView (que muda com a cena, já nas dependências)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bare, fit, width, height, model]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -543,7 +555,11 @@ export function Stage({
           vibrate(10);
           gesture.current = { kind: "none" };
         }, LONG_MS);
-        gesture.current = { kind: "press", target, start: { ...view.current }, timer };
+        // peça de outra camada (a placa de base, por exemplo): o toque escolhe, o arrasto move a vista
+        const pm = part ? model.parts.get(part) : undefined;
+        const movable = !!pm && (pm.layer === activeLayer || selection?.id === part);
+        gesture.current = { kind: "press", target, start: { ...view.current }, timer, movable };
+        if (!movable) armHold(x, y);
         return;
       }
     }
@@ -568,7 +584,7 @@ export function Stage({
       ctl?.dragMove(w);
     } else if (g.kind === "press") {
       const moved = Math.hypot(x - p.x0, y - p.y0);
-      if (g.target.kind === "part" && moved > MOVE_PX && model) {
+      if (g.target.kind === "part" && g.movable && moved > MOVE_PX && model) {
         window.clearTimeout(g.timer);
         const m = model.parts.get(g.target.id);
         if (!m) return;
@@ -585,9 +601,10 @@ export function Stage({
         };
         sheets.current?.classList.add("is-dragging");
         onPointerMove(e);
-      } else if (g.target.kind === "link" && moved > TAP_PX) {
+      } else if ((g.target.kind === "link" || !g.movable) && moved > TAP_PX) {
         window.clearTimeout(g.timer);
         gesture.current = { kind: "pan", start: g.start, tap: false };
+        onPointerMove(e);
       } else if (moved > TAP_PX) window.clearTimeout(g.timer);
     } else if (g.kind === "move") {
       const tol = SNAP_PX * mmPerPx(view.current.zoom);

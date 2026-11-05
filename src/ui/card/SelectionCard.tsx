@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUiStore, type Selection } from "@/editor/useUiStore";
 import type { SceneModel } from "@/render/prepare";
 import { Sheet } from "../Sheet";
@@ -41,6 +41,18 @@ function CardSheetFor({ model, sel }: { model: SceneModel; sel: NonNullable<Sele
     const p = api.worldToClient(Array.isArray(at) ? at : [at.x, at.y]);
     return p[0] > window.innerWidth / 2 ? "left" : "right";
   });
+  // em retrato o cartão é a folha de baixo: a vista sobe a peça para a parte livre da prancha
+  useEffect(() => {
+    if (!window.matchMedia("(orientation: portrait) and (max-width: 700px)").matches) return;
+    const at = sel.kind === "part" ? model.parts.get(sel.id)?.part : model.linkById.get(sel.id)?.world;
+    const api = stageApi.get();
+    if (!at || !api) return;
+    const p = api.worldToClient(Array.isArray(at) ? at : [at.x, at.y]);
+    const free = window.innerHeight * 0.38;
+    if (p[1] > free - 40) api.panBy(0, free * 0.55 - p[1]);
+    // só ao abrir o cartão desta seleção
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <Sheet
       title={sel.kind === "link" ? "Ligação" : "Peça"}

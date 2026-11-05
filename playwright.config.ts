@@ -28,6 +28,8 @@ export default defineConfig({
   projects: [
     { name: "capture", testMatch: /capture\.spec\.ts/ },
     { name: "capture-d", testMatch: /parte-d\.spec\.ts/, timeout: 120_000 },
+    { name: "e2a", testMatch: /parte-e2a\.spec\.ts/, timeout: 60_000 },
+    { name: "capture-e2a", testMatch: /capture-e2a\.spec\.ts/, timeout: 120_000 },
     { name: "overflow", testMatch: /overflow\.spec\.ts/ },
     { name: "bench", testMatch: /bench\.spec\.ts/, timeout: 30 * 60_000 },
     { name: "lab", testMatch: /lab\.spec\.ts/ },

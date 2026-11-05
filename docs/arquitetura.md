@@ -305,6 +305,26 @@ Feito para o dedo e para a caneta, paisagem primeiro no celular. A complexidade 
 
 - Toda mudança é um comando com desfazer e refazer (patches do Immer). Um arrasto é um comando só, registrado ao soltar.
 
+### Como ficou na implementação (Parte E2a)
+
+Onde o texto acima deixava margem, ou o uso mostrou outra coisa:
+
+- **Nomes dos modos:** **Montar** e **Testar** na interface (no código continuam `edit` e `simulate`). O botão único mostra o modo para onde vai: "Testar" (o bloco claro) no Montar, "Montar" em contorno no Testar.
+- **Comandos** (`src/editor/commands.ts`, `history.ts`): cada comando olha a cena, dá o nome legível ("Mover Barra 3", "Excluir eixo 41") e devolve a receita; `produceWithPatches` guarda ida e volta; pilha de 200. Passos seguidos do mesmo controle (o deslizante do tamanho, o − e + da escala) dentro de 1,5 s viram um passo só. Excluir peça remove as ligações que ficariam sem referência (e limpa guia de mola, ações de sensor e portas que apontavam para elas). O nome do projeto não entra na pilha.
+- **Mover só na camada ativa.** Arrastar uma peça da camada ativa (ou a já escolhida) move a peça; arrastar uma peça de outra camada move a vista, e tocar nela a escolhe e ativa a camada. Sem isso, numa cena com placa de base (a camada 1 cobrindo tudo), não havia fundo livre para mover a vista nem para o gesto do menu de borda, e a placa saía do lugar sem querer.
+- **Menu de borda:** faixa de 15% da largura da prancha, 1 s parado com menos de 8 px; o anel é uma máscara cônica animada (só máscara, como pede o `AGENTS.md`). O gesto também começa sobre peça de outra camada (é o mesmo que mover a vista). O raio do arco se ajusta à altura útil; com o menu aberto, cantos e abas saem da frente. Itens como dado em `src/editor/menus.ts`; as ações em `src/ui/menuActions.ts`.
+- **Toque com vários dedos** (`src/editor/gestures.ts`): cada dedo com menos de 250 ms e menos de 10 px; a vista volta para onde estava (a pinça mínima do toque é desfeita). O aviso curto deixa o toque atravessar (só o botão Desfazer dele pega o dedo), para não roubar o segundo dedo.
+- **Encaixe** (`src/editor/snap.ts`, `snapScene.ts`), em ordem: ponto com ponto (origem e centros de furo com centros de peça, de furo e de ligação; vértice com vértice), borda, retas dos eixos das ligações (horizontal e vertical por cada ligação e a reta do trilho), grade da cena. Tolerância de 10 px de tela. A vibração de 10 ms só sai no Chrome Android (o Safari não tem `navigator.vibrate`).
+- **Alças** (`src/editor/handles.ts`): girar em volta da origem da peça, passos de 15° a até 4° dos redondos; esticar pelos parâmetros principais (paramétricas) ou escala por eixo e uniforme (as outras; círculo e engrenagem só uniforme). Os pontos de ligação presos à peça acompanham a escala.
+- **Botão da peça:** no canto de cima, ao lado da seleção (a alça de girar fica no meio de cima), dentro da tela, e embaixo quando o dedo está em cima da peça. No computador o cartão fica no painel fixo; o botão continua.
+- **Cartão rápido:** folha lateral do lado oposto ao da peça (decidido ao abrir); em retrato, folha de baixo, e a vista sobe a peça para a parte livre. Detalhes da ligação: formulário gerado do schema Zod (`src/editor/linkFields.ts`), carregado sob demanda com o Zod; campos opcionais (motor, batente, mola de torção, mola de retorno, atrito, carga) ligam e desligam com valores padrão; listas (paredes, respiros, portas, ações) ficam para a E2b.
+- **Gaveta** (`src/parts/`): onze geradores com faixas e padrões; miniaturas e projetos usam `src/render/thumbnail.ts` (SVG com classes, cores pelos tokens). A peça espelhada guarda `mirror` nos parâmetros (a catraca espelhada vira polígono).
+- **Camadas:** ocultar esconde o grupo da camada no palco (a simulação continua com ela); travar tira as peças do toque.
+- **Projetos** (`src/editor/projects.ts`, `src/ui/projectFlow.ts`): IndexedDB `interativlabs` com os depósitos `projects` e `meta` (último aberto). Abrir um exemplo cria um projeto. A pilha de desfazer da sessão fica no sessionStorage por projeto e só volta se a cena for a mesma (hash sem os metadados). Sem IndexedDB, o projeto vive na memória e um aviso diz isso.
+- **Tela e instalação:** sem service worker (desde o Chrome 108 no Android, instalar pelo menu não exige mais um; o aviso automático de instalação ainda pode exigir). Manifesto com `display: standalone`, `orientation: any`, ícones 192, 512 e 512 maskable e o `apple-touch-icon` de 180 (ícone provisório gerado por `npm run icons`).
+- **Enquadrar** mira a caixa das peças móveis e das ligações (com margem de 6%); sem peças móveis, tudo. Os exemplos não precisaram ser recompostos.
+- **Chamadas:** a camada 1 é a própria folha; as peças fixas dela não contam como obstáculo (o número pode ficar sobre a placa de base e a linha pode cruzá-la). Para cada número, 24 direções; vence a de menos cruzamentos além dos inevitáveis, depois a mais curta e mais voltada para fora.
+
 ## 7. Persistência
 
 - Projetos em IndexedDB: cena, miniatura e data. Autosave a cada comando, com debounce.

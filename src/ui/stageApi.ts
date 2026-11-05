@@ -19,6 +19,8 @@ export interface StageApi {
   /** centro da vista, mm */
   center(): Vec2;
   fit(): void;
+  /** move a vista (px), com animação curta */
+  panBy(dx: number, dy: number): void;
   /**
    * Fantasma da peça que vem da gaveta, com o encaixe ativo, no ponto do
    * cliente. Devolve a pose encaixada (mundo) ou null fora do palco;

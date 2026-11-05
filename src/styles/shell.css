@@ -1162,6 +1162,8 @@
   font-size: var(--text-body);
   transform: translateX(-50%);
   animation: toast-in var(--dur-quick) var(--ease-develop);
+  /* o toque atravessa o aviso (dois dedos na prancha desfazem); só o botão pega */
+  pointer-events: none;
 }
 
 @keyframes toast-in {
@@ -1180,6 +1182,7 @@
 }
 
 .toast__undo {
+  pointer-events: auto;
   align-self: stretch;
   min-width: var(--touch-min);
   padding: 0 var(--space-4);
@@ -2312,4 +2315,40 @@
 
 .sheet--main .card__row {
   margin-bottom: var(--space-2);
+}
+
+.card__layers {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.lstack {
+  container-type: inline-size;
+}
+
+.lrow__btns {
+  flex: none;
+  display: flex;
+}
+
+/* painel estreito (computador, 320 px): os botões descem para uma segunda linha */
+@container (max-width: 359px) {
+  .lrow__main {
+    flex-wrap: wrap;
+  }
+
+  .lrow__pick {
+    flex-basis: 100%;
+    min-height: 48px;
+  }
+
+  .lrow__btns {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: -4px;
+  }
+
+  .lrow__edit {
+    padding-left: var(--space-2);
+  }
 }

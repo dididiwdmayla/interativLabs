@@ -22,6 +22,7 @@ import {
   useProjects,
 } from "./projectFlow";
 import { Sheet } from "./Sheet";
+import { stageApi } from "./stageApi";
 import { useSimStore } from "./sim/simStore";
 import { useSimulation } from "./sim/useSimulation";
 import { Stage } from "./Stage";
@@ -91,6 +92,7 @@ function Workbench() {
       sim: useSimStore,
       openExample: openExampleAsProject,
       projects: { useProjects, newProject, openProject, importText, exportJson, flushAutosave },
+      stage: stageApi,
     };
   }, []);
 

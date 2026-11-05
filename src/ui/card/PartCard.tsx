@@ -103,7 +103,7 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
         <h3 className="card__k">
           Camada {li + 1} · {model.layers[li]?.layer.name}
         </h3>
-        <div className="card__row">
+        <div className="card__layers">
           <button
             type="button"
             className="btn btn--outline btn--small card__layer"

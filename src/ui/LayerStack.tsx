@@ -70,41 +70,43 @@ function Row({
             </span>
           </span>
         </button>
-        <button
-          type="button"
-          className="iconbtn lrow__btn"
-          aria-label={layer.visible ? `Ocultar a camada ${layer.name}` : `Mostrar a camada ${layer.name}`}
-          aria-pressed={!layer.visible}
-          onClick={() => ui.commit(setLayerFields(scene, layer.id, { visible: !layer.visible }))}
-        >
-          <Icon name={layer.visible ? "eye" : "eyeOff"} uid={`${uid}v`} />
-        </button>
-        <button
-          type="button"
-          className="iconbtn lrow__btn"
-          aria-label={layer.locked ? `Destravar a camada ${layer.name}` : `Travar a camada ${layer.name}`}
-          aria-pressed={layer.locked}
-          onClick={() => ui.commit(setLayerFields(scene, layer.id, { locked: !layer.locked }))}
-        >
-          <Icon name={layer.locked ? "lock" : "unlock"} uid={`${uid}l`} />
-        </button>
-        <button
-          type="button"
-          className="iconbtn lrow__btn"
-          aria-label={`Editar a camada ${layer.name}`}
-          aria-expanded={open}
-          onClick={onOpen}
-        >
-          <Icon name="pencil" uid={`${uid}e`} />
-        </button>
-        <button
-          type="button"
-          className="iconbtn lrow__btn lrow__grip"
-          aria-label={`Arrastar para reordenar a camada ${layer.name}`}
-          onPointerDown={onGrip}
-        >
-          <Icon name="grip" uid={`${uid}g`} />
-        </button>
+        <div className="lrow__btns">
+          <button
+            type="button"
+            className="iconbtn lrow__btn"
+            aria-label={layer.visible ? `Ocultar a camada ${layer.name}` : `Mostrar a camada ${layer.name}`}
+            aria-pressed={!layer.visible}
+            onClick={() => ui.commit(setLayerFields(scene, layer.id, { visible: !layer.visible }))}
+          >
+            <Icon name={layer.visible ? "eye" : "eyeOff"} uid={`${uid}v`} />
+          </button>
+          <button
+            type="button"
+            className="iconbtn lrow__btn"
+            aria-label={layer.locked ? `Destravar a camada ${layer.name}` : `Travar a camada ${layer.name}`}
+            aria-pressed={layer.locked}
+            onClick={() => ui.commit(setLayerFields(scene, layer.id, { locked: !layer.locked }))}
+          >
+            <Icon name={layer.locked ? "lock" : "unlock"} uid={`${uid}l`} />
+          </button>
+          <button
+            type="button"
+            className="iconbtn lrow__btn"
+            aria-label={`Editar a camada ${layer.name}`}
+            aria-expanded={open}
+            onClick={onOpen}
+          >
+            <Icon name="pencil" uid={`${uid}e`} />
+          </button>
+          <button
+            type="button"
+            className="iconbtn lrow__btn lrow__grip"
+            aria-label={`Arrastar para reordenar a camada ${layer.name}`}
+            onPointerDown={onGrip}
+          >
+            <Icon name="grip" uid={`${uid}g`} />
+          </button>
+        </div>
       </div>
       {open && (
         <div className="lrow__edit">
