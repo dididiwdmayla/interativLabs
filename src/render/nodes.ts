@@ -30,6 +30,11 @@ export function drawnFrame(model: SceneModel): FrameSource {
   };
 }
 
+/** Quadro com uma peça numa pose diferente (o dedo arrastando no Montar). */
+export function overrideFrame(base: FrameSource, id: Id, pose: PartPose): FrameSource {
+  return { pose: (pid) => (pid === id ? pose : base.pose(pid)), chamber: (cid) => base.chamber(cid) };
+}
+
 interface PartNodes {
   g?: SVGGElement | null;
   wall?: SVGGElement | null;

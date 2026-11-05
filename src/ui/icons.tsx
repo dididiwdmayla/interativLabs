@@ -34,7 +34,33 @@ export type IconName =
   | "step"
   | "restart"
   | "xray"
-  | "close";
+  | "close"
+  | "fullscreen"
+  | "share"
+  | "tips"
+  | "lefty"
+  | "examples"
+  | "parts"
+  | "layerAdd"
+  | "duplicate"
+  | "trash"
+  | "rotate"
+  | "mirror"
+  | "lock"
+  | "unlock"
+  | "eye"
+  | "eyeOff"
+  | "grip"
+  | "minus"
+  | "plus"
+  | "details"
+  | "export"
+  | "import"
+  | "fixed"
+  | "loose"
+  | "pencil"
+  | "up"
+  | "down";
 
 /** Linhas a 45° cobrindo a grade inteira; recortadas pela forma de cada ícone. */
 function hatchLines(spacing: number, offset = 0): string {
@@ -258,6 +284,185 @@ const ICONS: Record<IconName, (c: DrawCtx) => ReactNode> = {
     </>
   ),
   close: () => <path d="M6 6L18 18M18 6L6 18" />,
+  // tela cheia: quatro cantos com setas para fora
+  fullscreen: () => (
+    <>
+      <path d="M3.75 9V3.75H9M15 3.75H20.25V9M20.25 15V20.25H15M9 20.25H3.75V15" />
+      <path d="M4.5 4.5L9.5 9.5M19.5 4.5L14.5 9.5M19.5 19.5L14.5 14.5M4.5 19.5L9.5 14.5" className="thin" />
+    </>
+  ),
+  // Compartilhar do Safari: bandeja aberta com seta para cima
+  share: () => (
+    <>
+      <path d="M8.5 9.25H5.75V21H18.25V9.25H15.5" />
+      <path d="M12 2.75V15" />
+      <path d="M8.25 6.25L12 2.5L15.75 6.25" />
+    </>
+  ),
+  // dica: número de chamada com a linha até o ponto
+  tips: () => (
+    <>
+      <circle cx="8.5" cy="8.5" r="5.75" />
+      <path d="M8.5 7V11.5M8.5 4.9V5.6" />
+      <path d="M12.6 12.6C15 15 16.5 16.8 19 19.5" className="thin" />
+      <circle cx="19.25" cy="19.75" r="1.1" className="fillInk" />
+    </>
+  ),
+  // canhoto: os dois lados trocam
+  lefty: () => (
+    <>
+      <path d="M4 8.5H19M15.5 5L19.25 8.5L15.5 12" />
+      <path d="M20 15.5H5M8.5 12L4.75 15.5L8.5 19" />
+    </>
+  ),
+  // exemplos: prancha com a figura e o "Fig." embaixo
+  examples: (c) => (
+    <>
+      <rect x="3.75" y="2.75" width="16.5" height="18.5" />
+      {c.hatch(<circle cx="12" cy="10.5" r="4.25" />, "ex")}
+      <circle cx="12" cy="10.5" r="4.25" />
+      <path d="M7 18H11M13 18H17" className="thin" />
+    </>
+  ),
+  // peças prontas: bandeja com uma placa e um disco
+  parts: (c) => (
+    <>
+      <path d="M2.75 13.75V20.25H21.25V13.75" />
+      {c.hatch(<rect x="4.75" y="7.75" width="8.5" height="8.5" />, "pt")}
+      <rect x="4.75" y="7.75" width="8.5" height="8.5" />
+      <circle cx="17.25" cy="10" r="3.5" className="fillStage" />
+      <circle cx="17.25" cy="10" r="1" className="thin" />
+    </>
+  ),
+  layerAdd: () => (
+    <>
+      <rect x="7.75" y="2.75" width="13.5" height="9.5" className="thin" />
+      <rect x="2.75" y="7.75" width="13.5" height="9.5" className="fillStage" />
+      <path d="M18.5 15.5V21.5M15.5 18.5H21.5" />
+    </>
+  ),
+  duplicate: (c) => (
+    <>
+      <rect x="8.75" y="2.75" width="12.5" height="12.5" className="thin" />
+      {c.hatch(<rect x="2.75" y="8.75" width="12.5" height="12.5" />, "du")}
+      <rect x="2.75" y="8.75" width="12.5" height="12.5" />
+    </>
+  ),
+  trash: () => (
+    <>
+      <path d="M3.5 6.25H20.5M9 6V3.25H15V6" />
+      <path d="M5.75 6.25L7 21H17L18.25 6.25" />
+      <path d="M10 9.5V17.75M14 9.5V17.75" className="thin" />
+    </>
+  ),
+  // girar 90°: arco de um quarto com ponta de seta
+  rotate: () => (
+    <>
+      <path d="M5 12A7 7 0 0 1 12 5H14" />
+      <path d="M13.5 1.75L18 5L13.5 8.25Z" className="fillInk" />
+      <rect x="7.75" y="10.75" width="10.5" height="10.5" className="thin" />
+    </>
+  ),
+  // espelhar: eixo em traço-ponto e duas metades
+  mirror: (c) => (
+    <>
+      <path d="M12 2V5M12 7V8M12 10V14M12 16V17M12 19V22" className="thin" />
+      {c.hatch(<path d="M9.75 5.5V18.5L3 18.5Z" />, "mi")}
+      <path d="M9.75 5.5V18.5L3 18.5Z" />
+      <path d="M14.25 5.5V18.5L21 18.5Z" />
+    </>
+  ),
+  lock: () => (
+    <>
+      <rect x="4.75" y="10.75" width="14.5" height="10.5" />
+      <path d="M8 10.5V7.5C8 5.3 9.8 3.5 12 3.5C14.2 3.5 16 5.3 16 7.5V10.5" />
+      <path d="M12 14.5V17.5" />
+    </>
+  ),
+  unlock: () => (
+    <>
+      <rect x="4.75" y="10.75" width="14.5" height="10.5" />
+      <path d="M8 10.5V7.5C8 5.3 9.8 3.5 12 3.5C14 3.5 15.5 4.9 15.9 6.75" />
+      <path d="M12 14.5V17.5" />
+    </>
+  ),
+  eye: () => (
+    <>
+      <path d="M2.5 12C5 7.5 8.5 5.5 12 5.5C15.5 5.5 19 7.5 21.5 12C19 16.5 15.5 18.5 12 18.5C8.5 18.5 5 16.5 2.5 12Z" />
+      <circle cx="12" cy="12" r="3" />
+      <circle cx="12" cy="12" r="1" className="fillInk" />
+    </>
+  ),
+  eyeOff: () => (
+    <>
+      <path
+        d="M2.5 12C5 7.5 8.5 5.5 12 5.5C15.5 5.5 19 7.5 21.5 12C19 16.5 15.5 18.5 12 18.5C8.5 18.5 5 16.5 2.5 12Z"
+        className="dashed"
+      />
+      <path d="M4 20L20 4" />
+    </>
+  ),
+  grip: () => <path d="M7 8.5H17M7 12H17M7 15.5H17" className="thin" />,
+  minus: () => <path d="M5 12H19" />,
+  plus: () => <path d="M12 5V19M5 12H19" />,
+  // detalhes: cotas com valores
+  details: () => (
+    <>
+      <path d="M3 6.5H21M3 12H21M3 17.5H21" className="thin" />
+      <path d="M7 4.25V8.75M15 9.75V14.25M10 15.25V19.75" />
+    </>
+  ),
+  export: () => (
+    <>
+      <path d="M4 13.5V20.25H20V13.5" />
+      <path d="M12 3V15M7.75 7.25L12 3L16.25 7.25" />
+    </>
+  ),
+  import: () => (
+    <>
+      <path d="M4 13.5V20.25H20V13.5" />
+      <path d="M12 3V15M7.75 10.75L12 15L16.25 10.75" />
+    </>
+  ),
+  // fixa: o símbolo de apoio (traço com tiques a 45°)
+  fixed: (c) => (
+    <>
+      {c.hatch(<rect x="5.75" y="3.75" width="12.5" height="9.5" />, "fx")}
+      <rect x="5.75" y="3.75" width="12.5" height="9.5" />
+      <path d="M12 13.5V16.5M5 16.5H19" />
+      <path
+        d="M7 16.5L4.75 19.25M10 16.5L7.75 19.25M13 16.5L10.75 19.25M16 16.5L13.75 19.25M19 16.5L16.75 19.25"
+        className="thin"
+      />
+    </>
+  ),
+  // solta: a peça com setas de movimento
+  loose: (c) => (
+    <>
+      {c.hatch(<rect x="6.75" y="6.75" width="10.5" height="10.5" />, "lo")}
+      <rect x="6.75" y="6.75" width="10.5" height="10.5" />
+      <path d="M12 1.75V4.5M12 19.5V22.25M1.75 12H4.5M19.5 12H22.25" className="thin" />
+    </>
+  ),
+  pencil: () => (
+    <>
+      <path d="M4 20L5 15.5L16 4.5L19.5 8L8.5 19Z" />
+      <path d="M13.75 6.75L17.25 10.25" className="thin" />
+      <path d="M4 20H20" className="thin" />
+    </>
+  ),
+  up: () => (
+    <>
+      <path d="M12 20V5" />
+      <path d="M6.5 10L12 4.5L17.5 10" />
+    </>
+  ),
+  down: () => (
+    <>
+      <path d="M12 4V19" />
+      <path d="M6.5 14L12 19.5L17.5 14" />
+    </>
+  ),
 };
 
 interface IconProps {

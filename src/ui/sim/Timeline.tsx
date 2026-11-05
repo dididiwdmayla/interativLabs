@@ -5,7 +5,7 @@ import { useSimStore, type TimelineState } from "./simStore";
 /**
  * Linha do tempo em régua gravada (identidade, "Simulação"): os últimos
  * 10 s, tique longo a cada segundo e curto a cada 0,1 s (só os longos
- * quando não cabem), eventos em brasa, cabeça de leitura em ouro com ponta
+ * quando ficariam a menos de 4 px), eventos em brasa, cabeça de leitura em ouro com ponta
  * triangular. Arrastar mostra as poses gravadas; continuar reexecuta até
  * ali e segue. A cada quadro só mudam transforms e o texto do tempo.
  */
@@ -56,7 +56,7 @@ export function Timeline() {
   }, [ctl, k]);
 
   // tiques de base até base + 11 s, em px absolutos (t · k)
-  const short = k * 0.1 >= 5;
+  const short = k * 0.1 >= 4;
   let ticks = "";
   let longs = "";
   for (let i = 0; i <= 110; i++) {
@@ -75,7 +75,7 @@ export function Timeline() {
 
   return (
     <div
-      className="timeline stage__ui"
+      className="timeline"
       ref={ref}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);

@@ -1,22 +1,22 @@
 import { useUiStore } from "@/editor/useUiStore";
 
-interface ModeButtonProps {
-  className?: string;
-}
-
-/** Botão principal: o único elemento invertido da tela (fundo ink, texto stage). */
-export function ModeButton({ className = "" }: ModeButtonProps) {
+/**
+ * Montar / Testar num botão só. No Montar ele é o principal (o único bloco
+ * invertido da tela: fundo ink, texto stage) e diz "Testar"; no Testar fica
+ * em contorno e diz "Montar".
+ */
+export function ModeButton({ className = "" }: { className?: string }) {
   const mode = useUiStore((s) => s.mode);
   const toggle = useUiStore((s) => s.toggleMode);
-  const simulating = mode === "simulate";
+  const testing = mode === "simulate";
   return (
     <button
       type="button"
-      className={`btn ${simulating ? "btn--outline" : "btn--primary"} ${className}`}
-      aria-pressed={simulating}
+      className={`btn ${testing ? "btn--outline" : "btn--primary"} ${className}`}
+      aria-label={testing ? "Montar: voltar a editar" : "Testar: ligar a física"}
       onClick={toggle}
     >
-      {simulating ? "Editar" : "Simular"}
+      {testing ? "Montar" : "Testar"}
     </button>
   );
 }

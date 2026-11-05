@@ -75,6 +75,8 @@ export interface SceneModel {
   linkById: Map<Id, LinkModel>;
   /** caixa de tudo no mundo, mm */
   bounds: Box;
+  /** caixa do que interessa enquadrar: peças móveis e ligações (sem móveis: tudo) */
+  focus: Box;
   /** poses desenhadas */
   drawn: Map<Id, PartPose>;
 }
@@ -130,6 +132,17 @@ export function prepareScene(scene: Scene): SceneModel {
     y1 = Math.max(y1, p[1]);
   };
 
+  let f0 = Infinity;
+  let g0 = Infinity;
+  let f1 = -Infinity;
+  let g1 = -Infinity;
+  const growFocus = (p: Vec2) => {
+    f0 = Math.min(f0, p[0]);
+    g0 = Math.min(g0, p[1]);
+    f1 = Math.max(f1, p[0]);
+    g1 = Math.max(g1, p[1]);
+  };
+
   for (const part of scene.parts) {
     const li = layerIndex.get(part.layer) ?? 0;
     const g = shapeOutline(part.shape);
@@ -149,6 +162,8 @@ export function prepareScene(scene: Scene): SceneModel {
       for (const q of s.outer) grow(transform(q, part.x, part.y, part.angle));
     }
     const dynamic = !part.fixed && !groundScrewed.has(part.id);
+    if (dynamic)
+      for (const s of outline) for (const q of s.outer) growFocus(transform(q, part.x, part.y, part.angle));
     // paridade entre as peças do mesmo material na camada
     const same = lm.parts.filter((p) => p.part.material === part.material).length;
     const hatch: HatchId = part.material;
@@ -285,6 +300,7 @@ export function prepareScene(scene: Scene): SceneModel {
     if (lm) {
       links.push(lm);
       grow(lm.world);
+      if (lm.link.kind !== "slot") growFocus(lm.world);
     }
   }
 
@@ -294,7 +310,18 @@ export function prepareScene(scene: Scene): SceneModel {
     x1 = 50;
     y1 = 50;
   }
+  // margem do enquadramento: 6% do maior lado (no mínimo 3 mm)
+  const hasFocus = Number.isFinite(f0) && f1 - f0 + (g1 - g0) > 1;
+  const m = hasFocus ? Math.max(3, 0.06 * Math.max(f1 - f0, g1 - g0)) : 0;
+  const focus: Box = hasFocus
+    ? [Math.max(x0, f0 - m), Math.max(y0, g0 - m), 0, 0]
+    : [x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0)];
+  if (hasFocus) {
+    focus[2] = Math.max(1, Math.min(x1, f1 + m) - focus[0]);
+    focus[3] = Math.max(1, Math.min(y1, g1 + m) - focus[1]);
+  }
   return {
+    focus,
     scene,
     layers,
     parts,
