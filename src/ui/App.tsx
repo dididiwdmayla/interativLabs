@@ -10,7 +10,17 @@ import { MainSheet } from "./MainSheet";
 import { PartsDrawer } from "./PartsDrawer";
 import { LayerStack } from "./LayerStack";
 import { SidePanel } from "./Panel";
-import { DEFAULT_EXAMPLE, openExample } from "./scenes/examples";
+import {
+  boot,
+  exportJson,
+  flushAutosave,
+  importText,
+  newProject,
+  openExampleAsProject,
+  openProject,
+  startAutosave,
+  useProjects,
+} from "./projectFlow";
 import { Sheet } from "./Sheet";
 import { useSimStore } from "./sim/simStore";
 import { useSimulation } from "./sim/useSimulation";
@@ -65,9 +75,10 @@ function Workbench() {
   const [error, setError] = useState<string | null>(null);
   const model = useMemo(() => (current ? prepareScene(current.scene) : null), [current]);
 
-  // a cena padrão aparece montada, no Montar, ao abrir o app
+  // abre o último projeto (na primeira vez, "Meu primeiro mecanismo", cópia do objeto padrão)
   useEffect(() => {
-    if (!useUiStore.getState().current) openExample(DEFAULT_EXAMPLE).catch((e: Error) => setError(e.message));
+    if (!useUiStore.getState().current) boot().catch((e: Error) => setError(e.message));
+    return startAutosave();
   }, []);
 
   useSimulation(mode === "simulate", nodes);
@@ -75,7 +86,12 @@ function Workbench() {
 
   // gancho dos testes automatizados (tests/e2e): estados da interface e da simulação
   useEffect(() => {
-    (window as unknown as { __IL__?: unknown }).__IL__ = { ui: useUiStore, sim: useSimStore, openExample };
+    (window as unknown as { __IL__?: unknown }).__IL__ = {
+      ui: useUiStore,
+      sim: useSimStore,
+      openExample: openExampleAsProject,
+      projects: { useProjects, newProject, openProject, importText, exportJson, flushAutosave },
+    };
   }, []);
 
   const fitPad = useMemo(() => {

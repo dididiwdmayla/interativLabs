@@ -1,4 +1,3 @@
-import { useUiStore } from "@/editor/useUiStore";
 import type { Scene } from "@/model/types";
 import index from "../../../scenes/examples/index.json";
 
@@ -57,11 +56,4 @@ export async function loadExample(id: string): Promise<Scene> {
   const r = loadScene(raw);
   if (!r.ok) throw new Error(`Exemplo ${id} inválido: ${r.issues.map((x) => x.message).join("; ")}`);
   return r.scene;
-}
-
-/** Abre um exemplo no palco, enquadrado e no modo Editar. */
-export async function openExample(id: string): Promise<void> {
-  const e = EXAMPLES.find((x) => x.id === id);
-  const scene = await loadExample(id);
-  useUiStore.getState().openScene(id, scene, e?.figure ?? 1);
 }
