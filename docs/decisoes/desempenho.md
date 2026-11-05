@@ -25,11 +25,11 @@ A página `/#perf` ganhou a escolha da velocidade (Real, o padrão da medição;
 
 | Velocidade | qps mediana · p5 | Quadros > 20 ms | Passos por quadro | Física/quadro (mediana · p95) | Desenho/quadro (mediana · p95) | Interpolação/quadro (média · p95) |
 | --- | --- | --- | --- | --- | --- | --- |
-| Lento (1/20) | 59,9 · 59,5 | 1 de 540 | 0,2 | 0 · 2,2 ms | 0,7 · 3,0 ms | 0,004 · 0 ms |
-| Normal (¼) | 59,9 · 59,9 | 1 de 540 | 1,0 | 1,7 · 3,2 ms | 0,7 · 3,0 ms | 0,006 · 0,1 ms |
-| Real (1×) | 59,9 · 59,5 | 3 de 538 | 4,0 | 6,4 · 12,6 ms | 0,7 · 4,0 ms | 0,026 · 0,1 ms |
+| Lento (1/20) | 59,9 · 59,5 | 1 de 541 | 0,2 | 0,0 · 1,5 ms | 0,5 · 0,7 ms | 0,008 · 0,0 ms |
+| Normal (¼) | 59,9 · 59,9 | 0 de 541 | 1,0 | 1,1 · 1,5 ms | 0,5 · 0,8 ms | 0,004 · 0,0 ms |
+| Real (1×) | 59,9 · 59,5 | 0 de 541 | 4,0 | 3,7 · 6,9 ms | 0,5 · 0,7 ms | 0,004 · 0,0 ms |
 
-Em Lento o desenho agora roda em todo quadro (antes, só nos quadros em que chegava um passo, ~1 em 5): o custo é a escrita dos `transform` (0,7 ms de mediana), igual à de Normal.
+Em Lento o desenho agora roda em todo quadro (antes, só nos quadros em que chegava um passo, ~1 em 5): o custo é a escrita dos `transform` (0,5 ms de mediana), igual à de Normal.
 
 ## Onde o tempo ia e o que foi corrigido
 

@@ -1209,6 +1209,11 @@
   padding: var(--space-2) 0;
 }
 
+/* aviso sem o botão Desfazer: a margem da direita é do próprio texto */
+.toast__text:last-child {
+  padding-right: var(--space-4);
+}
+
 .toast__undo {
   pointer-events: auto;
   align-self: stretch;

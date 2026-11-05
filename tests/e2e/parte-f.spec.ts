@@ -76,7 +76,18 @@ test.describe("velocidades", () => {
         test(`${name}`, async ({ page }) => {
           await boot(page);
           await test_(page);
-          await page.evaluate((s) => (window as unknown as W).__IL__.sim.getState().ctl!.setSpeed(s), speed);
+          if (speed === 1) {
+            // Real pelo botão de verdade: a frase da primeira vez aparece
+            if (vp.mobile) await page.locator(".simctl__cycle").click();
+            else await page.getByRole("button", { name: /^Real/ }).click();
+            await expect(
+              page.getByText("Tempo real: peças pequenas se movem rápido de verdade."),
+            ).toBeVisible();
+          } else
+            await page.evaluate(
+              (s) => (window as unknown as W).__IL__.sim.getState().ctl!.setSpeed(s),
+              speed,
+            );
           await page.waitForTimeout(600);
           await page.screenshot({ path: `${DIR}/velocidade-${name}-${vp.name}.png` });
         });
@@ -268,4 +279,38 @@ test.describe("toque em outra camada", () => {
     });
     expect(after).toEqual({ layer: 0, part: "Placa de base" });
   });
+});
+
+/** Arrasto forte no "Cabo" (laboratório, Real): o peso vai até o fim do cabo e o cabo fica inteiro. */
+test.describe("cabo", () => {
+  for (const vp of [
+    { name: "390x844", width: 390, height: 844 },
+    { name: "1440x900", ...DESK },
+  ]) {
+    test.describe(vp.name, () => {
+      test.use({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 2 });
+      test("arrasto forte", async ({ page }) => {
+        await page.goto("/#lab/fixacoes/cabo");
+        const svg = page.locator(".lab__svg");
+        await svg.waitFor();
+        await page.getByRole("button", { name: /^Real/ }).click();
+        await page.locator(".lab__stagewrap").scrollIntoViewIfNeeded();
+        await page.waitForTimeout(800);
+        const box = (await page.locator('.lab__svg [data-part="p1"]').boundingBox())!;
+        const x = box.x + box.width / 2;
+        const y = box.y + box.height / 2;
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        // o dedo vai longe e rápido, na diagonal (o peso de Ø 18 mm está a 59 mm
+        // abaixo do ponto do cabo): até o mundo (200, 200), 4 vezes o cabo
+        const k = box.width / 18;
+        await page.mouse.move(x + 200 * k, y + (200 - 59) * k, { steps: 6 });
+        await page.waitForTimeout(500);
+        await page
+          .locator(".lab__stagewrap")
+          .screenshot({ path: `${DIR}/cabo-arrasto-forte-${vp.name}.png` });
+        await page.mouse.up();
+      });
+    });
+  }
 });
