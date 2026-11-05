@@ -197,6 +197,37 @@ Como ficou na implementação (Parte C), onde o texto acima deixava margem:
 - **Espessura**: camada nova com 3 mm; camada migrada com 10 mm (as massas da v1).
 - **Doses da carga** (Parte C2): `charge.shots` (inteiro ≥ 1, opcional, padrão 1) é quantas vezes a câmara acende; cada acendimento (sensor ou roteiro) queima uma dose inteira, nunca durante a queima da anterior. Sem o campo, a câmara acende uma vez só, como antes; nenhuma cena antiga muda. Cena de teste `gas/cargas`.
 
+## 3.2 Formato da cena (versão 3) — peça multicamada e trava
+
+Decidido em 05/11/2026. Entra na Fase 1 · Parte E2b, com a migração `v2 → v3` (só troca a versão: nenhuma cena v2 muda de comportamento nem de hash).
+
+**Peça multicamada.** Em mecanismo de verdade, uma peça só costuma trabalhar em planos diferentes: a roda que é engrenagem embaixo e catraca em cima, o pinhão com a manivela, o gatilho com a barra que desce até o retém. Hoje isso se faz com duas peças aparafusadas, o que funciona na física mas atrapalha na mão (duas seleções, uma ferragem que não existe na peça real). Na v3, a peça tem a forma principal na camada dela e, opcionalmente, **perfis** em outras camadas, todos presos à mesma origem e ao mesmo ângulo:
+
+```ts
+interface Scene { version: 3; /* … como na v2 … */ }
+
+interface Part { /* … como na v2: layer, shape, material, source … */
+  profiles?: Profile[] }                     // um por camada extra; nunca na camada da principal
+
+interface Profile { id: Id; layer: Id; shape: Shape;     // forma em coordenadas locais da peça
+  material?: MaterialId;                     // sem = o da peça
+  source?: { generator: string; params: Record<string, number | string> } }
+
+type Link = /* … todas as da v2 … */
+  | { kind: "lock"; a: Id | null; b: Id; at: Vec2;       // trava: prende até soltar
+      breakForce?: number }                  // N; sem = só solta por toque ou sensor
+  // slot ganha: profile?: Id                — perfil da guia que tem o furo (sem = a forma principal)
+  // sensor ganha a ação: { do: "release"; target: Id /* trava */ }
+```
+
+Regras da v3:
+
+- **Um corpo, várias camadas.** A peça é um corpo só no motor; cada perfil vira as suas formas convexas com o filtro da própria camada, então ele toca só o que está na camada dele. Massa e inércia somam todos os perfis (área × espessura da camada × densidade do material do perfil).
+- **Perfis em camadas distintas**, uma por camada, nenhuma igual à da principal. Não precisam ser vizinhas: a ligação entre planos fica implícita, como a de um pino.
+- **Geometria numa ligação.** Quando uma ligação usa a forma de uma peça (furo do rasgo, face de parede de câmara, eixo da guia de mola, hospedeiro de pino e sensor), vale o perfil na camada da ligação; sem perfil ali, a forma principal. O rasgo diz o perfil explicitamente (`slot.profile`).
+- **Editar.** Mover e girar agem na peça inteira. Esticar, o lápis e o tamanho paramétrico agem no perfil da camada ativa. Mudar a peça de camada desloca todos os perfis juntos na pilha (bloqueado se algum sairia dela). Apagar uma camada apaga os perfis que estão nela; se for a da principal, o primeiro perfil restante vira a principal.
+- **Trava** (`lock`): solda rígida entre `b` e `a` (ou o fundo), igual a um parafuso enquanto está presa, mas com as peças em corpos separados. Solta, a junta some e não volta até reiniciar a simulação (que sempre parte do desenhado). Solta por toque nela no Testar, pela ação `release` de um sensor, ou sozinha quando a força na junta passa de `breakForce` (trava fusível). O toque que solta é uma entrada gravada, como o arrasto, para a linha do tempo reproduzir igual.
+
 ## 4. Física
 
 ### Camadas como filtros
@@ -225,6 +256,8 @@ Cada camada `i` tem o bit `1 << i`. Uma peça usa categoria e máscara iguais ao
 | Mola | Toda mola ganha uma junta de distância com mínimo = comprimento sólido (o batente das espiras) e sem colisão desligada. Força de Hooke explícita a cada passo, com o modo (apoiada só age encostada e só empurra; só tração só age esticada e só puxa); se `ω·h > 0,5` ou `c·h/m > 0,25` (m = massa efetiva ao longo da mola na pose desenhada), vira a mola nativa da junta, com `lower/upperSpringForce` no lugar do modo. Mola com guia é sempre explícita. |
 | Câmara | Estado do gás comum (`src/engine/chamber.ts`); a força entra no solver como mola de distância entre as faces (ver abaixo). |
 | Arrasto (a mão) | Corpo cinemático no alvo e junta de motor com mola linear limitada (resolvida junto com os contatos, como nos exemplos do Box2D v3.2). Ver "Arrasto", abaixo. |
+| Peça multicamada (v3) | Um corpo com as formas convexas de todos os perfis, cada uma com o filtro da sua camada e a densidade do seu material e da espessura da sua camada. |
+| Trava (v3) | Junta soldada rígida (como as juntas, a 960 Hz). Soltar = destruir a junta na fronteira do passo. Trava fusível: a força de reação da junta, lida a cada passo, passando de `breakForce` solta no fim daquele passo. O estado (presa ou solta) vai no snapshot. |
 
 ### Arrasto (Parte F)
 
@@ -315,8 +348,8 @@ Feito para o dedo e para a caneta, paisagem primeiro no celular. A complexidade 
 
 - Um dedo na peça: seleciona; arrastar move (com encaixe). Um dedo no fundo: move a vista. Dois dedos: zoom e move. Toque longo na peça: menu da peça.
 - Toque com dois dedos: desfaz. Com três: refaz.
-- **Menus circulares de borda:** arrastar um dedo a partir do fundo da prancha até a faixa lateral (15% da largura) e segurar parado 1 s abre um menu circular naquela borda; um anel que se completa mostra o segundo passando, e soltar antes disso é só mover a vista (que volta para onde estava se o menu abrir). Escolha deslizando até o item e soltando (menu de marcação) ou tocando depois de aberto. As abas no meio das bordas abrem o mesmo menu com um toque. Direita: **Inserir** (peças, ligações, molas, gás e sensor). Esquerda: **Vista e modos** (camadas em cores, raio-x, isolar camada, enquadrar, tela cheia, testar).
-- **Caneta** (`pointerType: "pen"`): com a opção ligada, a caneta desenha e seleciona; o dedo só move a vista e dá zoom.
+- **Menus circulares de borda:** arrastar um dedo a partir do fundo da prancha até a faixa lateral (15% da largura) e segurar parado 1 s abre um menu circular naquela borda; um anel que se completa mostra o segundo passando, e soltar antes disso é só mover a vista (que volta para onde estava se o menu abrir). Escolha deslizando até o item e soltando (menu de marcação) ou tocando depois de aberto. As abas no meio das bordas abrem o mesmo menu com um toque. Direita: **Inserir** (peças prontas, nova camada, e atalhos para o Martelo e o Lápis). Esquerda: **Vista e modos** (camadas em cores, raio-x, isolar camada, enquadrar, tela cheia, testar).
+- **Caneta** (`pointerType: "pen"`): no Lápis, a caneta desenha e o dedo só move a vista e dá zoom (ver "Ferramentas da mão").
 
 ### Peça selecionada
 
@@ -326,8 +359,46 @@ Feito para o dedo e para a caneta, paisagem primeiro no celular. A complexidade 
 ### Inserir e conectar
 
 - **Gaveta de peças prontas** (pelo menu Inserir): placa, barra, disco, bloco, alavanca, esfera, engrenagem, catraca, cremalheira, placa com furo, placa com rasgo. Arrasta para a prancha; a peça entra na camada ativa e é paramétrica (`source.generator`), então mudar o tamanho regenera a forma.
-- **Conectar por toque:** tocar onde duas peças se sobrepõem abre um menu circular só com as ligações válidas ali (parafuso, eixo, pino, rasgo…), cada uma com ícone e uma frase. Mola, haste e cabo: arrastar de uma peça à outra.
-- Desenho livre e furo/rasgo à mão: com a caneta ou com o dedo em modo desenho.
+- ~~Conectar por toque: tocar onde duas peças se sobrepõem abre um menu circular.~~ Substituído em 05/11 pelas ferramentas da mão (abaixo): com uma placa de base embaixo de tudo, todo ponto é sobreposição, e o toque precisa continuar sendo seleção.
+
+### Ferramentas da mão (decidido em 05/11/2026)
+
+Dois botões redondos flutuantes, só no Montar, na fileira de baixo junto do desfazer (o canhoto troca o lado): o **Martelo** (ligar e fixar) e o **Lápis** (forma). Cada um liga um modo que fica até tocar de novo no botão, apertar Esc ou ir para o Testar. Com um modo ligado, uma faixa mostra as ferramentas dele e uma frase diz o que a ferramenta ativa faz e o que o próximo toque vai fazer ("Eixo: a Alavanca 7 gira sobre a Placa de base 1"). Um dedo arrastando no fundo continua movendo a vista; dois dedos, zoom; os toques de desfazer e refazer continuam valendo.
+
+**Martelo** — quatro grupos:
+
+| Grupo | Ferramentas | Gesto |
+| --- | --- | --- |
+| Fixar | Parafuso, Eixo, Pino, Trava | Tocar no ponto. |
+| Ligar | Mola, Haste, Cabo | Arrastar de um ponto a outro. |
+| Guiar | Trilho | Arrastar na direção do curso, a partir da peça que corre. |
+| Gás | Câmara, Sensor | Câmara: arrastar ao longo do furo, do fundo à boca. Sensor: tocar no ponto e depois no alvo. |
+
+- **Prévia acima do dedo.** Pressionar mostra a ferragem (ou a mola, a haste, o trilho) deslocada acima do dedo, com uma linha fina até o ponto, as guias de encaixe e as duas peças que vão ser ligadas realçadas em ouro (a de cima cheia, a de baixo tracejada). Arrastar ajusta; soltar crava. Com caneta e mouse, sem deslocamento.
+- **Quais peças.** `b` é a peça mais alta sob o ponto na camada ativa (se não houver, a mais alta abaixo); `a` é a próxima abaixo dela no mesmo ponto (mesma camada, ordem menor, ou camadas de baixo); sem nenhuma, o fundo. O cartão da ligação mostra o par e deixa trocar entre as peças daquele ponto.
+- **Encaixe forte em centros.** Eixo e parafuso puxam para o centro de disco, engrenagem e furo redondo quando o ponto cai perto dele (até 30% do raio ou 24 px de tela). Os outros encaixes são os do §6 (pontos, bordas, retas das ligações, grade).
+- **Pino.** O hospedeiro é `b`. A faixa vai da camada dele até a vizinha onde o ponto está livre (primeiro para baixo, depois para cima). Se o ponto cai num furo ou rasgo de uma peça de outra camada, a faixa chega até ela e o rasgo nasce junto (`joint` se o rasgo for reto, senão `contact`). O pino nunca nasce dentro de material: se nasceria, o cartão avisa.
+- **Trava.** Fixa como o parafuso; no Testar, um toque nela solta (a ferragem salta para fora). Cartão: soltar por toque, por sensor ou fusível (com a força).
+- **Ligar e guiar.** Ponta solta no fundo vazio = o fundo. Mola nasce presa, com o comprimento livre igual ao desenhado. Trilho: direção com encaixe de 15° e no eixo principal da peça; o curso é o comprimento arrastado. Câmara: o corpo é a peça sob o começo do arraste; as paredes, as peças móveis da mesma camada que cruzam a linha (até duas, a da frente primeiro); o diâmetro, a largura livre medida no meio da linha.
+- **Mexer depois.** Ligação selecionada se arrasta pela ferragem, com o mesmo encaixe. As alças no palco ajustam o que é geometria: batentes de ângulo do eixo, curso do trilho, comprimento livre da mola, raio do sensor.
+- Cada cravada é um comando ("Cravar eixo 12"), com desfazer. Animação curta de cravar (só `transform` e `opacity`) e vibração de 12 ms no Android.
+
+**Cartão da ligação** — predefinições antes dos números: parafuso rígido ou elástico (vira suporte elástico, firme ou macio); eixo livre, com atrito (pouco, muito), com motor (sentido, velocidade, força), com mola de torção (macia, média, dura) e batentes; mola presa, apoiada ou só tração, macia, média ou dura, com guia (tocar na peça-guia); haste, cabo e mola se trocam entre si mantendo as pontas; trilho com mola de retorno e atrito por predefinição; trava por toque, por sensor ou fusível; câmara com carga fraca, média ou forte, doses, e as listas de paredes, respiros, portas (tocar para acrescentar); sensor com as ações (escolher a ação, tocar no alvo). "Detalhes" continua com todos os números.
+
+**Peça multicamada no cartão da peça** — "Camadas desta peça": as camadas que ela ocupa (tocar ativa a camada e realça o perfil), "Estender para outra camada" (escolher a camada, ou uma nova acima ou abaixo, e a forma: cópia desta, disco, engrenagem, catraca, came, alavanca), "Tirar desta camada", "Separar em peça" (vira peça própria aparafusada à original) e "Fundir peças aparafusadas" (o inverso, quando cada uma está numa camada). A gaveta ganha peças prontas multicamada (engrenagem com catraca, pinhão com manivela) e o gerador de came (excêntrico e caracol).
+
+**Lápis** (Parte E2c) — dois controles, e a combinação diz o que acontece:
+
+| | Somar | Tirar |
+| --- | --- | --- |
+| **Contorno** (laço fechado, ou traço de borda a borda) | acrescenta a região à peça | recorta a região da peça |
+| **Traço** (com largura) | pincel: barra ou alavanca à mão | borracha; reto, vira rasgo; um toque, furo redondo |
+
+- Age na peça escolhida, no perfil da camada ativa (sem peça escolhida, na mais alta sob o começo do traço). Somar onde não há peça da camada ativa cria uma peça nova.
+- Traço aberto de borda a borda divide a peça em dois lados: o menor vem marcado em brasa ("vai sair"), com "trocar lado" e confirmar. Se o corte deixar duas partes soltas, viram duas peças (com aviso) e cada ligação fica com a parte que contém o ponto dela.
+- **Régua** (liga e desliga): traço quase reto vira reta, quase círculo vira círculo, cantos viram vértices. Com a régua, a borracha reta dá um rasgo reto de verdade (vale para rasgo `joint`).
+- Peça paramétrica que passa pelo lápis vira forma livre (aviso curto; desfazer volta). Engrenagem e disco viram polígono.
+- **Caneta:** com caneta (`pointerType: "pen"`), ela desenha e o dedo só move a vista, sem precisar de opção.
 
 ### Entender
 
@@ -384,3 +455,6 @@ Onde o texto acima deixava margem, ou o uso mostrou outra coisa:
 | Formato v2 e ligações 2.0 | 04/11 | Fechada (§3.1); implementada na Fase 1 · Parte C |
 | Gravidade | 04/11 | Real (9 810 mm/s²) por padrão; calibração de contato e subpassos feita na Parte C (§4) |
 | Funções transcendentais | Fase 1 · Parte C | Fechada: `src/geometry/dmath.ts` (fdlibm) em todo o código de física e geometria; mesmo hash no Node e no Chromium |
+| Velocidades | 04/11 (Parte F) | Fechada: Lento 1/20, Normal ¼ (padrão), Real 1×, com interpolação de desenho |
+| Peça multicamada e trava (formato v3) | 05/11 | Fechada (§3.2); implementação na Fase 1 · Parte E2b |
+| Ferramentas da mão: Martelo e Lápis | 05/11 | Fechada (§6); Martelo na Parte E2b, Lápis na E2c. Substitui o "conectar por toque na sobreposição" |

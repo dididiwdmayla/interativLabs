@@ -17,6 +17,8 @@ O protótipo reescrito sobre a arquitetura definitiva, com o motor escolhido por
 
 Saída: um app no ar na Vercel que faz tudo o que o protótipo fazia, mais desfazer, salvar projetos e a linha do tempo básica, com os testes do motor passando.
 
+Cresceu no caminho (04–05/11): palco vivo na pele da Prancha índigo, editor tátil em paisagem, exemplo-vitrine, e as ferramentas da mão para montar do zero: Martelo (ligar e fixar), peça multicamada e trava (formato v3), Lápis (recortar, acrescentar, borracha e rasgo) e o modo camadas em cores. Partes e itens em `docs/fases/fase-1.md`.
+
 ## Fase 2 — Linguagem visual
 
 A base da pele (contorno, parede, chanfro, sombras, hachuras, papel, ferragens, molas, chamadas) entra antes, no palco vivo da Fase 1 · Parte D. A Fase 2 fecha o acabamento: falhas de tinta e madeira (lote 01 revisto), efeitos (pontilhado do gás, leque do escape, faíscas de impacto), tela de entrada com a ilustração das pranchas, movimento de interface com as curvas da identidade, ícones finais e revisão de diretor de arte em todas as telas.

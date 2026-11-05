@@ -1,6 +1,6 @@
 # Fase 1 — Fundação
 
-Branch: `fase-1`. A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt: **A** (itens 1–2, feita), **B** (3–4, feita), **C** (item 5: motor definitivo e ligações 2.0, feita), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo, com o renderizador definitivo na Prancha índigo), **E1** (item 10: pipeline de assets, feita), **E2a** (itens 7–9: base do editor tátil, paisagem e tela cheia, menus de borda, botão da peça, gaveta de peças, camadas e projetos) e **E2b** (item 13: conectar por toque, caneta, ajustes simples, modo camadas em cores, cartões, tutorial e rastro), **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit. Ao terminar, abra um PR para o `main` com o documento de verificação.
+Branch: `fase-1` (ou o da sessão do executor). A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt e o seu PR para o `main`: **A** (itens 1–2), **B** (3–4), **C** (item 5: motor definitivo e ligações 2.0), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo), **E1** (item 10: pipeline de assets), **E2a** (itens 7–9: base do editor tátil), **F** (item 14: correções do teste real e exemplo-vitrine), todas feitas; **E2b** (item 13: Martelo, cartões de ligação, peça multicamada e trava), **E2c** (item 15: Lápis, caneta e camadas em cores), **E2d** (item 16: entender: cartões "o que é", tutorial e rastro) e **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit.
 
 Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual já usa os tokens, a paleta e as fontes da Prancha índigo (`docs/identidade/identidade.md`), mas sem hachuras, texturas nem ferragens: isso é da Fase 2. Alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 completa a pele, não refaz a estrutura.
 
@@ -91,9 +91,17 @@ O modelo de interação está em `docs/arquitetura.md` §6. A Parte E2a entrega:
 
 O app abre com um mecanismo montado, que a pessoa opera e edita a partir dele: um lançador de esferas de brinquedo com ferrolho que recua pelo gás (recuo do fundo), percussor, retém, gatilho e carregador. Proporções inventadas, gás didático, nenhuma reprodução de arma real. Mostra as ligações 2.0 juntas: mola de retorno numa haste-guia, molas apoiadas, rasgo como guia, pino entre camadas, câmara com duas paredes, sensor. Cena de teste com o ciclo completo. Subitens e aceites no prompt da Parte C2.
 
-## Item 13 — Conectar e entender (Parte E2b)
+## Item 13 — Martelo, cartões de ligação, peça multicamada e trava (Parte E2b)
 
-Conectar por toque e por arrasto, desenho livre e furo/rasgo com caneta, ajustes simples com predefinições, modo camadas em cores com afastamento 2,5D e isolamento, cartões "o que é", tutorial sobre o objeto padrão e rastro do movimento no Testar. Prompt depois da revisão da E2a.
+Formato v3 (`docs/arquitetura.md` §3.2) e as ferramentas da mão (§6, "Ferramentas da mão"), menos o Lápis:
+- 13.1 Formato v3: perfis por camada, trava, `slot.profile`, ação `release`; migração `v2 → v3` sem mudar nenhum hash.
+- 13.2 Motor e desenho dos perfis e da trava (soltar por toque, sensor e força), com a entrada gravada.
+- 13.3 Martelo: Fixar (parafuso, eixo, pino com rasgo automático, trava), com prévia acima do dedo e encaixe forte em centros.
+- 13.4 Martelo: Ligar (mola, haste, cabo), Guiar (trilho) e Gás (câmara e sensor), e mover a ligação depois.
+- 13.5 Cartões de ligação com predefinições, trocas de tipo, alças no palco e as listas da câmara e do sensor.
+- 13.6 Peça multicamada no cartão da peça, gerador de came e peças prontas multicamada.
+- 13.7 Exemplo "Roda e lingueta" e cenas de teste.
+- 13.8 Verificação.
 
 ## Item 14 — Correções do teste real e exemplo-vitrine (Parte F)
 
@@ -106,3 +114,11 @@ Depois do primeiro teste do Will no celular (04/11):
 - paisagem sem a coluna vazia da esquerda.
 
 Subitens e aceites no prompt da Parte F.
+
+## Item 15 — Lápis, caneta e camadas em cores (Parte E2c)
+
+O Lápis de §6 (contorno e traço, somar e tirar, régua, dividir em duas peças, forma livre), a caneta desenhando com o dedo movendo a vista, e o modo camadas em cores (cor ordenada por camada, número na peça, afastamento 2,5D, isolar camada). Prompt depois da revisão da E2b.
+
+## Item 16 — Entender (Parte E2d)
+
+Cartões "o que é" de cada ligação com animação curta, tutorial sobre o objeto padrão e rastro do movimento no Testar. Prompt depois da revisão da E2c.
