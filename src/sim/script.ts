@@ -31,6 +31,8 @@ export type Quantity =
   | { part: Id; along: Vec2; at?: Vec2 }
   /** distância de um ponto local da peça até onde ele estava no início */
   | { part: Id; disp: true; at?: Vec2 }
+  /** velocidade do centro da peça no último passo (mm/s), projetada no eixo `vel` (mundo) */
+  | { part: Id; vel: Vec2 }
   /** campo numérico do estado da ligação, com caminho (ex.: "walls.0.impulse") */
   | { link: Id; field: string }
   /** distância entre dois pontos (peça null = mundo) */
@@ -88,13 +90,33 @@ export type ScriptAssertion = Base &
         event: string;
         match?: Record<string, string | number>;
       }
-    /** depois do evento, a grandeza cai abaixo de `fraction` do pico em até `within` s */
+    /**
+     * depois do evento, a grandeza cai abaixo de `fraction` do pico em até
+     * `within` s; com `from`, vale o primeiro evento a partir desse instante
+     * (e o pico desde ele)
+     */
     | {
         kind: "dropsAfter";
         q: Quantity;
         event: string;
         match?: Record<string, string | number>;
         fraction: number;
+        within: number;
+        from?: number;
+      }
+    /**
+     * depois do primeiro evento (a partir de `from`), a grandeza sai da faixa
+     * [min, max] e volta a ela em até `within` s (ex.: o ferrolho que recua e
+     * volta ao batente)
+     */
+    | {
+        kind: "returnsAfter";
+        q: Quantity;
+        event: string;
+        match?: Record<string, string | number>;
+        from?: number;
+        min?: number;
+        max?: number;
         within: number;
       }
     | { kind: "maxPenetration"; max: number; from?: number }

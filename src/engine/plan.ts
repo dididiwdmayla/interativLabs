@@ -621,6 +621,7 @@ export function buildPlan(scene: Scene): Plan {
           p0: l.gas.p0,
           charge: l.gas.charge?.amount ?? 0,
           burn: (l.gas.charge?.burnMs ?? 0) / 1000,
+          shots: l.gas.charge?.shots ?? 1,
         });
         break;
       }

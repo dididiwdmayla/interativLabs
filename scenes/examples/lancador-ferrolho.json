@@ -1,0 +1,753 @@
+{
+  "version": 2,
+  "meta": {
+    "title": "Lançador de ferrolho",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Armação",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Ferrolho",
+      "visible": true,
+      "locked": false,
+      "thickness": 4
+    },
+    {
+      "id": "L3",
+      "name": "Disparo",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L4",
+      "name": "Gatilho",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Corpo",
+      "layer": "L1",
+      "x": -41,
+      "y": 29,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-75, -41],
+          [71, -41],
+          [71, -19],
+          [75, -9],
+          [75, 3],
+          [67, 17],
+          [45, 17],
+          [44, 41],
+          [15, 41],
+          [7, -5],
+          [-25, -7],
+          [-29, -19],
+          [-75, -19]
+        ],
+        "holes": [
+          [
+            [9.2, -15.2],
+            [14.2, -15.2],
+            [16, -12.7],
+            [19, -12.7],
+            [19, -9.3],
+            [9.2, -9.3]
+          ],
+          [
+            [51, -5],
+            [67, -8],
+            [71, 1],
+            [65, 11],
+            [50, 12]
+          ]
+        ]
+      },
+      "material": "aluminum",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 4,
+      "name": "Haste-guia",
+      "layer": "L1",
+      "x": -97,
+      "y": -4,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-17, -1.2],
+          [17, -1.2],
+          [17, 1.2],
+          [-17, 1.2]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 2,
+      "name": "Cano",
+      "layer": "L2",
+      "x": 35,
+      "y": -6.6,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-49, -1.4],
+          [35, -1.4],
+          [35, -3.4],
+          [41, -3.4],
+          [41, -1.4],
+          [49, -1.4],
+          [49, 3.45],
+          [-49, 3.45]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 3,
+      "name": "Canal do carregador",
+      "layer": "L2",
+      "x": 35.4,
+      "y": 32.6,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-48.6, -29.45],
+          [-46.6, -29.45],
+          [-46.6, 27.4],
+          [-40.2, 27.4],
+          [-40.2, -27.3],
+          [-38, -29.45],
+          [-28.75, -29.45],
+          [-25.75, -27.95],
+          [-22.75, -29.45],
+          [48.6, -29.45],
+          [48.6, -23.6],
+          [-38.2, -23.6],
+          [-38.2, 29.4],
+          [-48.6, 29.4]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p5",
+      "ref": 10,
+      "name": "Ferrolho",
+      "layer": "L2",
+      "x": -63.7,
+      "y": -1.6,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-18.3, -4.4],
+          [18.3, -4.4],
+          [18.3, 4.4],
+          [-18.3, 4.4]
+        ],
+        "holes": []
+      },
+      "material": "polymer",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p6",
+      "ref": 11,
+      "name": "Luva",
+      "layer": "L2",
+      "x": -20,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-26.4, -2.8],
+          [26.4, -2.8],
+          [26.4, -2.05],
+          [-25.4, -2.05],
+          [-25.4, 2.05],
+          [26.4, 2.05],
+          [26.4, 2.8],
+          [-26.4, 2.8]
+        ],
+        "holes": []
+      },
+      "material": "polymer",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p7",
+      "ref": 12,
+      "name": "Êmbolo",
+      "layer": "L2",
+      "x": -11.9,
+      "y": -1.2,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-18.5, -3.3],
+          [-16.5, -3.3],
+          [-16.5, -0.8],
+          [18.55, -0.8],
+          [18.55, 3.2],
+          [-18.5, 3.2]
+        ],
+        "holes": []
+      },
+      "material": "polymer",
+      "fixed": false,
+      "fast": true
+    },
+    {
+      "id": "p8",
+      "ref": 13,
+      "name": "Esfera 1",
+      "layer": "L2",
+      "x": 9.65,
+      "y": 1.2959,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p9",
+      "ref": 14,
+      "name": "Esfera 2",
+      "layer": "L2",
+      "x": -8,
+      "y": 5.85,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p10",
+      "ref": 15,
+      "name": "Esfera 3",
+      "layer": "L2",
+      "x": -8,
+      "y": 11.9,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p11",
+      "ref": 16,
+      "name": "Esfera 4",
+      "layer": "L2",
+      "x": -8,
+      "y": 17.95,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p12",
+      "ref": 17,
+      "name": "Esfera 5",
+      "layer": "L2",
+      "x": -8,
+      "y": 24,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p13",
+      "ref": 18,
+      "name": "Esfera 6",
+      "layer": "L2",
+      "x": -8,
+      "y": 30.05,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p14",
+      "ref": 19,
+      "name": "Empurrador",
+      "layer": "L2",
+      "x": -8,
+      "y": 35.1,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-3, -2],
+          [3, -2],
+          [3, 2],
+          [-3, 2]
+        ],
+        "holes": []
+      },
+      "material": "polymer",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p15",
+      "ref": 20,
+      "name": "Percussor",
+      "layer": "L3",
+      "x": -67.5,
+      "y": 1.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-9, -3],
+          [8, -3],
+          [9, -1.5],
+          [8, 0],
+          [-6, 0],
+          [-6, 3],
+          [-8, 3],
+          [-9, 2]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": false,
+      "fast": true
+    },
+    {
+      "id": "p16",
+      "ref": 21,
+      "name": "Retém",
+      "layer": "L3",
+      "x": -66.2,
+      "y": 9.5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-7.3, -7.5],
+          [-6.3, -7.5],
+          [-3.8, -4.5],
+          [4.2, -4.5],
+          [4.4, -6.9],
+          [5.7, -7.55],
+          [7, -6.9],
+          [7.2, -5],
+          [7.2, 5.3],
+          [5.7, 7.5],
+          [4.2, 7.5],
+          [4.2, -2],
+          [-7.3, -2]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p17",
+      "ref": 30,
+      "name": "Gatilho",
+      "layer": "L4",
+      "x": 15.4,
+      "y": 27,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-2.8, -14],
+          [0, -13.4],
+          [3.8, -2],
+          [3.8, 1],
+          [2.2, 7],
+          [-0.4, 12],
+          [-3, 14],
+          [-3.8, 12.6],
+          [-1.4, 7],
+          [-0.4, 1.5],
+          [-0.6, -1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p18",
+      "ref": 31,
+      "name": "Barra do gatilho",
+      "layer": "L4",
+      "x": -24.9,
+      "y": 14.9,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-40.1, -0.9792],
+          [40.1, -1.9062],
+          [40.1, 0.8938],
+          [-40.1, 1.8208]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": false,
+      "fast": true
+    }
+  ],
+  "links": [
+    {
+      "id": "k19",
+      "ref": 40,
+      "kind": "screw",
+      "a": "p1",
+      "b": "p3",
+      "at": [5, 0.6]
+    },
+    {
+      "id": "k20",
+      "ref": 41,
+      "kind": "screw",
+      "a": "p1",
+      "b": "p4",
+      "at": [-43.4, 28.4]
+    },
+    {
+      "id": "k21",
+      "ref": 42,
+      "kind": "screw",
+      "a": "p5",
+      "b": "p6",
+      "at": [-25.9, 0]
+    },
+    {
+      "id": "k22",
+      "ref": 43,
+      "kind": "slider",
+      "a": "p1",
+      "b": "p5",
+      "at": [-1.3, -1.4],
+      "dir": 0,
+      "travel": [-22, 0]
+    },
+    {
+      "id": "k23",
+      "ref": 44,
+      "kind": "spring",
+      "a": "p1",
+      "b": "p5",
+      "atA": [-71, -33],
+      "atB": [-18.3, -2.4],
+      "k": 0.015,
+      "damping": 0,
+      "freeLength": 90,
+      "mode": "seated",
+      "guide": "p2",
+      "coil": {
+        "outerD": 5.2,
+        "wireD": 0.5,
+        "turns": 10
+      }
+    },
+    {
+      "id": "k24",
+      "ref": 45,
+      "kind": "spring",
+      "a": "p3",
+      "b": "p5",
+      "atA": [-49, 1.2],
+      "atB": [18.3, -3.8],
+      "k": 0.002,
+      "damping": 0.009,
+      "freeLength": 54.4,
+      "mode": "seated",
+      "coil": {
+        "outerD": 4,
+        "wireD": 0.4,
+        "turns": 9
+      }
+    },
+    {
+      "id": "k25",
+      "ref": 46,
+      "kind": "slider",
+      "a": "p5",
+      "b": "p7",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [0, 40],
+      "spring": {
+        "k": 0.05,
+        "rest": 0,
+        "damping": 0.0004
+      }
+    },
+    {
+      "id": "k26",
+      "ref": 47,
+      "kind": "chamber",
+      "body": null,
+      "at": [-45.4, 0],
+      "dir": 0,
+      "bore": 6,
+      "length": 100,
+      "walls": [
+        {
+          "part": "p7",
+          "seal": 100
+        },
+        {
+          "part": "p5",
+          "seal": 16
+        }
+      ],
+      "vents": [
+        {
+          "at": 7,
+          "d": 0.5,
+          "open": true
+        }
+      ],
+      "ports": [],
+      "gas": {
+        "model": "adiabatic",
+        "gamma": 1.4,
+        "p0": 101.325,
+        "charge": {
+          "amount": 0.45,
+          "burnMs": 1,
+          "shots": 12
+        }
+      }
+    },
+    {
+      "id": "k27",
+      "ref": 48,
+      "kind": "slider",
+      "a": "p4",
+      "b": "p14",
+      "at": [0, 0],
+      "dir": -1.5707963267948966,
+      "travel": [0, 29.8]
+    },
+    {
+      "id": "k28",
+      "ref": 49,
+      "kind": "spring",
+      "a": "p4",
+      "b": "p14",
+      "atA": [-43.4, 27.4],
+      "atB": [0, 2],
+      "k": 0.008,
+      "damping": 0.0003,
+      "freeLength": 79.15,
+      "mode": "seated",
+      "coil": {
+        "outerD": 5.6,
+        "wireD": 0.4,
+        "turns": 18
+      }
+    },
+    {
+      "id": "k29",
+      "ref": 50,
+      "kind": "slider",
+      "a": "p5",
+      "b": "p15",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-1, 9]
+    },
+    {
+      "id": "k30",
+      "ref": 51,
+      "kind": "spring",
+      "a": "p5",
+      "b": "p15",
+      "atA": [-17.8, 1.6],
+      "atB": [-9, -1.5],
+      "k": 0.025,
+      "damping": 0.000005,
+      "freeLength": 15.5,
+      "mode": "fixed",
+      "coil": {
+        "outerD": 2.4,
+        "wireD": 0.4,
+        "turns": 8
+      }
+    },
+    {
+      "id": "k31",
+      "ref": 52,
+      "kind": "axle",
+      "a": "p1",
+      "b": "p16",
+      "at": [5.7, -6.25],
+      "limit": {
+        "lower": -0.8,
+        "upper": 0
+      },
+      "torsion": {
+        "k": 3,
+        "rest": 0.3,
+        "damping": 0.0002
+      }
+    },
+    {
+      "id": "k32",
+      "ref": 53,
+      "kind": "sensor",
+      "host": "p1",
+      "at": [-8, -29],
+      "r": 1.5,
+      "layers": ["L3", "L3"],
+      "minSpeed": 800,
+      "actions": [
+        {
+          "do": "ignite",
+          "target": "k26"
+        }
+      ]
+    },
+    {
+      "id": "k33",
+      "ref": 54,
+      "kind": "axle",
+      "a": "p1",
+      "b": "p17",
+      "at": [1.6, -1],
+      "limit": {
+        "lower": 0,
+        "upper": 0.55
+      },
+      "torsion": {
+        "k": 4,
+        "rest": -0.3,
+        "damping": 0.0005
+      }
+    },
+    {
+      "id": "k34",
+      "ref": 55,
+      "kind": "axle",
+      "a": "p17",
+      "b": "p18",
+      "at": [38.7942, -0.4911],
+      "torsion": {
+        "k": 8,
+        "rest": 0.3,
+        "damping": 0.0005
+      }
+    },
+    {
+      "id": "k35",
+      "ref": 56,
+      "kind": "pin",
+      "host": "p18",
+      "at": [-5.1, 0.0163],
+      "r": 1.2,
+      "layers": ["L1", "L4"]
+    },
+    {
+      "id": "k36",
+      "ref": 57,
+      "kind": "slot",
+      "pin": "k35",
+      "guide": "p1",
+      "hole": 0,
+      "mode": "contact"
+    },
+    {
+      "id": "k37",
+      "ref": 58,
+      "kind": "pin",
+      "host": "p18",
+      "at": [-38.3, 0.4],
+      "r": 1.2,
+      "layers": ["L3", "L4"]
+    }
+  ]
+}

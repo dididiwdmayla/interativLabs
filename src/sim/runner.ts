@@ -76,6 +76,9 @@ interface QCtx {
   scene: Scene;
   initial: Snapshot;
   links: Map<Id, Link>;
+  /** snapshot do passo anterior (velocidades) e o passo, s */
+  prev?: Snapshot;
+  h?: number;
 }
 
 function localToWorld(s: Snapshot, part: Id | null, at: Vec2): Vec2 | null {
@@ -125,6 +128,13 @@ export function measure(q: Quantity, s: Snapshot, ctx: QCtx): number {
   }
   if ("link" in q) return field(s.links[q.link], q.field);
   if ("field" in q) return s.parts[q.part]?.[q.field] ?? NaN;
+  if ("vel" in q) {
+    const a = ctx.prev?.parts[q.part];
+    const b = s.parts[q.part];
+    if (!a || !b || !ctx.h) return NaN;
+    const l = dhypot(q.vel[0], q.vel[1]);
+    return ((b.x - a.x) * q.vel[0] + (b.y - a.y) * q.vel[1]) / l / ctx.h;
+  }
   const at = q.at ?? [0, 0];
   const p = localToWorld(s, q.part, at);
   const p0 = localToWorld(ctx.initial, q.part, at);
@@ -323,6 +333,7 @@ function evaluator(a: ScriptAssertion, ctx: QCtx): Evaluator {
       let tDrop = -1;
       return {
         step(t, s) {
+          if (!inWin(t, a.from)) return;
           const v = measure(a.q, s, ctx);
           if (tEvent < 0) {
             peak = Math.max(peak, v);
@@ -338,6 +349,32 @@ function evaluator(a: ScriptAssertion, ctx: QCtx): Evaluator {
             pass: dt <= a.within + 1e-9,
             value: `caiu em ${fmt(dt * 1000, 1)} ms (pico ${fmt(peak, 1)})`,
           };
+        },
+      };
+    }
+    case "returnsAfter": {
+      let tEvent = -1;
+      let tLeft = -1;
+      let tBack = -1;
+      return {
+        step(t, s) {
+          if (!inWin(t, a.from)) return;
+          if (tEvent < 0) {
+            if (s.events.some((e) => matches(e as never, a.event, a.match))) tEvent = t;
+            return;
+          }
+          if (tBack >= 0) return;
+          const inside = within(measure(a.q, s, ctx), a.min, a.max);
+          if (tLeft < 0) {
+            if (!inside) tLeft = t;
+          } else if (inside) tBack = t;
+        },
+        result: () => {
+          if (tEvent < 0) return { pass: false, value: "o evento não aconteceu" };
+          if (tLeft < 0) return { pass: false, value: "não saiu da faixa" };
+          if (tBack < 0) return { pass: false, value: "não voltou" };
+          const dt = tBack - tEvent;
+          return { pass: dt <= a.within + 1e-9, value: `voltou em ${fmt(dt * 1000, 1)} ms` };
         },
       };
     }
@@ -504,7 +541,13 @@ export async function runFixture(
     const sc = applyRunChanges(scene, run);
     const report = adapter.compile(sc, { unitMm: opts.unitMm ?? 1 });
     const initial = adapter.snapshot();
-    const ctx: QCtx = { scene: sc, initial, links: new Map(sc.links.map((l) => [l.id, l] as const)) };
+    const ctx: QCtx = {
+      scene: sc,
+      initial,
+      links: new Map(sc.links.map((l) => [l.id, l] as const)),
+      prev: initial,
+      h,
+    };
     const evals = run.assertions.map((a) => evaluator(a, ctx));
     const n = Math.round(run.duration / h);
     const times: number[] = [];
@@ -529,6 +572,7 @@ export async function runFixture(
       maxDepth = Math.max(maxDepth, depth);
       const t = (i + 1) * h;
       for (const e of evals) e.step(t, s, depth);
+      ctx.prev = s;
       if ((i + 1) % 60 === 0 || i === n - 1) hash.addSnapshot(s, ids);
     }
     const sorted = times.slice().sort((a, b) => a - b);
