@@ -3,10 +3,18 @@ import { assets } from "@/assets/registry";
 import { MultiTap } from "@/editor/gestures";
 import { MENUS, menuAt } from "@/editor/menus";
 import { useUiStore } from "@/editor/useUiStore";
+import type { PartPose } from "@/engine/types";
+import { movePart, scalePart, scaleShape, setPose } from "@/editor/commands";
+import { handlesFor, localBox, stretchTo, type Handle, type StretchResult } from "@/editor/handles";
+import { snapAngle, snapMove, type SnapFeature, type SnapTargets } from "@/editor/snap";
+import { snapFeatures, snapTargets } from "@/editor/snapScene";
+import { shapeOutline } from "@/geometry/outline";
 import type { Vec2 } from "@/geometry/vec";
+import type { Part, Shape } from "@/model/types";
+import { clampParams, paramsOf, regenerate } from "@/parts";
 import { linkAt, partAt } from "@/render/hit";
-import { StageNodes } from "@/render/nodes";
-import type { SceneModel } from "@/render/prepare";
+import { StageNodes, drawnFrame, overrideFrame } from "@/render/nodes";
+import { localOf, outlinePath, worldOf, type PartModel, type SceneModel } from "@/render/prepare";
 import { SceneSvg, type LayerMode, type Selection } from "@/render/SceneSvg";
 import {
   fitView,
@@ -19,6 +27,8 @@ import {
   zoomAt,
   type View,
 } from "@/render/view";
+import { EditOverlay, type OverlayHandle } from "./EditOverlay";
+import { Icon } from "./icons";
 import { useSimStore } from "./sim/simStore";
 import { hitEdgeMenu } from "./edgeMenuState";
 import { runMenuItem } from "./menuActions";
@@ -67,6 +77,92 @@ const EDGE_ZONE = 0.15;
 const HOLD_MS = 1000;
 const HOLD_PX = 8;
 const SNAP_MS = 220;
+/** arrastar uma peça não selecionada: seleciona e move depois de 6 px */
+const MOVE_PX = 6;
+const LONG_MS = 500;
+/** alvo das alças, px (44 de diâmetro) */
+const HANDLE_PX = 22;
+/** tolerância do encaixe, px de tela */
+const SNAP_PX = 10;
+
+type Gesture =
+  | { kind: "none" }
+  | { kind: "menu" }
+  | { kind: "drag" }
+  | { kind: "pan"; start: View; tap: boolean }
+  | { kind: "pinch"; start: View; d0: number; m0: Vec2 }
+  | { kind: "press"; target: NonNullable<Selection>; start: View; timer: number }
+  | {
+      kind: "move";
+      id: string;
+      pose: PartPose;
+      grab: Vec2;
+      last: PartPose | null;
+      features: SnapFeature[];
+      targets: SnapTargets;
+    }
+  | { kind: "rotate"; id: string; pose: PartPose; a0: number; last: PartPose | null }
+  | { kind: "stretch"; id: string; pose: PartPose; handle: Handle; last: StretchResult | null };
+
+function vibrate(ms: number) {
+  try {
+    // só Chrome Android (sem suporte no Safari); exige um gesto da pessoa
+    navigator.vibrate?.(ms);
+  } catch {
+    // sem vibração
+  }
+}
+
+/** Contorno de prévia do esticar, no espaço local da peça. */
+function previewPath(part: Part, res: StretchResult): string | null {
+  let shape: Shape;
+  if (res.kind === "params") {
+    const pp = paramsOf(part);
+    if (!pp) return null;
+    shape = pp.g.build(clampParams(pp.g, { ...pp.params, ...res.params }));
+  } else {
+    const uniform = part.shape.kind !== "poly";
+    const k = (res.sx + res.sy) / 2;
+    shape = scaleShape(part.shape, uniform ? k : res.sx, uniform ? k : res.sy);
+  }
+  const o = shapeOutline(shape);
+  return o.ok ? outlinePath(o.value.outline) : null;
+}
+
+/** Posição do botão da peça (px do palco): acima da seleção, ou embaixo se faltar espaço ou o dedo estiver em cima. */
+function partButtonPos(m: PartModel, pose: PartPose, v: View, w: number, h: number, fingerY?: number): Vec2 {
+  const b = localBox(m);
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (const q of [
+    [b.x0, b.y0],
+    [b.x1, b.y0],
+    [b.x1, b.y1],
+    [b.x0, b.y1],
+  ] as Vec2[]) {
+    const s = toScreen(v, worldOf(pose, q));
+    x0 = Math.min(x0, s[0]);
+    y0 = Math.min(y0, s[1]);
+    x1 = Math.max(x1, s[0]);
+    y1 = Math.max(y1, s[1]);
+  }
+  // no canto de cima, ao lado: a alça de girar fica no meio de cima e as de esticar nas laterais
+  const right = x1 + BTN_GAP;
+  const left = x0 - BTN_GAP;
+  const x = right <= w - 40 ? right : left >= 40 ? left : Math.min(w - 40, Math.max(40, (x0 + x1) / 2));
+  const above = y0 - BTN_GAP / 2;
+  const below = y1 + BTN_GAP / 2;
+  const fingerAbove = fingerY !== undefined && fingerY < (y0 + y1) / 2;
+  let y = above < BTN_MIN_Y || fingerAbove ? below : above;
+  if (y > h - BTN_MIN_Y) y = Math.max(BTN_MIN_Y, above);
+  return [x, Math.min(h - 40, Math.max(BTN_MIN_Y, y))];
+}
+
+/** px entre a caixa da peça e o centro do botão; px livres no topo e embaixo (cantos) */
+const BTN_GAP = 34;
+const BTN_MIN_Y = 76;
 const WHEEL_SETTLE_MS = 160;
 
 interface Pointer {
@@ -113,6 +209,8 @@ export function Stage({
   }, [nodes, onNodes]);
 
   const view = useRef<View>({ zoom: 1, tx: 0, ty: 0 });
+  /** chamado a cada mudança da vista (o botão da peça acompanha) */
+  const onView = useRef<(() => void) | null>(null);
   const [zoom, setZoom] = useState(1);
   const [fitZoom, setFitZoom] = useState(1);
 
@@ -121,6 +219,7 @@ export function Stage({
     const m = viewMatrix(v);
     if (nodes) for (const g of nodes.worlds.values()) g.setAttribute("transform", m);
     if (box.current) box.current.style.backgroundPosition = `${v.tx}px ${v.ty}px`;
+    onView.current?.();
   }, [nodes]);
 
   /** fim do gesto: o que é medido em px de tela é refeito */
@@ -182,13 +281,10 @@ export function Stage({
   const multi = useRef(new MultiTap());
   /** vista no começo de um toque com vários dedos (volta para ela se for desfazer) */
   const multiView = useRef<View | null>(null);
-  const gesture = useRef<{
-    kind: "none" | "pan" | "pinch" | "drag" | "menu";
-    start?: View;
-    d0?: number;
-    m0?: Vec2;
-    tap?: boolean;
-  }>({ kind: "none" });
+  const gesture = useRef<Gesture>({ kind: "none" });
+  const overlay = useRef<OverlayHandle>(null);
+  const partBtn = useRef<HTMLButtonElement>(null);
+  const snapKey = useRef<string | null>(null);
 
   // ——— segurar na borda: menu circular (docs/arquitetura.md §6) ———
   const ring = useRef<HTMLDivElement>(null);
@@ -222,7 +318,7 @@ export function Stage({
       clearHold();
       useUiStore.getState().setEdgeMenu({ side: h.side, cy: h.ay, hover: null });
       // a vista volta, com animação curta, para onde estava antes do gesto
-      if (g.start) animateView(g.start);
+      animateView(g.start);
       gesture.current = { kind: "menu" };
     }, HOLD_MS);
     hold.current = { ax: x, ay: y, side, timer };
@@ -270,6 +366,82 @@ export function Stage({
     };
   };
 
+  // ——— edição: peça mais alta sob o dedo, alças, pose durante o gesto ———
+  const layerOk = (i: number) => {
+    const L = model?.layers[i]?.layer;
+    return !!L && L.visible && !L.locked;
+  };
+  const pickPart = (w: Vec2): string | null => {
+    if (!model || !nodes) return null;
+    const tol = 8 * mmPerPx(view.current.zoom);
+    return (
+      partAt(model, nodes.frame, w, { tol, layer: (i) => i === activeLayer && layerOk(i) }) ??
+      partAt(model, nodes.frame, w, { tol, layer: layerOk })
+    );
+  };
+  const pickLink = (w: Vec2): string | null => {
+    if (!model) return null;
+    const id = linkAt(model, w, 14 * mmPerPx(view.current.zoom));
+    const lm = id ? model.linkById.get(id) : null;
+    return lm && model.layers[lm.layer]?.layer.visible !== false ? id : null;
+  };
+  const selectPart = (id: string) => {
+    const m = model?.parts.get(id);
+    if (!m) return;
+    const ui = useUiStore.getState();
+    if (m.layer !== ui.activeLayer) ui.setActiveLayer(m.layer);
+    if (ui.selection?.id !== id) onSelect?.({ kind: "part", id });
+  };
+  const selModel = selection?.kind === "part" ? (model?.parts.get(selection.id) ?? null) : null;
+  const selEditable = editing && !bare && !!selModel && layerOk(selModel.layer);
+  const handles = useMemo(
+    () => (selEditable && selModel ? handlesFor(selModel, mmPerPx(zoom)) : []),
+    [selEditable, selModel, zoom],
+  );
+  const hitHandle = (x: number, y: number): Handle | null => {
+    if (!selModel || handles.length === 0) return null;
+    let best: Handle | null = null;
+    let bd = HANDLE_PX;
+    for (const h of handles) {
+      const s = toScreen(view.current, worldOf(selModel.part, h.local));
+      const d = Math.hypot(s[0] - x, s[1] - y);
+      if (d <= bd) {
+        bd = d;
+        best = h;
+      }
+    }
+    return best;
+  };
+  /** escreve a pose da peça no gesto (a cena só muda ao soltar) */
+  const showPose = (id: string, pose: PartPose | null, fingerY?: number) => {
+    if (!model || !nodes) return;
+    const base = drawnFrame(model);
+    nodes.write(pose ? overrideFrame(base, id, pose) : base, true);
+    overlay.current?.pose(pose);
+    placePartButton(pose ?? model.drawn.get(id) ?? null, fingerY);
+  };
+  /** botão da peça: acima da seleção, dentro da tela, do lado oposto ao dedo */
+  const placePartButton = (pose: PartPose | null, fingerY?: number) => {
+    const el = partBtn.current;
+    if (!el || !selModel || !pose) return;
+    const pos = partButtonPos(selModel, pose, view.current, width, height, fingerY);
+    el.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
+  };
+  useLayoutEffect(() => {
+    onView.current = selModel ? () => placePartButton(selModel.part) : null;
+    if (selModel && gesture.current.kind === "none") placePartButton(selModel.part);
+  });
+  const snapTo = (k: string | null) => {
+    if (k && k !== snapKey.current) vibrate(10);
+    snapKey.current = k;
+  };
+  const endEditGesture = () => {
+    overlay.current?.guides([]);
+    overlay.current?.preview(null);
+    snapKey.current = null;
+    sheets.current?.classList.remove("is-dragging");
+  };
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as Element).closest(".stage__ui")) return;
     if (!model || !nodes) return;
@@ -283,16 +455,60 @@ export function Stage({
     }
     if (pointers.current.size === 2) {
       clearHold();
-      if (gesture.current.kind === "menu") return;
-      if (gesture.current.kind === "drag") ctl?.dragEnd();
+      const g = gesture.current;
+      if (g.kind === "menu") return;
+      if (g.kind === "drag") ctl?.dragEnd();
+      if (g.kind === "press") window.clearTimeout(g.timer);
+      if (g.kind === "move" || g.kind === "rotate" || g.kind === "stretch") {
+        // o segundo dedo cancela a edição em curso: a peça volta
+        showPose(g.id, null);
+        endEditGesture();
+      }
       beginPinch();
       return;
     }
     if (pointers.current.size > 2) return;
     const w = toWorld(view.current, x, y);
-    if (!editing && ctl && ctl.dragAt(w)) {
-      gesture.current = { kind: "drag" };
-      return;
+    if (!editing) {
+      if (ctl && ctl.dragAt(w)) {
+        gesture.current = { kind: "drag" };
+        return;
+      }
+    } else if (!bare) {
+      const h = hitHandle(x, y);
+      if (h && selModel) {
+        const pose = { x: selModel.part.x, y: selModel.part.y, angle: selModel.part.angle };
+        gesture.current =
+          h.kind === "rotate"
+            ? {
+                kind: "rotate",
+                id: selModel.part.id,
+                pose,
+                a0: Math.atan2(w[1] - pose.y, w[0] - pose.x),
+                last: pose,
+              }
+            : { kind: "stretch", id: selModel.part.id, pose, handle: h, last: null };
+        return;
+      }
+      const link = pickLink(w);
+      const part = link ? null : pickPart(w);
+      if (link || part) {
+        const target: NonNullable<Selection> = link
+          ? { kind: "link", id: link }
+          : { kind: "part", id: part ?? "" };
+        const timer = window.setTimeout(() => {
+          const g = gesture.current;
+          if (g.kind !== "press") return;
+          // toque longo: abre o cartão rápido da peça (ou da ligação)
+          if (g.target.kind === "part") selectPart(g.target.id);
+          else onSelect?.(g.target);
+          useUiStore.getState().setSheet("card");
+          vibrate(10);
+          gesture.current = { kind: "none" };
+        }, LONG_MS);
+        gesture.current = { kind: "press", target, start: { ...view.current }, timer };
+        return;
+      }
     }
     gesture.current = { kind: "pan", start: { ...view.current }, tap: true };
     armHold(x, y);
@@ -306,21 +522,65 @@ export function Stage({
     p.y = y;
     if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
+    const w = toWorld(view.current, x, y);
     if (g.kind === "menu") {
       const ui = useUiStore.getState();
       const hover = hitEdgeMenu(x, y);
       if (ui.edgeMenu && ui.edgeMenu.hover !== hover) ui.setEdgeMenu({ ...ui.edgeMenu, hover });
     } else if (g.kind === "drag") {
-      ctl?.dragMove(toWorld(view.current, x, y));
-    } else if (g.kind === "pan" && g.start) {
-      const h = hold.current;
-      if (pointers.current.size === 1 && (!h || Math.hypot(x - h.ax, y - h.ay) > HOLD_PX)) armHold(x, y);
+      ctl?.dragMove(w);
+    } else if (g.kind === "press") {
+      const moved = Math.hypot(x - p.x0, y - p.y0);
+      if (g.target.kind === "part" && moved > MOVE_PX && model) {
+        window.clearTimeout(g.timer);
+        const m = model.parts.get(g.target.id);
+        if (!m) return;
+        selectPart(m.part.id);
+        const w0 = toWorld(view.current, p.x0, p.y0);
+        gesture.current = {
+          kind: "move",
+          id: m.part.id,
+          pose: { x: m.part.x, y: m.part.y, angle: m.part.angle },
+          grab: [w0[0] - m.part.x, w0[1] - m.part.y],
+          last: null,
+          features: snapFeatures(m),
+          targets: snapTargets(model, m.part.id),
+        };
+        sheets.current?.classList.add("is-dragging");
+        onPointerMove(e);
+      } else if (g.target.kind === "link" && moved > TAP_PX) {
+        window.clearTimeout(g.timer);
+        gesture.current = { kind: "pan", start: g.start, tap: false };
+      } else if (moved > TAP_PX) window.clearTimeout(g.timer);
+    } else if (g.kind === "move") {
+      const tol = SNAP_PX * mmPerPx(view.current.zoom);
+      const want = { x: w[0] - g.grab[0], y: w[1] - g.grab[1], angle: g.pose.angle };
+      const s = snapMove(want, g.features, g.targets, tol);
+      g.last = { x: s.x, y: s.y, angle: g.pose.angle };
+      overlay.current?.guides(s.guides);
+      snapTo(s.key);
+      showPose(g.id, g.last, y);
+    } else if (g.kind === "rotate") {
+      const a = Math.atan2(w[1] - g.pose.y, w[0] - g.pose.x);
+      const r = snapAngle(g.pose.angle + a - g.a0);
+      g.last = { ...g.pose, angle: r.angle };
+      snapTo(r.snapped ? `a:${r.angle.toFixed(4)}` : null);
+      showPose(g.id, g.last, y);
+    } else if (g.kind === "stretch" && model) {
+      const part = model.parts.get(g.id)?.part;
+      if (!part) return;
+      const res = stretchTo(part, g.handle, localOf(g.pose, w));
+      g.last = res;
+      overlay.current?.preview(res ? previewPath(part, res) : null);
+    } else if (g.kind === "pan") {
       if (Math.hypot(x - p.x0, y - p.y0) > TAP_PX) g.tap = false;
       if (!g.tap) {
         view.current = panBy(g.start, x - p.x0, y - p.y0);
         writeView();
       }
-    } else if (g.kind === "pinch" && g.start && g.d0 && g.m0) {
+      const h = hold.current;
+      if (pointers.current.size === 1 && (!h || Math.hypot(x - h.ax, y - h.ay) > HOLD_PX)) armHold(x, y);
+    } else if (g.kind === "pinch") {
       const [a, b] = [...pointers.current.values()];
       if (!a || !b) return;
       const d = Math.hypot(b.x - a.x, b.y - a.y);
@@ -354,42 +614,77 @@ export function Stage({
       }
     }
     const g = gesture.current;
+    const up = e.type === "pointerup";
     clearHold();
-    if (g.kind === "menu") {
-      // deslizar e soltar: escolhe o item sob o dedo; sem item, o menu fica aberto
-      const hover = useUiStore.getState().edgeMenu?.hover;
-      gesture.current = { kind: "none" };
-      if (hover && e.type === "pointerup") runMenuItem(hover);
-      return;
-    }
-    if (g.kind === "drag") {
-      ctl?.dragEnd();
-      gesture.current = { kind: "none" };
-      return;
-    }
-    if (g.kind === "pinch") {
-      if (pointers.current.size === 1) {
-        // sobra um dedo: continua movendo a vista a partir daqui
-        const q = [...pointers.current.values()][0];
-        if (q) {
-          q.x0 = q.x;
-          q.y0 = q.y;
-        }
-        gesture.current = { kind: "pan", start: { ...view.current }, tap: false };
-      } else gesture.current = { kind: "none" };
-      settle();
-      return;
-    }
-    if (g.kind === "pan") {
-      if (g.tap && e.type === "pointerup" && editing && model && nodes) {
-        const w = toWorld(view.current, p.x, p.y);
-        const px = mmPerPx(view.current.zoom);
-        const link = linkAt(model, w, 14 * px);
-        const part = link ? null : partAt(model, nodes.frame, w, { tol: 8 * px });
-        onSelect?.(link ? { kind: "link", id: link } : part ? { kind: "part", id: part } : null);
+    const ui = useUiStore.getState();
+    const scene = ui.current?.scene;
+    switch (g.kind) {
+      case "menu": {
+        // deslizar e soltar: escolhe o item sob o dedo; sem item, o menu fica aberto
+        const hover = ui.edgeMenu?.hover;
+        gesture.current = { kind: "none" };
+        if (hover && up) runMenuItem(hover);
+        return;
       }
-      gesture.current = { kind: "none" };
-      settle();
+      case "drag":
+        ctl?.dragEnd();
+        gesture.current = { kind: "none" };
+        return;
+      case "press":
+        window.clearTimeout(g.timer);
+        if (up) {
+          if (g.target.kind === "part") selectPart(g.target.id);
+          else onSelect?.(g.target);
+        }
+        gesture.current = { kind: "none" };
+        return;
+      case "move":
+      case "rotate": {
+        gesture.current = { kind: "none" };
+        endEditGesture();
+        // um arrasto é um comando só, registrado ao soltar
+        const last = g.last;
+        const cmd =
+          up && last && scene
+            ? g.kind === "move"
+              ? movePart(scene, g.id, last.x, last.y)
+              : setPose(scene, g.id, last)
+            : null;
+        if (!cmd || !ui.commit(cmd)) showPose(g.id, null);
+        return;
+      }
+      case "stretch": {
+        gesture.current = { kind: "none" };
+        endEditGesture();
+        const res = g.last;
+        if (!up || !res || !scene) return;
+        ui.commit(
+          res.kind === "params"
+            ? regenerate(scene, g.id, res.params)
+            : scalePart(scene, g.id, res.sx, res.sy),
+        );
+        return;
+      }
+      case "pinch":
+        if (pointers.current.size === 1) {
+          // sobra um dedo: continua movendo a vista a partir daqui
+          const q = [...pointers.current.values()][0];
+          if (q) {
+            q.x0 = q.x;
+            q.y0 = q.y;
+          }
+          gesture.current = { kind: "pan", start: { ...view.current }, tap: false };
+        } else gesture.current = { kind: "none" };
+        settle();
+        return;
+      case "pan":
+        // toque no fundo: limpa a seleção
+        if (g.tap && up && editing && !bare) onSelect?.(null);
+        gesture.current = { kind: "none" };
+        settle();
+        return;
+      case "none":
+        return;
     }
   };
 
@@ -470,6 +765,23 @@ export function Stage({
               size={{ width, height }}
             />
           )}
+          {model && nodes && editing && !bare && (
+            <EditOverlay
+              ref={overlay}
+              nodes={nodes}
+              size={{ width, height }}
+              px={mmPerPx(zoom)}
+              selection={
+                selEditable && selModel
+                  ? {
+                      pose: { x: selModel.part.x, y: selModel.part.y, angle: selModel.part.angle },
+                      handles,
+                      d: selModel.d,
+                    }
+                  : null
+              }
+            />
+          )}
         </div>
       )}
       {ready && (
@@ -494,6 +806,18 @@ export function Stage({
             </text>
           )}
         </svg>
+      )}
+      {selEditable && selModel && ready && (
+        <button
+          type="button"
+          ref={partBtn}
+          className="stage__ui partbtn"
+          aria-label={`Cartão de ${selModel.part.name || "peça"} (${selModel.part.ref})`}
+          data-keeps-sheet
+          onClick={() => useUiStore.getState().setSheet("card")}
+        >
+          <Icon name="details" uid={`${uid}pb`} size={20} />
+        </button>
       )}
     </main>
   );

@@ -18,7 +18,14 @@ export interface Entry {
   label: string;
   patches: Patch[];
   inverse: Patch[];
+  /** chave para juntar passos seguidos do mesmo controle (o deslizante do tamanho) */
+  merge?: string;
+  /** ms (performance.now) do último passo juntado */
+  at?: number;
 }
+
+/** Passos seguidos com a mesma chave, dentro deste intervalo, viram um só. */
+export const MERGE_MS = 1500;
 
 export interface HistoryState {
   past: Entry[];
@@ -37,6 +44,25 @@ export function run(scene: Scene, label: string, recipe: Recipe): { scene: Scene
   const [next, patches, inverse] = produceWithPatches(scene, recipe);
   if (patches.length === 0) return null;
   return { scene: next, entry: { label, patches, inverse } };
+}
+
+/**
+ * Empilha juntando com a anterior quando as duas têm a mesma chave e vieram
+ * em sequência (um deslizante arrastado vira um passo de desfazer).
+ */
+export function pushMerged(h: HistoryState, entry: Entry, now: number, limit = HISTORY_LIMIT): HistoryState {
+  const last = h.past[h.past.length - 1];
+  if (entry.merge && last?.merge === entry.merge && last.at !== undefined && now - last.at <= MERGE_MS) {
+    const merged: Entry = {
+      label: last.label,
+      patches: [...last.patches, ...entry.patches],
+      inverse: [...entry.inverse, ...last.inverse],
+      merge: entry.merge,
+      at: now,
+    };
+    return { past: [...h.past.slice(0, -1), merged], future: [] };
+  }
+  return push(h, { ...entry, at: now }, limit);
 }
 
 /** Empilha a entrada (limpa o refazer; corta o mais antigo acima do limite). */

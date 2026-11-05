@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { useUiStore } from "@/editor/useUiStore";
+import { deleteSelectionAction } from "./menuActions";
 
 const typing = (t: EventTarget | null) =>
   t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 
-/** Atalhos de teclado: Ctrl+Z desfaz, Ctrl+Shift+Z (ou Ctrl+Y) refaz, Esc fecha. */
+/** Atalhos: Ctrl+Z desfaz, Ctrl+Shift+Z (ou Ctrl+Y) refaz, Delete exclui a seleção, Esc limpa a seleção. */
 export function useShortcuts(extra?: (e: KeyboardEvent) => boolean): void {
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
@@ -21,6 +22,15 @@ export function useShortcuts(extra?: (e: KeyboardEvent) => boolean): void {
       if (mod && k === "y") {
         e.preventDefault();
         s.redo();
+        return;
+      }
+      if ((k === "delete" || k === "backspace") && s.mode === "edit" && s.selection) {
+        e.preventDefault();
+        deleteSelectionAction();
+        return;
+      }
+      if (k === "escape" && !s.sheet && !s.edgeMenu && s.selection) {
+        s.select(null);
         return;
       }
       if (extra?.(e)) e.preventDefault();

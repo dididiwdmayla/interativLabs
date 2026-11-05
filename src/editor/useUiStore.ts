@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
 import type { Command } from "./commands";
-import { emptyHistory, lowerFirst, push, redo, run, undo, type HistoryState } from "./history";
+import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
 
 export type Mode = "edit" | "simulate";
 export type { Selection } from "@/render/SceneSvg";
@@ -65,7 +65,11 @@ interface UiState {
   setActiveLayer: (i: number) => void;
   setXray: (on: boolean) => void;
   /** aplica um comando (com desfazer); devolve se mudou a cena */
-  commit: (cmd: Command | null, after?: Partial<Pick<UiState, "selection" | "activeLayer">>) => boolean;
+  commit: (
+    cmd: Command | null,
+    after?: Partial<Pick<UiState, "selection" | "activeLayer">>,
+    opts?: { merge?: string },
+  ) => boolean;
   undo: () => void;
   redo: () => void;
   notify: (text: string, opts?: { undo?: boolean; warn?: boolean }) => void;
@@ -149,7 +153,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   setActiveLayer: (activeLayer) => set({ activeLayer }),
   setXray: (xray) => set({ xray }),
 
-  commit: (cmd, after) => {
+  commit: (cmd, after, opts) => {
     const s = get();
     if (!cmd || !s.current) return false;
     const r = run(s.current.scene, cmd.label, cmd.recipe);
@@ -160,7 +164,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
     );
     set({
       current: { ...s.current, scene: r.scene },
-      history: push(s.history, r.entry),
+      history: opts?.merge
+        ? pushMerged(s.history, { ...r.entry, merge: opts.merge }, performance.now())
+        : push(s.history, r.entry),
       selection,
       activeLayer: clampLayer(r.scene, after?.activeLayer ?? s.activeLayer),
     });

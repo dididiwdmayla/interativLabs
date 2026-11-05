@@ -11,13 +11,15 @@ interface SheetProps {
   modal?: boolean;
   className?: string;
   onClose?: () => void;
+  /** lado físico, quando precisa fugir de algo na prancha (o cartão foge da peça) */
+  place?: "left" | "right";
 }
 
 /**
  * Folha lateral em paisagem e no computador; folha de baixo em retrato.
  * Cabeçalho com o título em Old Standard TT caixa alta e fio duplo.
  */
-export function Sheet({ title, side, children, modal = true, className = "", onClose }: SheetProps) {
+export function Sheet({ title, side, children, modal = true, className = "", onClose, place }: SheetProps) {
   const uid = useId();
   const setSheet = useUiStore((s) => s.setSheet);
   const ref = useRef<HTMLElement>(null);
@@ -43,7 +45,14 @@ export function Sheet({ title, side, children, modal = true, className = "", onC
   }, [modal]);
 
   return (
-    <aside className={`sheet ${className}`} data-side={side} ref={ref} role="dialog" aria-label={title}>
+    <aside
+      className={`sheet ${className}`}
+      data-side={side}
+      data-place={place}
+      ref={ref}
+      role="dialog"
+      aria-label={title}
+    >
       <header className="sheet__head">
         <h2 className="sheet__title">{title}</h2>
         <button type="button" className="iconbtn sheet__close" aria-label="Fechar" onClick={close}>

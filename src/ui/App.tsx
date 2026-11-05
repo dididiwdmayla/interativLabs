@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useUiStore } from "@/editor/useUiStore";
 import type { StageNodes } from "@/render/nodes";
 import { prepareScene } from "@/render/prepare";
+import { CardSheet } from "./card/SelectionCard";
 import { Corners } from "./Corners";
 import { EdgeMenu, EdgeTabs } from "./EdgeMenu";
 import { InstallSheet } from "./InstallSheet";
@@ -115,6 +116,7 @@ function Workbench() {
       {wide && <SidePanel model={model} />}
       {sheet === "main" && <MainSheet />}
       {sheet === "install" && <InstallSheet />}
+      {sheet === "card" && !wide && model && <CardSheet model={model} />}
       {sheet === "layers" && !wide && model && (
         <Sheet title="Camadas" side="tools">
           <LayerPlates model={model} />

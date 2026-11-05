@@ -368,3 +368,66 @@
   stroke: var(--color-gold);
   stroke-width: var(--stroke-select);
 }
+
+/* ---------- edição: alças, encaixe, prévia e fantasma (ouro: a mão da pessoa) ---------- */
+
+.stage__sheet--edit {
+  pointer-events: none;
+}
+
+.handles__dot {
+  fill: var(--color-stage);
+  stroke: var(--color-gold);
+  stroke-width: var(--stroke-hardware-gold, 1.5px);
+}
+
+.handles__arc,
+.handles__stem {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 1.5px;
+}
+
+.handles__stem {
+  stroke-width: 0.75px;
+  stroke-dasharray: 2 2;
+}
+
+.handles__tip {
+  fill: var(--color-gold);
+  stroke: none;
+}
+
+.handles__preview {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 1.5px;
+  stroke-dasharray: 4 3;
+}
+
+.snapguide {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 0.75px;
+  stroke-dasharray: 4 3;
+  opacity: 0.8;
+}
+
+.snapmark {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 1.5px;
+}
+
+.ghost__path {
+  fill: var(--color-stage);
+  fill-opacity: 0.6;
+  stroke: var(--color-gold);
+  stroke-width: 1.5px;
+  stroke-dasharray: 4 3;
+}
+
+/* durante o arrasto, os números de chamada (que não acompanham) saem */
+.stage__sheets.is-dragging .callouts {
+  display: none;
+}

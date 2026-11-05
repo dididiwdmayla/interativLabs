@@ -1441,3 +1441,460 @@
   pointer-events: none;
   transition: opacity var(--dur-quick) var(--ease-fade);
 }
+
+/* ---------- botão da peça ---------- */
+
+.partbtn {
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  padding: 0;
+  border: 1.5px solid var(--color-gold);
+  border-radius: 50%;
+  background: var(--color-stage);
+  color: var(--color-gold);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--color-stage);
+  transition: opacity var(--dur-quick) var(--ease-develop);
+}
+
+.partbtn:active {
+  background: var(--color-raised);
+}
+
+.partbtn__ref {
+  font-family: var(--font-callout);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1;
+}
+
+/* ---------- cartão rápido ---------- */
+
+.card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-min);
+}
+
+.card__ref {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--color-gold);
+  border-radius: 50%;
+  color: var(--color-gold);
+  font-family: var(--font-callout);
+  font-style: italic;
+  font-size: 17px;
+}
+
+.card__icon {
+  display: inline-grid;
+  place-items: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 1px solid var(--color-ink-3);
+}
+
+.card__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+}
+
+.card__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--touch-min);
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-ink-3);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+}
+
+.card__name:focus {
+  outline: none;
+  border-bottom: 2px solid var(--color-gold);
+}
+
+.card__sec {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.card__k {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+.card__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.card__layer {
+  justify-content: flex-start;
+  min-width: 0;
+  padding: 0 var(--space-2);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card__layer:disabled,
+.btn:disabled {
+  color: var(--color-ink-faint);
+  border-color: var(--color-ink-faint);
+  cursor: default;
+}
+
+.card__empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-ink-2);
+}
+
+.card__details {
+  justify-self: start;
+}
+
+.card__details[aria-expanded="true"] {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}
+
+.card__form {
+  padding-top: var(--space-2);
+  border-top: 3px double var(--color-ink-3);
+}
+
+.card__group {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  border: 0;
+  border-bottom: 1px solid var(--color-ink-faint);
+}
+
+.card__acts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.cardact {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 60px;
+  padding: var(--space-1) 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.cardact__icon {
+  display: grid;
+  place-items: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: 1px solid var(--color-ink-3);
+  background: var(--color-stage);
+  transition: transform var(--dur-tick) var(--ease-press);
+}
+
+.cardact:active .cardact__icon {
+  transform: translateY(1px);
+  background: var(--color-raised);
+}
+
+.cardact__label {
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--color-ink-2);
+}
+
+.cardact--danger .cardact__icon,
+.cardact--danger .cardact__label {
+  color: var(--color-ember);
+}
+
+/* tamanho: − valor + e o deslizante */
+.stepper {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.stepper__label {
+  font-size: 13px;
+  color: var(--color-ink-2);
+}
+
+.stepper__row {
+  display: grid;
+  grid-template-columns: var(--touch-min) minmax(0, 1fr) var(--touch-min);
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepper__value {
+  text-align: center;
+  font-size: var(--text-value);
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--color-ink-3);
+  line-height: 32px;
+}
+
+.stepper__unit {
+  color: var(--color-ink-2);
+}
+
+.stepper__range {
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  accent-color: var(--color-gold);
+}
+
+/* materiais */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.swatch {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: var(--space-1);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-ink-2);
+  cursor: pointer;
+}
+
+.swatch[aria-checked="true"] {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.swatch__face {
+  fill: var(--color-stage);
+}
+
+.swatch__edge {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1px;
+}
+
+.swatch[aria-checked="true"] .swatch__edge {
+  stroke: var(--color-gold);
+  stroke-width: 1.5px;
+}
+
+.swatch__art .hatch {
+  fill: none;
+  stroke: var(--color-ink-2);
+}
+
+.swatch__name {
+  font-size: 12px;
+}
+
+/* fixa ou solta */
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--color-ink-3);
+}
+
+.seg__opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  border: 0;
+  background: transparent;
+  color: var(--color-ink-2);
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.seg__opt + .seg__opt {
+  border-left: 1px solid var(--color-ink-3);
+}
+
+.seg__opt[aria-checked="true"] {
+  color: var(--color-gold);
+  background: var(--color-raised);
+}
+
+/* campos dos detalhes */
+.nfield {
+  display: grid;
+  gap: 2px;
+}
+
+.nfield__label {
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+.nfield__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-ink-3);
+}
+
+.nfield__row:focus-within {
+  border-bottom: 2px solid var(--color-gold);
+}
+
+.nfield.has-error .nfield__row {
+  border-bottom-color: var(--color-ember);
+}
+
+.nfield__input,
+.nfield__select {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-value);
+  font-variant-numeric: tabular-nums;
+}
+
+.nfield__select {
+  border-bottom: 1px solid var(--color-ink-3);
+  min-height: var(--touch-min);
+}
+
+.nfield__select option {
+  background: var(--color-surface);
+}
+
+.nfield__input:focus {
+  outline: none;
+}
+
+.nfield.is-readonly .nfield__input {
+  color: var(--color-ink-2);
+}
+
+.nfield__unit {
+  color: var(--color-ink-2);
+  font-size: 13px;
+}
+
+.nfield__error,
+.nfield__note {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.nfield__error {
+  color: var(--color-ember);
+}
+
+.nfield__note {
+  color: var(--color-ink-3);
+}
+
+.checkfield {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.checkfield input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--color-gold);
+}
+
+.linklist__item--static {
+  cursor: default;
+  color: var(--color-ink-2);
+}
+
+/* o cartão foge da peça: o lado físico vale sobre o lógico */
+.shell .sheet[data-place="left"] {
+  left: 0;
+  right: auto;
+  padding-left: var(--sa-left);
+  padding-right: 0;
+  border-right-width: 1px;
+  border-left-width: 0;
+  --sheet-from: -16px;
+}
+
+.shell .sheet[data-place="right"] {
+  right: 0;
+  left: auto;
+  padding-right: var(--sa-right);
+  padding-left: 0;
+  border-left-width: 1px;
+  border-right-width: 0;
+  --sheet-from: 16px;
+}
