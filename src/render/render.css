@@ -431,3 +431,8 @@
 .stage__sheets.is-dragging .callouts {
   display: none;
 }
+
+/* camada oculta pela pilha de camadas */
+.layer.is-hidden {
+  display: none;
+}

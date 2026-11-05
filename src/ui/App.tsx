@@ -8,7 +8,8 @@ import { EdgeMenu, EdgeTabs } from "./EdgeMenu";
 import { InstallSheet } from "./InstallSheet";
 import { MainSheet } from "./MainSheet";
 import { PartsDrawer } from "./PartsDrawer";
-import { LayerPlates, SidePanel } from "./Panel";
+import { LayerStack } from "./LayerStack";
+import { SidePanel } from "./Panel";
 import { DEFAULT_EXAMPLE, openExample } from "./scenes/examples";
 import { Sheet } from "./Sheet";
 import { useSimStore } from "./sim/simStore";
@@ -120,8 +121,8 @@ function Workbench() {
       {sheet === "drawer" && mode === "edit" && <PartsDrawer />}
       {sheet === "card" && !wide && model && <CardSheet model={model} />}
       {sheet === "layers" && !wide && model && (
-        <Sheet title="Camadas" side="tools">
-          <LayerPlates model={model} />
+        <Sheet title="Camadas" side="tools" className="sheet--layers">
+          <LayerStack model={model} />
         </Sheet>
       )}
       <Toast />

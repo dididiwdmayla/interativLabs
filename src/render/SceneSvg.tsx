@@ -328,7 +328,11 @@ export function SceneSvg(props: SceneSvgProps) {
           layer: L.index,
           kind,
           items: [
-            <g key="layer" className={`layer layer--${st}`} data-layer={L.index}>
+            <g
+              key="layer"
+              className={`layer layer--${st}${L.layer.visible === false ? " is-hidden" : ""}`}
+              data-layer={L.index}
+            >
               {items[kind]}
             </g>,
           ],

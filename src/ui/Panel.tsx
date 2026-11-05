@@ -3,44 +3,7 @@ import { useUiStore } from "@/editor/useUiStore";
 import type { SceneModel } from "@/render/prepare";
 import { CardBody } from "./card/SelectionCard";
 import { Icon } from "./icons";
-
-export function LayerPlates({ model }: { model: SceneModel }) {
-  const active = useUiStore((s) => s.activeLayer);
-  const setActive = useUiStore((s) => s.setActiveLayer);
-  // a do topo é a mais próxima de quem olha: ordem visual é o array invertido
-  const top = [...model.layers].reverse();
-  return (
-    <ol className="plates" aria-label="Camadas">
-      {top.map((l) => {
-        const n = l.index + 1;
-        const isActive = l.index === active;
-        return (
-          <li key={l.layer.id}>
-            <button
-              type="button"
-              className="plate"
-              aria-current={isActive ? "true" : undefined}
-              onClick={() => setActive(l.index)}
-            >
-              <span className="plate__thumb" aria-hidden="true">
-                <span className="plate__sheet" />
-                <span className="plate__sheet" />
-                <span className="plate__sheet plate__sheet--front" />
-              </span>
-              <span className="plate__num">{n}</span>
-              <span className="plate__meta">
-                <span className="plate__name">{l.layer.name}</span>
-                <span className="plate__count">
-                  {l.parts.length === 1 ? "1 peça" : `${l.parts.length} peças`}
-                </span>
-              </span>
-            </button>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
+import { LayerStack } from "./LayerStack";
 
 /** Painel lateral fixo do computador (a partir de 1100 px): a seleção e as camadas. */
 export function SidePanel({ model }: { model: SceneModel | null }) {
@@ -60,7 +23,7 @@ export function SidePanel({ model }: { model: SceneModel | null }) {
       </section>
       <section className="panel__section">
         <h2 className="panel__title">Camadas</h2>
-        {model && <LayerPlates model={model} />}
+        {model && <LayerStack model={model} />}
         <button
           type="button"
           className="btn btn--outline panel__xray"
