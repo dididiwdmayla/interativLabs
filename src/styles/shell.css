@@ -1206,3 +1206,238 @@
     width: calc(100% - 2 * var(--corner-gap) - var(--sa-left) - var(--sa-right));
   }
 }
+
+/* ---------- segurar na borda: o anel do segundo ---------- */
+
+@property --hold {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.holdring {
+  position: absolute;
+  left: -32px;
+  top: -32px;
+  z-index: 5;
+  width: 64px;
+  height: 64px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.holdring.is-on {
+  opacity: 1;
+}
+
+.holdring__track,
+.holdring__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.holdring__track {
+  border: 1px solid var(--color-ink-faint);
+}
+
+/* o ouro se completa em 1 s: máscara cônica animada */
+.holdring__fill {
+  border: 2px solid var(--color-gold);
+  -webkit-mask: conic-gradient(#000 var(--hold), transparent 0);
+  mask: conic-gradient(#000 var(--hold), transparent 0);
+}
+
+.holdring.is-on .holdring__fill {
+  animation: hold-fill 1000ms linear forwards;
+}
+
+@keyframes hold-fill {
+  from {
+    --hold: 0deg;
+  }
+  to {
+    --hold: 360deg;
+  }
+}
+
+/* ---------- menu circular de borda ---------- */
+
+.edgemenu {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+}
+
+.edgemenu__backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.edgemenu__arc {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.edgemenu__guide {
+  fill: none;
+  stroke: var(--color-ink-3);
+  stroke-width: 0.75px;
+  stroke-dasharray: var(--dash-center);
+}
+
+.edgemenu__hub {
+  fill: var(--color-stage);
+  stroke: var(--color-gold);
+  stroke-width: 1.5px;
+}
+
+.edgemenu__title {
+  fill: var(--color-ink-2);
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.edgemenu__item {
+  position: absolute;
+  left: -26px;
+  top: -26px;
+  display: block;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+  animation: edge-item-in var(--dur-quick) var(--ease-develop) backwards;
+}
+
+@keyframes edge-item-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.edgemenu__disc {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--color-ink-3);
+  border-radius: 50%;
+  background: var(--color-stage);
+  box-shadow: 0 0 0 3px var(--color-stage);
+  transition: transform var(--dur-tick) var(--ease-press);
+}
+
+.edgemenu__item[aria-pressed="true"] .edgemenu__disc {
+  border-style: double;
+  border-width: 3px;
+  border-color: var(--color-ink-2);
+}
+
+.edgemenu__item[data-hover="true"] .edgemenu__disc,
+.edgemenu__item:active .edgemenu__disc {
+  border: 2px solid var(--color-gold);
+  color: var(--color-gold);
+  transform: scale(1.08);
+}
+
+.edgemenu__label {
+  position: absolute;
+  top: 50%;
+  padding: 1px 6px;
+  background: var(--color-stage);
+  border-bottom: 1px solid var(--color-ink-faint);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.edgemenu[data-side="right"] .edgemenu__label {
+  right: calc(100% + 8px);
+}
+
+.edgemenu[data-side="left"] .edgemenu__label {
+  left: calc(100% + 8px);
+}
+
+.edgemenu__item[data-hover="true"] .edgemenu__label {
+  color: var(--color-gold);
+  border-bottom-color: var(--color-gold);
+}
+
+/* abas discretas no meio das bordas */
+.edgetab {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--touch-min);
+  height: 88px;
+  margin-top: -44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.edgetab[data-side="left"] {
+  left: calc(var(--sa-left) + var(--frame-inset) - 4px);
+}
+
+.edgetab[data-side="right"] {
+  right: calc(var(--sa-right) + var(--frame-inset) - 4px);
+}
+
+.shell[data-wide="true"] .edgetab[data-side="right"] {
+  right: calc(var(--frame-inset) - 4px);
+}
+
+.edgetab__mark {
+  display: block;
+  padding: var(--space-2) 3px;
+  background: var(--color-stage);
+  border: 1px solid var(--color-ink-faint);
+  color: var(--color-ink-2);
+  font-family: var(--font-title);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+.edgetab[data-side="left"] .edgetab__mark {
+  transform: rotate(180deg);
+}
+
+.edgetab[aria-expanded="true"] .edgetab__mark,
+.edgetab:active .edgetab__mark {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edgemenu__item {
+    animation: none;
+  }
+}
+
+/* com um menu de borda aberto, os cantos e as abas saem da frente (o menu é modal) */
+.shell[data-edgemenu="true"] .corner,
+.shell[data-edgemenu="true"] .edgetab {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-quick) var(--ease-fade);
+}

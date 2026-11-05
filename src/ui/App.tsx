@@ -1,8 +1,9 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import type { StageNodes } from "@/render/nodes";
 import { prepareScene } from "@/render/prepare";
 import { Corners } from "./Corners";
+import { EdgeMenu, EdgeTabs } from "./EdgeMenu";
 import { InstallSheet } from "./InstallSheet";
 import { MainSheet } from "./MainSheet";
 import { LayerPlates, SidePanel } from "./Panel";
@@ -14,6 +15,7 @@ import { Stage } from "./Stage";
 import { TestBar } from "./TestBar";
 import { Toast } from "./Toast";
 import { WIDE_QUERY, useMedia } from "./useMedia";
+import { useElementSize } from "./useElementSize";
 import { useSafeArea } from "./useSafeArea";
 import { useShortcuts } from "./useShortcuts";
 
@@ -48,10 +50,15 @@ function Workbench() {
   const lefty = useUiStore((s) => s.lefty);
   const sheet = useUiStore((s) => s.sheet);
   const hint = useUiStore((s) => s.hint);
+  const edgeOpen = useUiStore((s) => s.edgeMenu !== null);
   const wide = useMedia(WIDE_QUERY);
   const sa = useSafeArea();
   const portrait = useMedia("(orientation: portrait) and (max-width: 700px)");
   const [nodes, setNodes] = useState<StageNodes | null>(null);
+  const bench = useRef<HTMLDivElement>(null);
+  const size = useElementSize(bench);
+  // no computador o painel fica à direita: a borda direita do palco não tem entalhe
+  const menuInsets = useMemo(() => (wide ? { ...sa, right: 0 } : sa), [sa, wide]);
   const [error, setError] = useState<string | null>(null);
   const model = useMemo(() => (current ? prepareScene(current.scene) : null), [current]);
 
@@ -85,8 +92,8 @@ function Workbench() {
   }, []);
 
   return (
-    <div className="shell" data-mode={mode} data-lefty={lefty} data-wide={wide}>
-      <div className="workbench">
+    <div className="shell" data-mode={mode} data-lefty={lefty} data-wide={wide} data-edgemenu={edgeOpen}>
+      <div className="workbench" ref={bench}>
         <Stage
           model={model}
           figure={current?.figure ?? 1}
@@ -102,6 +109,8 @@ function Workbench() {
         />
         <Corners model={model} wide={wide} />
         {mode === "simulate" && <TestBar />}
+        <EdgeTabs height={size.height} />
+        <EdgeMenu width={size.width} height={size.height} insets={menuInsets} />
       </div>
       {wide && <SidePanel model={model} />}
       {sheet === "main" && <MainSheet />}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
 import { MultiTap } from "@/editor/gestures";
+import { MENUS, menuAt } from "@/editor/menus";
 import { useUiStore } from "@/editor/useUiStore";
 import type { Vec2 } from "@/geometry/vec";
 import { linkAt, partAt } from "@/render/hit";
@@ -19,6 +20,8 @@ import {
   type View,
 } from "@/render/view";
 import { useSimStore } from "./sim/simStore";
+import { hitEdgeMenu } from "./edgeMenuState";
+import { runMenuItem } from "./menuActions";
 import { stageApi } from "./stageApi";
 import { useElementSize } from "./useElementSize";
 
@@ -59,6 +62,11 @@ type Pad = [number, number, number, number];
 const FIT_PAD_EDIT: Pad = [64, 44, 64, 44];
 const FIT_PAD_SIM: Pad = [56, 32, 92, 32];
 const TAP_PX = 8;
+/** faixa lateral do gesto do menu, fração da largura da prancha */
+const EDGE_ZONE = 0.15;
+const HOLD_MS = 1000;
+const HOLD_PX = 8;
+const SNAP_MS = 220;
 const WHEEL_SETTLE_MS = 160;
 
 interface Pointer {
@@ -175,12 +183,76 @@ export function Stage({
   /** vista no começo de um toque com vários dedos (volta para ela se for desfazer) */
   const multiView = useRef<View | null>(null);
   const gesture = useRef<{
-    kind: "none" | "pan" | "pinch" | "drag";
+    kind: "none" | "pan" | "pinch" | "drag" | "menu";
     start?: View;
     d0?: number;
     m0?: Vec2;
     tap?: boolean;
   }>({ kind: "none" });
+
+  // ——— segurar na borda: menu circular (docs/arquitetura.md §6) ———
+  const ring = useRef<HTMLDivElement>(null);
+  const hold = useRef<{ ax: number; ay: number; side: "left" | "right"; timer: number } | null>(null);
+  const showRing = (x: number, y: number) => {
+    const el = ring.current;
+    if (!el) return;
+    el.style.transform = `translate(${x}px, ${y}px)`;
+    el.classList.remove("is-on");
+    void el.offsetWidth; // reinicia a animação do anel
+    el.classList.add("is-on");
+  };
+  const clearHold = () => {
+    if (hold.current) window.clearTimeout(hold.current.timer);
+    hold.current = null;
+    ring.current?.classList.remove("is-on");
+  };
+  /** começa (ou recomeça) a contar o segundo parado, se o dedo está na faixa lateral */
+  const armHold = (x: number, y: number) => {
+    clearHold();
+    if (bare || width <= 0) return;
+    const side = x < width * EDGE_ZONE ? "left" : x > width * (1 - EDGE_ZONE) ? "right" : null;
+    if (!side) return;
+    const ui = useUiStore.getState();
+    if (!MENUS[menuAt(side, ui.lefty)].modes.includes(ui.mode)) return;
+    showRing(x, y);
+    const timer = window.setTimeout(() => {
+      const g = gesture.current;
+      const h = hold.current;
+      if (g.kind !== "pan" || !h || pointers.current.size !== 1) return;
+      clearHold();
+      useUiStore.getState().setEdgeMenu({ side: h.side, cy: h.ay, hover: null });
+      // a vista volta, com animação curta, para onde estava antes do gesto
+      if (g.start) animateView(g.start);
+      gesture.current = { kind: "menu" };
+    }, HOLD_MS);
+    hold.current = { ax: x, ay: y, side, timer };
+  };
+  const anim = useRef(0);
+  const animateView = (to: View) => {
+    cancelAnimationFrame(anim.current);
+    const from = { ...view.current };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      view.current = to;
+      writeView();
+      settle();
+      return;
+    }
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const k = Math.min(1, (t - t0) / SNAP_MS);
+      const e = 1 - (1 - k) ** 3;
+      view.current = {
+        zoom: from.zoom + (to.zoom - from.zoom) * e,
+        tx: from.tx + (to.tx - from.tx) * e,
+        ty: from.ty + (to.ty - from.ty) * e,
+      };
+      writeView();
+      if (k < 1) anim.current = requestAnimationFrame(step);
+      else settle();
+    };
+    anim.current = requestAnimationFrame(step);
+  };
+  useEffect(() => () => clearHold(), []);
 
   const local = (e: { clientX: number; clientY: number }): Vec2 => {
     const r = box.current?.getBoundingClientRect();
@@ -210,6 +282,8 @@ export function Stage({
       multi.current.down(e.pointerId, x, y, e.timeStamp);
     }
     if (pointers.current.size === 2) {
+      clearHold();
+      if (gesture.current.kind === "menu") return;
       if (gesture.current.kind === "drag") ctl?.dragEnd();
       beginPinch();
       return;
@@ -221,6 +295,7 @@ export function Stage({
       return;
     }
     gesture.current = { kind: "pan", start: { ...view.current }, tap: true };
+    armHold(x, y);
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -231,9 +306,15 @@ export function Stage({
     p.y = y;
     if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
-    if (g.kind === "drag") {
+    if (g.kind === "menu") {
+      const ui = useUiStore.getState();
+      const hover = hitEdgeMenu(x, y);
+      if (ui.edgeMenu && ui.edgeMenu.hover !== hover) ui.setEdgeMenu({ ...ui.edgeMenu, hover });
+    } else if (g.kind === "drag") {
       ctl?.dragMove(toWorld(view.current, x, y));
     } else if (g.kind === "pan" && g.start) {
+      const h = hold.current;
+      if (pointers.current.size === 1 && (!h || Math.hypot(x - h.ax, y - h.ay) > HOLD_PX)) armHold(x, y);
       if (Math.hypot(x - p.x0, y - p.y0) > TAP_PX) g.tap = false;
       if (!g.tap) {
         view.current = panBy(g.start, x - p.x0, y - p.y0);
@@ -273,6 +354,14 @@ export function Stage({
       }
     }
     const g = gesture.current;
+    clearHold();
+    if (g.kind === "menu") {
+      // deslizar e soltar: escolhe o item sob o dedo; sem item, o menu fica aberto
+      const hover = useUiStore.getState().edgeMenu?.hover;
+      gesture.current = { kind: "none" };
+      if (hover && e.type === "pointerup") runMenuItem(hover);
+      return;
+    }
     if (g.kind === "drag") {
       ctl?.dragEnd();
       gesture.current = { kind: "none" };
@@ -354,6 +443,10 @@ export function Stage({
       onPointerCancel={onPointerUp}
     >
       <div className="stage__vignette" aria-hidden="true" />
+      <div className="holdring" ref={ring} aria-hidden="true">
+        <span className="holdring__track" />
+        <span className="holdring__fill" />
+      </div>
       {ready && (
         <div
           className="stage__sheets"
