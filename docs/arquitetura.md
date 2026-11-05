@@ -224,7 +224,35 @@ Cada camada `i` tem o bit `1 << i`. Uma peça usa categoria e máscara iguais ao
 | Rasgo (`contact`) | Nada além da geometria: o furo existe na peça-guia (decomposição com furos) e o pino colide com as paredes. |
 | Mola | Toda mola ganha uma junta de distância com mínimo = comprimento sólido (o batente das espiras) e sem colisão desligada. Força de Hooke explícita a cada passo, com o modo (apoiada só age encostada e só empurra; só tração só age esticada e só puxa); se `ω·h > 0,5` ou `c·h/m > 0,25` (m = massa efetiva ao longo da mola na pose desenhada), vira a mola nativa da junta, com `lower/upperSpringForce` no lugar do modo. Mola com guia é sempre explícita. |
 | Câmara | Estado do gás comum (`src/engine/chamber.ts`); a força entra no solver como mola de distância entre as faces (ver abaixo). |
-| Arrasto (o dedo) | Corpo cinemático no dedo e junta de motor com mola linear (resolvida junto com os contatos, como nos exemplos do Box2D v3.2). Frequência `min(30, 6·√(g/100))` Hz e força máxima `(6 000·m + 4 000)·g/100` g·mm/s²: os 6 Hz e a força do protótipo, escalados com a gravidade. |
+| Arrasto (a mão) | Corpo cinemático no alvo e junta de motor com mola linear limitada (resolvida junto com os contatos, como nos exemplos do Box2D v3.2). Ver "Arrasto", abaixo. |
+
+### Arrasto (Parte F)
+
+O arrasto é uma ação física da mão, não uma força ilimitada (`HAND` e `handLimits` em `src/engine/runtime.ts`; o Box2D em `box2dAdapter.ts`). Até a Parte E2a a força máxima era `(6 000·m + 4 000)·g/100` g·mm/s²: com gravidade real, ~98 vezes a do protótipo, dezenas de vezes o peso da peça (um peso de 20 g puxado com 12 N); ela vencia juntas macias (cabo, suporte elástico) e arremessava peças leves. E o corpo-alvo só recebia posição quando o dedo andava: com o dedo parado, ele seguia na última velocidade e levava a peça embora.
+
+- **Alvo.** O dedo dá a posição; o alvo anda até ela a no máximo **600 mm/s de tempo simulado** e para quando chega. Em Lento (1/20), o dedo andando 100 mm/s na tela não vira 2 000 mm/s na simulação: a peça acompanha o dedo enquanto ele anda até 30 mm/s na tela (150 em Normal, 600 em Real) e fica para trás se ele for mais rápido.
+- **Força máxima** (g·mm/s²; 1 N = 10⁶):
+  `F = min( P + M, S, J )`, com
+  - `P = clamp(10·m·g, 0,02 N, 5 N)`: dez vezes o peso (g de pelo menos 9 810 mm/s², para a mão funcionar igual sem gravidade), com piso para peças muito leves e teto absoluto;
+  - `M = max(Σ molas da peça, mola mais forte do mecanismo)`, cada mola no fim do curso normal: `k·(livre − sólido)` (só tração: `k·livre`), `k·max|curso − repouso|` no trilho, `k·faixa/braço` na torção (faixa do batente, ou 90°; braço do eixo ao centro da peça, ≥ 5 mm). A soma das próprias molas puxa o ferrolho contra a mola de retorno; a mola mais forte do mecanismo deixa puxar o gatilho que empurra o retém contra a mola dele (o retém não é ligado ao gatilho, só encosta);
+  - `S` (suporte elástico): `(4·m·g + 1,5 mm / c) / 1,6`, com `c = λmax(K)/ω²` a flexibilidade do suporte no ponto (K = M⁻¹ efetiva da junta soldada, ω pela `linearHz`): a mão leva o ponto até ~4 vezes a deflexão pelo peso mais 1,5 mm, descontada a sobrelevação de ζ ≈ 0,2;
+  - `J` (juntas da peça: eixo, trilho, rasgo em junta, haste, solda rígida): `0,25 mm / c`, com `c = λmax(K)/(2π·960 Hz)²`. É o que a junta cede com a força da mão: **a junta sempre vence o dedo** porque a força nunca passa do que abre a junta mais macia da peça 0,25 mm (metade do limite do teste de abuso), e as juntas ficam a 960 Hz, 8 a 32 vezes a mola da mão.
+- **Mola da mão.** Amortecimento crítico; rigidez para chegar à força máxima com a peça 4 mm atrás do alvo: `f = clamp(√(F/(4 mm·m))/2π, 30, 120)` Hz, sempre abaixo dos 960 Hz das juntas. Peça leve contra mola forte (o gatilho de 2,3 g contra 2 N) fica perto de 80 Hz; peça pesada sem mola, em 30 Hz.
+- **Soltar.** O ponto agarrado sai com no máximo 750 mm/s (velocidade e giro escalados juntos).
+- **Atravessar.** A peça na mão vira "bala" do Box2D enquanto está agarrada (colisão contínua também contra peças móveis); ao soltar, volta ao que a cena diz.
+
+Números (a força máxima, a parcela que manda e a mola da mão):
+
+| Cena · peça | Massa | F máx. | Quem limita | Mola da mão |
+| --- | --- | --- | --- | --- |
+| Cabo · peso | 20 g | 1,96 N | 10 × peso | 30 Hz |
+| Parafusado × suporte elástico · barra no suporte | 8,5 g | 0,28 N | suporte (10 × peso daria 0,83 N) | 30 Hz |
+| Pêndulo · barra | 14,1 g | 1,39 N | 10 × peso (junta: 32 N) | 30 Hz |
+| Trava · maçaneta | 0,62 g | 0,12 N | peso + mola de torção | 35 Hz |
+| Lançador de ferrolho · ferrolho | 1,95 g | 2,25 N | junta do trilho (peso + molas daria 3,9 N) | 86 Hz |
+| Lançador de ferrolho · gatilho | 2,33 g | 2,23 N | peso + mola mais forte | 78 Hz |
+
+O teste de abuso (`docs/decisoes/abuso.md`) confere tudo isso em todas as cenas.
 
 ### Câmara de gás (v2)
 

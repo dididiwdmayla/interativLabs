@@ -125,7 +125,9 @@ export function generateExemplos(): void {
           name: "girar e soltar",
           duration: 2,
           inputs: [
-            { kind: "drag", part: "p9", from: [46, 66.8], to: [53.9, 85.5], t0: 0.3, t1: 0.6, release: 0.9 },
+            // o dedo passa um pouco do ponto de 30° (como a mão de verdade, até o batente):
+            // a mão do app tem atraso sob carga e não chega ao batente parando no ponto exato
+            { kind: "drag", part: "p9", from: [46, 66.8], to: [55.1, 88.3], t0: 0.3, t1: 0.6, release: 0.9 },
           ],
           assertions: [
             {

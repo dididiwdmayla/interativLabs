@@ -1,9 +1,9 @@
 import type { Id } from "@/model/types";
 import type { Vec2 } from "@/geometry/vec";
 import { ChamberSim, exchange, type ChamberGeometry, type PlanChamber } from "./chamber";
-import type { Plan, PlanSensor, PlanSpring } from "./plan";
+import type { Plan, PlanBody, PlanSensor, PlanSpring } from "./plan";
 import { N } from "@/model/units";
-import type { EngineEvent, LinkState, PartPose, Snapshot } from "./types";
+import type { EngineEvent, EngineProbe, LinkState, PartPose, Snapshot } from "./types";
 import { PI, dcos, dhypot, dsin } from "@/geometry/dmath";
 
 /**
@@ -50,11 +50,10 @@ export interface BodyIO {
 }
 
 /**
- * Arrasto: mola amortecida resolvida como restrição suave (como a junta de
- * mouse). No protótipo (gravidade de 100 mm/s²): 6 Hz e força máxima de
- * (600·m + 400) g·(10 mm)/s². Aqui a frequência e a força escalam com a
- * gravidade da cena (√g e g), para que com gravidade real o dedo ainda
- * levante a peça sem que ela fique pendurada vários mm abaixo do dedo.
+ * Arrasto de reserva (bancada: Planck e Rapier): mola amortecida resolvida
+ * como restrição suave (como a junta de mouse), com os 6 Hz e a força
+ * máxima de (600·m + 400) g·(10 mm)/s² do protótipo, escalados pela
+ * gravidade. O motor do app usa a mão (`handLimits`, abaixo).
  */
 const DRAG_HZ = 6;
 const DRAG_HZ_MAX = 30;
@@ -90,9 +89,9 @@ export function ringSignedDistance(ring: Vec2[], p: Vec2): number {
 }
 
 /**
- * Mola do arrasto (o dedo): frequência e força máxima, escaladas pela
- * gravidade da cena a partir das do protótipo (6 Hz e (600·m + 400) g·(10 mm)/s²
- * com 100 mm/s²).
+ * Mola do arrasto de reserva (bancada): frequência e força máxima, escaladas
+ * pela gravidade da cena a partir das do protótipo (6 Hz e
+ * (600·m + 400) g·(10 mm)/s² com 100 mm/s²).
  */
 export function dragParams(mass: number, gravity: Vec2): { hertz: number; maxForce: number } {
   const gs = Math.max(1, dhypot(gravity[0], gravity[1]) / DRAG_G_REF);
@@ -100,6 +99,177 @@ export function dragParams(mass: number, gravity: Vec2): { hertz: number; maxFor
     hertz: Math.min(DRAG_HZ_MAX, DRAG_HZ * Math.sqrt(gs)),
     maxForce: (DRAG_FORCE_PER_GRAM * mass + DRAG_FORCE_BASE) * gs,
   };
+}
+
+/**
+ * A mão (Fase 1 · Parte F, item 14.3): o arrasto do app é uma ação física,
+ * não uma força ilimitada. Ver docs/arquitetura.md §4, "Arrasto".
+ *
+ * - A peça é puxada por uma mola (com amortecimento crítico) até um alvo
+ *   que persegue o dedo a no máximo `speed` mm/s de tempo simulado; em
+ *   Lento o dedo andando 100 mm/s na tela não vira 2 000 mm/s. Quando o
+ *   dedo para, o alvo para.
+ * - A força da mola é limitada: `weight` vezes o peso da peça (gravidade de
+ *   pelo menos 9 810 mm/s², para que a mão funcione igual sem gravidade),
+ *   entre `minForce` e `maxForce`, mais a força de mola no fim do curso
+ *   normal (a soma das molas da peça, ou a mola mais forte do mecanismo, o
+ *   que for maior: puxar o ferrolho contra a mola de retorno, puxar o
+ *   gatilho que empurra o retém contra a mola dele). Nunca mais que o que
+ *   abre uma junta da peça `jointSink` mm, nem o que deforma um suporte
+ *   elástico além da faixa dele.
+ * - Ao soltar, o ponto agarrado fica com no máximo `release` mm/s.
+ */
+export const HAND = {
+  /**
+   * mola da mão: rígida o bastante para chegar à força máxima com a peça
+   * `reach` mm atrás do alvo, entre `hertzMin` e `hertzMax` Hz (as juntas
+   * ficam em 960 Hz)
+   */
+  reach: 4,
+  hertzMin: 30,
+  hertzMax: 120,
+  /** força máxima pelo peso: vezes m·g */
+  weight: 10,
+  /** piso e teto da parte do peso, g·mm/s² (0,02 N e 5 N) */
+  minForce: 0.02 * N,
+  maxForce: 5 * N,
+  /** velocidade máxima do alvo, mm/s de tempo simulado */
+  speed: 600,
+  /** velocidade máxima do ponto agarrado ao soltar, mm/s */
+  release: 750,
+  /** suporte elástico: a mão leva o ponto até `mountRange` vezes a deflexão pelo peso + `mountMargin` mm… */
+  mountRange: 4,
+  mountMargin: 1.5,
+  /** …contando a sobrelevação da resposta (ζ ≈ 0,2 dá ~1,5) */
+  mountOvershoot: 1.6,
+  /** gravidade mínima da conta do peso, mm/s² */
+  gMin: 9810,
+  /** abertura máxima que a força da mão causa numa junta da peça (rígida, 960 Hz), mm */
+  jointSink: 0.25,
+};
+
+export interface HandLimits {
+  hertz: number;
+  /** força máxima, g·mm/s² */
+  maxForce: number;
+  /** parcelas, para documentação e testes */
+  weight: number;
+  springs: number;
+  /** teto pelos suportes elásticos (Infinity sem suporte) */
+  mountCap: number;
+  /** teto pelas juntas da peça (Infinity sem junta) */
+  jointCap: number;
+}
+
+/** Massa efetiva inversa (matriz K = M⁻¹ no ponto) de um ou dois corpos, como nas juntas do Box2D. */
+function pointK(bodies: { body: PlanBody; r: Vec2 }[]): { k11: number; k12: number; k22: number } {
+  let k11 = 0;
+  let k12 = 0;
+  let k22 = 0;
+  for (const { body, r } of bodies) {
+    if (body.static || !(body.mass > 0)) continue;
+    k11 += 1 / body.mass + (r[1] * r[1]) / body.inertia;
+    k12 -= (r[0] * r[1]) / body.inertia;
+    k22 += 1 / body.mass + (r[0] * r[0]) / body.inertia;
+  }
+  return { k11, k12, k22 };
+}
+
+/** Limites da mão para o corpo `body`, na pose desenhada. */
+/** Força de cada mola no fim do curso normal, g·mm/s² (só as do corpo, ou todas com null). */
+export function springStroke(plan: Plan, body: number | null): number[] {
+  const out: number[] = [];
+  const mine = (a: number, b: number) => body === null || a === body || b === body;
+  for (const s of plan.springs) {
+    if (!mine(s.a, s.b)) continue;
+    const stroke = s.mode === "tension" ? s.freeLength : s.freeLength - s.solidLength;
+    out.push(s.k * Math.max(0, stroke));
+  }
+  for (const s of plan.sliders) {
+    if (!s.spring || !mine(s.a, s.b)) continue;
+    out.push(s.spring.k * Math.max(Math.abs(s.lower - s.spring.rest), Math.abs(s.upper - s.spring.rest)));
+  }
+  for (const a of plan.axles) {
+    if (!a.torsion || !mine(a.a, a.b)) continue;
+    const range = a.limit
+      ? Math.max(Math.abs(a.limit.lower - a.torsion.rest), Math.abs(a.limit.upper - a.torsion.rest))
+      : PI / 2;
+    // braço: do eixo ao centro da peça que gira (no mínimo 5 mm)
+    const bd = plan.bodies[a.b]!;
+    const arm = Math.max(5, dhypot(bd.position[0] - a.anchor[0], bd.position[1] - a.anchor[1]));
+    out.push((a.torsion.k * range) / arm);
+  }
+  return out;
+}
+
+/** Maior autovalor de K (a direção mais macia) de uma junta entre os corpos a e b no ponto. */
+function jointCompliance(plan: Plan, a: number, b: number, at: Vec2, hertz: number): number {
+  const ends = [a, b].map((i) => {
+    const bd = plan.bodies[i]!;
+    return { body: bd, r: [at[0] - bd.position[0], at[1] - bd.position[1]] as Vec2 };
+  });
+  const { k11, k12, k22 } = pointK(ends);
+  const tr = (k11 + k22) / 2;
+  const lmax = tr + Math.sqrt(Math.max(0, ((k11 - k22) / 2) ** 2 + k12 * k12));
+  const w = 2 * PI * hertz;
+  return lmax / (w * w);
+}
+
+/**
+ * Limites da mão para o corpo `body`, na pose desenhada (`jointHertz`: a
+ * rigidez das juntas no motor).
+ */
+export function handLimits(plan: Plan, body: number, jointHertz = 960): HandLimits {
+  const b = plan.bodies[body]!;
+  const gReal = dhypot(plan.gravity[0], plan.gravity[1]);
+  const g = Math.max(gReal, HAND.gMin);
+  const weight = Math.min(HAND.maxForce, Math.max(HAND.minForce, HAND.weight * b.mass * g));
+  // as molas da peça somadas, ou a mola mais forte do mecanismo (puxar um
+  // gatilho que empurra o retém contra a mola dele), o que for maior
+  const own = springStroke(plan, body).reduce((x, y) => x + y, 0);
+  const any = springStroke(plan, null).reduce((x, y) => Math.max(x, y), 0);
+  const springs = Math.max(own, any);
+  let mountCap = Infinity;
+  for (const m of plan.mounts) {
+    if ((m.a !== body && m.b !== body) || !(m.linearHz > 0)) continue;
+    const c = jointCompliance(plan, m.a, m.b, m.anchor, m.linearHz);
+    if (!(c > 0)) continue;
+    mountCap = Math.min(
+      mountCap,
+      (HAND.mountRange * b.mass * gReal + HAND.mountMargin / c) / HAND.mountOvershoot,
+    );
+  }
+  // juntas da peça: a força da mão nunca abre uma delas mais que `jointSink`
+  let jointCap = Infinity;
+  const joint = (a: number, c: number, at: Vec2) => {
+    if (a !== body && c !== body) return;
+    const k = jointCompliance(plan, a, c, at, jointHertz);
+    if (k > 0) jointCap = Math.min(jointCap, HAND.jointSink / k);
+  };
+  for (const a of plan.axles) joint(a.a, a.b, a.anchor);
+  for (const s of plan.sliders) joint(s.a, s.b, s.anchor);
+  for (const s of plan.slots) joint(s.a, s.b, s.anchor);
+  for (const d of plan.distances) if (d.kind === "rod") joint(d.a, d.b, d.anchorB);
+  for (const m of plan.mounts) if (!(m.linearHz > 0)) joint(m.a, m.b, m.anchor);
+  const maxForce = Math.min(weight + springs, mountCap, jointCap);
+  const w = Math.sqrt(maxForce / (HAND.reach * b.mass));
+  return {
+    hertz: Math.min(HAND.hertzMax, Math.max(HAND.hertzMin, w / (2 * PI))),
+    maxForce,
+    weight,
+    springs,
+    mountCap,
+    jointCap,
+  };
+}
+
+/** O alvo da mão anda até o dedo, no máximo `maxStep` mm por passo. */
+export function chase(target: Vec2, finger: Vec2, maxStep: number): Vec2 {
+  const dx = finger[0] - target[0];
+  const dy = finger[1] - target[1];
+  const d = dhypot(dx, dy);
+  if (d <= maxStep) return [finger[0], finger[1]];
+  return [target[0] + (dx * maxStep) / d, target[1] + (dy * maxStep) / d];
 }
 
 export class Runtime {
@@ -599,5 +769,110 @@ export class Runtime {
 
   sensorCount(id: Id): number {
     return this.sensors.get(id)?.count ?? 0;
+  }
+
+  /**
+   * Diagnóstico do estado (teste de abuso): energia cinética e potencial
+   * (gravidade e molas), maior velocidade de peça (só dentro de `region`,
+   * se dada: as que caíram da cena estão em queda livre), folgas de trilho
+   * e de rasgo em junta. A energia das molas segue o que o motor aplica: Hooke
+   * com o modo da mola, a mola de retorno do trilho, a mola de torção e,
+   * no suporte elástico, a mola macia da junta soldada do Box2D (massa
+   * efetiva K⁻¹ no ponto, ω² pela frequência).
+   */
+  probe(region?: [number, number, number, number]): EngineProbe {
+    const { plan } = this;
+    const g = plan.gravity;
+    let kin = 0;
+    let pot = 0;
+    let maxSpeed = 0;
+    let outside = 0;
+    let nan = false;
+    for (let i = 1; i < plan.bodies.length; i++) {
+      if (!this.dyn(i)) continue;
+      const b = plan.bodies[i]!;
+      const s = this.body(i);
+      if (![s.x, s.y, s.angle, s.vx, s.vy, s.w].every(Number.isFinite)) nan = true;
+      kin += 0.5 * b.mass * (s.vx * s.vx + s.vy * s.vy) + 0.5 * b.inertia * s.w * s.w;
+      // relativa à pose desenhada (o centro de massa começa em b.position)
+      pot -= b.mass * (g[0] * (s.x - b.position[0]) + g[1] * (s.y - b.position[1]));
+      if (region && (s.x < region[0] || s.y < region[1] || s.x > region[2] || s.y > region[3])) outside++;
+      else maxSpeed = Math.max(maxSpeed, dhypot(s.vx, s.vy));
+    }
+    for (const sp of plan.springs) {
+      const f = this.springForce(sp);
+      const d = f.L - sp.freeLength;
+      if (sp.mode === "fixed" || (sp.mode === "seated" && d < 0) || (sp.mode === "tension" && d > 0))
+        pot += 0.5 * sp.k * d * d;
+    }
+    let railGap = 0;
+    let railOver = 0;
+    for (const sl of plan.sliders) {
+      const A = this.body(sl.a);
+      const c = dcos(A.angle);
+      const n = dsin(A.angle);
+      const ux = sl.axis[0] * c - sl.axis[1] * n;
+      const uy = sl.axis[0] * n + sl.axis[1] * c;
+      const pa = this.world(sl.a, this.localOf(sl.a, sl.anchor));
+      const pb = this.world(sl.b, this.localOf(sl.b, sl.anchor));
+      const dx = pb[0] - pa[0];
+      const dy = pb[1] - pa[1];
+      const t = dx * ux + dy * uy;
+      railGap = Math.max(railGap, Math.abs(dx * uy - dy * ux));
+      railOver = Math.max(railOver, sl.lower - t, t - sl.upper);
+      if (sl.spring) pot += 0.5 * sl.spring.k * (t - sl.spring.rest) ** 2;
+    }
+    for (const sl of plan.slots) {
+      const A = this.body(sl.a);
+      const c = dcos(A.angle);
+      const n = dsin(A.angle);
+      const ux = sl.axis[0] * c - sl.axis[1] * n;
+      const uy = sl.axis[0] * n + sl.axis[1] * c;
+      const pa = this.world(sl.a, this.localOf(sl.a, sl.anchor));
+      const pb = this.world(sl.b, this.localOf(sl.b, sl.anchor));
+      const dx = pb[0] - pa[0];
+      const dy = pb[1] - pa[1];
+      const t = dx * ux + dy * uy;
+      railGap = Math.max(railGap, Math.abs(dx * uy - dy * ux));
+      railOver = Math.max(railOver, sl.lower - t, t - sl.upper);
+    }
+    for (const a of plan.axles) {
+      if (!a.torsion) continue;
+      const d = this.body(a.b).angle - this.body(a.a).angle - a.torsion.rest;
+      pot += 0.5 * a.torsion.k * d * d;
+    }
+    for (const m of plan.mounts) {
+      const pa = this.world(m.a, this.localOf(m.a, m.anchor));
+      const pb = this.world(m.b, this.localOf(m.b, m.anchor));
+      const cx = pb[0] - pa[0];
+      const cy = pb[1] - pa[1];
+      // K = M⁻¹ efetiva no ponto (como a junta soldada do Box2D); energia ½·ω²·Cᵀ·K⁻¹·C
+      let k11 = 0;
+      let k12 = 0;
+      let k22 = 0;
+      let iSum = 0;
+      for (const [bi, p] of [
+        [m.a, pa],
+        [m.b, pb],
+      ] as const) {
+        if (!this.dyn(bi)) continue;
+        const bd = plan.bodies[bi]!;
+        const s = this.body(bi);
+        const rx = p[0] - s.x;
+        const ry = p[1] - s.y;
+        k11 += 1 / bd.mass + (ry * ry) / bd.inertia;
+        k12 -= (rx * ry) / bd.inertia;
+        k22 += 1 / bd.mass + (rx * rx) / bd.inertia;
+        iSum += 1 / bd.inertia;
+      }
+      const det = k11 * k22 - k12 * k12;
+      const wl = 2 * PI * m.linearHz;
+      if (det > 0 && m.linearHz > 0)
+        pot += (0.5 * wl * wl * (k22 * cx * cx - 2 * k12 * cx * cy + k11 * cy * cy)) / det;
+      const wa = 2 * PI * m.angularHz;
+      const th = this.body(m.b).angle - this.body(m.a).angle;
+      if (iSum > 0 && m.angularHz > 0) pot += (0.5 * wa * wa * th * th) / iSum;
+    }
+    return { kinetic: kin * 1e-6, potential: pot * 1e-6, maxSpeed, outside, railGap, railOver, nan };
   }
 }

@@ -4,8 +4,7 @@ import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
 import { ANGULAR_DAMPING, FIXED_STEP, SPEED_LIMIT, trackedBodies, unwrapAngle } from "../common";
 import { buildPlan, type Plan } from "../plan";
-import { dragParams } from "../runtime";
-import { Runtime, type BodyIO, type BodyState } from "../runtime";
+import { HAND, Runtime, chase, handLimits, type BodyIO, type BodyState } from "../runtime";
 import type { CompileOptions, CompileReport, EngineAdapter, EngineEvent, PartPose, Snapshot } from "../types";
 
 export const BOX2D_WASM_VERSION = "6.0.0";
@@ -108,13 +107,27 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
   /** mola nativa do gás de cada câmara: junta de distância entre as duas faces (ou fundo e face) */
   let gasJoints: ({ joint: b2JointId; a: number; b: number; la: Vec2; lb: Vec2; active: boolean } | null)[] =
     [];
-  /** arrasto: corpo cinemático no dedo + junta de motor com mola (resolvida junto com os contatos) */
-  let drag: { body: b2BodyId; joint: b2JointId } | null = null;
+  /**
+   * a mão: corpo cinemático no alvo + junta de motor com mola limitada
+   * (resolvida junto com os contatos). O alvo persegue o dedo com
+   * velocidade limitada; a peça agarrada vira "bala" enquanto está na mão
+   * (colisão contínua também contra peças móveis).
+   */
+  let drag: {
+    body: b2BodyId;
+    joint: b2JointId;
+    /** índice do corpo agarrado e o ponto agarrado no espaço dele */
+    held: number;
+    local: Vec2;
+    target: Vec2;
+    finger: Vec2;
+  } | null = null;
 
   const endDrag = () => {
     if (!drag) return;
     B.b2DestroyJoint(drag.joint);
     B.b2DestroyBody(drag.body);
+    if (plan && bodies[drag.held]) B.b2Body_SetBullet(bodies[drag.held]!, plan.bodies[drag.held]!.bullet);
     drag = null;
   };
 
@@ -176,6 +189,38 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
     q.c = dcos(angle);
     q.s = dsin(angle);
     return q;
+  };
+
+  /** Contato mais fundo do último passo (mm) e as duas peças. */
+  const deepest = (): { depth: number; a: Id; b: Id } => {
+    let max = 0;
+    let a = "";
+    let b = "";
+    for (const i of dynamic) {
+      const id = bodies[i]!;
+      const cap = B.b2Body_GetContactCapacity(id);
+      if (!cap) continue;
+      const list = B.b2Body_GetContactData(id, cap) as {
+        manifold: { pointCount: number; GetPoint(k: number): { separation: number; delete(): void } };
+        shapeIdA: b2ShapeId;
+        shapeIdB: b2ShapeId;
+        delete(): void;
+      }[];
+      for (const c of list) {
+        const m = c.manifold;
+        for (let k = 0; k < m.pointCount; k++) {
+          const q = m.GetPoint(k);
+          if (-q.separation > max) {
+            max = -q.separation;
+            a = shapeInfo(c.shapeIdA)?.part ?? "";
+            b = shapeInfo(c.shapeIdB)?.part ?? "";
+          }
+          q.delete();
+        }
+        c.delete();
+      }
+    }
+    return { depth: max * L, a, b };
   };
 
   const adapter: EngineAdapter = {
@@ -506,6 +551,15 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
 
     step(dt: number) {
       if (!worldId || !rt) return;
+      if (drag) {
+        // o alvo anda até o dedo com velocidade limitada (tempo simulado)
+        drag.target = chase(drag.target, drag.finger, HAND.speed * dt);
+        const t = new B.b2Transform();
+        t.p = new B.b2Vec2(drag.target[0] / L, drag.target[1] / L);
+        t.q = rot(0);
+        B.b2Body_SetTargetTransform(drag.body, t, dt, true);
+        t.delete();
+      }
       rt.beforeStep(dt);
       B.b2World_Step(worldId, dt, tuning.subSteps);
       const ev = B.b2World_GetSensorEvents(worldId);
@@ -563,7 +617,6 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       const r = rt?.plan.partRel.get(partId);
       if (!worldId || !rt || !r || rt.plan.bodies[r.body]!.static) return false;
       endDrag();
-      const pb = rt.plan.bodies[r.body]!;
       const bd = B.b2DefaultBodyDef();
       bd.type = B.b2BodyType.b2_kinematicBody;
       bd.position = new B.b2Vec2(pointMm[0] / L, pointMm[1] / L);
@@ -580,7 +633,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       jd.base.bodyIdB = bodies[r.body]!;
       jd.base.localFrameB.p = new B.b2Vec2((dx * c - dy * n) / L, (dx * n + dy * c) / L);
       jd.base.collideConnected = true;
-      const d = dragParams(pb.mass, rt.plan.gravity);
+      const d = handLimits(rt.plan, r.body, tuning.jointHertz);
       jd.linearHertz = d.hertz;
       jd.linearDampingRatio = 1;
       jd.maxSpringForce = d.maxForce / L;
@@ -588,45 +641,50 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       jd.maxSpringTorque = 0;
       jd.maxVelocityForce = 0;
       jd.maxVelocityTorque = 0;
-      drag = { body, joint: B.b2CreateMotorJoint(worldId, jd) };
+      drag = {
+        body,
+        joint: B.b2CreateMotorJoint(worldId, jd),
+        held: r.body,
+        local: [dx * c - dy * n, dx * n + dy * c],
+        target: [pointMm[0], pointMm[1]],
+        finger: [pointMm[0], pointMm[1]],
+      };
       jd.delete();
+      B.b2Body_SetBullet(bodies[r.body]!, true);
       return true;
     },
     dragMove(q: Vec2) {
-      if (!drag) return;
-      const t = new B.b2Transform();
-      t.p = new B.b2Vec2(q[0] / L, q[1] / L);
-      t.q = rot(0);
-      B.b2Body_SetTargetTransform(drag.body, t, FIXED_STEP, true);
-      t.delete();
+      if (drag) drag.finger = [q[0], q[1]];
     },
     dragEnd() {
+      if (drag && rt) {
+        // ao soltar, o ponto agarrado fica com no máximo HAND.release mm/s
+        const i = drag.held;
+        const s = rt.body(i);
+        const p = rt.world(i, drag.local);
+        const rx = p[0] - s.x;
+        const ry = p[1] - s.y;
+        const vx = s.vx - s.w * ry;
+        const vy = s.vy + s.w * rx;
+        const v = Math.sqrt(vx * vx + vy * vy);
+        if (v > HAND.release) {
+          const k = HAND.release / v;
+          v1.x = (s.vx * k) / L;
+          v1.y = (s.vy * k) / L;
+          B.b2Body_SetLinearVelocity(bodies[i]!, v1);
+          B.b2Body_SetAngularVelocity(bodies[i]!, s.w * k);
+        }
+      }
       endDrag();
     },
 
     contactsDepthMax() {
-      let max = 0;
-      for (const i of dynamic) {
-        const id = bodies[i]!;
-        const cap = B.b2Body_GetContactCapacity(id);
-        if (!cap) continue;
-        const list = B.b2Body_GetContactData(id, cap) as {
-          manifold: { pointCount: number; GetPoint(k: number): { separation: number; delete(): void } };
-          shapeIdA: b2ShapeId;
-          shapeIdB: b2ShapeId;
-          delete(): void;
-        }[];
-        for (const c of list) {
-          const m = c.manifold;
-          for (let k = 0; k < m.pointCount; k++) {
-            const q = m.GetPoint(k);
-            max = Math.max(max, -q.separation);
-            q.delete();
-          }
-          c.delete();
-        }
-      }
-      return max * L;
+      return deepest().depth;
+    },
+
+    contactsDeepest() {
+      const d = deepest();
+      return d.depth > 0 ? d : null;
     },
 
     setMotorSpeed(linkId: Id, speed: number) {
@@ -653,6 +711,12 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
 
     setVent(linkId: Id, vent: number, open: boolean) {
       rt?.setVent(linkId, vent, open);
+    },
+
+    probe(region?: [number, number, number, number]) {
+      if (!rt)
+        return { kinetic: 0, potential: 0, maxSpeed: 0, outside: 0, railGap: 0, railOver: 0, nan: false };
+      return rt.probe(region);
     },
 
     dispose() {
