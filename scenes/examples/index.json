@@ -1,7 +1,15 @@
 {
-  "default": "cilindro-dois-pistoes",
-  "order": ["cilindro-dois-pistoes", "engrenagens", "biela-manivela", "trava", "lancador"],
+  "default": "lancador-ferrolho",
+  "order": [
+    "lancador-ferrolho",
+    "cilindro-dois-pistoes",
+    "engrenagens",
+    "biela-manivela",
+    "trava",
+    "lancador"
+  ],
   "descriptions": {
+    "lancador-ferrolho": "Observe o ferrolho recuar empurrado pelo gás, a mola de retorno se comprimir na haste-guia e a próxima esfera subir do carregador para a câmara. Puxe o gatilho em 0,05× para ver cada passo.",
     "cilindro-dois-pistoes": "Uma esfera cai no sensor e acende o gás: o pistão avança e o fundo recua.",
     "engrenagens": "Motor, par de engrenagens e uma catraca com lingueta que só deixa girar para um lado.",
     "biela-manivela": "A manivela gira e a haste transforma a rotação no vaivém da cruzeta.",
