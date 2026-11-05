@@ -36,7 +36,7 @@ Os sites (MDN, web.dev, developer.chrome.com) estão fora da rede liberada desta
 
 ## Testes
 
-`npm run lint`, `npm run typecheck`, `npm test` (26 arquivos, 554 testes + 4 falhas esperadas preexistentes, já com as cenas da C2; 13 do pipeline de assets) e `npm run build` limpos, sem avisos. Novos:
+`npm run lint`, `npm run typecheck`, `npm test` (26 arquivos, 556 testes + 4 falhas esperadas preexistentes, já com as cenas da C2; 13 do pipeline de assets) e `npm run build` limpos, sem avisos. Novos:
 
 - `src/editor/commands.test.ts`: **50 edições aleatórias** de todos os tipos desta parte (inserir de cada gerador, mover, girar, girar 90°, escalar, mudar parâmetro, espelhar, duplicar, excluir peça e ligação, mudar de camada, nova camada, campos de camada, reordenar, excluir camada, material, fixa/solta, nome, campos de ligação) em seis exemplos (inclusive o lançador de ferrolho), cada uma validada pelo schema; desfeitas, a cena volta ao hash do início; refeitas, ao hash do fim. Limite de 200, refazer limpo ao editar, nomes legíveis, exclusão em cascata e aviso de pino.
 - `src/editor/gestures.test.ts`, `radial.test.ts` (nada fora da tela nem sob o entalhe em 844×390, 640×360, 390×844 e 1440×900, dos dois lados, com 2 a 9 itens), `snap.test.ts`, `linkFields.test.ts` (rótulos em português, campos opcionais ligados continuam válidos, graus).
