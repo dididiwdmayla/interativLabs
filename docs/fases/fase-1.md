@@ -94,3 +94,15 @@ O app abre com um mecanismo montado, que a pessoa opera e edita a partir dele: u
 ## Item 13 — Conectar e entender (Parte E2b)
 
 Conectar por toque e por arrasto, desenho livre e furo/rasgo com caneta, ajustes simples com predefinições, modo camadas em cores com afastamento 2,5D e isolamento, cartões "o que é", tutorial sobre o objeto padrão e rastro do movimento no Testar. Prompt depois da revisão da E2a.
+
+## Item 14 — Correções do teste real e exemplo-vitrine (Parte F)
+
+Depois do primeiro teste do Will no celular (04/11):
+- velocidades renomeadas para Lento (1/20), Normal (¼, o padrão) e Real (1×), porque tempo real em peça pequena parece 4× rápido;
+- câmera lenta fluida, com interpolação de desenho entre passos;
+- arrasto da mão com força e velocidade limitadas, para nunca romper juntas nem arremessar peças (a força era multiplicada por ~98);
+- teste de abuso em todas as cenas, com invariantes de junta, penetração, velocidade e energia;
+- o objeto padrão refeito como exemplo-vitrine bem composto, com gatilho na orientação certa, câmara em corte, ferrolho com recuo visível e coletor de esferas;
+- paisagem sem a coluna vazia da esquerda.
+
+Subitens e aceites no prompt da Parte F.
