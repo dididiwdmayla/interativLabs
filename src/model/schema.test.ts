@@ -187,6 +187,19 @@ describe("v2: integridade referencial", () => {
     });
   });
 
+  it("charge.shots é opcional, inteiro e pelo menos 1", () => {
+    expect(issues(() => {})).toEqual([]);
+    expect(issues((s) => (link<"chamber">(s, "k3").gas.charge!.shots = 7))).toEqual([]);
+    expect(issues((s) => (link<"chamber">(s, "k3").gas.charge!.shots = 0))).toContainEqual({
+      path: "links[2].gas.charge.shots",
+      message: "O número de cargas precisa ser pelo menos 1",
+    });
+    expect(issues((s) => (link<"chamber">(s, "k3").gas.charge!.shots = 1.5))).toContainEqual({
+      path: "links[2].gas.charge.shots",
+      message: "O número de cargas precisa ser inteiro",
+    });
+  });
+
   it("chamber.ports aponta para outra câmara", () => {
     expect(issues((s) => (link<"chamber">(s, "k3").ports = [{ to: "k1", at: 10, d: 2 }]))).toContainEqual({
       path: "links[2].ports[0].to",

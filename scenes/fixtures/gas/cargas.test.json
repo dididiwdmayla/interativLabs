@@ -1,0 +1,143 @@
+{
+  "id": "gas/cargas",
+  "group": "gas",
+  "title": "Cargas da câmara",
+  "notes": "Uma câmara com reservatório de duas doses (charge.shots = 2): cada toque no sensor acende uma dose. Sem shots, a carga acende uma vez só, como antes. O respiro aberto esvazia a câmara entre um toque e outro.",
+  "view": [-35, -80, 115, 135],
+  "runs": [
+    {
+      "name": "duas doses, dois toques",
+      "duration": 0.8,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "o sensor conta os dois toques",
+          "event": "sensor",
+          "min": 2,
+          "max": 2
+        },
+        {
+          "kind": "events",
+          "label": "e a câmara acende duas vezes",
+          "event": "chamber-fired",
+          "min": 2,
+          "max": 2
+        },
+        {
+          "kind": "at",
+          "label": "o estado conta as duas doses",
+          "q": {
+            "link": "k8",
+            "field": "shots"
+          },
+          "t": 0.8,
+          "min": 2,
+          "max": 2
+        }
+      ]
+    },
+    {
+      "name": "uma dose (padrão), dois toques",
+      "duration": 0.8,
+      "patch": {
+        "k8": {
+          "gas": {
+            "model": "isothermal",
+            "gamma": 1.4,
+            "p0": 101.325,
+            "charge": {
+              "amount": 0.02,
+              "burnMs": 2
+            }
+          }
+        }
+      },
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "o sensor conta os dois toques",
+          "event": "sensor",
+          "min": 2,
+          "max": 2
+        },
+        {
+          "kind": "events",
+          "label": "mas a câmara acende uma vez só",
+          "event": "chamber-fired",
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "name": "durante a queima",
+      "duration": 0.3,
+      "override": {
+        "p3": {
+          "x": -60
+        },
+        "p4": {
+          "x": -60
+        }
+      },
+      "patch": {
+        "k8": {
+          "gas": {
+            "model": "isothermal",
+            "gamma": 1.4,
+            "p0": 101.325,
+            "charge": {
+              "amount": 0.02,
+              "burnMs": 20,
+              "shots": 2
+            }
+          }
+        }
+      },
+      "inputs": [
+        {
+          "kind": "ignite",
+          "link": "k8",
+          "t": 0.01
+        },
+        {
+          "kind": "ignite",
+          "link": "k8",
+          "t": 0.02
+        },
+        {
+          "kind": "ignite",
+          "link": "k8",
+          "t": 0.1
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "at",
+          "label": "um acendimento durante a queima não gasta dose; depois dela, gasta",
+          "q": {
+            "link": "k8",
+            "field": "shots"
+          },
+          "t": 0.3,
+          "min": 2,
+          "max": 2
+        },
+        {
+          "kind": "at",
+          "label": "no meio da queima, uma dose só",
+          "q": {
+            "link": "k8",
+            "field": "shots"
+          },
+          "t": 0.05,
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ],
+  "scene": "cargas.scene.json"
+}
