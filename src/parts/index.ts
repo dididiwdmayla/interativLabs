@@ -210,7 +210,8 @@ export const GENERATORS: Generator[] = [
       teeth: p.teeth!,
       pressureAngle: 20 * DEG,
       profile: "involute",
-      bore: Math.min(p.bore!, p.module! * (p.teeth! - 3)),
+      // o furo fica dentro de 60% do diâmetro de pé
+      bore: Math.min(p.bore!, 0.6 * p.module! * (p.teeth! - 2.5)),
     }),
   },
   {

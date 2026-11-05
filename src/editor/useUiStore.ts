@@ -58,6 +58,9 @@ interface UiState {
   lefty: boolean;
   /** dica curta no topo da prancha */
   hint: boolean;
+  /** a gaveta sai da frente enquanto uma peça é arrastada dela */
+  drawerAway: boolean;
+  setDrawerAway: (on: boolean) => void;
   setMode: (mode: Mode) => void;
   toggleMode: () => void;
   openScene: (id: string, scene: Scene, figure: number, history?: HistoryState) => void;
@@ -130,6 +133,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   lefty: hasWindow && readPref("il.lefty") === "1",
   hint: !hasWindow || readPref("il.hint") !== "0",
 
+  drawerAway: false,
+  setDrawerAway: (drawerAway) => set({ drawerAway }),
   setMode: (mode) => set({ mode, edgeMenu: null, sheet: mode === "simulate" ? null : get().sheet }),
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
   openScene: (id, scene, figure, history) =>

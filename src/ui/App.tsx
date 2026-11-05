@@ -7,6 +7,7 @@ import { Corners } from "./Corners";
 import { EdgeMenu, EdgeTabs } from "./EdgeMenu";
 import { InstallSheet } from "./InstallSheet";
 import { MainSheet } from "./MainSheet";
+import { PartsDrawer } from "./PartsDrawer";
 import { LayerPlates, SidePanel } from "./Panel";
 import { DEFAULT_EXAMPLE, openExample } from "./scenes/examples";
 import { Sheet } from "./Sheet";
@@ -116,6 +117,7 @@ function Workbench() {
       {wide && <SidePanel model={model} />}
       {sheet === "main" && <MainSheet />}
       {sheet === "install" && <InstallSheet />}
+      {sheet === "drawer" && mode === "edit" && <PartsDrawer />}
       {sheet === "card" && !wide && model && <CardSheet model={model} />}
       {sheet === "layers" && !wide && model && (
         <Sheet title="Camadas" side="tools">

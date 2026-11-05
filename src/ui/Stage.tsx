@@ -237,31 +237,6 @@ export function Stage({
     settle();
   }, [model, width, height, editing, writeView, settle, fitPad]);
 
-  // a vista para o resto da interface (gaveta, menus)
-  useEffect(() => {
-    if (bare) return;
-    const rect = () => box.current?.getBoundingClientRect();
-    stageApi.set({
-      view: () => view.current,
-      clientToWorld: (x, y) => {
-        const r = rect();
-        return toWorld(view.current, x - (r?.left ?? 0), y - (r?.top ?? 0));
-      },
-      worldToClient: (p) => {
-        const r = rect();
-        const q = toScreen(view.current, p);
-        return [q[0] + (r?.left ?? 0), q[1] + (r?.top ?? 0)];
-      },
-      overStage: (x, y) => {
-        const r = rect();
-        return !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-      },
-      center: () => toWorld(view.current, width / 2, height / 2),
-      fit,
-    });
-    return () => stageApi.set(null);
-  }, [bare, fit, width, height]);
-
   // enquadra ao abrir a cena e na primeira medida do palco
   const fitted = useRef<string>("");
   useLayoutEffect(() => {
@@ -441,6 +416,68 @@ export function Stage({
     snapKey.current = null;
     sheets.current?.classList.remove("is-dragging");
   };
+
+  // a vista para o resto da interface (gaveta, menus)
+  useEffect(() => {
+    if (bare) return;
+    const rect = () => box.current?.getBoundingClientRect();
+    stageApi.set({
+      view: () => view.current,
+      clientToWorld: (x, y) => {
+        const r = rect();
+        return toWorld(view.current, x - (r?.left ?? 0), y - (r?.top ?? 0));
+      },
+      worldToClient: (p) => {
+        const r = rect();
+        const q = toScreen(view.current, p);
+        return [q[0] + (r?.left ?? 0), q[1] + (r?.top ?? 0)];
+      },
+      overStage: (x, y) => {
+        const r = rect();
+        return !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      },
+      center: () => toWorld(view.current, width / 2, height / 2),
+      fit,
+      insertPreview: (shape, cx, cy) => {
+        const r = rect();
+        if (!shape || cx === undefined || cy === undefined || !r || !model) {
+          overlay.current?.ghost(null);
+          overlay.current?.guides([]);
+          snapKey.current = null;
+          return null;
+        }
+        if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) {
+          overlay.current?.ghost(null);
+          overlay.current?.guides([]);
+          return null;
+        }
+        const o = shapeOutline(shape);
+        if (!o.ok) return null;
+        const w = toWorld(view.current, cx - r.left, cy - r.top);
+        const feats: SnapFeature[] = [{ local: [0, 0], kind: "origin" }];
+        for (const sh of o.value.outline) {
+          for (const h of sh.holes) {
+            const c = h.reduce<Vec2>((a, q) => [a[0] + q[0] / h.length, a[1] + q[1] / h.length], [0, 0]);
+            feats.push({ local: c, kind: "center" });
+          }
+          if (shape.kind === "poly" && sh.outer.length <= 24)
+            for (const v of sh.outer) feats.push({ local: v, kind: "vertex" });
+        }
+        const sn = snapMove(
+          { x: w[0], y: w[1], angle: 0 },
+          feats,
+          snapTargets(model, ""),
+          SNAP_PX * mmPerPx(view.current.zoom),
+        );
+        const pose = { x: sn.x, y: sn.y, angle: 0 };
+        overlay.current?.ghost(outlinePath(o.value.outline), pose);
+        overlay.current?.guides(sn.guides);
+        snapTo(sn.key);
+        return pose;
+      },
+    });
+    return () => stageApi.set(null);
+  }, [bare, fit, width, height, model]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as Element).closest(".stage__ui")) return;

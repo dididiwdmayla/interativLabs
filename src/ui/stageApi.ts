@@ -1,4 +1,6 @@
+import type { PartPose } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
+import type { Shape } from "@/model/types";
 import type { View } from "@/render/view";
 
 /**
@@ -17,6 +19,12 @@ export interface StageApi {
   /** centro da vista, mm */
   center(): Vec2;
   fit(): void;
+  /**
+   * Fantasma da peça que vem da gaveta, com o encaixe ativo, no ponto do
+   * cliente. Devolve a pose encaixada (mundo) ou null fora do palco;
+   * shape null apaga o fantasma.
+   */
+  insertPreview(shape: Shape | null, clientX?: number, clientY?: number): PartPose | null;
 }
 
 let current: StageApi | null = null;

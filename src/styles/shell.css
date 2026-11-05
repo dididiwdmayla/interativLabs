@@ -1898,3 +1898,108 @@
   border-right-width: 0;
   --sheet-from: 16px;
 }
+
+/* ---------- gaveta de peças prontas ---------- */
+
+.sheet--drawer {
+  transition: opacity var(--dur-quick) var(--ease-fade);
+}
+
+.sheet--drawer.is-away {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--space-2);
+}
+
+.tile {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: 92px;
+  padding: var(--space-2) var(--space-1);
+  border: 1px solid var(--color-ink-faint);
+  background: var(--color-stage);
+  color: var(--color-ink);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tile:active {
+  border-color: var(--color-gold);
+}
+
+.tile__art {
+  display: block;
+  width: 72px;
+  height: 52px;
+  pointer-events: none;
+}
+
+.tile__name {
+  font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 14px;
+}
+
+/* retrato: a gaveta é uma fileira que rola de lado; arrastar para cima leva a peça */
+@media (orientation: portrait) and (max-width: 700px) {
+  .tiles {
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior: contain;
+    padding-bottom: var(--space-2);
+  }
+
+  .tiles li {
+    flex: none;
+    width: 104px;
+  }
+
+  .tile {
+    touch-action: pan-x;
+  }
+}
+
+/* ---------- miniaturas gravadas ---------- */
+
+.thumb {
+  display: block;
+}
+
+.thumb__face {
+  fill: var(--color-stage);
+  fill-rule: evenodd;
+}
+
+.thumb__line {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  fill-rule: evenodd;
+}
+
+.thumb__hatch {
+  fill: none;
+  stroke: var(--color-ink-2);
+}
+
+.thumb__link {
+  fill: var(--color-ink);
+}
