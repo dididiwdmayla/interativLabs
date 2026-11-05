@@ -1,13 +1,30 @@
 import { useId } from "react";
+import { useUiStore } from "@/editor/useUiStore";
+import { DEFAULT_SPEED, REAL_NOTICE, SPEEDS, speedMode, type Speed } from "@/sim/pacing";
 import { Icon } from "../icons";
-import { SPEEDS, useSimStore } from "./simStore";
+import { useSimStore } from "./simStore";
+import { firstRealChoice } from "./speed";
 
-const speedLabel = (s: number) => `${String(s).replace(".", ",")}×`;
+/** Nome e, menor embaixo, a fração do tempo real. */
+function SpeedLabel({ speed }: { speed: number }) {
+  const m = speedMode(speed);
+  return (
+    <>
+      <span className="simctl__speedname">{m.name}</span>
+      <span className="simctl__speedfrac">{m.frac}</span>
+    </>
+  );
+}
+
+function chooseSpeed(set: (s: Speed) => void, s: Speed): void {
+  set(s);
+  if (firstRealChoice(s)) useUiStore.getState().notify(REAL_NOTICE);
+}
 
 /**
  * Controles do Testar, na faixa de baixo junto com a régua: pausa, um
- * passo, câmera lenta (um botão que troca no celular; os três no
- * computador) e reiniciar.
+ * passo, velocidade (Lento 1/20, Normal ¼, Real 1×: um botão que troca
+ * no celular; os três no computador) e reiniciar.
  */
 export function SimControls() {
   const uid = useId();
@@ -39,11 +56,17 @@ export function SimControls() {
       <button
         type="button"
         className="simctl__speed simctl__cycle"
-        aria-label={`Velocidade ${speedLabel(st.speed)}; toque para trocar`}
+        aria-label={`Velocidade: ${speedMode(st.speed).name} (${speedMode(st.speed).frac} do tempo real); toque para trocar`}
         disabled={!ctl}
-        onClick={() => ctl?.setSpeed(SPEEDS[(SPEEDS.indexOf(st.speed) + 1) % SPEEDS.length] ?? 0.25)}
+        onClick={() =>
+          ctl &&
+          chooseSpeed(
+            (s) => ctl.setSpeed(s),
+            SPEEDS[(SPEEDS.indexOf(st.speed) + 1) % SPEEDS.length] ?? DEFAULT_SPEED,
+          )
+        }
       >
-        {speedLabel(st.speed)}
+        <SpeedLabel speed={st.speed} />
       </button>
       <div className="simctl__speeds" role="group" aria-label="Velocidade">
         {SPEEDS.map((s) => (
@@ -52,10 +75,11 @@ export function SimControls() {
             type="button"
             className="simctl__speed"
             aria-pressed={st.speed === s}
+            aria-label={`${speedMode(s).name} (${speedMode(s).frac} do tempo real)`}
             disabled={!ctl}
-            onClick={() => ctl?.setSpeed(s)}
+            onClick={() => ctl && chooseSpeed((x) => ctl.setSpeed(x), s)}
           >
-            {speedLabel(s)}
+            <SpeedLabel speed={s} />
           </button>
         ))}
       </div>

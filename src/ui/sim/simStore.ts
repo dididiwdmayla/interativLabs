@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
+import { DEFAULT_SPEED, type Speed } from "@/sim/pacing";
 
 /**
  * Estado da simulação visível na interface. O laço e o motor ficam no
  * controlador (src/ui/sim/controller.ts), carregado só ao entrar no Simular.
  */
 
-export const SPEEDS = [0.05, 0.25, 1] as const;
-export type Speed = (typeof SPEEDS)[number];
+export { SPEEDS, type Speed } from "@/sim/pacing";
 
 export interface TimelineState {
   /** s: início e fim da janela gravada */
@@ -56,7 +56,7 @@ export const useSimStore = create<SimState>()((set) => ({
   status: "off",
   error: null,
   paused: false,
-  speed: 0.25,
+  speed: DEFAULT_SPEED,
   recalculating: false,
   scrubbed: false,
   ctl: null,
