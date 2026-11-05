@@ -2,7 +2,6 @@ import { create } from "zustand";
 import type { Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
 import type { Command } from "./commands";
-import type { ToolId } from "./tools";
 import { emptyHistory, lowerFirst, push, redo, run, undo, type HistoryState } from "./history";
 
 export type Mode = "edit" | "simulate";
@@ -59,14 +58,6 @@ interface UiState {
   lefty: boolean;
   /** dica curta no topo da prancha */
   hint: boolean;
-  // casca da Parte D (sai no item 7.2)
-  tool: ToolId;
-  sheetOpen: boolean;
-  menuOpen: boolean;
-  setTool: (tool: ToolId) => void;
-  setSheetOpen: (open: boolean) => void;
-  setMenuOpen: (open: boolean) => void;
-
   setMode: (mode: Mode) => void;
   toggleMode: () => void;
   openScene: (id: string, scene: Scene, figure: number, history?: HistoryState) => void;
@@ -134,12 +125,6 @@ export const useUiStore = create<UiState>()((set, get) => ({
   edgeMenu: null,
   lefty: hasWindow && readPref("il.lefty") === "1",
   hint: !hasWindow || readPref("il.hint") !== "0",
-  tool: "select",
-  sheetOpen: false,
-  menuOpen: false,
-  setTool: (tool) => set({ tool }),
-  setSheetOpen: (sheetOpen) => set({ sheetOpen }),
-  setMenuOpen: (menuOpen) => set({ menuOpen }),
 
   setMode: (mode) => set({ mode, edgeMenu: null, sheet: mode === "simulate" ? null : get().sheet }),
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
@@ -152,7 +137,6 @@ export const useUiStore = create<UiState>()((set, get) => ({
       sheet: null,
       details: false,
       edgeMenu: null,
-      menuOpen: false,
       // a camada mais alta começa ativa: é a mais perto de quem olha
       activeLayer: Math.max(0, scene.layers.length - 1),
     })),

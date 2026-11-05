@@ -21,6 +21,7 @@
     "bench:browser": "playwright test --project=bench",
     "bench:size": "node scripts/bench/bundle-size.mjs",
     "assets": "node scripts/assets/build.mjs",
+    "icons": "node scripts/icons/build.mjs",
     "test:assets": "node --test scripts/assets/*.test.mjs",
     "fixtures": "node scripts/run-ts.mjs scripts/fixtures/generate.ts",
     "fixtures:hashes": "node scripts/run-ts.mjs scripts/fixtures/hashes.ts",

@@ -5,8 +5,9 @@ import { SPEEDS, useSimStore } from "./simStore";
 const speedLabel = (s: number) => `${String(s).replace(".", ",")}×`;
 
 /**
- * Controles do Simular, no lugar das ferramentas (barra de baixo no
- * celular, trilho no computador): pausa, um passo, câmera lenta e reiniciar.
+ * Controles do Testar, na faixa de baixo junto com a régua: pausa, um
+ * passo, câmera lenta (um botão que troca no celular; os três no
+ * computador) e reiniciar.
  */
 export function SimControls() {
   const uid = useId();
@@ -35,17 +36,16 @@ export function SimControls() {
       >
         <Icon name="step" uid={`${uid}s`} />
       </button>
-      <span className="toolbar__sep only-desktop" aria-hidden="true" />
       <button
         type="button"
-        className="simctl__speed simctl__cycle only-mobile"
+        className="simctl__speed simctl__cycle"
         aria-label={`Velocidade ${speedLabel(st.speed)}; toque para trocar`}
         disabled={!ctl}
         onClick={() => ctl?.setSpeed(SPEEDS[(SPEEDS.indexOf(st.speed) + 1) % SPEEDS.length] ?? 0.25)}
       >
         {speedLabel(st.speed)}
       </button>
-      <div className="simctl__speeds only-desktop-flex" role="group" aria-label="Velocidade">
+      <div className="simctl__speeds" role="group" aria-label="Velocidade">
         {SPEEDS.map((s) => (
           <button
             key={s}
@@ -59,7 +59,6 @@ export function SimControls() {
           </button>
         ))}
       </div>
-      <span className="toolbar__sep only-desktop" aria-hidden="true" />
       <button
         type="button"
         className="tool"

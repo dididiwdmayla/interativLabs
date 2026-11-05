@@ -42,7 +42,10 @@ async function open(page: Page, id: string) {
 }
 
 async function simulateUntil(page: Page, t: number) {
-  await page.getByRole("button", { name: "Simular" }).first().click();
+  await page
+    .getByRole("button", { name: /^Testar/ })
+    .first()
+    .click();
   await page.waitForFunction(
     () => (window as unknown as { __IL__: Hooks }).__IL__.sim.getState().ctl !== null,
   );

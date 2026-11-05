@@ -1,14 +1,13 @@
 import { memo, useLayoutEffect, useMemo, type ReactNode } from "react";
 import { assets, type Asset } from "@/assets/registry";
 import { layoutCallouts, type CalloutTarget } from "./callouts";
+import { calloutGeometry } from "./calloutScene";
 import { chamberGeo } from "./geometry";
 import { HATCHES, WOOD_TILE_PX, hatchCoverage, hatchScale, patternTransform, type HatchId } from "./hatch";
 import { HW_IDS, type ArtContext } from "./hardware";
 import { CarriedArt, Ground, TwoEndArt } from "./LinkArt";
 import type { StageNodes } from "./nodes";
-import { containsPoint } from "@/geometry/polygon";
-import type { Vec2 } from "@/geometry/vec";
-import { localOf, worldOf, type LinkModel, type PartModel, type SceneModel } from "./prepare";
+import type { LinkModel, PartModel, SceneModel } from "./prepare";
 import { SkinCache, type PartSkin } from "./skin";
 import { hatchStep, mmPerPx } from "./view";
 import "./render.css";
@@ -233,6 +232,8 @@ export function SceneSvg(props: SceneSvgProps) {
     }
   }
 
+  const calloutGeo = useMemo(() => calloutGeometry(model), [model]);
+
   // chamadas: ligações no Editar; a peça selecionada (no Simular, só se ela se move)
   const callouts = useMemo(() => {
     if (props.callouts === false) return [];
@@ -255,33 +256,9 @@ export function SceneSvg(props: SceneSvgProps) {
       if (m && (mode === "edit" || m.dynamic))
         targets.push({ id: m.part.id, ref: m.part.ref, p: [m.part.x, m.part.y], priority: 1000 });
     }
-    // espaço livre: fora de toda peça (caixas no mundo primeiro, para descartar rápido)
-    const boxes = model.partList.map((m) => {
-      let x0 = Infinity;
-      let y0 = Infinity;
-      let x1 = -Infinity;
-      let y1 = -Infinity;
-      for (const sh of m.outline)
-        for (const q of sh.outer) {
-          const w = worldOf(m.part, q);
-          x0 = Math.min(x0, w[0]);
-          y0 = Math.min(y0, w[1]);
-          x1 = Math.max(x1, w[0]);
-          y1 = Math.max(y1, w[1]);
-        }
-      return { m, x0, y0, x1, y1 };
-    });
-    const occupied = (q: Vec2) =>
-      boxes.some(
-        (b) =>
-          q[0] >= b.x0 &&
-          q[0] <= b.x1 &&
-          q[1] >= b.y0 &&
-          q[1] <= b.y1 &&
-          b.m.outline.some((sh) => containsPoint(sh, localOf(b.m.part, q))),
-      );
-    return layoutCallouts(targets, model.bounds, px, occupied);
-  }, [model, mode, selection, px, props.active, props.callouts]);
+    // espaço livre e cruzamentos: contornos das peças visíveis no mundo
+    return layoutCallouts(targets, calloutGeo.bounds, px, calloutGeo.geo);
+  }, [model, mode, selection, px, props.active, props.callouts, calloutGeo]);
 
   // depois de cada montagem, reaplica o quadro atual (as poses não passam pelo React)
   useLayoutEffect(() => {

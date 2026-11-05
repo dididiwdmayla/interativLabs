@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
-import { toolById } from "@/editor/tools";
 import { MultiTap } from "@/editor/gestures";
 import { useUiStore } from "@/editor/useUiStore";
 import type { Vec2 } from "@/geometry/vec";
@@ -8,10 +7,19 @@ import { linkAt, partAt } from "@/render/hit";
 import { StageNodes } from "@/render/nodes";
 import type { SceneModel } from "@/render/prepare";
 import { SceneSvg, type LayerMode, type Selection } from "@/render/SceneSvg";
-import { fitView, mmPerPx, panBy, toWorld, viewMatrix, zoomAt, type View } from "@/render/view";
-import { Icon } from "./icons";
+import {
+  fitView,
+  hatchStep,
+  mmPerPx,
+  panBy,
+  toScreen,
+  toWorld,
+  viewMatrix,
+  zoomAt,
+  type View,
+} from "@/render/view";
 import { useSimStore } from "./sim/simStore";
-import { Timeline } from "./sim/Timeline";
+import { stageApi } from "./stageApi";
 import { useElementSize } from "./useElementSize";
 
 /**
@@ -37,13 +45,19 @@ interface StageProps {
   onSelect?: (s: Selection) => void;
   /** chamado quando a cena monta (a simulação pega os nós aqui) */
   onNodes?: (nodes: StageNodes | null) => void;
-  /** sem chamadas, dica nem botão de enquadrar (perf) */
+  /** sem chamadas (perf) */
   bare?: boolean;
+  /** margens do enquadramento, px: cima, direita, baixo, esquerda (cantos, abas e régua) */
+  fitPad?: { edit: Pad; sim: Pad };
+  /** primeiro toque na prancha (a dica some) */
+  onFirstTouch?: () => void;
 }
 
-/** margens do enquadramento, px: cima, direita, baixo, esquerda (espaço das chamadas e da régua) */
-const FIT_PAD_EDIT: [number, number, number, number] = [64, 44, 64, 44];
-const FIT_PAD_SIM: [number, number, number, number] = [56, 32, 92, 32];
+type Pad = [number, number, number, number];
+
+/** margens padrão do enquadramento, px: cima, direita, baixo, esquerda */
+const FIT_PAD_EDIT: Pad = [64, 44, 64, 44];
+const FIT_PAD_SIM: Pad = [56, 32, 92, 32];
 const TAP_PX = 8;
 const WHEEL_SETTLE_MS = 160;
 
@@ -75,12 +89,13 @@ export function Stage({
   onSelect,
   onNodes,
   bare = false,
+  fitPad,
+  onFirstTouch,
 }: StageProps) {
   const box = useRef<HTMLDivElement>(null);
   const sheets = useRef<HTMLDivElement>(null);
   const { width, height } = useElementSize(box);
   const uid = useId().replace(/:/g, "");
-  const tool = useUiStore((s) => s.tool);
   const ctl = useSimStore((s) => s.ctl);
   const editing = mode === "edit";
 
@@ -107,12 +122,38 @@ export function Stage({
 
   const fit = useCallback(() => {
     if (!model || width <= 0 || height <= 0) return;
-    const v = fitView(model.bounds, width, height, editing ? FIT_PAD_EDIT : FIT_PAD_SIM);
+    const pad = editing ? (fitPad?.edit ?? FIT_PAD_EDIT) : (fitPad?.sim ?? FIT_PAD_SIM);
+    const v = fitView(model.focus, width, height, pad);
     view.current = v;
     setFitZoom(v.zoom);
     writeView();
     settle();
-  }, [model, width, height, editing, writeView, settle]);
+  }, [model, width, height, editing, writeView, settle, fitPad]);
+
+  // a vista para o resto da interface (gaveta, menus)
+  useEffect(() => {
+    if (bare) return;
+    const rect = () => box.current?.getBoundingClientRect();
+    stageApi.set({
+      view: () => view.current,
+      clientToWorld: (x, y) => {
+        const r = rect();
+        return toWorld(view.current, x - (r?.left ?? 0), y - (r?.top ?? 0));
+      },
+      worldToClient: (p) => {
+        const r = rect();
+        const q = toScreen(view.current, p);
+        return [q[0] + (r?.left ?? 0), q[1] + (r?.top ?? 0)];
+      },
+      overStage: (x, y) => {
+        const r = rect();
+        return !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      },
+      center: () => toWorld(view.current, width / 2, height / 2),
+      fit,
+    });
+    return () => stageApi.set(null);
+  }, [bare, fit, width, height]);
 
   // enquadra ao abrir a cena e na primeira medida do palco
   const fitted = useRef<string>("");
@@ -160,6 +201,7 @@ export function Stage({
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as Element).closest(".stage__ui")) return;
     if (!model || !nodes) return;
+    onFirstTouch?.();
     const [x, y] = local(e);
     box.current?.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { id: e.pointerId, x, y, x0: x, y0: y, t0: performance.now() });
@@ -285,6 +327,16 @@ export function Stage({
     ctl?.redraw();
   }, [zoom, ctl]);
 
+  // troca de degrau da hachura: transição de opacidade de 120 ms (identidade, "Como o zoom afeta")
+  const step = hatchStep(zoom);
+  const lastStep = useRef(step);
+  const [restep, setRestep] = useState<"a" | "b" | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (lastStep.current === step) return;
+    lastStep.current = step;
+    setRestep((r) => (r === "a" ? "b" : "a"));
+  }, [step]);
+
   const ready = width > 0 && height > 0;
   const inset = 8;
   const gap = 3;
@@ -303,7 +355,13 @@ export function Stage({
     >
       <div className="stage__vignette" aria-hidden="true" />
       {ready && (
-        <div className="stage__sheets" ref={sheets} role="img" aria-label={`Prancha: ${title}`}>
+        <div
+          className="stage__sheets"
+          ref={sheets}
+          data-restep={restep}
+          role="img"
+          aria-label={`Prancha: ${title}`}
+        >
           {model && nodes && (
             <SceneSvg
               model={model}
@@ -337,35 +395,13 @@ export function Stage({
             width={width - 2 * (inset + gap)}
             height={height - 2 * (inset + gap)}
           />
-          {editing && (
-            <text className="stage__fig" x={inset + gap + 14} y={height - inset - gap - 14}>
+          {editing && !bare && (
+            <text className="stage__fig" x={width / 2} y={height - inset - gap - 14} textAnchor="middle">
               <tspan className="stage__fig-script">Fig. {figure}</tspan>
-              <tspan className="stage__fig-name" dx="10">
-                {title}
-              </tspan>
             </text>
           )}
         </svg>
       )}
-      {!bare && (
-        <div className="stage__ui stage__corner">
-          <button
-            type="button"
-            className="iconbtn stage__fit"
-            aria-label="Enquadrar"
-            title="Enquadrar"
-            onClick={fit}
-          >
-            <Icon name="fit" uid={`${uid}fit`} />
-          </button>
-        </div>
-      )}
-      {editing && !bare && (
-        <p className="stage__hint" aria-live="polite">
-          {toolById(tool).hint}
-        </p>
-      )}
-      {!editing && !bare && <Timeline />}
     </main>
   );
 }

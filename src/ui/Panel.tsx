@@ -36,7 +36,7 @@ function Field({ label, value, unit }: { label: string; value: string; unit?: st
   );
 }
 
-function Properties({ model }: { model: SceneModel }) {
+export function Properties({ model }: { model: SceneModel }) {
   const sel = useUiStore((s) => s.selection);
   const select = useUiStore((s) => s.select);
   if (!sel)
@@ -115,7 +115,7 @@ function Properties({ model }: { model: SceneModel }) {
   );
 }
 
-function LayerPlates({ model }: { model: SceneModel }) {
+export function LayerPlates({ model }: { model: SceneModel }) {
   const active = useUiStore((s) => s.activeLayer);
   const setActive = useUiStore((s) => s.setActiveLayer);
   // a do topo é a mais próxima de quem olha: ordem visual é o array invertido
@@ -153,80 +153,30 @@ function LayerPlates({ model }: { model: SceneModel }) {
   );
 }
 
-/**
- * Painel de propriedades: coluna à direita no computador, folha inferior
- * no celular (recolhida por padrão; a alça mostra a seleção ou a camada).
- */
-export function Panel({ model }: { model: SceneModel | null }) {
+/** Painel lateral fixo do computador (a partir de 1100 px): a seleção e as camadas. */
+export function SidePanel({ model }: { model: SceneModel | null }) {
   const uid = useId();
-  const open = useUiStore((s) => s.sheetOpen);
-  const setOpen = useUiStore((s) => s.setSheetOpen);
-  const active = useUiStore((s) => s.activeLayer);
   const xray = useUiStore((s) => s.xray);
   const setXray = useUiStore((s) => s.setXray);
-  const sel = useUiStore((s) => s.selection);
-  const bodyId = `${uid}body`;
-  const layer = model?.layers[active];
-  const selName =
-    sel?.kind === "part"
-      ? model?.parts.get(sel.id)?.part.name
-      : sel?.kind === "link"
-        ? (() => {
-            const l = model?.linkById.get(sel.id)?.link;
-            return l ? `${LINK_LABEL[l.kind]} ${l.ref}` : undefined;
-          })()
-        : undefined;
   return (
-    <aside className="panel" data-open={open} aria-label="Propriedades">
-      <button
-        type="button"
-        className="panel__handle only-mobile"
-        aria-expanded={open}
-        aria-controls={bodyId}
-        onClick={() => setOpen(!open)}
-      >
-        <span className="panel__grip" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </span>
-        <span className="panel__handle-label">
-          {selName ? (
-            <>
-              <span className="panel__handle-k panel__handle-k--sel">Seleção</span>
-              <span className="panel__handle-name">{selName}</span>
-            </>
-          ) : (
-            <>
-              <span className="panel__handle-k">Camada</span>
-              <span className="panel__handle-num">{active + 1}</span>
-              <span className="panel__handle-name">{layer?.layer.name}</span>
-            </>
-          )}
-        </span>
-        <span className="panel__chev" aria-hidden="true">
-          <Icon name="chevron" uid={`${uid}c`} size={20} />
-        </span>
-      </button>
-      <div className="panel__body" id={bodyId}>
-        <section className="panel__section">
-          <h2 className="panel__title">Propriedades</h2>
-          {model && <Properties model={model} />}
-        </section>
-        <section className="panel__section">
-          <h2 className="panel__title">Camadas</h2>
-          {model && <LayerPlates model={model} />}
-          <button
-            type="button"
-            className="btn btn--outline panel__xray"
-            aria-pressed={xray}
-            onClick={() => setXray(!xray)}
-          >
-            <Icon name="xray" uid={`${uid}x`} size={20} />
-            Raio-x
-          </button>
-        </section>
-      </div>
+    <aside className="panel" aria-label="Propriedades e camadas">
+      <section className="panel__section">
+        <h2 className="panel__title">Propriedades</h2>
+        {model && <Properties model={model} />}
+      </section>
+      <section className="panel__section">
+        <h2 className="panel__title">Camadas</h2>
+        {model && <LayerPlates model={model} />}
+        <button
+          type="button"
+          className="btn btn--outline panel__xray"
+          aria-pressed={xray}
+          onClick={() => setXray(!xray)}
+        >
+          <Icon name="xray" uid={`${uid}x`} size={20} />
+          Raio-x
+        </button>
+      </section>
     </aside>
   );
 }
