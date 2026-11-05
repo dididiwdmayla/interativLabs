@@ -75,7 +75,12 @@ export interface ChamberGeometry {
   /** posição de cada face ao longo do eixo, mm do fundo, e o ponto no mundo */
   s: number[];
   faces: Vec2[];
+  /** distância de cada face até a linha do eixo, mm (fora do furo: a parede saiu do cilindro) */
+  lat?: number[];
 }
+
+/** Uma parede com a face a mais de 1,5 raio da linha do eixo saiu do cilindro. */
+const OUT_OF_BORE = 1.5;
 
 interface WallSim {
   travel: number;
@@ -105,6 +110,8 @@ export class ChamberSim {
   portExposed: number[];
   /** área total de escape para o ambiente no passo (mm²) */
   private outArea = 0;
+  /** alguma parede saiu do furo (de lado): o cilindro está aberto e o gás não empurra */
+  breached = false;
 
   constructor(p: PlanChamber) {
     this.p = p;
@@ -200,6 +207,10 @@ export class ChamberSim {
     });
     // boca do cilindro: a parede da frente que passa do comprimento abre o furo inteiro
     if (front > p.length) area += Math.min(1, (front - p.length) / p.length + 0.5) * p.area;
+    // parede que saiu do furo de lado (arrancada, caída): o cilindro fica aberto
+    const r = Math.sqrt(p.area / Math.PI);
+    this.breached = !!g.lat?.some((l) => l > OUT_OF_BORE * r);
+    if (this.breached) area += 4 * p.area;
     this.outArea = area;
     if (area > 0) this.relaxTo(p.p0, area, h);
     this.pressure();
@@ -247,8 +258,9 @@ export class ChamberSim {
     });
   }
 
-  /** Força do gás em cada parede, g·mm/s² (positiva = para fora). */
+  /** Força do gás em cada parede, g·mm/s² (positiva = para fora); zero com o cilindro arrombado. */
   gasForce(): number {
+    if (this.breached) return 0;
     return (this.P - this.p.p0) * this.p.area * KPA_MM2;
   }
 
@@ -257,6 +269,7 @@ export class ChamberSim {
    * Usada pela mola nativa que leva a força do gás para dentro do solver.
    */
   stiffness(h: number): number {
+    if (this.breached) return 0;
     const L = this.V / this.p.area;
     const g = this.p.model === "isothermal" ? 1 : this.p.gamma;
     const k = (g * this.P * this.p.area * KPA_MM2) / L;

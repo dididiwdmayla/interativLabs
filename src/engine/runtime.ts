@@ -118,6 +118,8 @@ export function dragParams(mass: number, gravity: Vec2): { hertz: number; maxFor
  *   abre uma junta da peça `jointSink` mm, nem o que deforma um suporte
  *   elástico além da faixa dele.
  * - Ao soltar, o ponto agarrado fica com no máximo `release` mm/s.
+ * - Atravessar: o alvo anda no máximo 2,5 mm por passo; contra peças fixas
+ *   vale a colisão contínua do Box2D.
  */
 export const HAND = {
   /**
@@ -447,7 +449,8 @@ export class Runtime {
     const axis: Vec2 = [p.axis[0] * c - p.axis[1] * n, p.axis[0] * n + p.axis[1] * c];
     const faces = p.walls.map((w) => this.world(w.body, w.face));
     const s = faces.map((f) => (f[0] - base[0]) * axis[0] + (f[1] - base[1]) * axis[1]);
-    return { base, axis, s, faces };
+    const lat = faces.map((f) => Math.abs((f[0] - base[0]) * axis[1] - (f[1] - base[1]) * axis[0]));
+    return { base, axis, s, faces, lat };
   }
 
   /** Gás de todas as câmaras: volume, queima, escape, portas e forças. */

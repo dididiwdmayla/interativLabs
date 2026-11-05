@@ -1,8 +1,8 @@
 {
   "exemplos/biela-manivela": "06233377c0f61c00",
-  "exemplos/cilindro-dois-pistoes": "fbc93cba622d0c39",
+  "exemplos/cilindro-dois-pistoes": "713887709959157d",
   "exemplos/engrenagens": "13a3c088813ef6f7",
-  "exemplos/lancador": "6c6131acde857fd3",
+  "exemplos/lancador": "21535b84262b88a3",
   "exemplos/lancador-ferrolho": "d495f4a9f2c91b3a",
   "exemplos/trava": "1eb2b45e72a5bdfd",
   "fixacoes/biela": "04c4dd6669ae4005",
@@ -21,11 +21,11 @@
   "gas/cargas": "7ed7269ed31a6be1",
   "gas/lei": "3ccb69e5d0a855ec",
   "gas/portas": "601b21bd9b52d1aa",
-  "gas/recuo": "1749be63412e07f2",
+  "gas/recuo": "fff6cd4b873b09d4",
   "gas/sensor": "3b23804483e2d92f",
   "calibracao/bala": "20103ec8b4211e99",
   "calibracao/corrente": "007c1ccfc0ee15e4",
   "calibracao/pilha": "7801499766c01642",
   "calibracao/pinhao": "753fcbe7b0464bd4",
-  "desempenho/desempenho": "2a73c5b1377cd124"
+  "desempenho/desempenho": "1d244d257b98cd16"
 }

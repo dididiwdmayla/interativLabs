@@ -110,8 +110,10 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
   /**
    * a mão: corpo cinemático no alvo + junta de motor com mola limitada
    * (resolvida junto com os contatos). O alvo persegue o dedo com
-   * velocidade limitada; a peça agarrada vira "bala" enquanto está na mão
-   * (colisão contínua também contra peças móveis).
+   * velocidade limitada (600 mm/s: no máximo 2,5 mm por passo); contra as
+   * peças fixas vale a colisão contínua do Box2D. A peça na mão não vira
+   * "bala": a colisão contínua de bala não respeita as juntas e prendia o
+   * elo de uma corrente no vizinho (junta abrindo 13,9 mm no teste de abuso).
    */
   let drag: {
     body: b2BodyId;
@@ -127,7 +129,6 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
     if (!drag) return;
     B.b2DestroyJoint(drag.joint);
     B.b2DestroyBody(drag.body);
-    if (plan && bodies[drag.held]) B.b2Body_SetBullet(bodies[drag.held]!, plan.bodies[drag.held]!.bullet);
     drag = null;
   };
 
@@ -650,7 +651,6 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         finger: [pointMm[0], pointMm[1]],
       };
       jd.delete();
-      B.b2Body_SetBullet(bodies[r.body]!, true);
       return true;
     },
     dragMove(q: Vec2) {

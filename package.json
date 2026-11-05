@@ -26,6 +26,7 @@
     "fixtures": "node scripts/run-ts.mjs scripts/fixtures/generate.ts",
     "fixtures:hashes": "node scripts/run-ts.mjs scripts/fixtures/hashes.ts",
     "calibrate": "node scripts/run-ts.mjs scripts/bench/calibrate.ts",
+    "abuse": "node scripts/run-ts.mjs scripts/abuse.ts",
     "test:e2e": "playwright test --project=determinism"
   },
   "dependencies": {

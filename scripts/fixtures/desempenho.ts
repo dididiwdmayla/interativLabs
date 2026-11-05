@@ -61,7 +61,9 @@ export function generateDesempenho(): void {
       a: null,
       b: arm.id,
       at: [-15, 0],
-      motor: { speed: i % 2 ? -2 : 1.5, maxTorque: 40 },
+      // 2 N·mm move o braço com a engrenagem (o peso dá ~0,4 N·mm) sem esmagar
+      // o bloco leve em que o pino do braço encosta (40 N·mm afundava 1,4 mm)
+      motor: { speed: i % 2 ? -2 : 1.5, maxTorque: 2 },
     });
     const bob = b.part({
       name: `Engrenagem ${i + 1}`,
