@@ -115,6 +115,8 @@ export class ChamberSim {
 
   constructor(p: PlanChamber) {
     this.p = p;
+    // antes do primeiro passo, a pressão do ambiente (o quadro 0 mostra p0, não 0)
+    this.P = p.p0;
     this.walls = p.walls.map((w) => ({
       travel: 0,
       sealed: true,

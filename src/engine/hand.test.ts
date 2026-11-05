@@ -51,7 +51,7 @@ describe("limites da mão", () => {
   });
 
   it("ferrolho: vence a mola de retorno, sem passar do que abre o trilho 0,25 mm", () => {
-    const { plan, body } = bodyOf(load("scenes/examples/lancador-ferrolho.json"), "Ferrolho");
+    const { plan, body } = bodyOf(load("scenes/examples/lancador-bancada.json"), "Ferrolho");
     const h = handLimits(plan, body);
     expect(h.maxForce / N).toBeGreaterThan(1.23); // mola de retorno no fim do curso
     expect(h.maxForce).toBeLessThanOrEqual(h.jointCap);

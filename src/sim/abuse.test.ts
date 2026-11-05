@@ -39,6 +39,8 @@ const EXPECTED: Record<string, Partial<Record<InvariantId, string>>> = {
   "desempenho/desempenho": { penetration: IMPACT },
   "gas/cargas": { penetration: IMPACT },
   "gas/sensor": { penetration: IMPACT },
+  "gas/recuo": { penetration: IMPACT },
+  "exemplos/cilindro-dois-pistoes": { penetration: IMPACT },
   "rasgos/camadas": {
     penetration: IMPACT,
     speed:
@@ -46,11 +48,7 @@ const EXPECTED: Record<string, Partial<Record<InvariantId, string>>> = {
     energy: "o impacto da queda (3,4 m/s) é desfeito pelo contato, que devolve 0,0014 mJ",
   },
   "exemplos/engrenagens": { penetration: IMPACT },
-  "exemplos/lancador-ferrolho": {
-    joint:
-      "a barra do gatilho sacudida emperra o pino no rasgo do corpo; substituído pelo lançador de bancada (item 14.5)",
-    penetration: IMPACT,
-  },
+  "exemplos/lancador-bancada": { penetration: IMPACT },
   "exemplos/lancador": { penetration: IMPACT },
   "exemplos/trava": { penetration: IMPACT },
 };

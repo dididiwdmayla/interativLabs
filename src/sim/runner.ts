@@ -432,6 +432,7 @@ function evaluator(a: ScriptAssertion, ctx: QCtx): Evaluator {
         },
         result: () => {
           if (n < (a.minSteps ?? 1)) return { pass: false, value: `a condição valeu em ${n} passos` };
+          if (a.peak) return { pass: within(hi, a.min, a.max), value: `pico ${fmt(hi, 6)} em ${n} passos` };
           return {
             pass: within(lo, a.min, a.max) && within(hi, a.min, a.max),
             value: `de ${fmt(lo, 6)} a ${fmt(hi, 6)} em ${n} passos`,

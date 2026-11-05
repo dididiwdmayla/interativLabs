@@ -361,6 +361,18 @@ class Controller implements SimControl {
     if (f) this.draw(f);
   }
 
+  preview(t: number) {
+    if (this.rewinding) return;
+    if (this.dragging) this.dragEnd();
+    const d = Math.max(this.rec.oldest, Math.min(this.rec.latest, t / this.h));
+    this.shownStep = Math.floor(d);
+    this.state.set({ paused: true, scrubbed: true });
+    const { step, alpha } = blendAt(d, this.rec.oldest, this.rec.latest);
+    const f = this.rec.blend(step, alpha, this.h, this.mix);
+    if (f) this.draw(f);
+    this.drawnAt = this.shownStep;
+  }
+
   timeline(): TimelineState {
     const h = this.h;
     return {

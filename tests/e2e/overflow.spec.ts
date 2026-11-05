@@ -10,7 +10,7 @@ const ROUTES = [
   "/#bench",
   "/#lab",
   "/#lab/exemplos/cilindro-dois-pistoes",
-  "/#lab/exemplos/lancador-ferrolho",
+  "/#lab/exemplos/lancador-bancada",
   "/#perf",
 ];
 

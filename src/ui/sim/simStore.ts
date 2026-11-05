@@ -31,6 +31,8 @@ export interface SimControl {
   dragEnd(): void;
   /** arrastar a régua: mostra o quadro gravado do instante t (s) */
   scrub(t: number): void;
+  /** mostra o quadro misturado de um instante qualquer (fração de passo), parado (capturas) */
+  preview(t: number): void;
   timeline(): TimelineState;
   /** ouvinte chamado a cada quadro desenhado (null tira) */
   setFrameListener(fn: ((t: TimelineState) => void) | null): void;

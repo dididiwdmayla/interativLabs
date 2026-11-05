@@ -7,8 +7,14 @@ import type { Quantity, ScriptAssertion, ScriptInput } from "@/sim/script";
 import { Builder, r4, writeExample } from "./builder";
 
 /**
- * Objeto padrão (item 12): lançador de esferas de brinquedo com ferrolho.
- * Mecanismo genérico e esquemático, com proporções inventadas e gás didático.
+ * Objeto padrão (Parte F, item 14.5): lançador de bancada. Peça de
+ * demonstração genérica e esquemática, montada sobre uma placa de base, com
+ * proporções inventadas e gás didático; não é uma arma (não tem empunhadura
+ * nem forma de pistola). Herdou os conjuntos afinados do lançador de ferrolho
+ * da Parte C2 (câmara de duas paredes, êmbolo e luva, percussor, retém, barra
+ * do gatilho com desconector), refeitos para a bancada: recuo de 15 mm,
+ * carregador junto da câmara, gatilho com a face côncava para a boca e um
+ * coletor à direita da boca.
  *
  * Coordenadas do mundo em mm, x para a frente (a boca à direita) e y para
  * baixo. O eixo do cano é y = 0. Pose desenhada: ferrolho fechado, percussor
@@ -43,33 +49,46 @@ function polyAt(
 const local = (p: Part, q: Vec2): Vec2 => [r4(q[0] - p.x), r4(q[1] - p.y)];
 
 /** Medidas que o desenho fixa (também usadas pelo roteiro e pelo relatório). */
-export const FERROLHO = {
+export const BANCADA = {
   ballR: 3,
   /** centro da esfera na câmara */
   chamberX: 9.65,
   /** fundo do assento em V da câmara, mm */
   seatDepth: 1.5,
-  /** centro da coluna do carregador */
-  magX: -8,
-  /** boca do cano */
-  muzzleX: 84,
+  /** centro da coluna do carregador (junto da câmara: o recuo de 15 mm descobre a boca dele) */
+  magX: -2.5,
+  /** boca do cano (a esfera só é empurrada nos primeiros ~14 mm; o resto é guia) */
+  muzzleX: 50,
   /** face do ferrolho fechado (fundo da câmara de gás) */
   boltFace: -45.4,
   /** comprimento da câmara de gás com o êmbolo recolhido */
   gasGap: 15,
   /** curso do ferrolho para trás */
-  boltTravel: 22,
+  boltTravel: 15,
+  /** recuo do ferrolho em que o gás desveda: o gás leva o ferrolho até perto do batente */
+  boltSeal: 14.5,
+  /** dose de gás por tiro, mmol */
+  charge: 0.5,
+  /** força do carregador com a coluna cheia, N, e o amortecimento, N·s/mm */
+  feedForce: 0.6,
+  feedDamping: 0.0015,
+  /** amortecimento do retorno do ferrolho, N·s/mm (só freia a volta) */
+  buffer: 0.014,
   /** curso do êmbolo à frente do ferrolho */
   emboloStroke: 40,
-  /** onde o dedo puxa o gatilho (mundo) */
-  triggerPull: [14.6, 33] as Vec2,
+  /** onde o dedo puxa o gatilho (mundo): na curva da face da frente */
+  triggerPull: [16.0, 35.5] as Vec2,
+  /** coletor: rampa e parede do fundo */
+  collectorX: [50, 92] as Vec2,
+  collectorFloor: 25,
   /** onde o dedo pega o ferrolho (mundo) */
   boltGrip: [-65, -5] as Vec2,
 };
 
-export interface FerrolhoIds {
+export interface BancadaIds {
   scene: Scene;
-  corpo: string;
+  placa: string;
+  coletor: string;
   ferrolho: string;
   embolo: string;
   balls: string[];
@@ -90,22 +109,23 @@ export interface FerrolhoIds {
   slot: string;
 }
 
-export function buildFerrolho(): FerrolhoIds {
-  const b = new Builder("Lançador de ferrolho");
-  const L1 = b.layer("Armação", 3);
+export function buildBancada(): BancadaIds {
+  const b = new Builder("Lançador de bancada");
+  const L1 = b.layer("Base", 3);
   // 4 mm: a esfera de Ø 6 mm tem a massa da esfera de aço de verdade (0,89 g)
-  const L2 = b.layer("Ferrolho", 4);
+  const L2 = b.layer("Ação", 4);
   const L3 = b.layer("Disparo", 3);
   const L4 = b.layer("Gatilho", 3);
-  const { ballR, chamberX, magX, muzzleX, boltFace } = FERROLHO;
+  const { ballR, chamberX, magX, muzzleX, boltFace } = BANCADA;
   const bore = ballR + 0.15;
   /** meia altura do êmbolo e da luva (que segura a coluna do carregador) */
   const eH = 2.0;
   const lH = 2.8;
 
-  // ——— 1. Armação ———
-  // rasgo do pino da barra do gatilho: no fim do curso a borda de cima desce e
-  // abaixa a barra (desconector)
+  // ——— 1. Base ———
+  // placa de base aparafusada à bancada nos quatro cantos; o rasgo do pino da
+  // barra do gatilho é um furo dela. No fim do curso a borda de cima do rasgo
+  // desce e abaixa a barra (desconector)
   const slotHole: Vec2[] = [
     [-31.8, 13.8],
     [-26.8, 13.8],
@@ -114,44 +134,48 @@ export function buildFerrolho(): FerrolhoIds {
     [-22.0, 19.7],
     [-31.8, 19.7],
   ];
-  const guardWindow: Vec2[] = [
-    [10, 24],
-    [26, 21],
-    [30, 30],
-    [24, 40],
-    [9, 41],
-  ];
-  const corpo = polyAt(
+  const plate: [number, number, number, number] = [-128, -20, 104, 68];
+  const ch = 5;
+  const placa = polyAt(
     b,
-    "Corpo",
+    "Placa de base",
     L1,
     [
-      [-116, -12],
-      [30, -12],
-      [30, 10],
-      [34, 20],
-      [34, 32],
-      [26, 46],
-      [4, 46],
-      [3, 70],
-      [-26, 70],
-      [-34, 24],
-      [-66, 22],
-      [-70, 10],
-      [-116, 10],
+      [plate[0] + ch, plate[1]],
+      [plate[2] - ch, plate[1]],
+      [plate[2], plate[1] + ch],
+      [plate[2], plate[3] - ch],
+      [plate[2] - ch, plate[3]],
+      [plate[0] + ch, plate[3]],
+      [plate[0], plate[3] - ch],
+      [plate[0], plate[1] + ch],
     ],
     "aluminum",
-    { fixed: true, holes: [slotHole, guardWindow] },
+    { fixed: true, holes: [slotHole] },
+  );
+  // suporte traseiro: segura a haste-guia e é o assento da mola de retorno
+  const suporte = polyAt(
+    b,
+    "Suporte traseiro",
+    L1,
+    [
+      [-122, -14],
+      [-112, -14],
+      [-112, 6],
+      [-122, 6],
+    ],
+    "steel",
+    { fixed: true },
   );
   const haste = polyAt(
     b,
     "Haste-guia",
     L1,
     [
-      [-114, -5.2],
+      [-112, -5.2],
       [-80, -5.2],
       [-80, -2.8],
-      [-114, -2.8],
+      [-112, -2.8],
     ],
     "steel",
     { fixed: true },
@@ -162,10 +186,6 @@ export function buildFerrolho(): FerrolhoIds {
     L2,
     [
       [-14, -8],
-      [70, -8],
-      [70, -10],
-      [76, -10],
-      [76, -8],
       [muzzleX, -8],
       [muzzleX, -bore],
       [-14, -bore],
@@ -181,10 +201,11 @@ export function buildFerrolho(): FerrolhoIds {
       [magX - 3.2, bore],
       [magX - 3.2, 60],
       [magX + 3.2, 60],
-      [magX + 3.2, 5.3],
-      [-2.6, bore],
+      // parede reta até o piso do cano: a esfera sobe na vertical (uma rampa a
+      // jogava para a frente, e ela passava do assento da câmara)
+      [magX + 3.2, bore],
       [chamberX - 3, bore],
-      [chamberX, bore + FERROLHO.seatDepth],
+      [chamberX, bore + BANCADA.seatDepth],
       [chamberX + 3, bore],
       [muzzleX, bore],
       [muzzleX, 9],
@@ -195,6 +216,29 @@ export function buildFerrolho(): FerrolhoIds {
     "steel",
   );
 
+  // coletor: caixa aberta para a boca. A rampa continua o piso do cano e desce
+  // até a parede do fundo, onde a esfera bate, perde a velocidade e cai; o
+  // teto segura a que sobe girando. As esferas se acumulam contra a parede
+  const [cx0, cx1] = BANCADA.collectorX;
+  const cf = BANCADA.collectorFloor;
+  const coletor = polyAt(
+    b,
+    "Coletor",
+    L2,
+    [
+      [cx0, bore],
+      [cx1, cf],
+      [cx1, -12],
+      [cx0 + 12, -12],
+      [cx0 + 12, -16],
+      [cx1 + 5, -16],
+      [cx1 + 5, cf + 5],
+      [cx0, 12],
+    ],
+    "steel",
+    { fixed: true },
+  );
+
   // ——— 2. Ferrolho ———
   const ferrolho = polyAt(
     b,
@@ -202,11 +246,15 @@ export function buildFerrolho(): FerrolhoIds {
     L2,
     [
       [-82, -6],
+      [-70, -6],
+      [-69, -9.5],
+      [-61, -9.5],
+      [-60, -6],
       [boltFace, -6],
       [boltFace, lH],
       [-82, lH],
     ],
-    "polymer",
+    "steel",
   );
   // luva: o cilindro do gás, parafusada no ferrolho; por baixo fecha a boca do
   // carregador enquanto o êmbolo corre dentro dela
@@ -225,12 +273,12 @@ export function buildFerrolho(): FerrolhoIds {
       [luvaFront, lH],
       [boltFace - 1, lH],
     ],
-    "polymer",
+    "steel",
   );
   // haste de impulso: a parede da frente do gás; empurra a esfera. O ressalto de
   // cima bate no fundo do cano (batente da armação) e o gás segue empurrando só
   // o ferrolho para trás
-  const eRear = boltFace + FERROLHO.gasGap;
+  const eRear = boltFace + BANCADA.gasGap;
   const embolo = polyAt(
     b,
     "Êmbolo",
@@ -244,11 +292,12 @@ export function buildFerrolho(): FerrolhoIds {
       [eRear, eH],
     ],
     "polymer",
+    // bala: colisão contínua contra a esfera que ele empurra a 7 m/s
     { fast: true },
   );
   // assento em V no piso do cano: a esfera que chega devagar fica nele
-  const seatA = Math.atan2(FERROLHO.seatDepth, 3);
-  const ballY = r4(bore + FERROLHO.seatDepth - ballR / Math.cos(seatA));
+  const seatA = Math.atan2(BANCADA.seatDepth, 3);
+  const ballY = r4(bore + BANCADA.seatDepth - ballR / Math.cos(seatA));
   const balls: Part[] = [b.circle("Esfera 1", L2, chamberX, ballY, ballR, "steel")];
   const magTop = lH + ballR + 0.05;
   for (let i = 0; i < 5; i++)
@@ -264,7 +313,8 @@ export function buildFerrolho(): FerrolhoIds {
       [magX + 3, followerTop + 4],
       [magX - 3, followerTop + 4],
     ],
-    "polymer",
+    // aço: pesado o bastante para a mola do carregador não o afundar nas esferas
+    "steel",
   );
   // ——— 3. Disparo ———
   const percussor = polyAt(
@@ -282,7 +332,9 @@ export function buildFerrolho(): FerrolhoIds {
       [-76.5, 3.5],
     ],
     "aluminum",
-    { fast: true },
+    // sem "bala": a colisão contínua de bala não respeita as juntas (trilho no
+    // ferrolho, eixo no gatilho) e segurava a peça contra a vizinha
+    {},
   );
   // pivô à frente do dente, na altura do contato com a espora: o percussor não
   // força o retém para nenhum lado; só a mola de torção o segura
@@ -316,17 +368,23 @@ export function buildFerrolho(): FerrolhoIds {
     b,
     "Gatilho",
     L4,
+    // braço de cima (pivô da barra), cubo no eixo e a lâmina: a face da frente
+    // é côncava (o dedo assenta nela) e a ponta volta para a boca
     [
       [12.6, 13.0],
       [15.4, 13.6],
-      [19.2, 25.0],
-      [19.2, 28.0],
-      [17.6, 34.0],
-      [15.0, 39.0],
-      [12.4, 41.0],
-      [11.6, 39.6],
-      [14.0, 34.0],
-      [15.0, 28.5],
+      [19.0, 24.5],
+      [19.6, 27.5],
+      [18.1, 31.5],
+      [17.3, 35.0],
+      [17.7, 38.4],
+      [19.3, 41.0],
+      [20.8, 42.3],
+      [19.8, 43.6],
+      [17.2, 42.2],
+      [15.2, 39.2],
+      [14.5, 35.0],
+      [15.0, 31.0],
       [14.8, 26.0],
     ],
     "steel",
@@ -345,31 +403,36 @@ export function buildFerrolho(): FerrolhoIds {
       [-65, r4(barY(-65) + 1.4)],
     ],
     "aluminum",
-    { fast: true },
+    // sem "bala": a colisão contínua de bala não respeita as juntas (trilho no
+    // ferrolho, eixo no gatilho) e segurava a peça contra a vizinha
+    {},
   );
 
   // ——— ligações ———
-  b.link({ kind: "screw", a: corpo.id, b: cano.id, at: local(cano, [40, -6]) });
-  b.link({ kind: "screw", a: corpo.id, b: canal.id, at: local(canal, [magX, 61]) });
+  // peças fixas presas à placa (a placa é a bancada: fixa, sem parafuso de enfeite)
+  b.link({ kind: "screw", a: placa.id, b: cano.id, at: local(cano, [25, -6]) });
+  b.link({ kind: "screw", a: placa.id, b: canal.id, at: local(canal, [magX, 58]) });
+  b.link({ kind: "screw", a: placa.id, b: coletor.id, at: local(coletor, [cx1 + 2.5, cf + 1]) });
+  b.link({ kind: "screw", a: placa.id, b: suporte.id, at: local(suporte, [-117, -9]) });
   b.link({ kind: "screw", a: ferrolho.id, b: luva.id, at: local(luva, [boltFace - 0.5, 0]) });
   const boltSlider = b.link({
     kind: "slider",
-    a: corpo.id,
+    a: placa.id,
     b: ferrolho.id,
     at: local(ferrolho, [-65, -3]),
     dir: 0,
-    travel: [-FERROLHO.boltTravel, 0],
+    travel: [-BANCADA.boltTravel, 0],
   });
   // mola de retorno apoiada, na haste-guia, pré-carregada contra o batente da frente
   const rsA: Vec2 = [-112, -4];
   const rsB: Vec2 = [-82, -4];
   const rsK = 0.015;
-  const rsPre = 0.9;
+  const rsPre = 1.1;
   const returnSpring = b.link({
     kind: "spring",
-    a: corpo.id,
+    a: suporte.id,
     b: ferrolho.id,
-    atA: local(corpo, rsA),
+    atA: local(suporte, rsA),
     atB: local(ferrolho, rsB),
     k: rsK,
     damping: 0,
@@ -390,8 +453,8 @@ export function buildFerrolho(): FerrolhoIds {
     atA: local(cano, bfA),
     atB: local(ferrolho, bfB),
     k: 0.002,
-    damping: 0.009,
-    freeLength: r4(bfA[0] - bfB[0] + FERROLHO.boltTravel + 1),
+    damping: BANCADA.buffer,
+    freeLength: r4(bfA[0] - bfB[0] + BANCADA.boltTravel + 1),
     mode: "seated",
     coil: { outerD: 4, wireD: 0.4, turns: 9 },
   });
@@ -401,8 +464,9 @@ export function buildFerrolho(): FerrolhoIds {
     b: embolo.id,
     at: [0, 0],
     dir: 0,
-    travel: [0, FERROLHO.emboloStroke],
-    spring: { k: 0.05, rest: 0, damping: 0.0004 },
+    travel: [0, BANCADA.emboloStroke],
+    // volta depressa para trás da boca do carregador (o recuo é curto)
+    spring: { k: 0.08, rest: 0, damping: 0.00015 },
   });
   const chamber = b.link({
     kind: "chamber",
@@ -413,12 +477,22 @@ export function buildFerrolho(): FerrolhoIds {
     length: 100,
     walls: [
       { part: embolo.id, seal: 100 },
-      { part: ferrolho.id, seal: 16 },
+      { part: ferrolho.id, seal: BANCADA.boltSeal },
     ],
-    // respiro sempre aberto no meio da câmara: drena o gás que sobra depois do tiro
-    vents: [{ at: 7, d: 0.5, open: true }],
+    // respiro sempre aberto no meio da câmara: drena o gás que sobra depois do tiro;
+    // válvula de alívio (fechada até o ferrolho chegar atrás): sem ela, o êmbolo
+    // ficava sobre um colchão de gás quando o ferrolho voltava a vedar
+    vents: [
+      { at: 7, d: 0.5, open: true },
+      { at: 4, d: 3, open: false },
+    ],
     ports: [],
-    gas: { model: "adiabatic", gamma: 1.4, p0: P_ATM, charge: { amount: 0.45, burnMs: 1, shots: 12 } },
+    gas: {
+      model: "adiabatic",
+      gamma: 1.4,
+      p0: P_ATM,
+      charge: { amount: BANCADA.charge, burnMs: 1, shots: 12 },
+    },
   });
   const feedSlider = b.link({
     kind: "slider",
@@ -430,7 +504,7 @@ export function buildFerrolho(): FerrolhoIds {
   });
   const fsA: Vec2 = [magX, 60];
   const fsB: Vec2 = [magX, followerTop + 4];
-  const fsK = 0.008;
+  const fsK = 0.005;
   b.link({
     kind: "spring",
     a: canal.id,
@@ -438,8 +512,10 @@ export function buildFerrolho(): FerrolhoIds {
     atA: local(canal, fsA),
     atB: local(empurrador, fsB),
     k: fsK,
-    damping: 0.0003,
-    freeLength: r4(fsA[1] - fsB[1] + 0.45 / fsK),
+    // amortecida: a coluna sobe a ~0,3 m/s (mais rápido, quando a esfera de cima
+    // para o empurrador atravessa a de baixo num passo)
+    damping: BANCADA.feedDamping,
+    freeLength: r4(fsA[1] - fsB[1] + BANCADA.feedForce / fsK),
     mode: "seated",
     coil: { outerD: 5.6, wireD: 0.4, turns: 18 },
   });
@@ -467,26 +543,42 @@ export function buildFerrolho(): FerrolhoIds {
   });
   const retemAxle = b.link({
     kind: "axle",
-    a: corpo.id,
+    a: placa.id,
     b: retem.id,
     at: local(retem, retemPivot),
     limit: { lower: -0.8, upper: 0 },
     torsion: { k: 3, rest: 0.3, damping: 0.0002 },
   });
-  // sensor na armação, no fundo da câmara: o percussor só o alcança com o
-  // ferrolho fechado (no recuo, um percussor que quica não acende de novo)
+  // sensor na placa, no fundo da câmara: o percussor só o alcança com o
+  // ferrolho fechado (no recuo, um percussor que quica não acende de novo).
+  // Fecha a válvula de alívio e acende uma dose
   const sensor = b.link({
     kind: "sensor",
-    host: corpo.id,
-    at: local(corpo, [-49, 0]),
+    host: placa.id,
+    at: local(placa, [-49, 0]),
     r: 1.5,
     layers: [L3, L3],
     minSpeed: 800,
-    actions: [{ do: "ignite", target: chamber.id }],
+    actions: [
+      { do: "close", target: chamber.id, vent: 1 },
+      { do: "ignite", target: chamber.id },
+    ],
+  });
+  // sensor de fim de curso, no suporte traseiro: o ferrolho chegando atrás abre
+  // a válvula de alívio, e o êmbolo volta livre para trás da boca do carregador
+  const rearX = -82 - BANCADA.boltTravel;
+  b.link({
+    kind: "sensor",
+    host: suporte.id,
+    at: local(suporte, [rearX - 0.5, -1]),
+    r: 1.2,
+    layers: [L2, L2],
+    minSpeed: 50,
+    actions: [{ do: "open", target: chamber.id, vent: 1 }],
   });
   const triggerAxle = b.link({
     kind: "axle",
-    a: corpo.id,
+    a: placa.id,
     b: gatilho.id,
     at: local(gatilho, T0),
     limit: { lower: 0, upper: 0.55 },
@@ -500,16 +592,18 @@ export function buildFerrolho(): FerrolhoIds {
     torsion: { k: 8, rest: 0.3, damping: 0.0005 },
   });
   const pinAL = b.link({ kind: "pin", host: barra.id, at: local(barra, pinA), r: 1.2, layers: [L1, L4] });
-  const slot = b.link({ kind: "slot", pin: pinAL.id, guide: corpo.id, hole: 0, mode: "contact" });
+  const slot = b.link({ kind: "slot", pin: pinAL.id, guide: placa.id, hole: 0, mode: "contact" });
   b.link({ kind: "pin", host: barra.id, at: local(barra, pinB), r: 1.2, layers: [L3, L4] });
 
-  // números de chamada: armação 1–9, ferrolho 10–19, disparo 20–29, gatilho 30–39,
+  // números de chamada: base 1–9, ação 10–19, disparo 20–29, gatilho 30–39,
   // ligações a partir de 40 (na ordem em que foram criadas)
   const refs: Record<string, number> = {
-    Corpo: 1,
-    Cano: 2,
-    "Canal do carregador": 3,
-    "Haste-guia": 4,
+    "Placa de base": 1,
+    "Suporte traseiro": 2,
+    "Haste-guia": 3,
+    Cano: 4,
+    "Canal do carregador": 5,
+    Coletor: 6,
     Ferrolho: 10,
     Luva: 11,
     Êmbolo: 12,
@@ -529,7 +623,8 @@ export function buildFerrolho(): FerrolhoIds {
 
   return {
     scene: b.scene,
-    corpo: corpo.id,
+    placa: placa.id,
+    coletor: coletor.id,
     ferrolho: ferrolho.id,
     embolo: embolo.id,
     balls: balls.map((p) => p.id),
@@ -558,17 +653,17 @@ function pull(gatilho: string, t: number, hold: number): ScriptInput {
   return {
     kind: "drag",
     part: gatilho,
-    from: FERROLHO.triggerPull,
-    to: [-2, 32],
+    from: BANCADA.triggerPull,
+    to: [-2, 34.5],
     t0: t,
     t1: t + 0.12,
     release: t + hold,
   };
 }
 
-export function generateFerrolho(): void {
-  const f = buildFerrolho();
-  const { chamberX, muzzleX } = FERROLHO;
+export function generateBancada(): void {
+  const f = buildBancada();
+  const { chamberX, muzzleX } = BANCADA;
   const bolt: Quantity = { link: f.boltSlider, field: "translation" };
   const pin: Quantity = { link: f.pinSlider, field: "translation" };
   const gauge: Quantity = { diff: [{ link: f.chamber, field: "pressure" }, { const: P_ATM }] };
@@ -578,17 +673,48 @@ export function generateFerrolho(): void {
   const seatY = f.scene.parts.find((p) => p.id === f.balls[0])!.y;
   const nextY = f.scene.parts.find((p) => p.id === f.balls[1])!.y;
   /** recuo mínimo: a frente da luva passa da boca do carregador (e a espora, do retém) */
-  const needed = 18;
+  const needed = 12;
+  const [cx0, cx1] = BANCADA.collectorX;
+  /** a esfera i parada no coletor: dentro da caixa e sem andar no último 0,5 s */
+  const collected = (i: number, t1: number): ScriptAssertion[] => [
+    {
+      kind: "at",
+      label: `a esfera ${i + 1} para no coletor`,
+      q: ballX(i),
+      t: t1,
+      min: cx0 + 10,
+      max: cx1,
+    },
+    {
+      kind: "at",
+      label: `a esfera ${i + 1} está no fundo do coletor`,
+      q: ballY(i),
+      t: t1,
+      min: 5,
+      max: BANCADA.collectorFloor,
+    },
+    {
+      kind: "span",
+      label: `e fica lá (a esfera ${i + 1} anda menos de 0,2 mm no último 0,5 s)`,
+      q: { part: f.balls[i]!, disp: true },
+      from: t1 - 0.5,
+      to: t1,
+      max: 0.2,
+    },
+  ];
 
   const exits = (i: number, label: string): ScriptAssertion => ({
     kind: "while",
     label,
     cond: ballX(i),
+    // da boca até a parede do coletor: o pico é a velocidade de saída (depois de
+    // bater na parede ela volta devagar)
     condMin: muzzleX,
-    condMax: muzzleX + 150,
+    condMax: BANCADA.collectorX[1] - 3,
     q: { part: f.balls[i]!, vel: [1, 0] },
     min: 5000,
     max: 20000,
+    peak: true,
   });
   const inChamber = (i: number, t: number, label: string): ScriptAssertion[] => [
     { kind: "at", label, q: ballX(i), t, min: chamberX - 0.5, max: chamberX + 0.5 },
@@ -632,11 +758,11 @@ export function generateFerrolho(): void {
     );
   }
 
-  writeExample("lancador-ferrolho", f.scene, {
-    title: "Lançador de ferrolho",
+  writeExample("lancador-bancada", f.scene, {
+    title: "Lançador de bancada",
     notes:
-      "Puxe o gatilho e veja em 0,05×: o gás empurra o êmbolo e a esfera para a frente e o ferrolho para trás, a mola de retorno se comprime na haste-guia e, na volta, a próxima esfera sobe do carregador e entra na câmara. Brinquedo esquemático: proporções inventadas, esferas de aço de 6 mm e gás didático.",
-    view: [-120, -20, 210, 95],
+      "Puxe o gatilho e veja em Lento: o gás empurra o êmbolo e a esfera para a frente e o ferrolho para trás, a mola de retorno se comprime na haste-guia e, na volta, a próxima esfera sobe do carregador para a câmara; a esfera para no coletor. Peça de demonstração esquemática: proporções inventadas, esferas de aço de 6 mm e gás didático.",
+    view: [-130, -26, 270, 90],
     labRun: 1,
     runs: [
       {
@@ -660,7 +786,7 @@ export function generateFerrolho(): void {
             min: -0.5,
             max: 0.5,
           },
-          { kind: "events", label: "e o sensor não dispara", event: "sensor", max: 0 },
+          { kind: "events", label: "e o sensor não dispara", event: "sensor", match: sensorEv, max: 0 },
           {
             kind: "range",
             label: "o carregador mantém a próxima esfera encostada na luva (sem folga)",
@@ -744,6 +870,7 @@ export function generateFerrolho(): void {
           },
           { kind: "events", label: "e sete cargas", event: "chamber-fired", min: 7, max: 7 },
           ...cycles,
+          ...Array.from({ length: 6 }, (_, i) => collected(i, 0.3 + 7 * cycle)).flat(),
           {
             kind: "dropsAfter",
             label: "carregador vazio: o gás não fica preso (abaixo de 5% do pico em 20 ms)",
@@ -763,8 +890,8 @@ export function generateFerrolho(): void {
           {
             kind: "drag",
             part: f.ferrolho,
-            from: FERROLHO.boltGrip,
-            to: [FERROLHO.boltGrip[0] - 45, FERROLHO.boltGrip[1]],
+            from: BANCADA.boltGrip,
+            to: [BANCADA.boltGrip[0] - 45, BANCADA.boltGrip[1]],
             t0: 0.3,
             t1: 0.6,
             release: 0.75,
@@ -775,11 +902,17 @@ export function generateFerrolho(): void {
             kind: "range",
             label: "o dedo leva o ferrolho até o fim do curso",
             q: bolt,
-            max: -(FERROLHO.boltTravel - 0.5),
+            max: -(BANCADA.boltTravel - 0.5),
             from: 0.6,
             to: 0.75,
           },
-          { kind: "events", label: "o percussor não acende a carga", event: "sensor", max: 0 },
+          {
+            kind: "events",
+            label: "o percussor não acende a carga",
+            event: "sensor",
+            match: sensorEv,
+            max: 0,
+          },
           ...inChamber(1, 2.5, "soltando, a esfera 2 entra na câmara"),
           closed(2.5, "e o ferrolho volta ao batente"),
           cocked(2.5, "com o percussor preso"),

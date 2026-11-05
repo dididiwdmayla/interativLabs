@@ -112,9 +112,10 @@ export function dragParams(mass: number, gravity: Vec2): { hertz: number; maxFor
  * - A força da mola é limitada: `weight` vezes o peso da peça (gravidade de
  *   pelo menos 9 810 mm/s², para que a mão funcione igual sem gravidade),
  *   entre `minForce` e `maxForce`, mais a força de mola no fim do curso
- *   normal (a soma das molas da peça, ou a mola mais forte do mecanismo, o
- *   que for maior: puxar o ferrolho contra a mola de retorno, puxar o
- *   gatilho que empurra o retém contra a mola dele). Nunca mais que o que
+ *   normal (a soma das molas da peça, ou a mola mais forte ao alcance dela,
+ *   `reach`, o que for maior: puxar o ferrolho contra a mola de retorno,
+ *   puxar o gatilho que, pela barra, empurra o retém contra a mola dele).
+ *   Nunca mais que o que
  *   abre uma junta da peça `jointSink` mm, nem o que deforma um suporte
  *   elástico além da faixa dele.
  * - Ao soltar, o ponto agarrado fica com no máximo `release` mm/s.
@@ -178,10 +179,14 @@ function pointK(bodies: { body: PlanBody; r: Vec2 }[]): { k11: number; k12: numb
 }
 
 /** Limites da mão para o corpo `body`, na pose desenhada. */
-/** Força de cada mola no fim do curso normal, g·mm/s² (só as do corpo, ou todas com null). */
-export function springStroke(plan: Plan, body: number | null): number[] {
+/**
+ * Força de cada mola no fim do curso normal, g·mm/s²: as do corpo (número),
+ * as de um conjunto de corpos, ou todas (null).
+ */
+export function springStroke(plan: Plan, body: number | null | Set<number>): number[] {
   const out: number[] = [];
-  const mine = (a: number, b: number) => body === null || a === body || b === body;
+  const mine = (a: number, b: number) =>
+    body === null || (typeof body === "number" ? a === body || b === body : body.has(a) || body.has(b));
   for (const s of plan.springs) {
     if (!mine(s.a, s.b)) continue;
     const stroke = s.mode === "tension" ? s.freeLength : s.freeLength - s.solidLength;
@@ -200,6 +205,87 @@ export function springStroke(plan: Plan, body: number | null): number[] {
     const bd = plan.bodies[a.b]!;
     const arm = Math.max(5, dhypot(bd.position[0] - a.anchor[0], bd.position[1] - a.anchor[1]));
     out.push((a.torsion.k * range) / arm);
+  }
+  return out;
+}
+
+/** Caixa de cada forma no mundo, na pose desenhada (o corpo começa com ângulo 0). */
+function fixtureBoxes(plan: Plan): { body: number; bits: number; box: [number, number, number, number] }[] {
+  const out: { body: number; bits: number; box: [number, number, number, number] }[] = [];
+  for (const b of plan.bodies) {
+    if (b.index === 0) continue;
+    for (const f of b.fixtures) {
+      if (f.sensor) continue;
+      const pts: Vec2[] =
+        f.piece.kind === "circle"
+          ? [
+              [f.piece.c[0] - f.piece.r, f.piece.c[1] - f.piece.r],
+              [f.piece.c[0] + f.piece.r, f.piece.c[1] + f.piece.r],
+            ]
+          : f.piece.points;
+      let x0 = Infinity;
+      let y0 = Infinity;
+      let x1 = -Infinity;
+      let y1 = -Infinity;
+      for (const q of pts) {
+        x0 = Math.min(x0, q[0]);
+        y0 = Math.min(y0, q[1]);
+        x1 = Math.max(x1, q[0]);
+        y1 = Math.max(y1, q[1]);
+      }
+      const [px, py] = b.position;
+      out.push({ body: b.index, bits: f.bits, box: [x0 + px, y0 + py, x1 + px, y1 + py] });
+    }
+  }
+  return out;
+}
+
+/**
+ * Corpos ao alcance da peça: até `depth` passos por ligação (eixo, trilho,
+ * haste, cabo, mola, rasgo, suporte) ou por contato possível (camada em
+ * comum e formas a menos de `gap` mm na pose desenhada), sem atravessar as
+ * peças fixas. O gatilho alcança a barra, e a barra, pelo pino entre
+ * camadas, o retém.
+ */
+export function reach(plan: Plan, body: number, depth = 2, gap = 2): Set<number> {
+  const boxes = fixtureBoxes(plan);
+  const near = new Map<number, Set<number>>();
+  const add = (a: number, b: number) => {
+    if (a === b) return;
+    if (!near.has(a)) near.set(a, new Set());
+    if (!near.has(b)) near.set(b, new Set());
+    near.get(a)!.add(b);
+    near.get(b)!.add(a);
+  };
+  for (const l of [
+    ...plan.axles,
+    ...plan.sliders,
+    ...plan.distances,
+    ...plan.mounts,
+    ...plan.slots,
+    ...plan.springs,
+  ])
+    add(l.a, l.b);
+  for (let i = 0; i < boxes.length; i++)
+    for (let j = i + 1; j < boxes.length; j++) {
+      const p = boxes[i]!;
+      const q = boxes[j]!;
+      if (p.body === q.body || !(p.bits & q.bits)) continue;
+      if (p.box[0] - gap > q.box[2] || q.box[0] - gap > p.box[2]) continue;
+      if (p.box[1] - gap > q.box[3] || q.box[1] - gap > p.box[3]) continue;
+      add(p.body, q.body);
+    }
+  const out = new Set([body]);
+  let front = [body];
+  for (let d = 0; d < depth; d++) {
+    const next: number[] = [];
+    for (const i of front)
+      for (const j of near.get(i) ?? []) {
+        if (out.has(j) || j === 0 || plan.bodies[j]!.static) continue;
+        out.add(j);
+        next.push(j);
+      }
+    front = next;
   }
   return out;
 }
@@ -226,10 +312,10 @@ export function handLimits(plan: Plan, body: number, jointHertz = 960): HandLimi
   const gReal = dhypot(plan.gravity[0], plan.gravity[1]);
   const g = Math.max(gReal, HAND.gMin);
   const weight = Math.min(HAND.maxForce, Math.max(HAND.minForce, HAND.weight * b.mass * g));
-  // as molas da peça somadas, ou a mola mais forte do mecanismo (puxar um
-  // gatilho que empurra o retém contra a mola dele), o que for maior
+  // as molas da peça somadas, ou a mola mais forte ao alcance dela (puxar um
+  // gatilho que, pela barra, empurra o retém contra a mola dele), o que for maior
   const own = springStroke(plan, body).reduce((x, y) => x + y, 0);
-  const any = springStroke(plan, null).reduce((x, y) => Math.max(x, y), 0);
+  const any = springStroke(plan, reach(plan, body)).reduce((x, y) => Math.max(x, y), 0);
   const springs = Math.max(own, any);
   let mountCap = Infinity;
   for (const m of plan.mounts) {

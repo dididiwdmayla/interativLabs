@@ -125,7 +125,7 @@ describe("desfazer e refazer", () => {
     ["trava", 3],
     ["lancador", 4],
     ["biela-manivela", 5],
-    ["lancador-ferrolho", 6],
+    ["lancador-bancada", 6],
   ] as const)
     it(`50 edições aleatórias em ${id}: desfeitas voltam ao início, refeitas chegam ao fim`, () => {
       const rnd = seededRandom(seed);

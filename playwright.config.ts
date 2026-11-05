@@ -33,7 +33,6 @@ export default defineConfig({
     { name: "overflow", testMatch: /overflow\.spec\.ts/ },
     { name: "bench", testMatch: /bench\.spec\.ts/, timeout: 30 * 60_000 },
     { name: "lab", testMatch: /lab\.spec\.ts/ },
-    { name: "capture-c2", testMatch: /parte-c2\.spec\.ts/, timeout: 120_000 },
     { name: "capture-f", testMatch: /parte-f\.spec\.ts/, timeout: 120_000 },
     { name: "determinism", testMatch: /determinism\.spec\.ts/, timeout: 20 * 60_000 },
   ],
