@@ -46,6 +46,8 @@ export interface WallState {
 
 export interface LinkState {
   kind: LinkKind;
+  released?: boolean;
+  releasedAt?: number;
   /** eixo: ângulo relativo à pose desenhada (rad), velocidade (rad/s), abertura entre os dois pontos (mm) */
   angle?: number;
   speed?: number;
@@ -89,6 +91,7 @@ export interface LinkState {
 }
 
 export type EngineEvent =
+  | { kind: "lock-released"; lock: Id; by: "touch" | "sensor" | "force"; force: number; time: number }
   | { kind: "sensor"; sensor: Id; part: Id; speed: number; time: number }
   | { kind: "chamber-fired"; chamber: Id; time: number }
   | { kind: "wall-unsealed"; chamber: Id; part: Id; time: number }
@@ -158,6 +161,7 @@ export interface EngineAdapter {
   setForce(partId: Id, force: Vec2 | null, at?: Vec2): void;
   /** Acende uma câmara (como o sensor). */
   ignite(linkId: Id): boolean;
+  release?(linkId: Id): void;
   /** Abre ou fecha a válvula de um respiro. */
   setVent(linkId: Id, vent: number, open: boolean): void;
   /** Diagnóstico do estado atual (energia, folgas, velocidade); só o motor do app. */

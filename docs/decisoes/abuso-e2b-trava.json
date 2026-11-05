@@ -1,0 +1,71 @@
+[
+  {
+    "id": "fixacoes/trava",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.007430076599122869,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Acionador · Real · sacudida 8 Hz · t = 0.479 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 653.8751831054688,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Acionador · Normal · sacudida 8 Hz · t = 0.221 s"
+      },
+      "energy": {
+        "worst": 0.00013482640531886636,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Acionador · Lento · soltura no meio · t = 1.146 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  }
+]

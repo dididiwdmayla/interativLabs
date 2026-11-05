@@ -3,6 +3,7 @@
  * (scenes/examples/). Determinístico: rodar de novo produz os mesmos arquivos.
  * Uso: npm run fixtures [-- calibracao,fixacoes]
  */
+import { generateMulticamada } from "./multicamada";
 import { generateCalibracao } from "./calibracao";
 import { generateDesempenho } from "./desempenho";
 import { generateExemplos } from "./exemplos";
@@ -13,6 +14,7 @@ import { generateMolas } from "./molas";
 import { generateRasgos } from "./rasgos";
 
 const GROUPS: Record<string, () => void> = {
+  multicamada: generateMulticamada,
   calibracao: generateCalibracao,
   fixacoes: generateFixacoes,
   molas: generateMolas,

@@ -1,0 +1,44 @@
+{
+  "id": "multicamada/rasgo-no-perfil",
+  "group": "multicamada",
+  "title": "Rasgo no perfil",
+  "runs": [
+    {
+      "name": "curso",
+      "duration": 0.5,
+      "inputs": [
+        {
+          "kind": "force",
+          "part": "p2",
+          "f": [0.01, 0],
+          "t0": 0,
+          "t1": 0.4
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "Pino permanece na linha",
+          "q": {
+            "link": "k4",
+            "field": "deviation"
+          },
+          "min": -0.05,
+          "max": 0.05
+        },
+        {
+          "kind": "at",
+          "label": "Pino chega ao fim do rasgo do perfil",
+          "q": {
+            "part": "p2",
+            "field": "x"
+          },
+          "t": 0.4,
+          "min": 19.8,
+          "max": 20.3
+        }
+      ]
+    }
+  ],
+  "scene": "rasgo-no-perfil.scene.json"
+}

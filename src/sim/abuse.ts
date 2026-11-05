@@ -265,7 +265,7 @@ function runCase(
     const pr: EngineProbe | undefined = a.probe?.(geo.region);
     let joint = 0;
     for (const [id, st] of Object.entries(s.links)) {
-      if (st.kind === "axle") joint = Math.max(joint, st.gap ?? 0);
+      if (st.kind === "axle" || (st.kind === "lock" && !st.released)) joint = Math.max(joint, st.gap ?? 0);
       else if (st.kind === "slot" && st.deviation !== undefined)
         joint = Math.max(joint, Math.abs(st.deviation));
       else if (st.kind === "rod")
@@ -414,6 +414,7 @@ export function abuseScene(
     joint: scene.links.some(
       (l) =>
         l.kind === "axle" ||
+        l.kind === "lock" ||
         l.kind === "rod" ||
         l.kind === "slider" ||
         (l.kind === "slot" && l.mode === "joint") ||

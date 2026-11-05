@@ -26,6 +26,7 @@ export interface BodyState {
 }
 
 export interface RuntimeOptions {
+  destroyLock?: (id: Id) => void;
   /** ligações que o motor resolve sozinho (mola de torção e do trilho nativas): o runtime não aplica força */
   native?: Set<Id>;
   /** força de reação de uma junta nativa, g·mm/s² no mundo (quando o motor sabe) */
@@ -335,6 +336,7 @@ export function handLimits(plan: Plan, body: number, jointHertz = 960): HandLimi
     if (k > 0) jointCap = Math.min(jointCap, HAND.jointSink / k);
   };
   for (const a of plan.axles) joint(a.a, a.b, a.anchor);
+  for (const l of plan.locks) joint(l.a, l.b, l.anchor);
   for (const s of plan.sliders) joint(s.a, s.b, s.anchor);
   for (const s of plan.slots) joint(s.a, s.b, s.anchor);
   for (const d of plan.distances) if (d.kind === "rod") joint(d.a, d.b, d.anchorB);
@@ -376,6 +378,9 @@ export class Runtime {
   private drag: { body: number; local: Vec2; target: Vec2 } | null = null;
   private forces = new Map<number, { f: Vec2; local: Vec2 }>();
   private native: Set<Id>;
+  private destroyLock: RuntimeOptions["destroyLock"];
+  private lockState = new Map<Id, { released: boolean; force: number; releasedAt?: number }>();
+  private releaseQueue = new Set<Id>();
   private jointForce: (linkId: Id) => Vec2 | null;
   private jointTorque: (linkId: Id) => number | null;
   time = 0;
@@ -385,6 +390,8 @@ export class Runtime {
     this.plan = plan;
     this.io = io;
     this.native = options.native ?? new Set();
+    this.destroyLock = options.destroyLock;
+    for (const l of plan.locks) this.lockState.set(l.id, { released: false, force: 0 });
     this.jointForce = options.jointForce ?? (() => null);
     this.jointTorque = options.jointTorque ?? (() => null);
     this.st = plan.bodies.map((b) => ({ x: b.position[0], y: b.position[1], angle: 0, vx: 0, vy: 0, w: 0 }));
@@ -429,6 +436,8 @@ export class Runtime {
   beforeStep(h: number): void {
     this.fresh.fill(false);
     this.events = [];
+    for (const id of this.releaseQueue) this.releaseLock(id, "touch");
+    this.releaseQueue.clear();
     const io = this.io;
     // estado antes do passo (velocidade de aproximação dos sensores)
     if (this.plan.sensors.length)
@@ -642,8 +651,32 @@ export class Runtime {
       this.events.push({ kind: "sensor", sensor: e.sensor, part: e.part, speed: e.speed, time: this.time });
       for (const a of s.p.actions) {
         if (a.do === "ignite") this.ignite(a.target);
+        else if (a.do === "release") this.releaseLock(a.target, "sensor");
         else if (a.vent !== undefined) this.setVent(a.target, a.vent, a.do === "open");
       }
+    }
+  }
+
+  requestRelease(id: Id): void {
+    if (this.lockState.has(id)) this.releaseQueue.add(id);
+  }
+
+  private releaseLock(id: Id, by: "touch" | "sensor" | "force"): void {
+    const st = this.lockState.get(id);
+    if (!st || st.released || !this.destroyLock) return;
+    this.destroyLock(id);
+    st.released = true;
+    st.releasedAt = this.time;
+    this.events.push({ kind: "lock-released", lock: id, by, force: st.force, time: this.time });
+  }
+
+  checkFuses(): void {
+    for (const l of this.plan.locks) {
+      const st = this.lockState.get(l.id)!;
+      if (st.released) continue;
+      const f = this.jointForce(l.id);
+      st.force = f ? dhypot(f[0], f[1]) / N : 0;
+      if (l.breakForce !== undefined && st.force > l.breakForce) this.releaseLock(l.id, "force");
     }
   }
 
@@ -745,6 +778,12 @@ export class Runtime {
       if (p) parts[id] = p;
     }
     const links: Record<Id, LinkState> = {};
+    for (const l of this.plan.locks) {
+      const st = this.lockState.get(l.id)!;
+      const pa = this.world(l.a, this.localOf(l.a, l.anchor));
+      const pb = this.world(l.b, this.localOf(l.b, l.anchor));
+      links[l.id] = { kind: "lock", ...st, gap: st.released ? 0 : dhypot(pb[0] - pa[0], pb[1] - pa[1]) };
+    }
     this.plan.axles.forEach((a, i) => {
       const s = this.axleAngle(i);
       const st: LinkState = { kind: "axle", angle: s.angle, speed: s.speed, gap: s.gap };

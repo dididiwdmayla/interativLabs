@@ -16,7 +16,7 @@ export type SimRequest =
   | { t: "restart"; id: number };
 
 export type SimReply =
-  | { t: "ready"; partIds: string[]; chamberIds: string[]; frame: Float32Array }
+  | { t: "ready"; partIds: string[]; chamberIds: string[]; lockIds: string[]; frame: Float32Array }
   | {
       t: "frames";
       id: number;
@@ -58,6 +58,7 @@ self.onmessage = async (e: MessageEvent<SimRequest>) => {
           t: "ready",
           partIds: [...session.rec.partIndex.keys()],
           chamberIds: [...session.rec.chamberIndex.keys()],
+          lockIds: [...session.rec.lockIndex.keys()],
           frame,
         },
         [frame.buffer],

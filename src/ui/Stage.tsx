@@ -12,7 +12,7 @@ import { shapeOutline } from "@/geometry/outline";
 import type { Vec2 } from "@/geometry/vec";
 import type { Part, Shape } from "@/model/types";
 import { clampParams, paramsOf, regenerate } from "@/parts";
-import { linkAt, partAt } from "@/render/hit";
+import { linkAt, partHit } from "@/render/hit";
 import { StageNodes, drawnFrame, overrideFrame } from "@/render/nodes";
 import { localOf, outlinePath, worldOf, type PartModel, type SceneModel } from "@/render/prepare";
 import { SceneSvg, type LayerMode, type Selection } from "@/render/SceneSvg";
@@ -368,13 +368,15 @@ export function Stage({
     const L = model?.layers[i]?.layer;
     return !!L && L.visible && !L.locked;
   };
+  const pickedSurface = useRef<{ id: string; layer: number } | null>(null);
   const pickPart = (w: Vec2): string | null => {
     if (!model || !nodes) return null;
     const tol = 8 * mmPerPx(view.current.zoom);
-    return (
-      partAt(model, nodes.frame, w, { tol, layer: (i) => i === activeLayer && layerOk(i) }) ??
-      partAt(model, nodes.frame, w, { tol, layer: layerOk })
-    );
+    const m =
+      partHit(model, nodes.frame, w, { tol, layer: (i) => i === activeLayer && layerOk(i) }) ??
+      partHit(model, nodes.frame, w, { tol, layer: layerOk });
+    pickedSurface.current = m ? { id: m.part.id, layer: m.layer } : null;
+    return m?.part.id ?? null;
   };
   const pickLink = (w: Vec2): string | null => {
     if (!model) return null;
@@ -386,10 +388,16 @@ export function Stage({
     const m = model?.parts.get(id);
     if (!m) return;
     const ui = useUiStore.getState();
-    if (m.layer !== ui.activeLayer) ui.setActiveLayer(m.layer);
+    const layer = pickedSurface.current?.id === id ? pickedSurface.current.layer : m.layer;
+    if (layer !== ui.activeLayer) ui.setActiveLayer(layer);
     if (ui.selection?.id !== id) onSelect?.({ kind: "part", id });
   };
-  const selModel = selection?.kind === "part" ? (model?.parts.get(selection.id) ?? null) : null;
+  const selModel =
+    selection?.kind === "part"
+      ? (model?.partList.find((m) => m.part.id === selection.id && m.layer === activeLayer) ??
+        model?.parts.get(selection.id) ??
+        null)
+      : null;
   const selEditable = editing && !bare && !!selModel && layerOk(selModel.layer);
   const handles = useMemo(
     () => (selEditable && selModel ? handlesFor(selModel, mmPerPx(zoom)) : []),
@@ -532,6 +540,10 @@ export function Stage({
     if (pointers.current.size > 2) return;
     const w = toWorld(view.current, x, y);
     if (!editing) {
+      if (ctl?.releaseAt(w)) {
+        gesture.current = { kind: "none" };
+        return;
+      }
       if (ctl && ctl.dragAt(w)) {
         gesture.current = { kind: "drag" };
         return;
@@ -570,7 +582,7 @@ export function Stage({
         }, LONG_MS);
         // peça de outra camada (a placa de base, por exemplo): o toque escolhe, o arrasto move a vista
         const pm = part ? model.parts.get(part) : undefined;
-        const movable = !!pm && (pm.layer === activeLayer || selection?.id === part);
+        const movable = !!pm && (pickedSurface.current?.layer === activeLayer || selection?.id === part);
         gesture.current = { kind: "press", target, start: { ...view.current }, timer, movable };
         if (!movable) armHold(x, y);
         return;

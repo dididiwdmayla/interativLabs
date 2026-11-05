@@ -15,16 +15,21 @@ import { lerpAngle } from "./pacing";
  */
 
 /** Entrada ainda sem passo (fila até o próximo passo). */
-export type PendingInput = { kind: "start"; part: Id; p: Vec2 } | { kind: "move"; p: Vec2 } | { kind: "end" };
+export type PendingInput =
+  | { kind: "release"; link: Id }
+  | { kind: "start"; part: Id; p: Vec2 }
+  | { kind: "move"; p: Vec2 }
+  | { kind: "end" };
 
 export type SimInput =
+  | { step: number; kind: "release"; link: Id }
   | { step: number; kind: "start"; part: Id; p: Vec2 }
   | { step: number; kind: "move"; p: Vec2 }
   | { step: number; kind: "end" };
 
 type Pending = PendingInput;
 
-export type SimEventKind = "sensor" | "chamber-fired" | "impact";
+export type SimEventKind = "sensor" | "chamber-fired" | "impact" | "lock-released";
 
 export interface SimEvent {
   step: number;
@@ -47,6 +52,7 @@ export interface FrameView {
   time: number;
   pose(id: Id): PartPose | undefined;
   chamber(id: Id): ChamberFrame | undefined;
+  lock?(id: Id): boolean | undefined;
 }
 
 /** Gravação circular de quadros (poses e câmaras) por passo. */
@@ -56,18 +62,20 @@ export class Recorder {
   private data: Float32Array;
   readonly partIndex: Map<Id, number>;
   readonly chamberIndex: Map<Id, number>;
+  readonly lockIndex: Map<Id, number>;
   private nParts: number;
   /** passo mais novo gravado (−1: vazio) */
   latest = -1;
   /** passo mais antigo ainda na gravação */
   oldest = 0;
 
-  constructor(partIds: Id[], chamberIds: Id[], capacity: number) {
+  constructor(partIds: Id[], chamberIds: Id[], capacity: number, lockIds: Id[] = []) {
     this.capacity = capacity;
     this.nParts = partIds.length;
     this.partIndex = new Map(partIds.map((id, i) => [id, i] as const));
     this.chamberIndex = new Map(chamberIds.map((id, i) => [id, i] as const));
-    this.stride = partIds.length * 3 + chamberIds.length * 3;
+    this.lockIndex = new Map(lockIds.map((id, i) => [id, i] as const));
+    this.stride = partIds.length * 3 + chamberIds.length * 3 + lockIds.length;
     this.data = new Float32Array(this.stride * (capacity + 1));
   }
 
@@ -92,6 +100,8 @@ export class Recorder {
       d[c0 + i * 3 + 1] = st?.walls?.[0]?.travel ?? 0;
       d[c0 + i * 3 + 2] = st?.walls?.[1]?.travel ?? 0;
     }
+    const l0 = c0 + this.chamberIndex.size * 3;
+    for (const [id, i] of this.lockIndex) d[l0 + i] = s.links[id]?.released ? 1 : 0;
     this.latest = step;
     this.oldest = Math.max(this.oldest, step - this.capacity);
   }
@@ -138,7 +148,12 @@ export class Recorder {
     for (let i = 0; i < this.stride; i++) {
       const u = d[a + i]!;
       const v = d[b + i]!;
-      out[i] = i < n3 && i % 3 === 2 ? lerpAngle(u, v, alpha) : u + (v - u) * alpha;
+      out[i] =
+        i >= this.stride - this.lockIndex.size
+          ? u
+          : i < n3 && i % 3 === 2
+            ? lerpAngle(u, v, alpha)
+            : u + (v - u) * alpha;
     }
     return this.viewOf(out, 0, step, (step + alpha) * h);
   }
@@ -157,6 +172,10 @@ export class Recorder {
         const i = this.partIndex.get(id);
         if (i === undefined) return undefined;
         return { x: d[o + i * 3]!, y: d[o + i * 3 + 1]!, angle: d[o + i * 3 + 2]! };
+      },
+      lock: (id) => {
+        const i = this.lockIndex.get(id);
+        return i === undefined ? undefined : d[c0 + this.chamberIndex.size * 3 + i] === 1;
       },
       chamber: (id) => {
         const i = this.chamberIndex.get(id);
@@ -203,7 +222,12 @@ export class SimSession {
     this.scene = scene;
     this.partIds = scene.parts.map((p) => p.id);
     const chambers = scene.links.filter((l) => l.kind === "chamber").map((l) => l.id);
-    this.rec = new Recorder(this.partIds, chambers, opts.capacity ?? Math.round(10 / FIXED_STEP));
+    this.rec = new Recorder(
+      this.partIds,
+      chambers,
+      opts.capacity ?? Math.round(10 / FIXED_STEP),
+      scene.links.filter((l) => l.kind === "lock").map((l) => l.id),
+    );
     this.adapter = this.compile();
     this.last = this.adapter.snapshot();
     this.rec.record(0, this.last);
@@ -232,11 +256,16 @@ export class SimSession {
     this.queue.push({ kind: "end" });
   }
 
+  release(link: Id): void {
+    this.queue.push({ kind: "release", link });
+  }
+
   private apply(a: EngineAdapter, inp: SimInput): void {
     if (inp.kind === "start") {
       this.dragging = a.dragStart(inp.part, inp.p);
       this.target = inp.p;
-    } else if (inp.kind === "move") this.target = inp.p;
+    } else if (inp.kind === "release") a.release?.(inp.link);
+    else if (inp.kind === "move") this.target = inp.p;
     else {
       a.dragEnd();
       this.dragging = false;
@@ -263,7 +292,9 @@ export class SimSession {
     this.last = s;
     this.rec.record(this.step, s);
     for (const e of s.events) {
-      if (e.kind === "sensor") this.events.push({ step: this.step, kind: "sensor", id: e.sensor });
+      if (e.kind === "lock-released")
+        this.events.push({ step: this.step, kind: "lock-released", id: e.lock });
+      else if (e.kind === "sensor") this.events.push({ step: this.step, kind: "sensor", id: e.sensor });
       else if (e.kind === "chamber-fired")
         this.events.push({ step: this.step, kind: "chamber-fired", id: e.chamber });
       else if (e.kind === "impact" && e.speed >= STRONG_IMPACT) {
@@ -282,6 +313,7 @@ export class SimSession {
     for (const q of list) {
       if (q.kind === "start") this.dragStart(q.part, q.p);
       else if (q.kind === "move") this.dragMove(q.p);
+      else if (q.kind === "release") this.release(q.link);
       else this.dragEnd();
     }
   }

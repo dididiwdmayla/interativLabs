@@ -22,6 +22,7 @@ const scenes = import.meta.glob<unknown>(
 export const GROUPS: { id: string; label: string }[] = [
   { id: "exemplos", label: "Exemplos" },
   { id: "fixacoes", label: "Fixações" },
+  { id: "multicamada", label: "Multicamada" },
   { id: "molas", label: "Molas" },
   { id: "rasgos", label: "Furos e rasgos" },
   { id: "gas", label: "Gás" },

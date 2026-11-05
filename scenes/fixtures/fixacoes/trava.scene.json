@@ -1,0 +1,123 @@
+{
+  "version": 3,
+  "meta": {
+    "title": "Trava: toque, sensor e fusível",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Base",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Móveis",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Base",
+      "layer": "L1",
+      "x": 0,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-40, -6],
+          [40, -6],
+          [40, 6],
+          [-40, 6]
+        ],
+        "holes": []
+      },
+      "material": "aluminum",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Peso preso",
+      "layer": "L2",
+      "x": -15,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Acionador",
+      "layer": "L2",
+      "x": 15,
+      "y": -8,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 1,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k3",
+      "ref": 3,
+      "kind": "lock",
+      "a": "p1",
+      "b": "p2",
+      "at": [0, 0]
+    },
+    {
+      "id": "k5",
+      "ref": 5,
+      "kind": "slider",
+      "a": "p1",
+      "b": "p4",
+      "at": [0, 0],
+      "dir": 1.5707963267948966,
+      "travel": [0, 8]
+    },
+    {
+      "id": "k6",
+      "ref": 6,
+      "kind": "sensor",
+      "host": "p1",
+      "at": [15, 0],
+      "r": 2,
+      "layers": ["L2", "L2"],
+      "minSpeed": 0,
+      "actions": []
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "version": 3,
+  "meta": {
+    "title": "Perfis nas camadas 1 e 3",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Traseira",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L2",
+      "name": "Vazia",
+      "visible": true,
+      "locked": false,
+      "thickness": 3
+    },
+    {
+      "id": "L3",
+      "name": "Frente",
+      "visible": true,
+      "locked": false,
+      "thickness": 5
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Peça multicamada",
+      "layer": "L1",
+      "x": 0,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-10, -2],
+          [-6, -2],
+          [-6, 2],
+          [-10, 2]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false,
+      "profiles": [
+        {
+          "id": "profile-front",
+          "layer": "L3",
+          "shape": {
+            "kind": "poly",
+            "outer": [
+              [6, -2],
+              [10, -2],
+              [10, 2],
+              [6, 2]
+            ],
+            "holes": []
+          },
+          "material": "brass"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Apoio traseiro",
+      "layer": "L1",
+      "x": -8,
+      "y": 12,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Apoio intermediário",
+      "layer": "L2",
+      "x": 0,
+      "y": 5,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-15, -1],
+          [15, -1],
+          [15, 1],
+          [-15, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Apoio frontal",
+      "layer": "L3",
+      "x": 8,
+      "y": 12,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -1],
+          [5, -1],
+          [5, 1],
+          [-5, 1]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    }
+  ],
+  "links": []
+}

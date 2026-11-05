@@ -53,6 +53,20 @@ export function CarriedArt({ ctx, lm, follower }: { ctx: ArtContext; lm: LinkMod
   const cls = `link link--${l.kind}${gold ? " is-selected" : ""}${strong ? " link--strong" : ""}`;
   let body: ReactNode;
   switch (l.kind) {
+    case "lock": {
+      const d = Math.max(3, Math.min(7, partSize(ctx, l.b) * 0.5));
+      body = (
+        <g ref={ctx.nodes.refLock(l.id)}>
+          <title>Puxe para soltar</title>
+          <Hardware ctx={ctx} id="hw-pin" d={d} gold={gold} />
+          <g className="hw-symbol">
+            <circle cy={-d * 0.65} r={d * 0.45} />
+            <path d={`M0 ${-d * 0.2}V${d * 0.4}`} />
+          </g>
+        </g>
+      );
+      break;
+    }
     case "screw": {
       const d = Math.min(6, partSize(ctx, lm.carrier) * 0.42);
       body = tiny(ctx, d) ? (
