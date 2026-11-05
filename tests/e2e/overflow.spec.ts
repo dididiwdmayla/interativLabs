@@ -5,7 +5,14 @@ import { OVERFLOW_WIDTHS } from "./viewports";
  * Reprova rolagem lateral da página em 360, 390 e 412 px.
  * Confere também que todo controle clicável tem alvo de pelo menos 44 px.
  */
-const ROUTES = ["/", "/#bench", "/#lab", "/#lab/exemplos/cilindro-dois-pistoes", "/#perf"];
+const ROUTES = [
+  "/",
+  "/#bench",
+  "/#lab",
+  "/#lab/exemplos/cilindro-dois-pistoes",
+  "/#lab/exemplos/lancador-ferrolho",
+  "/#perf",
+];
 
 for (const width of OVERFLOW_WIDTHS) {
   for (const route of ROUTES) {
