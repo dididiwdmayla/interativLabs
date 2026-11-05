@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadScene } from "@/model/scene";
 import type { Scene } from "@/model/types";
 import type { StageNodes } from "@/render/nodes";
+import { SPEEDS, speedMode, type Speed } from "@/sim/pacing";
 import { prepareScene } from "@/render/prepare";
 import type { FrameStats } from "../sim/controller";
 import { useSimStore } from "../sim/simStore";
@@ -11,9 +12,10 @@ import "./perf.css";
 
 /**
  * Medição de desempenho (/#perf): a cena sintética de 150 peças e 100
- * ligações no palco real, simulando a 1× por 10 s com um arrasto
- * roteirizado. Mostra quadros por segundo (mediana e p5), o tempo de
- * física e de desenho por quadro e os dados do aparelho.
+ * ligações no palco real, simulando por 10 s com um arrasto roteirizado,
+ * em Real (padrão), Normal ou Lento. Mostra quadros por segundo (mediana e
+ * p5), o tempo de física, de desenho e da interpolação por quadro e os
+ * dados do aparelho.
  */
 
 const DURATION = 10;
@@ -31,6 +33,10 @@ interface PerfResult {
   physicsP95: number;
   drawMedian: number;
   drawP95: number;
+  /** média (o relógio do navegador tem 0,1 ms de resolução: a mediana sairia 0) */
+  mixMean: number;
+  mixP95: number;
+  speed: number;
   stepsPerFrame: number;
   /** quadros acima de 20 ms */
   long: number;
@@ -56,7 +62,7 @@ function device(): Record<string, string | number> {
   };
 }
 
-function summarize(stats: FrameStats[]): PerfResult {
+function summarize(stats: FrameStats[], speed: number): PerfResult {
   // o primeiro segundo é aquecimento (compilação do WASM, primeira pintura)
   const s = stats.slice(Math.min(60, Math.floor(stats.length / 10)));
   const fps = s.map((x) => 1000 / Math.max(1, x.interval));
@@ -84,6 +90,12 @@ function summarize(stats: FrameStats[]): PerfResult {
       s.map((x) => x.draw),
       0.95,
     ),
+    mixMean: s.reduce((a, x) => a + x.mix, 0) / Math.max(1, s.length),
+    mixP95: q(
+      s.map((x) => x.mix),
+      0.95,
+    ),
+    speed,
     stepsPerFrame: s.reduce((a, x) => a + x.steps, 0) / Math.max(1, s.length),
     long: s.filter((x) => x.interval > 20).length,
     device: device(),
@@ -92,10 +104,11 @@ function summarize(stats: FrameStats[]): PerfResult {
 
 function resultText(r: PerfResult): string {
   return [
-    "interativLabs /#perf — 150 peças, 100 ligações, 1×, 10 s com arrasto",
+    `interativLabs /#perf — 150 peças, 100 ligações, ${speedMode(r.speed).name} (${speedMode(r.speed).frac}), 10 s com arrasto`,
     `qps: mediana ${n(r.fpsMedian)} · p5 ${n(r.fpsP5)} (${r.frames} quadros; ${r.long} acima de 20 ms)`,
     `física por quadro: mediana ${n(r.physicsMedian, 2)} ms · p95 ${n(r.physicsP95, 2)} ms (${n(r.stepsPerFrame, 2)} passos)`,
     `desenho por quadro: mediana ${n(r.drawMedian, 2)} ms · p95 ${n(r.drawP95, 2)} ms`,
+    `interpolação por quadro: média ${n(r.mixMean, 3)} ms · p95 ${n(r.mixP95, 3)} ms`,
     ...Object.entries(r.device).map(([k, v]) => `${k}: ${v}`),
   ].join("\n");
 }
@@ -106,6 +119,9 @@ export default function PerfPage() {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<PerfResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [speed, setSpeed] = useState<Speed>(
+    () => (window as unknown as { __PERF_SPEED__?: Speed }).__PERF_SPEED__ ?? 1,
+  );
   const [nodes, setNodes] = useState<StageNodes | null>(null);
   const stats = useRef<FrameStats[]>([]);
   const progress = useRef<HTMLSpanElement>(null);
@@ -132,13 +148,10 @@ export default function PerfPage() {
   );
   useSimulation(running, nodes, opts);
 
-  // roteiro: 10 s a 1×; de 2 s a 8 s o dedo arrasta o bloco da primeira célula em vaivém
+  // roteiro: 10 s; de 2 s a 8 s o dedo arrasta o bloco da primeira célula em vaivém
   useEffect(() => {
     if (!running || !ctl || !model) return;
-    useSimStore.getState().set({
-      speed: (window as unknown as { __PERF_SPEED__?: 0.05 | 0.25 | 1 }).__PERF_SPEED__ ?? 1,
-      paused: false,
-    });
+    useSimStore.getState().set({ speed, paused: false });
     stats.current = [];
     const block =
       model.partList.find((m) => m.part.name === "Bloco 1") ?? model.partList.find((m) => m.dynamic);
@@ -158,7 +171,7 @@ export default function PerfPage() {
         held = false;
       }
       if (t >= DURATION) {
-        const r = summarize(stats.current);
+        const r = summarize(stats.current, speed);
         setResult(r);
         (window as unknown as { __PERF__?: PerfResult }).__PERF__ = r;
         setRunning(false);
@@ -168,7 +181,7 @@ export default function PerfPage() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [running, ctl, model]);
+  }, [running, ctl, model, speed]);
 
   const copy = useCallback(async () => {
     if (!result) return;
@@ -206,6 +219,20 @@ export default function PerfPage() {
               0 s
             </span>
           )}
+          <div className="perf__speeds" role="group" aria-label="Velocidade">
+            {SPEEDS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                className="btn btn--outline perf__speed"
+                aria-pressed={speed === s}
+                disabled={running}
+                onClick={() => setSpeed(s)}
+              >
+                {speedMode(s).name}
+              </button>
+            ))}
+          </div>
           <button type="button" className="btn btn--outline" disabled={!result} onClick={copy}>
             {copied ? "Copiado" : "Copiar resultado"}
           </button>
@@ -238,6 +265,12 @@ export default function PerfPage() {
               <dd>
                 {n(result.physicsMedian, 2)} ms <span>mediana</span> · {n(result.physicsP95, 2)} ms{" "}
                 <span>p95</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Interpolação por quadro</dt>
+              <dd>
+                {n(result.mixMean, 3)} ms <span>média</span> · {n(result.mixP95, 3)} ms <span>p95</span>
               </dd>
             </div>
             <div>

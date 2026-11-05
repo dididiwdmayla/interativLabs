@@ -117,6 +117,24 @@ export interface EngineMeta {
   iterations: string;
 }
 
+/** Diagnóstico de um passo (teste de abuso), unidades da cena. */
+export interface EngineProbe {
+  /** energia cinética das peças móveis, mJ */
+  kinetic: number;
+  /** energia potencial: gravidade (relativa à pose desenhada) e molas (mola, trilho, torção, suporte elástico), mJ */
+  potential: number;
+  /** maior velocidade do centro de massa de uma peça móvel, mm/s (com `region`, só das que estão dentro dela) */
+  maxSpeed: number;
+  /** peças móveis com o centro fora de `region` (caíram da cena) */
+  outside: number;
+  /** maior desvio transversal de um trilho ou de um rasgo em junta, mm */
+  railGap: number;
+  /** maior passagem de um trilho ou rasgo em junta além do curso, mm */
+  railOver: number;
+  /** algum valor de corpo não finito */
+  nan: boolean;
+}
+
 export interface EngineAdapter {
   readonly meta: EngineMeta;
   compile(scene: Scene, options: CompileOptions): CompileReport;
@@ -130,6 +148,8 @@ export interface EngineAdapter {
   dragEnd(): void;
   /** Maior penetração entre peças no último passo, mm. */
   contactsDepthMax(): number;
+  /** O contato mais fundo do último passo e as duas peças (diagnóstico; só o motor do app). */
+  contactsDeepest?(): { depth: number; a: Id; b: Id } | null;
   /** Muda a velocidade-alvo do motor de um eixo (rad/s). */
   setMotorSpeed(linkId: Id, speed: number): void;
   /** Impõe velocidade a uma peça (mm/s, rad/s). Usado por roteiros de teste. */
@@ -140,6 +160,8 @@ export interface EngineAdapter {
   ignite(linkId: Id): boolean;
   /** Abre ou fecha a válvula de um respiro. */
   setVent(linkId: Id, vent: number, open: boolean): void;
+  /** Diagnóstico do estado atual (energia, folgas, velocidade); só o motor do app. */
+  probe?(region?: [number, number, number, number]): EngineProbe;
   dispose(): void;
 }
 

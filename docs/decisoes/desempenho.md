@@ -19,6 +19,18 @@ Chromium 153 headless desta sessão (Linux, 4 núcleos, sem GPU: rasterização 
 
 As linhas do Will ficam para depois do merge: abrir `/#perf`, tocar em "Rodar 10 s" e colar o resultado ("Copiar resultado") no chat.
 
+### Com a interpolação (Parte F, item 14.2)
+
+A página `/#perf` ganhou a escolha da velocidade (Real, o padrão da medição; Normal; Lento) e a linha "interpolação por quadro" (média, porque o relógio do navegador tem 0,1 ms de resolução). Chromium headless desta sessão, 1440×900, densidade 1 (`tests/e2e/parte-f.spec.ts`, `docs/decisoes/perf-parte-f.json`):
+
+| Velocidade | qps mediana · p5 | Quadros > 20 ms | Passos por quadro | Física/quadro (mediana · p95) | Desenho/quadro (mediana · p95) | Interpolação/quadro (média · p95) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Lento (1/20) | 59,9 · 59,5 | 1 de 541 | 0,2 | 0,0 · 1,5 ms | 0,5 · 0,7 ms | 0,008 · 0,0 ms |
+| Normal (¼) | 59,9 · 59,9 | 0 de 541 | 1,0 | 1,1 · 1,5 ms | 0,5 · 0,8 ms | 0,004 · 0,0 ms |
+| Real (1×) | 59,9 · 59,5 | 0 de 541 | 4,0 | 3,7 · 6,9 ms | 0,5 · 0,7 ms | 0,004 · 0,0 ms |
+
+Em Lento o desenho agora roda em todo quadro (antes, só nos quadros em que chegava um passo, ~1 em 5): o custo é a escrita dos `transform` (0,5 ms de mediana), igual à de Normal.
+
 ## Onde o tempo ia e o que foi corrigido
 
 Primeira medida, com a física no thread principal e uma folha SVG só: **mediana 59,9, p5 29,9**, 155 de 377 quadros acima de 20 ms (1440×900). Medido por partes:

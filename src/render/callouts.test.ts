@@ -57,7 +57,7 @@ describe("chamadas sem cruzar peças", () => {
     "lancador",
     "biela-manivela",
     "cilindro-dois-pistoes",
-    "lancador-ferrolho",
+    "lancador-bancada",
   ])
     it(`${id}: toda chamada visível tem caminho limpo ou fica fora da cena`, () => {
       const r = loadScene(JSON.parse(readFileSync(`scenes/examples/${id}.json`, "utf8")));

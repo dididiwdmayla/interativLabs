@@ -1,19 +1,29 @@
 import { useEffect } from "react";
 import { drawnFrame, type StageNodes } from "@/render/nodes";
+import { DEFAULT_SPEED } from "@/sim/pacing";
 import type { ControllerOptions } from "./controller";
 import { useSimStore } from "./simStore";
 
 /**
  * Liga a simulação enquanto `on` for verdadeiro: carrega o controlador e o
  * motor sob demanda (primeira vez), cria a sessão da cena montada em
- * `nodes` e, ao sair, descarta tudo e devolve a cena à pose desenhada.
+ * `nodes` (sempre em Normal) e, ao sair, descarta tudo e devolve a cena à
+ * pose desenhada.
  */
 export function useSimulation(on: boolean, nodes: StageNodes | null, opts?: ControllerOptions): void {
   useEffect(() => {
     if (!on || !nodes) return;
     let alive = true;
     const store = useSimStore.getState();
-    store.set({ status: "loading", error: null, recalculating: false, scrubbed: false, paused: false });
+    // Normal (¼ do tempo real) ao entrar em Testar
+    store.set({
+      status: "loading",
+      error: null,
+      recalculating: false,
+      scrubbed: false,
+      paused: false,
+      speed: DEFAULT_SPEED,
+    });
     import("./controller")
       .then((m) => m.createController(nodes, opts))
       .then(

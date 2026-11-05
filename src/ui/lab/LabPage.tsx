@@ -3,7 +3,9 @@ import { loadBox2d } from "@/engine/box2d/load";
 import type { EngineAdapter } from "@/engine/types";
 import type { Scene } from "@/model/types";
 import { FIXTURES, GROUPS, type FixtureEntry } from "@/sim/fixtures";
+import { DEFAULT_SPEED, REAL_NOTICE, SPEEDS, speedMode, type Speed } from "@/sim/pacing";
 import { runFixture, type FixtureResult } from "@/sim/runner";
+import { firstRealChoice } from "../sim/speed";
 import { LabStage, type StageControl } from "./LabStage";
 import { runAllFixtures } from "./labHook";
 import "./lab.css";
@@ -14,8 +16,6 @@ import "./lab.css";
  * renderizador definitivo. Endereço direto de uma cena: /#lab/<grupo>/<nome>.
  */
 
-const SPEEDS = [0.05, 0.25, 1] as const;
-const speedLabel = (s: number) => `${String(s).replace(".", ",")}×`;
 const fmtTime = (t: number) => `t = ${t.toFixed(3).replace(".", ",")} s`;
 
 function idFromHash(): string {
@@ -46,7 +46,8 @@ export default function LabPage() {
   const [loaded, setLoaded] = useState<{ id: string; scene: Scene } | null>(null);
   const [make, setMake] = useState<(() => EngineAdapter) | null>(null);
   const [paused, setPaused] = useState(false);
-  const [speed, setSpeed] = useState<number>(0.25);
+  const [speed, setSpeed] = useState<Speed>(DEFAULT_SPEED);
+  const [realNote, setRealNote] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [measured, setMeasured] = useState<{ id: string; result: FixtureResult } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -103,6 +104,7 @@ export default function LabPage() {
       const next = idFromHash();
       setId(next);
       setRunIdx(null);
+      setSpeed(DEFAULT_SPEED);
     };
     window.addEventListener("hashchange", on);
     return () => window.removeEventListener("hashchange", on);
@@ -113,6 +115,7 @@ export default function LabPage() {
     setId(next);
     setRunIdx(null);
     setPaused(false);
+    setSpeed(DEFAULT_SPEED);
   };
 
   const onTime = useCallback((t: number) => {
@@ -226,11 +229,16 @@ export default function LabPage() {
                 <button
                   key={s}
                   type="button"
-                  className="lab__chip"
+                  className="lab__chip lab__speed"
                   aria-pressed={speed === s}
-                  onClick={() => setSpeed(s)}
+                  aria-label={`${speedMode(s).name} (${speedMode(s).frac} do tempo real)`}
+                  onClick={() => {
+                    setSpeed(s);
+                    if (firstRealChoice(s)) setRealNote(true);
+                  }}
                 >
-                  {speedLabel(s)}
+                  <span className="lab__speedname">{speedMode(s).name}</span>
+                  <span className="lab__speedfrac">{speedMode(s).frac}</span>
                 </button>
               ))}
             </div>
@@ -247,6 +255,11 @@ export default function LabPage() {
               {fmtTime(0)}
             </output>
           </div>
+          {realNote && speed === 1 && (
+            <p className="lab__note" role="status">
+              {REAL_NOTICE}
+            </p>
+          )}
         </section>
 
         <aside className="lab__info" aria-live="polite">

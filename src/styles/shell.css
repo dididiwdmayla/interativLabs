@@ -340,6 +340,17 @@
   border-color: var(--color-ink-faint);
 }
 
+/* controles que flutuam sobre a prancha: fundo chrome translúcido (a peça
+   embaixo continua visível, e o controle se lê sobre a hachura) */
+.corner .tool,
+.corner__btn,
+.corner .pill,
+.testbar .tool,
+.testbar .simctl__speed,
+.edgetab__mark {
+  background: var(--color-chrome-float);
+}
+
 /* nome do projeto e dica: no topo, entre os cantos, fora do desenho */
 .corner--top {
   top: calc(var(--sa-top) + var(--corner-gap) + 2px);
@@ -770,7 +781,12 @@
 
 .simctl__speed {
   flex: none;
-  min-width: 48px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 60px;
   height: 48px;
   padding: 0 var(--space-1);
   border: 1px solid var(--color-ink-faint);
@@ -788,8 +804,20 @@
   transform: translateY(1px);
 }
 
+.simctl__speedname {
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.simctl__speedfrac {
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
 .simctl__cycle {
-  min-width: 60px;
+  min-width: 64px;
   color: var(--color-gold);
   border-color: var(--color-gold);
 }
@@ -1179,6 +1207,11 @@
 
 .toast__text {
   padding: var(--space-2) 0;
+}
+
+/* aviso sem o botão Desfazer: a margem da direita é do próprio texto */
+.toast__text:last-child {
+  padding-right: var(--space-4);
 }
 
 .toast__undo {

@@ -17,7 +17,9 @@ import { StageNodes, drawnFrame, overrideFrame } from "@/render/nodes";
 import { localOf, outlinePath, worldOf, type PartModel, type SceneModel } from "@/render/prepare";
 import { SceneSvg, type LayerMode, type Selection } from "@/render/SceneSvg";
 import {
+  fitAround,
   fitView,
+  type ScreenRect,
   hatchStep,
   mmPerPx,
   panBy,
@@ -62,6 +64,12 @@ interface StageProps {
   bare?: boolean;
   /** margens do enquadramento, px: cima, direita, baixo, esquerda (cantos, abas e régua) */
   fitPad?: { edit: Pad; sim: Pad };
+  /**
+   * controles que flutuam sobre a prancha, em px relativos ao palco: com
+   * eles, o enquadramento desvia só do que cobrem (fitAround) e a margem
+   * `fitPad` vira só a borda das áreas seguras
+   */
+  obstacles?: (stage: DOMRect) => { rects: ScreenRect[]; edge: Pad };
   /** primeiro toque na prancha (a dica some) */
   onFirstTouch?: () => void;
 }
@@ -201,6 +209,7 @@ export function Stage({
   onNodes,
   bare = false,
   fitPad,
+  obstacles,
   onFirstTouch,
 }: StageProps) {
   const box = useRef<HTMLDivElement>(null);
@@ -237,12 +246,16 @@ export function Stage({
   const fit = useCallback(() => {
     if (!model || width <= 0 || height <= 0) return;
     const pad = editing ? (fitPad?.edit ?? FIT_PAD_EDIT) : (fitPad?.sim ?? FIT_PAD_SIM);
-    const v = fitView(model.focus, width, height, pad);
+    const rect = box.current?.getBoundingClientRect();
+    const obs = rect && obstacles ? obstacles(rect) : null;
+    const v = obs
+      ? fitAround(model.focus, width, height, obs.rects, obs.edge)
+      : fitView(model.focus, width, height, pad);
     view.current = v;
     setFitZoom(v.zoom);
     writeView();
     settle();
-  }, [model, width, height, editing, writeView, settle, fitPad]);
+  }, [model, width, height, editing, writeView, settle, fitPad, obstacles]);
 
   // enquadra ao abrir a cena e na primeira medida do palco
   const fitted = useRef<string>("");

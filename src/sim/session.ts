@@ -2,6 +2,7 @@ import { FIXED_STEP } from "@/engine/common";
 import type { EngineAdapter, PartPose, Snapshot } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
+import { lerpAngle } from "./pacing";
 
 /**
  * Sessão de simulação do app (sem DOM): passo fixo de 1/240 s, entradas do
@@ -119,14 +120,39 @@ export class Recorder {
     return step >= this.oldest && step <= this.latest;
   }
 
+  /**
+   * Quadro entre os passos `step` e `step + 1` (fração `alpha`), escrito em
+   * `out` (um quadro): posição e pressão lineares, ângulo pelo menor arco.
+   * Devolve a vista sobre `out`, ou null se os dois passos não estão gravados.
+   */
+  blend(step: number, alpha: number, h: number, out: Float32Array): FrameView | null {
+    if (!this.has(step)) return null;
+    if (alpha <= 0 || !this.has(step + 1)) {
+      this.copyFrame(step, out, 0);
+      return this.viewOf(out, 0, step, step * h);
+    }
+    const a = this.slot(step);
+    const b = this.slot(step + 1);
+    const d = this.data;
+    const n3 = this.nParts * 3;
+    for (let i = 0; i < this.stride; i++) {
+      const u = d[a + i]!;
+      const v = d[b + i]!;
+      out[i] = i < n3 && i % 3 === 2 ? lerpAngle(u, v, alpha) : u + (v - u) * alpha;
+    }
+    return this.viewOf(out, 0, step, (step + alpha) * h);
+  }
+
   view(step: number, h: number): FrameView | null {
     if (!this.has(step)) return null;
-    const o = this.slot(step);
-    const d = this.data;
+    return this.viewOf(this.data, this.slot(step), step, step * h);
+  }
+
+  private viewOf(d: Float32Array, o: number, step: number, time: number): FrameView {
     const c0 = o + this.nParts * 3;
     return {
       step,
-      time: step * h,
+      time,
       pose: (id) => {
         const i = this.partIndex.get(id);
         if (i === undefined) return undefined;

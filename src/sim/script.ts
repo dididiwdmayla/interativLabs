@@ -132,6 +132,8 @@ export type ScriptAssertion = Base &
         minSteps?: number;
         from?: number;
         to?: number;
+        /** só o maior valor de q precisa ficar entre min e max (ex.: a velocidade de saída) */
+        peak?: boolean;
       }
     /** nenhuma das peças se afasta mais que `max` mm da posição inicial na janela */
     | { kind: "maxDisp"; parts: Id[] | "dynamic"; max: number; from?: number; to?: number }

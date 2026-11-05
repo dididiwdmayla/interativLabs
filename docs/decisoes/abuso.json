@@ -1,0 +1,2003 @@
+[
+  {
+    "id": "calibracao/bala",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 1962.0001220703125,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Esfera · Lento · fora e volta · t = 0.200 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "calibracao/corrente",
+    "runs": 108,
+    "steps": 65076,
+    "parts": 12,
+    "sampled": true,
+    "lasting": {
+      "worst": 3.2145957946777344,
+      "where": "Elo 2 · Lento · fora e volta · t = 1.817 s · entre Elo 38 e Elo 40"
+    },
+    "results": {
+      "joint": {
+        "worst": 1.0444692228632022,
+        "limit": 0.5,
+        "pass": false,
+        "na": false,
+        "where": "Elo 18 · Real · sacudida 8 Hz · t = 1.758 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 4.460122585296631,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Elo 22 · Normal · soltura no meio · t = 0.771 s · entre Elo 33 e Elo 40"
+      },
+      "speed": {
+        "worst": 3295.2363547013206,
+        "limit": 2000,
+        "pass": false,
+        "na": false,
+        "where": "Elo 5 · Real · fora e volta · t = 0.742 s"
+      },
+      "energy": {
+        "worst": 7.904297412608005,
+        "limit": 2,
+        "pass": false,
+        "na": false,
+        "where": "Elo 28 · Lento · fora e volta · t = 1.796 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "calibracao/pilha",
+    "runs": 108,
+    "steps": 65076,
+    "parts": 12,
+    "sampled": true,
+    "lasting": {
+      "worst": 9.497794151306152,
+      "where": "Caixa 1.9 · Lento · fora e volta · t = 0.454 s · entre Caixa 1.19 e Caixa 1.20"
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 10.00206470489502,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Caixa 1.9 · Lento · fora e volta · t = 0.450 s · entre Caixa 1.17 e Caixa 1.18"
+      },
+      "speed": {
+        "worst": 5477.709113055342,
+        "limit": 2000,
+        "pass": false,
+        "na": false,
+        "where": "Caixa 1.4 · Real · fora e volta · t = 0.646 s"
+      },
+      "energy": {
+        "worst": 202.3213909219525,
+        "limit": 2,
+        "pass": false,
+        "na": false,
+        "where": "Caixa 6.15 · Real · soltura no meio · t = 0.537 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "calibracao/pinhao",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.5587977170944214,
+      "where": "Cremalheira · Normal · soltura no meio · t = 0.263 s · entre Cremalheira e Pinhão"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.13755514446321815,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Cremalheira · Normal · soltura no meio · t = 0.258 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 1.2533317804336548,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Cremalheira · Normal · soltura no meio · t = 0.258 s · entre Cremalheira e Pinhão"
+      },
+      "speed": {
+        "worst": 807.9027709960938,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Cremalheira · Lento · fora e volta · t = 0.242 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "desempenho/desempenho",
+    "runs": 108,
+    "steps": 65076,
+    "parts": 12,
+    "sampled": true,
+    "lasting": {
+      "worst": 2.135138988494873,
+      "where": "Calço 13 · Real · sacudida 8 Hz · t = 1.333 s · entre Calço 12 e Calço 13"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.074188232421875,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Braço 17 · Real · fora e volta · t = 0.258 s"
+      },
+      "cable": {
+        "worst": 0.0053152909183715735,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Esfera 15 · Normal · sacudida 8 Hz · t = 0.358 s"
+      },
+      "mount": {
+        "worst": 0.0001353301197195045,
+        "limit": 1,
+        "pass": true,
+        "na": false,
+        "where": "Roda 2 · Lento · fora e volta · t = 0.013 s"
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 4.229911804199219,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Esfera 4 · Real · sacudida 8 Hz · t = 1.350 s · entre Calço 8 e Esfera 4"
+      },
+      "speed": {
+        "worst": 3867.8774996085385,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Calço 8 · Real · fora e volta · t = 1.533 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "fixacoes/biela",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.003582490781980141,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Lento · fora e volta · t = 0.217 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 98.48505401611328,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Lento · sacudida 8 Hz · t = 0.217 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "fixacoes/cabo",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0.0029656311035139993,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Peso de 20 g · Lento · fora e volta · t = 0.208 s"
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 645.6920374425613,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Peso de 20 g · Normal · sacudida 8 Hz · t = 0.217 s"
+      },
+      "energy": {
+        "worst": 0.894371461797717,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Peso de 20 g · Real · sacudida 8 Hz · t = 2.108 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "fixacoes/parafuso-suporte",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0.9709660557974735,
+        "limit": 1,
+        "pass": true,
+        "na": false,
+        "where": "Barra no suporte · Real · soltura no meio · t = 0.263 s"
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 665.2449244753066,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Barra no suporte · Lento · fora e volta · t = 0.271 s"
+      },
+      "energy": {
+        "worst": 0.0015896560500819445,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Barra no suporte · Real · fora e volta · t = 2.371 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "fixacoes/pendulo",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.003266295707038281,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Barra · Real · soltura no meio · t = 0.238 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 1230.5817646239816,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Barra · Real · sacudida 8 Hz · t = 0.817 s"
+      },
+      "energy": {
+        "worst": 0.2067377158636094,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Barra · Lento · sacudida 8 Hz · t = 0.983 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "gas/cargas",
+    "runs": 27,
+    "steps": 16269,
+    "parts": 3,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.4730667769908905,
+      "where": "Esfera 1 · Lento · fora e volta · t = 0.250 s · entre Piso e Esfera 1"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.25035667419433594,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Pistão · Real · sacudida 8 Hz · t = 0.296 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 1.448244571685791,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Esfera 1 · Lento · sacudida 8 Hz · t = 0.242 s · entre Esfera 1 e Esfera 2"
+      },
+      "speed": {
+        "worst": 1653.7744520681756,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Esfera 1 · Real · fora e volta · t = 0.275 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "gas/lei",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.24971677362918854,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Pistão · Real · sacudida 8 Hz · t = 0.412 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 99.57847595214844,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Pistão · Real · sacudida 8 Hz · t = 0.483 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "gas/portas",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.13228416442871094,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Pistão B · Normal · sacudida 8 Hz · t = 0.300 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 217.33364868164062,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Pistão B · Real · sacudida 8 Hz · t = 0.233 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "gas/recuo",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.36572790145874023,
+      "where": "Pistão (leve) · Lento · sacudida 8 Hz · t = 0.225 s · entre Trilho de cima e Pistão (leve)"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.010307062417268753,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Bloco (pesado) · Real · sacudida 8 Hz · t = 0.342 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.4963078498840332,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Pistão (leve) · Lento · sacudida 8 Hz · t = 0.221 s · entre Trilho de baixo e Pistão (leve)"
+      },
+      "speed": {
+        "worst": 1685.5762939453127,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Bloco (pesado) · Real · soltura no meio · t = 0.362 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "gas/sensor",
+    "runs": 27,
+    "steps": 16269,
+    "parts": 3,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.4730667769908905,
+      "where": "Esfera 1 · Lento · fora e volta · t = 0.250 s · entre Piso e Esfera 1"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.2498778998851776,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Pistão · Real · sacudida 8 Hz · t = 0.300 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 1.448244571685791,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Esfera 1 · Lento · sacudida 8 Hz · t = 0.242 s · entre Esfera 1 e Esfera 2"
+      },
+      "speed": {
+        "worst": 1653.7744520681756,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Esfera 1 · Real · fora e volta · t = 0.275 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "molas/apoiada",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.0038010456779839323,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Bloco pendurado · Real · sacudida 8 Hz · t = 0.529 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 977.5695190495636,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Bloco apoiado · Real · sacudida 8 Hz · t = 1.233 s"
+      },
+      "energy": {
+        "worst": 0.9700972445857124,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Bloco apoiado · Lento · sacudida 8 Hz · t = 0.333 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "molas/guia",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.004855881906825843,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Real · sacudida 8 Hz · t = 0.454 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 966.8856997615485,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Real · sacudida 8 Hz · t = 1.229 s"
+      },
+      "energy": {
+        "worst": 0.00006857195791667863,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Lento · soltura no meio · t = 2.042 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "molas/pre-carga",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.01249885559081676,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Lento · fora e volta · t = 0.208 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 663.6400146484375,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Real · sacudida 8 Hz · t = 1.204 s"
+      },
+      "energy": {
+        "worst": 0.11030230981567753,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Normal · sacudida 8 Hz · t = 0.458 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "molas/rigida",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.2497329715249208,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Real · fora e volta · t = 0.708 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 1049.1457519602027,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Normal · fora e volta · t = 0.496 s"
+      },
+      "energy": {
+        "worst": 1.2397817211481417e-13,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Bloco · Real · fora e volta · t = 1.258 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "molas/solido",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.0019186403684301467,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Bloco de 100 g · Lento · sacudida 8 Hz · t = 0.217 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 917.6517333984375,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Bloco de 100 g · Real · sacudida 8 Hz · t = 0.983 s"
+      },
+      "energy": {
+        "worst": 0.43670444165454975,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Bloco de 100 g · Real · fora e volta · t = 1.221 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "rasgos/camadas",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.02069091796875,
+      "where": "Peça com pino (camada 2) · Real · fora e volta · t = 1.537 s · entre Piso (camada 3) e Peça com pino (camada 2)"
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.6236838698387146,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Caixa solta (camada 1) · Lento · sacudida 8 Hz · t = 0.346 s · entre Prateleira (camada 1) e Caixa solta (camada 1)"
+      },
+      "speed": {
+        "worst": 3382.8720703125,
+        "limit": 2000,
+        "pass": false,
+        "na": false,
+        "where": "Peça com pino (camada 2) · Real · fora e volta · t = 1.487 s"
+      },
+      "energy": {
+        "worst": 2.673705898720668,
+        "limit": 2,
+        "pass": false,
+        "na": false,
+        "where": "Peça com pino (camada 2) · Real · fora e volta · t = 1.546 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "rasgos/curvo",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.13375473022460938,
+      "where": "Peça com pino · Real · sacudida 8 Hz · t = 0.271 s · entre Placa com rasgo em arco e Peça com pino"
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.19986200332641602,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": "Peça com pino · Real · sacudida 8 Hz · t = 0.721 s · entre Placa com rasgo em arco e Peça com pino"
+      },
+      "speed": {
+        "worst": 1121.5813897887756,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Peça com pino · Real · sacudida 8 Hz · t = 1.067 s"
+      },
+      "energy": {
+        "worst": 1.7816386119369925,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Peça com pino · Lento · soltura no meio · t = 1.725 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "rasgos/mancal",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.11124825477600098,
+      "where": "Alavanca · Real · sacudida 8 Hz · t = 1.262 s · entre Placa com furo de Ø 4,2 e Alavanca"
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.2207026481628418,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": "Alavanca · Lento · sacudida 8 Hz · t = 0.238 s · entre Placa com furo de Ø 4,2 e Alavanca"
+      },
+      "speed": {
+        "worst": 1116.6594764516296,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Alavanca · Real · sacudida 8 Hz · t = 0.467 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "rasgos/reto",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.011999261860125001,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Alavanca · Real · sacudida 8 Hz · t = 0.521 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 1368.565617417222,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Alavanca · Real · sacudida 8 Hz · t = 1.100 s"
+      },
+      "energy": {
+        "worst": 0.3051821702757115,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Alavanca · Normal · sacudida 8 Hz · t = 0.521 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "exemplos/biela-manivela",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.0038778159149686076,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Cruzeta · Normal · fora e volta · t = 0.437 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 49.364078521728516,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Cruzeta · Normal · sacudida 8 Hz · t = 0.417 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "exemplos/cilindro-dois-pistoes",
+    "runs": 27,
+    "steps": 16269,
+    "parts": 3,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.038596607744693756,
+      "where": "Esfera de disparo · Lento · sacudida 8 Hz · t = 0.379 s · entre Fundo móvel e Esfera de disparo"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.01048992294818163,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Fundo móvel · Lento · fora e volta · t = 0.213 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.333757609128952,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Esfera de disparo · Lento · sacudida 8 Hz · t = 0.375 s · entre Fundo móvel e Esfera de disparo"
+      },
+      "speed": {
+        "worst": 5363.63407035695,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Fundo móvel · Lento · fora e volta · t = 0.121 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "exemplos/engrenagens",
+    "runs": 36,
+    "steps": 21692,
+    "parts": 4,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.08095359802246094,
+      "where": "Lingueta · Real · soltura no meio · t = 0.412 s · entre Roda da catraca e Lingueta"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.014983129696023244,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Lingueta · Lento · fora e volta · t = 0.217 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.3943145275115967,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Lingueta · Real · soltura no meio · t = 0.408 s · entre Roda da catraca e Lingueta"
+      },
+      "speed": {
+        "worst": 220.12400281987408,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Lingueta · Normal · sacudida 8 Hz · t = 0.225 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "exemplos/lancador-bancada",
+    "runs": 108,
+    "steps": 65076,
+    "parts": 12,
+    "sampled": true,
+    "lasting": {
+      "worst": 1.3732233047485352,
+      "where": "Percussor · Real · sacudida 8 Hz · t = 1.254 s · entre Esfera 4 e Esfera 5"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.21933465757718823,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Percussor · Real · sacudida 8 Hz · t = 0.238 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 2.7037649154663086,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Esfera 3 · Lento · sacudida 8 Hz · t = 0.221 s · entre Esfera 4 e Esfera 5"
+      },
+      "speed": {
+        "worst": 10531.535491859016,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Percussor · Real · sacudida 8 Hz · t = 1.221 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "exemplos/lancador",
+    "runs": 36,
+    "steps": 21692,
+    "parts": 4,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.3798027038574219,
+      "where": "Esfera · Real · sacudida 8 Hz · t = 0.771 s · entre Parede superior e Esfera"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.02532535202802507,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Gatilho · Lento · fora e volta · t = 0.217 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.9344358444213867,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Gatilho · Lento · fora e volta · t = 0.213 s · entre Retém e Gatilho"
+      },
+      "speed": {
+        "worst": 2781.416918399579,
+        "limit": 2000,
+        "pass": true,
+        "na": true,
+        "where": "Percussor · Lento · fora e volta · t = 0.346 s"
+      },
+      "energy": {
+        "worst": 0,
+        "limit": 2,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "exemplos/trava",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.30695784091949463,
+      "where": "Maçaneta · Normal · fora e volta · t = 0.304 s · entre Maçaneta e Lingueta"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.014772594691502841,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Maçaneta · Real · fora e volta · t = 0.496 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.6490886211395264,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Maçaneta · Real · fora e volta · t = 0.496 s · entre Maçaneta e Lingueta"
+      },
+      "speed": {
+        "worst": 711.838134765625,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Lingueta · Real · sacudida 8 Hz · t = 0.979 s"
+      },
+      "energy": {
+        "worst": 0.0012493323820301921,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Maçaneta · Real · sacudida 8 Hz · t = 1.250 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  }
+]

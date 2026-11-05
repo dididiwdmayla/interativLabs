@@ -1,0 +1,71 @@
+{
+  "lento": {
+    "frames": 541,
+    "fpsMedian": 59.88023952095874,
+    "fpsP5": 59.523809523812105,
+    "intervalP95": 16.799999999999272,
+    "physicsMedian": 0,
+    "physicsP95": 1.5,
+    "drawMedian": 0.5,
+    "drawP95": 0.7000000000698492,
+    "mixMean": 0.008133086876198304,
+    "mixP95": 0,
+    "speed": 0.05,
+    "stepsPerFrame": 0.19963031423290203,
+    "long": 1,
+    "device": {
+      "navegador": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+      "densidade": 1,
+      "tela": "1440×900",
+      "janela": "1440×900",
+      "núcleos": 4,
+      "memória": "16 GB"
+    }
+  },
+  "normal": {
+    "frames": 541,
+    "fpsMedian": 59.880239520962,
+    "fpsP5": 59.88023952095548,
+    "intervalP95": 16.700000000000728,
+    "physicsMedian": 1.099999999976717,
+    "physicsP95": 1.5,
+    "drawMedian": 0.5,
+    "drawP95": 0.7999999999301508,
+    "mixMean": 0.0038817005542704282,
+    "mixP95": 0,
+    "speed": 0.25,
+    "stepsPerFrame": 1,
+    "long": 0,
+    "device": {
+      "navegador": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+      "densidade": 1,
+      "tela": "1440×900",
+      "janela": "1440×900",
+      "núcleos": 4,
+      "memória": "16 GB"
+    }
+  },
+  "real": {
+    "frames": 541,
+    "fpsMedian": 59.88023952095548,
+    "fpsP5": 59.523809523812105,
+    "intervalP95": 16.799999999999272,
+    "physicsMedian": 3.699999999953434,
+    "physicsP95": 6.899999999906868,
+    "drawMedian": 0.5,
+    "drawP95": 0.7000000000698492,
+    "mixMean": 0.0044362292058641945,
+    "mixP95": 0,
+    "speed": 1,
+    "stepsPerFrame": 4,
+    "long": 0,
+    "device": {
+      "navegador": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+      "densidade": 1,
+      "tela": "1440×900",
+      "janela": "1440×900",
+      "núcleos": 4,
+      "memória": "16 GB"
+    }
+  }
+}

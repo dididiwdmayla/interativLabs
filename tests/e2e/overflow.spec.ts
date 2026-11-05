@@ -2,7 +2,8 @@ import { expect, test } from "@playwright/test";
 import { OVERFLOW_LANDSCAPE, OVERFLOW_WIDTHS } from "./viewports";
 
 /**
- * Reprova rolagem lateral da página em 360, 390 e 412 px.
+ * Reprova rolagem lateral da página em 360, 390 e 412 px de largura e no
+ * celular deitado (844×390 e 640×360).
  * Confere também que todo controle clicável tem alvo de pelo menos 44 px.
  */
 const ROUTES = [
@@ -10,11 +11,11 @@ const ROUTES = [
   "/#bench",
   "/#lab",
   "/#lab/exemplos/cilindro-dois-pistoes",
-  "/#lab/exemplos/lancador-ferrolho",
+  "/#lab/exemplos/lancador-bancada",
   "/#perf",
 ];
 
-const SIZES = [...OVERFLOW_WIDTHS.map((width) => ({ width, height: 800 })), OVERFLOW_LANDSCAPE];
+const SIZES = [...OVERFLOW_WIDTHS.map((width) => ({ width, height: 800 })), ...OVERFLOW_LANDSCAPE];
 
 for (const { width, height } of SIZES) {
   for (const route of ROUTES) {
@@ -67,7 +68,7 @@ for (const { width, height } of SIZES) {
 
 /** As folhas e o menu de borda abertos também não fazem rolagem lateral e têm alvos de 44 px. */
 const SHEETS = ["main", "drawer", "layers", "card", "edge"] as const;
-for (const { width, height } of [{ width: 360, height: 800 }, OVERFLOW_LANDSCAPE]) {
+for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSCAPE]) {
   for (const sheet of SHEETS) {
     test(`folha ${sheet} em ${width}×${height}`, async ({ page }) => {
       await page.setViewportSize({ width, height });

@@ -224,7 +224,36 @@ Cada camada `i` tem o bit `1 << i`. Uma peça usa categoria e máscara iguais ao
 | Rasgo (`contact`) | Nada além da geometria: o furo existe na peça-guia (decomposição com furos) e o pino colide com as paredes. |
 | Mola | Toda mola ganha uma junta de distância com mínimo = comprimento sólido (o batente das espiras) e sem colisão desligada. Força de Hooke explícita a cada passo, com o modo (apoiada só age encostada e só empurra; só tração só age esticada e só puxa); se `ω·h > 0,5` ou `c·h/m > 0,25` (m = massa efetiva ao longo da mola na pose desenhada), vira a mola nativa da junta, com `lower/upperSpringForce` no lugar do modo. Mola com guia é sempre explícita. |
 | Câmara | Estado do gás comum (`src/engine/chamber.ts`); a força entra no solver como mola de distância entre as faces (ver abaixo). |
-| Arrasto (o dedo) | Corpo cinemático no dedo e junta de motor com mola linear (resolvida junto com os contatos, como nos exemplos do Box2D v3.2). Frequência `min(30, 6·√(g/100))` Hz e força máxima `(6 000·m + 4 000)·g/100` g·mm/s²: os 6 Hz e a força do protótipo, escalados com a gravidade. |
+| Arrasto (a mão) | Corpo cinemático no alvo e junta de motor com mola linear limitada (resolvida junto com os contatos, como nos exemplos do Box2D v3.2). Ver "Arrasto", abaixo. |
+
+### Arrasto (Parte F)
+
+O arrasto é uma ação física da mão, não uma força ilimitada (`HAND` e `handLimits` em `src/engine/runtime.ts`; o Box2D em `box2dAdapter.ts`). Até a Parte E2a a força máxima era `(6 000·m + 4 000)·g/100` g·mm/s²: com gravidade real, ~98 vezes a do protótipo, dezenas de vezes o peso da peça (um peso de 20 g puxado com 12 N); ela vencia juntas macias (cabo, suporte elástico) e arremessava peças leves. E o corpo-alvo só recebia posição quando o dedo andava: com o dedo parado, ele seguia na última velocidade e levava a peça embora.
+
+- **Alvo.** O dedo dá a posição; o alvo anda até ela a no máximo **600 mm/s de tempo simulado** e para quando chega. Em Lento (1/20), o dedo andando 100 mm/s na tela não vira 2 000 mm/s na simulação: a peça acompanha o dedo enquanto ele anda até 30 mm/s na tela (150 em Normal, 600 em Real) e fica para trás se ele for mais rápido.
+- **Força máxima** (g·mm/s²; 1 N = 10⁶):
+  `F = min( P + M, S, J )`, com
+  - `P = clamp(10·m·g, 0,02 N, 5 N)`: dez vezes o peso (g de pelo menos 9 810 mm/s², para a mão funcionar igual sem gravidade), com piso para peças muito leves e teto absoluto;
+  - `M = max(Σ molas da peça, mola mais forte ao alcance da peça)`, cada mola no fim do curso normal: `k·(livre − sólido)` (só tração: `k·livre`), `k·max|curso − repouso|` no trilho, `k·faixa/braço` na torção (faixa do batente, ou 90°; braço do eixo ao centro da peça, ≥ 5 mm). A soma das próprias molas puxa o ferrolho contra a mola de retorno. "Ao alcance" (`reach`) são as peças a até dois passos, por ligação ou por contato possível (camada em comum e formas a menos de 2 mm na pose desenhada), sem atravessar peças fixas: o gatilho alcança a barra e, pelo pino entre camadas, o retém, e assim vence a mola dele (o retém não é ligado ao gatilho, só encosta). A primeira versão usava a mola mais forte da cena inteira: no lançador de bancada era a do êmbolo (3,2 N), que a barra do gatilho nunca toca, e a mão forte demais afundava as esferas do carregador;
+  - `S` (suporte elástico): `(4·m·g + 1,5 mm / c) / 1,6`, com `c = λmax(K)/ω²` a flexibilidade do suporte no ponto (K = M⁻¹ efetiva da junta soldada, ω pela `linearHz`): a mão leva o ponto até ~4 vezes a deflexão pelo peso mais 1,5 mm, descontada a sobrelevação de ζ ≈ 0,2;
+  - `J` (juntas da peça: eixo, trilho, rasgo em junta, haste, solda rígida): `0,25 mm / c`, com `c = λmax(K)/(2π·960 Hz)²`. É o que a junta cede com a força da mão: **a junta sempre vence o dedo** porque a força nunca passa do que abre a junta mais macia da peça 0,25 mm (metade do limite do teste de abuso), e as juntas ficam a 960 Hz, 8 a 32 vezes a mola da mão.
+- **Mola da mão.** Amortecimento crítico; rigidez para chegar à força máxima com a peça 4 mm atrás do alvo: `f = clamp(√(F/(4 mm·m))/2π, 30, 120)` Hz, sempre abaixo dos 960 Hz das juntas. Peça leve contra mola forte fica perto de 60–120 Hz; peça pesada sem mola, em 30 Hz.
+- **Soltar.** O ponto agarrado sai com no máximo 750 mm/s (velocidade e giro escalados juntos).
+- **Atravessar.** O alvo anda no máximo 2,5 mm por passo (600 mm/s); contra peças fixas vale a colisão contínua do Box2D (peça que anda mais que meia largura por passo). A peça na mão não vira "bala": a colisão contínua de bala não respeita as juntas e prendia um elo de corrente no vizinho (junta abrindo 13,9 mm no teste de abuso).
+
+Números (a força máxima, a parcela que manda e a mola da mão):
+
+| Cena · peça | Massa | F máx. | Quem limita | Mola da mão |
+| --- | --- | --- | --- | --- |
+| Cabo · peso | 20 g | 1,96 N | 10 × peso | 30 Hz |
+| Parafusado × suporte elástico · barra no suporte | 8,5 g | 0,28 N | suporte (10 × peso daria 0,83 N) | 30 Hz |
+| Pêndulo · barra | 14,1 g | 1,39 N | 10 × peso (junta: 32 N) | 30 Hz |
+| Trava · maçaneta | 0,62 g | 0,12 N | peso + mola de torção | 35 Hz |
+| Lançador de bancada · ferrolho (aço, com a luva) | 13,7 g | 3,97 N | junta do trilho (peso + molas daria 6,4 N) | 43 Hz |
+| Lançador de bancada · gatilho | 2,42 g | 1,22 N | peso + mola ao alcance (a do percussor) | 57 Hz |
+| Lançador de bancada · barra do gatilho | 2,03 g | 0,88 N | peso + mola ao alcance | 52 Hz |
+
+O teste de abuso (`docs/decisoes/abuso.md`) confere tudo isso em todas as cenas.
 
 ### Câmara de gás (v2)
 
@@ -235,12 +264,17 @@ Cada camada `i` tem o bit `1 << i`. Uma peça usa categoria e máscara iguais ao
 - Escape (respiros descobertos e abertos, paredes desvedadas, boca do cilindro): `dn/dt = −K·A_o·(P − p0)`, `K = 0,05 mmol/(s·mm²·kPa)` (fluxo estrangulado do ar a 20 °C, 0,0814·P, com coeficiente de descarga 0,62, aplicado à diferença de pressão). Com orifícios de milímetros a constante de tempo `τ = V/(K·A_o·R·T)` é de microssegundos: integração exata, `n ← n_eq + (n − n_eq)·e^(−h/τ)`. No adiabático, o gás que sai expande o que fica (`U ∝ n^γ`); o que entra traz `γ·R·T/(γ − 1)` por mol.
 - Portas: a diferença de `n/V` entre as duas câmaras decai com taxa `K·A·R·T·(1/V₁ + 1/V₂)`, exata no passo; o gás leva a temperatura de quem cede.
 - **Força no solver.** Como força explícita, uma vez por passo, o gás é rígido demais: um pistão de gramas sob centenas de kPa atravessaria a câmara num passo. No Box2D a força do gás entra como mola de distância entre as faces, relinearizada a cada passo: rigidez `k = γ·P·A/L` (γ = 1 no isotérmico) e comprimento livre `L + F/k`, implícita no solver. Com a câmara aberta a rigidez efetiva cai para `k·τ/(τ + h)`; quando `ω·h < 0,5` a força volta a ser explícita (e a junta tem o impulso zerado). O estado termodinâmico (P, V, n, U) é sempre o exato; o trabalho e o impulso de cada parede vêm da força que o motor de fato aplicou.
+- **Parede fora do furo** (Parte F, achado do teste de abuso): uma parede cuja face está a mais de 1,5 raio da linha do eixo saiu do cilindro (arrancada, caída); a câmara fica aberta para o ambiente e não aplica força nem rigidez. Antes, um pistão que tinha saído e caído metros abaixo voltava a "fechar" a câmara quando a projeção dele no eixo entrava no furo, e a mola do gás o puxava de volta.
 - Snapshot por câmara: pressão, volume, gás e, por parede, força, impulso, trabalho, curso e vedação. É o dado dos gráficos da Fase 5.
-- Plausível e didático, não balística real. Com 240 passos por segundo, um disparo de gás dura de 2 a 10 passos: a câmera lenta (0,05×) mostra cada um.
+- Plausível e didático, não balística real. Com 240 passos por segundo, um disparo de gás dura de 2 a 10 passos: o Lento (1/20) mostra cada um.
 
 ### Passo de tempo
 
 Passo fixo de 1/240 s, com acumulador. Câmera lenta reduz o tempo simulado por quadro, não o passo. A linha do tempo grava snapshots (poses e estado das ligações) para voltar e repetir.
+
+**Velocidades (Parte F).** A física é sempre em tempo real e em unidades reais; a interface escolhe quanto tempo simulado cabe em cada segundo de tela: **Lento** (1/20), **Normal** (¼, o padrão ao entrar em Testar e ao abrir uma cena no laboratório) e **Real** (1×). Real em peça de milímetros parece acelerado porque é: um pêndulo de 50 mm tem período de 0,45 s. A régua e o relógio continuam em tempo simulado. A primeira vez que a pessoa escolhe Real, uma frase explica isso (uma vez por aparelho, `localStorage`).
+
+**Desenho entre passos (Parte F).** `src/sim/pacing.ts`: o `Pacer` guarda a posição de desenho em passos (fracionária) e pede ao worker sempre um passo adiante (`ceil(t) + 1`); o desenho mistura o passo anterior com o seguinte (`Recorder.blend`: posição e pressão lineares, ângulo pelo menor arco; molas, cabos, gás e chamadas saem das poses misturadas). Em Lento a cena anda em todo quadro (antes, um passo a cada ~5 quadros). Os eventos (sensor) aparecem no quadro em que o desenho chega ao passo deles. A linha do tempo e o "continuar daqui" usam passos inteiros. Custo da mistura: 0,004–0,008 ms por quadro (média) na cena de 150 peças (`docs/decisoes/perf-parte-f.json`).
 
 ### Escala de tela
 
@@ -264,7 +298,7 @@ Implementada na Fase 1 · Parte D (`src/render/`). A pele é a da Prancha índig
 - **Chamadas** (`callouts.ts`): número fora das peças, linha curva sem cruzar; no Simular, só a peça móvel selecionada, acompanhando a pose.
 - **Toque** (`hit.ts`): a peça mais alta sob o dedo (camada, depois ordem), com tolerância de borda.
 - **Orçamento de pintura**: com mais de 40 peças móveis, a parede delas sai no Simular (`docs/decisoes/desempenho.md`).
-- **Simular** (`src/sim/session.ts`, `src/ui/sim/`): a `SimSession` (sem DOM) roda num Web Worker; o thread principal pede os passos do quadro pelo acumulador, espelha a gravação dos últimos 10 s e desenha. A linha do tempo volta a um passo recriando o mundo e reexecutando as entradas gravadas.
+- **Simular** (`src/sim/session.ts`, `src/ui/sim/`): a `SimSession` (sem DOM) roda num Web Worker; o thread principal pede os passos do quadro pelo `Pacer`, espelha a gravação dos últimos 10 s e desenha a cada quadro a mistura de dois passos (§4, "Desenho entre passos"). A linha do tempo volta a um passo recriando o mundo e reexecutando as entradas gravadas.
 - Efeitos (pontilhado do gás, leque do escape, faíscas) e falhas de tinta (`tex-ink-wear`) entram na Fase 2. A vista explodida em perspectiva entra numa fase própria.
 
 ## 6. Editor (tátil, decidido em 04/11/2026)
@@ -324,6 +358,7 @@ Onde o texto acima deixava margem, ou o uso mostrou outra coisa:
 - **Projetos** (`src/editor/projects.ts`, `src/ui/projectFlow.ts`): IndexedDB `interativlabs` com os depósitos `projects` e `meta` (último aberto). Abrir um exemplo cria um projeto. A pilha de desfazer da sessão fica no sessionStorage por projeto e só volta se a cena for a mesma (hash sem os metadados). Sem IndexedDB, o projeto vive na memória e um aviso diz isso.
 - **Tela e instalação:** sem service worker (desde o Chrome 108 no Android, instalar pelo menu não exige mais um; o aviso automático de instalação ainda pode exigir). Manifesto com `display: standalone`, `orientation: any`, ícones 192, 512 e 512 maskable e o `apple-touch-icon` de 180 (ícone provisório gerado por `npm run icons`).
 - **Enquadrar** mira a caixa das peças móveis e das ligações (com margem de 6%); sem peças móveis, tudo. Os exemplos não precisaram ser recompostos.
+- **Paisagem sem coluna (Parte F).** A prancha ocupa a tela toda; cantos (menu, Montar/Testar, desfazer e refazer, pílula da camada), título, abas das bordas e a faixa do Testar flutuam sobre ela com fundo `--color-chrome-float` (o chrome a 84%). O enquadramento (`fitAround` em `src/render/view.ts`) mede os retângulos desses controles e procura a maior escala em que a caixa do mecanismo, com 8 px de folga, não encosta em nenhum deles nem passa das áreas seguras, provando alguns centros perto do meio: desconta só o espaço que os controles cobrem, não faixas inteiras. Sem medida (testes), volta às margens fixas. O lançador de bancada ocupa 94% da altura útil em 844×390 e 86% em 640×360 (entre a fileira de cima e a de baixo; `docs/capturas/fase-1/parte-f/paisagem-*.json`). A "coluna" das capturas da E2a era a borda da placa de base das engrenagens, que não chega à esquerda: fundo vazio, não um painel.
 - **Chamadas:** a camada 1 é a própria folha; as peças fixas dela não contam como obstáculo (o número pode ficar sobre a placa de base e a linha pode cruzá-la). Para cada número, 24 direções; vence a de menos cruzamentos além dos inevitáveis, depois a mais curta e mais voltada para fora.
 
 ## 7. Persistência
