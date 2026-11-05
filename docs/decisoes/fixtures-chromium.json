@@ -5,61 +5,67 @@
       "hash": "06233377c0f61c00",
       "pass": true,
       "stepMedian": 0.06000000000931323,
-      "stepP95": 0.2
+      "stepP95": 0.21000000000931324
     },
     "exemplos/cilindro-dois-pistoes": {
       "hash": "fbc93cba622d0c39",
       "pass": true,
-      "stepMedian": 0.07000000001862645,
-      "stepP95": 0.2
+      "stepMedian": 0.10999999996274709,
+      "stepP95": 0.24000000003725291
     },
     "exemplos/engrenagens": {
       "hash": "13a3c088813ef6f7",
       "pass": true,
       "stepMedian": 0.12000000001862646,
-      "stepP95": 0.21999999997206032
+      "stepP95": 0.1599999999627471
     },
     "exemplos/lancador": {
       "hash": "c441e2b2b88ff0fb",
       "pass": true,
-      "stepMedian": 0.0900000000372529,
-      "stepP95": 0.22000000006519257
+      "stepMedian": 0.10000000004656613,
+      "stepP95": 0.14999999990686774
+    },
+    "exemplos/lancador-ferrolho": {
+      "hash": "043e13252cd4564c",
+      "pass": true,
+      "stepMedian": 0.2,
+      "stepP95": 0.31000000005587935
     },
     "exemplos/trava": {
       "hash": "3ed465469ae5378d",
       "pass": true,
-      "stepMedian": 0.03999999999068678,
-      "stepP95": 0.11000000000931323
+      "stepMedian": 0.0400000000372529,
+      "stepP95": 0.06999999997206033
     },
     "fixacoes/biela": {
       "hash": "04c4dd6669ae4005",
       "pass": true,
-      "stepMedian": 0.030000000027939677,
-      "stepP95": 0.07000000006519258
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.06000000000931323
     },
     "fixacoes/cabo": {
       "hash": "be117b5930a8450c",
       "pass": true,
-      "stepMedian": 0.030000000027939677,
-      "stepP95": 0.07999999998137355
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.06000000000931323
     },
     "fixacoes/parafuso-suporte": {
       "hash": "5caf1dfca5a5b187",
       "pass": true,
-      "stepMedian": 0.030000000027939677,
+      "stepMedian": 0.03999999999068678,
       "stepP95": 0.07999999998137355
     },
     "fixacoes/pendulo": {
       "hash": "d891a728a66ded89",
       "pass": true,
-      "stepMedian": 0.059999999962747096,
-      "stepP95": 0.12999999998137354
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.08999999999068678
     },
     "molas/apoiada": {
       "hash": "d5fc8fd0daabea53",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.1
+      "stepMedian": 0.06000000000931323,
+      "stepP95": 0.0900000000372529
     },
     "molas/guia": {
       "hash": "cd3ff889ff5ebae2",
@@ -70,98 +76,104 @@
     "molas/pre-carga": {
       "hash": "8f16d7c59e297704",
       "pass": true,
-      "stepMedian": 0.03999999999068678,
-      "stepP95": 0.05000000004656613
+      "stepMedian": 0.05,
+      "stepP95": 0.14999999995343388
     },
     "molas/rigida": {
       "hash": "73e67c05ca70fe24",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.07999999998137355
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.06000000000931323
     },
     "molas/solido": {
       "hash": "67192bf5236e8f72",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.07999999998137355
+      "stepMedian": 0.1,
+      "stepP95": 0.12999999998137354
     },
     "rasgos/camadas": {
       "hash": "2715fe333fb90818",
       "pass": true,
-      "stepMedian": 0.03999999999068678,
-      "stepP95": 0.08000000002793968
+      "stepMedian": 0.05000000004656613,
+      "stepP95": 0.1
     },
     "rasgos/curvo": {
       "hash": "7e7d8b164cc16b3b",
       "pass": true,
-      "stepMedian": 0.07000000001862645,
-      "stepP95": 0.10999999996274709
+      "stepMedian": 0.07999999998137355,
+      "stepP95": 0.11000000000931323
     },
     "rasgos/mancal": {
       "hash": "ae41078adbd76643",
       "pass": true,
-      "stepMedian": 0.12000000001862646,
-      "stepP95": 0.15
+      "stepMedian": 0.11999999992549419,
+      "stepP95": 0.15000000004656613
     },
     "rasgos/reto": {
       "hash": "1c9829bdd9af6f5e",
       "pass": true,
       "stepMedian": 0.03999999999068678,
-      "stepP95": 0.07999999998137355
+      "stepP95": 0.06000000000931323
+    },
+    "gas/cargas": {
+      "hash": "7ed7269ed31a6be1",
+      "pass": true,
+      "stepMedian": 0.08000000002793968,
+      "stepP95": 0.15000000004656613
     },
     "gas/lei": {
       "hash": "3ccb69e5d0a855ec",
       "pass": true,
-      "stepMedian": 0.08999999999068678,
-      "stepP95": 0.1400000000372529
+      "stepMedian": 0.05,
+      "stepP95": 0.07999999998137355
     },
     "gas/portas": {
       "hash": "601b21bd9b52d1aa",
       "pass": true,
-      "stepMedian": 0.06000000000931323,
-      "stepP95": 0.08000000002793968
+      "stepMedian": 0.07000000001862645,
+      "stepP95": 0.11000000000931323
     },
     "gas/recuo": {
       "hash": "1749be63412e07f2",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.08999999999068678
+      "stepMedian": 0.06000000000931323,
+      "stepP95": 0.11000000000931323
     },
     "gas/sensor": {
       "hash": "3b23804483e2d92f",
       "pass": true,
-      "stepMedian": 0.07999999998137355,
-      "stepP95": 0.18000000002793967
+      "stepMedian": 0.08999999999068678,
+      "stepP95": 0.20000000004656612
     },
     "calibracao/bala": {
       "hash": "20103ec8b4211e99",
       "pass": true,
-      "stepMedian": 0.11000000000931323,
-      "stepP95": 0.11000000000931323
+      "stepMedian": 0.12000000001862646,
+      "stepP95": 0.12000000001862646
     },
     "calibracao/corrente": {
       "hash": "007c1ccfc0ee15e4",
       "pass": true,
-      "stepMedian": 0.12999999993480743,
-      "stepP95": 0.18000000002793967
+      "stepMedian": 0.13999999999068677,
+      "stepP95": 0.17000000001862645
     },
     "calibracao/pilha": {
       "hash": "7801499766c01642",
       "pass": true,
       "stepMedian": 0.38000000002793966,
-      "stepP95": 0.4400000000372529
+      "stepP95": 0.5399999999441206
     },
     "calibracao/pinhao": {
       "hash": "753fcbe7b0464bd4",
       "pass": true,
-      "stepMedian": 0.07999999998137355,
-      "stepP95": 0.13999999999068677
+      "stepMedian": 0.08999999999068678,
+      "stepP95": 0.11000000005587936
     },
     "desempenho/desempenho": {
       "hash": "2a73c5b1377cd124",
       "pass": true,
-      "stepMedian": 1.15,
-      "stepP95": 1.5600000000558794
+      "stepMedian": 1.2700000000651925,
+      "stepP95": 1.430000000074506
     }
   }
 }

@@ -63,6 +63,8 @@ export interface PlanChamber {
   charge: number;
   /** s */
   burn: number;
+  /** quantas vezes a carga acende */
+  shots: number;
 }
 
 /** Geometria lida dos corpos a cada passo. */
@@ -92,6 +94,8 @@ export class ChamberSim {
   V = 0;
   P = 0;
   fired = false;
+  /** acendimentos até agora */
+  shotsFired = 0;
   burning = false;
   private tBurn = 0;
   private first = true;
@@ -270,9 +274,15 @@ export class ChamberSim {
     ws.impulse += (this.p.walls[wall]!.side * force * h) / N;
   }
 
+  /**
+   * Acende uma dose da carga. Com `shots` = 1 (o padrão), uma vez só; com mais,
+   * de novo a cada acendimento enquanto houver dose, mas nunca durante uma
+   * queima (o gás da dose anterior ainda está entrando).
+   */
   ignite(time: number, events: EngineEvent[]): boolean {
-    if (this.fired) return false;
+    if (this.burning || this.shotsFired >= this.p.shots) return false;
     this.fired = true;
+    this.shotsFired++;
     this.burning = this.p.burn > 0;
     this.tBurn = 0;
     if (this.p.burn <= 0) {
@@ -304,6 +314,7 @@ export class ChamberSim {
       volume: this.V,
       gas: this.n,
       fired: this.fired,
+      shots: this.shotsFired,
       burning: this.burning,
       walls: this.p.walls.map((w, i) => {
         const ws = this.walls[i]!;

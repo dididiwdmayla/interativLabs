@@ -5,7 +5,14 @@ import { OVERFLOW_LANDSCAPE, OVERFLOW_WIDTHS } from "./viewports";
  * Reprova rolagem lateral da página em 360, 390 e 412 px.
  * Confere também que todo controle clicável tem alvo de pelo menos 44 px.
  */
-const ROUTES = ["/", "/#bench", "/#lab", "/#lab/exemplos/cilindro-dois-pistoes", "/#perf"];
+const ROUTES = [
+  "/",
+  "/#bench",
+  "/#lab",
+  "/#lab/exemplos/cilindro-dois-pistoes",
+  "/#lab/exemplos/lancador-ferrolho",
+  "/#perf",
+];
 
 const SIZES = [...OVERFLOW_WIDTHS.map((width) => ({ width, height: 800 })), OVERFLOW_LANDSCAPE];
 

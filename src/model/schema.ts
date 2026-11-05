@@ -245,6 +245,15 @@ export const GasSchema = z.strictObject({
       amount: nonNeg("A carga de gás"),
       /** tempo de queima, ms */
       burnMs: nonNeg("O tempo de queima"),
+      /**
+       * quantas vezes a carga acende (padrão 1): um reservatório que solta uma
+       * dose a cada acendimento, como num lançador que repete
+       */
+      shots: z
+        .number({ error: "O número de cargas precisa ser um número" })
+        .int("O número de cargas precisa ser inteiro")
+        .min(1, "O número de cargas precisa ser pelo menos 1")
+        .optional(),
     })
     .optional(),
 });

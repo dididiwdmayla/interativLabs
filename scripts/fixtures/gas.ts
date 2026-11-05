@@ -470,4 +470,130 @@ export function generateGas(): void {
       ],
     });
   }
+
+  // Cargas: a mesma câmara acende de novo a cada toque enquanto houver dose
+  {
+    const b = new Builder("Cargas");
+    const L = b.layer("Bancada", 3);
+    const w = 10;
+    const plate = b.rect("Suporte do sensor", L, -20, 0, 8, 30, "steel", { fixed: true });
+    b.rect("Piso", L, 0, 45, 30, 10, "steel", { fixed: true });
+    const r = 3;
+    const e1 = b.circle("Esfera 1", L, 0, -7 - 10, r, "steel");
+    const e2 = b.circle("Esfera 2", L, 0, -7 - 60, r, "steel");
+    const cyl = cylinder(b, "Cilindro", L, 30, 0, 70, w);
+    const piston = b.rect("Pistão", L, 30 + 14, 0, 8, w - 0.2, "aluminum");
+    b.link({
+      kind: "slider",
+      a: cyl.id,
+      b: piston.id,
+      at: [0, 0],
+      dir: 0,
+      travel: [-9.5, 50],
+      spring: { k: 0.2, rest: 0, damping: 0.0005 },
+    });
+    const gas = (shots?: number): Gas => ({
+      model: "isothermal",
+      gamma: 1.4,
+      p0: P_ATM,
+      charge: { amount: 0.02, burnMs: 2, ...(shots ? { shots } : {}) },
+    });
+    const chamber = b.link({
+      kind: "chamber",
+      body: cyl.id,
+      at: [0, 0],
+      dir: 0,
+      bore: w,
+      length: 70,
+      walls: [{ part: piston.id, seal: 200 }],
+      vents: [{ at: 4, d: 1, open: true }],
+      ports: [],
+      gas: gas(2),
+    });
+    b.link({
+      kind: "sensor",
+      host: plate.id,
+      at: [20, 0],
+      r: 4,
+      layers: [L, L],
+      minSpeed: 300,
+      actions: [{ do: "ignite", target: chamber.id }],
+    });
+    writeFixture("gas", "cargas", b.scene, {
+      title: "Cargas da câmara",
+      notes:
+        "Uma câmara com reservatório de duas doses (charge.shots = 2): cada toque no sensor acende uma dose. Sem shots, a carga acende uma vez só, como antes. O respiro aberto esvazia a câmara entre um toque e outro.",
+      view: [-35, -80, 115, 135],
+      runs: [
+        {
+          name: "duas doses, dois toques",
+          duration: 0.8,
+          inputs: [],
+          assertions: [
+            { kind: "events", label: "o sensor conta os dois toques", event: "sensor", min: 2, max: 2 },
+            {
+              kind: "events",
+              label: "e a câmara acende duas vezes",
+              event: "chamber-fired",
+              min: 2,
+              max: 2,
+            },
+            {
+              kind: "at",
+              label: "o estado conta as duas doses",
+              q: { link: chamber.id, field: "shots" },
+              t: 0.8,
+              min: 2,
+              max: 2,
+            },
+          ],
+        },
+        {
+          name: "uma dose (padrão), dois toques",
+          duration: 0.8,
+          patch: { [chamber.id]: { gas: gas() } },
+          inputs: [],
+          assertions: [
+            { kind: "events", label: "o sensor conta os dois toques", event: "sensor", min: 2, max: 2 },
+            {
+              kind: "events",
+              label: "mas a câmara acende uma vez só",
+              event: "chamber-fired",
+              min: 1,
+              max: 1,
+            },
+          ],
+        },
+        {
+          name: "durante a queima",
+          duration: 0.3,
+          override: { [e1.id]: { x: -60 }, [e2.id]: { x: -60 } },
+          patch: { [chamber.id]: { gas: { ...gas(2), charge: { amount: 0.02, burnMs: 20, shots: 2 } } } },
+          inputs: [
+            { kind: "ignite", link: chamber.id, t: 0.01 },
+            { kind: "ignite", link: chamber.id, t: 0.02 },
+            { kind: "ignite", link: chamber.id, t: 0.1 },
+          ],
+          assertions: [
+            {
+              kind: "at",
+              label: "um acendimento durante a queima não gasta dose; depois dela, gasta",
+              q: { link: chamber.id, field: "shots" },
+              t: 0.3,
+              min: 2,
+              max: 2,
+            },
+            {
+              kind: "at",
+              label: "no meio da queima, uma dose só",
+              q: { link: chamber.id, field: "shots" },
+              t: 0.05,
+              min: 1,
+              max: 1,
+            },
+          ],
+        },
+      ],
+    });
+  }
 }

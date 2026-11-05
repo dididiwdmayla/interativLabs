@@ -722,6 +722,514 @@ svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
         circle class=drag__ring"
 `;
 
+exports[`montagem da cena em SVG > estrutura estável: lancador-ferrolho 1`] = `
+"svg class=stage__sheet scene stage__sheet--defs data-mode=edit
+  g class=world
+    defs
+      pattern
+        path class=hatch
+        path class=hatch
+      pattern
+        path class=hatch
+        path class=hatch
+      pattern
+        path class=hatch
+      pattern
+        path class=hatch
+      pattern
+        path class=hatch
+        path class=hatch
+      pattern
+        path class=hatch
+        path class=hatch
+      pattern
+        path class=hatch
+        path class=hatch
+      pattern
+        path class=hatch
+        path class=hatch
+      pattern
+        path class=hatch
+      pattern
+        path class=hatch hatch--body
+      image href=/assets/ferragens/hw-screw-slot@2x.webp
+      image href=/assets/ferragens/hw-screw-slot-gold@2x.webp
+      image href=/assets/ferragens/hw-screw-hex@2x.webp
+      image href=/assets/ferragens/hw-screw-hex-gold@2x.webp
+      image href=/assets/ferragens/hw-axle@2x.webp
+      image href=/assets/ferragens/hw-axle-gold@2x.webp
+      image href=/assets/ferragens/hw-pin@2x.webp
+      image href=/assets/ferragens/hw-pin-gold@2x.webp
+      image href=/assets/ferragens/hw-sensor@2x.webp
+      image href=/assets/ferragens/hw-sensor-gold@2x.webp
+      image href=/assets/molas/spring-coil@2x.webp
+      image href=/assets/molas/spring-coil-gold@2x.webp
+      image href=/assets/molas/spring-end@2x.webp
+      image href=/assets/molas/spring-end-gold@2x.webp
+svg class=stage__sheet scene stage__sheet--static data-mode=edit
+  g class=world
+    g class=layer layer--below data-layer=0
+      g class=part part--fixed data-part=p1
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-aluminum-45)
+          path class=part__hatch fill=url(#Uh-body-0)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+          g class=link link--slider data-link=k22
+            path class=slider-guide
+            path class=centerline
+            rect class=slider-stop
+            rect class=slider-stop
+          g class=link link--sensor data-link=k32
+            circle class=sensor-zone
+            path class=sensor-ticks
+            use href=#Ua-hw-sensor class=hw
+      g class=part part--fixed is-tiny data-part=p2
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch part__tone
+          path class=part__outline
+svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
+  g class=world
+    g class=layer layer--below data-layer=0
+      g class=follower link--strong
+        g class=link link--pin link--strong data-link=k35
+          use href=#Ua-hw-pin class=hw
+          circle class=pin-ring
+svg class=stage__sheet scene stage__sheet--static data-mode=edit
+  g class=world
+    g class=layer layer--below data-layer=1
+      g class=link link--chamber data-link=k26
+        path class=chamber-bore
+        rect class=chamber-cap
+        path class=centerline
+svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
+  g class=world
+    g class=layer layer--below data-layer=1
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      polygon class=gas
+      g class=part part--dynamic data-part=p3
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+          g class=link link--screw data-link=k19
+            circle class=hw-shadow
+            circle class=hw-seat
+            use href=#Ua-hw-screw-hex class=hw
+      g class=part part--dynamic data-part=p4
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-135)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+          g class=link link--screw data-link=k20
+            circle class=hw-shadow
+            circle class=hw-seat
+            use href=#Ua-hw-screw-slot class=hw
+          g class=link link--slider data-link=k27
+            path class=slider-guide
+            path class=centerline
+            rect class=slider-stop
+            rect class=slider-stop
+      g class=part part--dynamic data-part=p5
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-polymer-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+          g class=link link--slider data-link=k25
+            path class=slider-guide
+            path class=centerline
+            rect class=slider-stop
+            rect class=slider-stop
+          g class=link link--slider data-link=k29
+            path class=slider-guide
+            path class=centerline
+            rect class=slider-stop
+            rect class=slider-stop
+      g class=part part--dynamic data-part=p6
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-polymer-135)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+          g class=link link--screw data-link=k21
+            circle class=hw-shadow
+            circle class=hw-seat
+            use href=#Ua-hw-screw-hex class=hw
+      g class=part part--dynamic data-part=p7
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-polymer-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic data-part=p8
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic data-part=p9
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-135)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic data-part=p10
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic data-part=p11
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-135)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic data-part=p12
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic data-part=p13
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-135)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic is-tiny data-part=p14
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch part__tone
+          path class=part__outline
+      g class=follower link--strong
+        g class=link link--pin link--strong data-link=k35
+          use href=#Ua-hw-pin class=hw
+          circle class=pin-ring
+      g class=link link--spring data-link=k23
+        g
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+        use href=#Ua-spring-end
+        g
+          use href=#Ua-spring-end
+      g class=link link--spring data-link=k24
+        g
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+        use href=#Ua-spring-end
+        g
+          use href=#Ua-spring-end
+      g class=link link--spring data-link=k28
+        g
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+        use href=#Ua-spring-end
+        g
+          use href=#Ua-spring-end
+svg class=stage__sheet scene stage__sheet--static data-mode=edit
+  g class=world
+    g class=layer layer--below data-layer=2
+      g class=follower
+        g class=link link--sensor data-link=k32
+          circle class=sensor-zone
+          path class=sensor-ticks
+          circle class=pin-ring
+svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
+  g class=world
+    g class=layer layer--below data-layer=2
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g class=part part--dynamic data-part=p15
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-aluminum-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+      g class=part part--dynamic data-part=p16
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-aluminum-135)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+          g class=link link--axle data-link=k31
+            circle class=hw-seat
+            use href=#Ua-hw-axle class=hw
+            path class=centerline
+      g class=follower link--strong
+        g class=link link--pin link--strong data-link=k35
+          use href=#Ua-hw-pin class=hw
+          circle class=pin-ring
+      g class=follower link--strong
+        g class=link link--pin link--strong data-link=k37
+          use href=#Ua-hw-pin class=hw
+          circle class=pin-ring
+      g class=link link--spring data-link=k30
+        g
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+          use href=#Ua-spring-coil
+        use href=#Ua-spring-end
+        g
+          use href=#Ua-spring-end
+svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
+  g class=world
+    g class=layer layer--active data-layer=3
+      g
+        path class=part__shadow
+      g
+        path class=part__shadow
+      g class=part part--dynamic data-part=p17
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch fill=url(#Uh-steel-45)
+          path class=part__light
+          path class=part__faint
+          path class=part__innerline
+          path class=part__outline
+          g class=link link--axle link--strong data-link=k33
+            circle class=hw-seat
+            use href=#Ua-hw-axle class=hw
+            path class=centerline
+      g class=part part--dynamic is-tiny data-part=p18
+        g class=part__wallg
+          path class=part__wall
+        g
+          path class=part__face
+          path class=part__hatch part__tone
+          path class=part__outline
+          g class=link link--axle link--strong data-link=k34
+            g class=hw-symbol
+              circle
+            path class=centerline
+          g class=link link--pin link--strong data-link=k35
+            use href=#Ua-hw-pin class=hw
+          g class=link link--pin link--strong data-link=k37
+            use href=#Ua-hw-pin class=hw
+svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
+  g class=world
+    g class=overlay
+      text class=gauge
+      g class=callouts
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+          text class=callout__sub
+        g class=callout
+          path class=callout__line
+          circle class=callout__dot
+          text class=callout__num
+          text class=callout__sub
+      g class=drag
+        line class=drag__wire
+        circle class=drag__ring"
+`;
+
 exports[`montagem da cena em SVG > estrutura estável: trava 1`] = `
 "svg class=stage__sheet scene stage__sheet--defs data-mode=edit
   g class=world

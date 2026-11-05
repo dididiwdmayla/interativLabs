@@ -172,7 +172,7 @@ type Link =
       vents: { at: number /* mm do fundo */; d: number /* Ø do orifício */; open: boolean }[];
       ports: { to: Id /* outra câmara */; at: number; d: number }[];
       gas: { model: "isothermal" | "adiabatic"; gamma: number; p0: number /* kPa */;
-             charge?: { amount: number /* mmol */; burnMs: number } } }
+             charge?: { amount: number /* mmol */; burnMs: number; shots?: number /* doses, padrão 1 */ } } }
   | { kind: "sensor"; host: Id; at: Vec2; r: number; layers: [Id, Id]; minSpeed: number;
       actions: { do: "ignite" | "open" | "close"; target: Id; vent?: number }[] };
 // Toda ligação tem também id e ref.
@@ -195,6 +195,7 @@ Como ficou na implementação (Parte C), onde o texto acima deixava margem:
 - **Portas**: a fração descoberta é medida na câmara que declara a porta.
 - **Mola com guia**: o eixo é o eixo principal (maior momento de área) do contorno da peça-guia, orientado de A para B; o comprimento é a projeção nesse eixo.
 - **Espessura**: camada nova com 3 mm; camada migrada com 10 mm (as massas da v1).
+- **Doses da carga** (Parte C2): `charge.shots` (inteiro ≥ 1, opcional, padrão 1) é quantas vezes a câmara acende; cada acendimento (sensor ou roteiro) queima uma dose inteira, nunca durante a queima da anterior. Sem o campo, a câmara acende uma vez só, como antes; nenhuma cena antiga muda. Cena de teste `gas/cargas`.
 
 ## 4. Física
 

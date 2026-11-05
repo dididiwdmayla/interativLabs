@@ -76,6 +76,8 @@ export interface LinkState {
   volume?: number;
   gas?: number;
   fired?: boolean;
+  /** câmara: quantas doses da carga já acenderam */
+  shots?: number;
   burning?: boolean;
   walls?: WallState[];
   /** câmara: respiros (aberto e fração descoberta) */
