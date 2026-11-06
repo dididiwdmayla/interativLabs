@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
+import type { CardPick } from "./cardPick";
 import type { HammerTool } from "./hammer";
 import type { Command } from "./commands";
 import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
@@ -42,6 +43,8 @@ export interface EdgeMenuState {
 
 interface UiState {
   mode: Mode;
+  pick: CardPick | null;
+  setPick: (pick: CardPick | null) => void;
   hammer: HammerTool | null;
   setHammer: (tool: HammerTool | null) => void;
   current: OpenScene | null;
@@ -123,8 +126,10 @@ const hasWindow = typeof window !== "undefined";
  */
 export const useUiStore = create<UiState>()((set, get) => ({
   mode: "edit",
+  pick: null,
+  setPick: (pick) => set({ pick, sheet: null, edgeMenu: null, hammer: null }),
   hammer: null,
-  setHammer: (hammer) => set({ hammer, sheet: null, edgeMenu: null, selection: null }),
+  setHammer: (hammer) => set({ hammer, pick: null, sheet: null, edgeMenu: null, selection: null }),
   current: null,
   history: emptyHistory(),
   selection: null,
@@ -143,6 +148,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   setMode: (mode) =>
     set({
       mode,
+      pick: null,
       hammer: mode === "simulate" ? null : get().hammer,
       edgeMenu: null,
       sheet: mode === "simulate" ? null : get().sheet,
@@ -154,6 +160,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
       history: history ?? emptyHistory(),
       mode: "edit",
       hammer: null,
+      pick: null,
       selection: null,
       sheet: null,
       details: false,

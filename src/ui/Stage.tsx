@@ -2,6 +2,9 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { assets } from "@/assets/registry";
 import { hammerPoint, hammerFix, type HammerPoint } from "@/editor/hammer";
 import { dragLink, insertLink, sensorLink } from "@/editor/hammerDrag";
+import { pickLinkEdit, PICK_PHRASE } from "@/editor/cardPick";
+import { linkHandles, adjustLinkHandle, type LinkHandle } from "@/editor/linkHandles";
+import { applyLink } from "./card/applyLink";
 import { LINK_LABEL } from "@/editor/names";
 import { moveLink } from "@/editor/moveLink";
 import { HammerBar } from "./HammerBar";
@@ -10,7 +13,7 @@ import { MultiTap } from "@/editor/gestures";
 import { MENUS, menuAt } from "@/editor/menus";
 import { useUiStore } from "@/editor/useUiStore";
 import type { PartPose } from "@/engine/types";
-import { movePart, scalePart, scaleShape, setPose } from "@/editor/commands";
+import { movePart, scalePart, scaleShape, setPose, setLink } from "@/editor/commands";
 import { handlesFor, localBox, stretchTo, type Handle, type StretchResult } from "@/editor/handles";
 import { snapAngle, snapMove, type SnapFeature, type SnapTargets } from "@/editor/snap";
 import { snapFeatures, snapTargets } from "@/editor/snapScene";
@@ -100,6 +103,7 @@ const HANDLE_PX = 22;
 const SNAP_PX = 10;
 
 type Gesture =
+  | { kind: "linkhandle"; link: Link; handle: LinkHandle; last: Link | null }
   | { kind: "hammer"; start: HammerPoint; last: HammerPoint; touch: boolean }
   | { kind: "linkmove"; id: string; last: HammerPoint | null; start: Vec2 }
   | { kind: "none" }
@@ -227,6 +231,15 @@ export function Stage({
   const ctl = useSimStore((s) => s.ctl);
   const editing = mode === "edit";
   const hammer = useUiStore((s) => s.hammer);
+  const picking = useUiStore((s) => s.pick);
+  const [linkPreview, setLinkPreview] = useState<Link | null>(null);
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") useUiStore.getState().setPick(null);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
   const [hammerPreview, setHammerPreview] = useState<{
     hit: HammerPoint;
     start?: HammerPoint;
@@ -442,6 +455,11 @@ export function Stage({
         model?.parts.get(selection.id) ??
         null)
       : null;
+  const selectedLink = selection?.kind === "link" ? model?.linkById.get(selection.id)?.link : undefined;
+  const linkFields =
+    editing && model && selectedLink
+      ? linkHandles(model, linkPreview?.id === selectedLink.id ? linkPreview : selectedLink, mmPerPx(zoom))
+      : [];
   const selEditable = editing && !bare && !!selModel && layerOk(selModel.layer);
   const handles = useMemo(
     () => (selEditable && selModel ? handlesFor(selModel, mmPerPx(zoom)) : []),
@@ -572,6 +590,7 @@ export function Stage({
       const g = gesture.current;
       if (g.kind === "menu") return;
       if (g.kind === "drag") ctl?.dragEnd();
+      if (g.kind === "linkhandle") setLinkPreview(null);
       if (g.kind === "hammer" || g.kind === "linkmove") {
         setHammerPreview(null);
         overlay.current?.guides([]);
@@ -597,6 +616,28 @@ export function Stage({
         return;
       }
     } else if (!bare) {
+      if (picking) {
+        const result = pickLinkEdit(model, picking, w, mmPerPx(view.current.zoom));
+        const error = result.link ? applyLink(result.link, picking.kind) : result.error;
+        const ui = useUiStore.getState();
+        if (error) ui.notify(error, { warn: true });
+        else {
+          ui.setPick(null);
+          ui.setSheet("card");
+        }
+        gesture.current = { kind: "none" };
+        return;
+      }
+      if (selectedLink) {
+        const handle = linkFields
+          .map((h) => ({ h, d: Math.hypot(h.point[0] - w[0], h.point[1] - w[1]) }))
+          .filter((x) => x.d <= HANDLE_PX * mmPerPx(view.current.zoom))
+          .sort((a, b) => a.d - b.d)[0]?.h;
+        if (handle) {
+          gesture.current = { kind: "linkhandle", link: selectedLink, handle, last: null };
+          return;
+        }
+      }
       if (hammer) {
         if (waiting) {
           if (waiting.kind === "sensor") {
@@ -717,7 +758,10 @@ export function Stage({
     if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
     const w = toWorld(view.current, x, y);
-    if (g.kind === "linkmove" && model) {
+    if (g.kind === "linkhandle" && model) {
+      g.last = adjustLinkHandle(model, g.link, g.handle, w);
+      setLinkPreview(g.last);
+    } else if (g.kind === "linkmove" && model) {
       if (Math.hypot(w[0] - g.start[0], w[1] - g.start[1]) < 3 * mmPerPx(view.current.zoom)) return;
       g.last = hammerPoint(model, "axle", w, activeLayer, mmPerPx(view.current.zoom));
       overlay.current?.guides(g.last.guides);
@@ -833,6 +877,12 @@ export function Stage({
     const ui = useUiStore.getState();
     const scene = ui.current?.scene;
     switch (g.kind) {
+      case "linkhandle": {
+        gesture.current = { kind: "none" };
+        setLinkPreview(null);
+        if (up && g.last && scene) ui.commit(setLink(scene, g.link.id, g.last));
+        return;
+      }
       case "linkmove": {
         gesture.current = { kind: "none" };
         setHammerPreview(null);
@@ -1008,6 +1058,19 @@ export function Stage({
       onPointerCancel={onPointerUp}
     >
       <div className="stage__vignette" aria-hidden="true" />
+      {editing && picking && (
+        <div className="pickprompt stage__ui" role="status">
+          <span>{PICK_PHRASE[picking.kind]}</span>
+          <button
+            type="button"
+            className="iconbtn"
+            aria-label="Cancelar escolha"
+            onClick={() => useUiStore.getState().setPick(null)}
+          >
+            <Icon name="close" uid="pick-close" />
+          </button>
+        </div>
+      )}
       {editing && !bare && !hammer && hammerPreview && (
         <HammerPreview
           hit={hammerPreview.hit}
@@ -1128,6 +1191,8 @@ export function Stage({
               nodes={nodes}
               size={{ width, height }}
               px={mmPerPx(zoom)}
+              linkHandles={linkFields}
+              picking={picking}
               selection={
                 selEditable && selModel
                   ? {

@@ -1,8 +1,11 @@
 import { Suspense, lazy, useId } from "react";
 import { deleteLink } from "@/editor/commands";
-import { LINK_LABEL, linkParts, partName } from "@/editor/names";
+import { LINK_LABEL } from "@/editor/names";
 import { useUiStore } from "@/editor/useUiStore";
 import type { LinkModel, SceneModel } from "@/render/prepare";
+import { LinkQuick } from "./LinkQuick";
+import { LinkLists } from "./LinkLists";
+import { LinkPair } from "./LinkPair";
 import { Icon, type IconName } from "../icons";
 
 const LinkDetails = lazy(() => import("./LinkDetails"));
@@ -16,10 +19,11 @@ const LINK_ICON: Partial<Record<string, IconName>> = {
   spring: "spring",
   chamber: "chamber",
   sensor: "sensor",
-  slot: "pin",
-  rod: "slider",
-  cable: "spring",
-  mount: "screw",
+  slot: "slot",
+  rod: "rod",
+  cable: "cable",
+  mount: "mount",
+  lock: "latch",
 };
 
 /** Cartão da ligação selecionada: tipo, peças ligadas, detalhes e excluir. */
@@ -27,8 +31,6 @@ export function LinkCard({ model, lm }: { model: SceneModel; lm: LinkModel }) {
   const uid = useId();
   const ui = useUiStore();
   const l = lm.link;
-  const parts = [...new Set(linkParts(l))];
-  const span = lm.span[0] === lm.span[1] ? `${lm.span[0] + 1}` : `${lm.span[0] + 1}–${lm.span[1] + 1}`;
   return (
     <div className="card">
       <div className="card__head">
@@ -38,32 +40,9 @@ export function LinkCard({ model, lm }: { model: SceneModel; lm: LinkModel }) {
         </span>
         <h3 className="card__title">{LINK_LABEL[l.kind]}</h3>
       </div>
-      <section className="card__sec" aria-label="Peças ligadas">
-        <h3 className="card__k">Liga · camadas {span}</h3>
-        <ul className="linklist">
-          {parts.map((id) => {
-            const p = id === null ? null : model.parts.get(id)?.part;
-            return (
-              <li key={id ?? "ground"}>
-                {p ? (
-                  <button
-                    type="button"
-                    className="linklist__item"
-                    onClick={() => ui.select({ kind: "part", id: p.id })}
-                  >
-                    <span className="linklist__ref">{p.ref}</span>
-                    {partName(p)}
-                  </button>
-                ) : (
-                  <span className="linklist__item linklist__item--static">
-                    <span className="linklist__ref">—</span>O fundo
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      <LinkQuick scene={model.scene} link={l} />
+      <LinkPair model={model} lm={lm} />
+      <LinkLists model={model} link={l} />
       <section className="card__acts" aria-label="Ações">
         <button
           type="button"

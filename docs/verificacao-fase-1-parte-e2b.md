@@ -62,10 +62,20 @@ Testes: 20 fluxos de ferramentas com mouse/toque, mais faixa 640×360 e câmara 
 
 Verificação do item 13.4: 686 testes Vitest passaram, cinco falhas esperadas (quatro herdadas e a reconstrução da câmara acima); 13 testes de assets passaram; lint, typecheck e build limpos. Os 22 testes Playwright das ferramentas passaram.
 
+## 13.5 — Cartões de ligação
+
+Os 12 cartões têm predefinições antes de Detalhes e ícones próprios. Trocas parafuso/suporte/trava e haste/cabo/mola preservam peças, pontos e identificador. A seção Liga permite trocar as peças sob o ponto, conservando coordenadas mundiais; no rasgo escolhe guia/perfil/furo. Câmara e sensor ganharam as listas editáveis e a escolha de alvos na prancha. Remover um respiro retira as ações correspondentes e renumera os demais índices no mesmo comando.
+
+Tabela final em §6 da arquitetura: molas 4/10/25 Hz com amortecimento 0,1 do crítico; suporte 60/15 Hz; atrito 0,05/0,30 do peso efetivo. Os testes conferem frequência linear e angular em duas massas, as 18 combinações de troca de tipo, alças e desfazer, além da escolha de paredes, respiros, portas e ações. São 22 testes de unidade novos. As alças de eixo, trilho, mola e sensor alteram somente o campo correspondente; eixo encaixa em 5°.
+
+Playwright: 17 testes passaram, incluindo captura dos 12 cartões em 844×390, agrupamento do desfazer no mesmo controle e arrasto real das quatro alças em 1440×900. Capturas `cartao-*` e `alca-*`. As cenas passam por `parseScene` antes de entrar no editor, como na importação do app.
+
+Verificação do item 13.5: 708 testes Vitest passaram, cinco falhas esperadas preservadas; 13 testes de assets; lint, typecheck e build limpos.
+
 ## Pedidos ao coordenador visual
 
 Ferragem própria da trava com argola de soltura. Até a entrega, a implementação usa exclusivamente as ferragens existentes do lote 01 e a marca desenhada no código. Nenhum asset foi gerado ou substituído.
 
 ## Ainda em andamento
 
-13.5–13.8: cartões, operações multicamada, exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.
+13.6–13.8: operações multicamada, exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.

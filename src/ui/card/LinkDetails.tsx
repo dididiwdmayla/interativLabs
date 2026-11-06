@@ -1,8 +1,8 @@
-import { setLink } from "@/editor/commands";
 import { linkForm, readField, toggleGroup, writeField, type FieldDesc } from "@/editor/linkFields";
 import { useUiStore } from "@/editor/useUiStore";
-import { formatPath, validateScene } from "@/model/scene";
+import { formatPath } from "@/model/scene";
 import type { Link } from "@/model/types";
+import { applyLink } from "./applyLink";
 import { NumberField } from "./fields";
 
 /**
@@ -10,24 +10,6 @@ import { NumberField } from "./fields";
  * validação do próprio schema (mensagens em português). Carregado sob
  * demanda, junto com o Zod.
  */
-
-/** Tenta a ligação nova na cena; devolve o erro do schema ou null (e aplica). */
-function tryLink(next: Link): string | null {
-  const ui = useUiStore.getState();
-  const scene = ui.current?.scene;
-  if (!scene) return null;
-  const i = scene.links.findIndex((l) => l.id === next.id);
-  if (i < 0) return null;
-  const links = scene.links.slice();
-  links[i] = next;
-  const r = validateScene({ ...scene, links });
-  if (!r.ok) {
-    const mine = r.issues.find((x) => x.path.startsWith(`links[${i}]`)) ?? r.issues[0];
-    return mine ? mine.message : "Valor inválido";
-  }
-  ui.commit(setLink(scene, next.id, next));
-  return null;
-}
 
 function Field({ link, f }: { link: Link; f: FieldDesc }) {
   const v = readField(link, f);
@@ -40,7 +22,7 @@ function Field({ link, f }: { link: Link; f: FieldDesc }) {
         digits={f.integer ? 0 : 3}
         onCommit={(x) => {
           if (f.integer && !Number.isInteger(x)) return "Use um número inteiro";
-          return tryLink(writeField(link, f.path, f.fromView(x)));
+          return applyLink(writeField(link, f.path, f.fromView(x)), formatPath(f.path));
         }}
       />
     );
@@ -50,7 +32,7 @@ function Field({ link, f }: { link: Link; f: FieldDesc }) {
         <input
           type="checkbox"
           checked={v === true}
-          onChange={(e) => tryLink(writeField(link, f.path, e.target.checked))}
+          onChange={(e) => applyLink(writeField(link, f.path, e.target.checked), formatPath(f.path))}
         />
         {f.label}
       </label>
@@ -62,7 +44,7 @@ function Field({ link, f }: { link: Link; f: FieldDesc }) {
         className="nfield__select"
         value={String(v)}
         aria-label={f.label}
-        onChange={(e) => tryLink(writeField(link, f.path, e.target.value))}
+        onChange={(e) => applyLink(writeField(link, f.path, e.target.value), formatPath(f.path))}
       >
         {f.options?.map(([k, label]) => (
           <option key={k} value={k}>
@@ -88,7 +70,7 @@ export default function LinkDetails({ link }: { link: Link }) {
               type="checkbox"
               checked={g.present}
               onChange={(e) => {
-                const err = tryLink(toggleGroup(link, g.key, e.target.checked));
+                const err = applyLink(toggleGroup(link, g.key, e.target.checked), g.key);
                 if (err) useUiStore.getState().notify(err, { warn: true });
               }}
             />
