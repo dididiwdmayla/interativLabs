@@ -6,9 +6,10 @@ import {
   LayerRangeSchema,
   MAX_LAYERS,
   MetaSchema,
-  PartSchema,
+  PartSchema as LegacyPartSchema,
   RefSchema,
   SettingsSchema,
+  ShapeSchema,
   Vec2Schema,
   checkCommon,
   finite,
@@ -23,7 +24,6 @@ export {
   IdSchema,
   MAX_LAYERS,
   MetaSchema,
-  PartSchema,
   PolyShapeSchema,
   SettingsSchema,
   ShapeSchema,
@@ -31,10 +31,20 @@ export {
 } from "./schema-common";
 
 /**
- * Formato da cena, versão 2 (docs/arquitetura.md §3.1): ligações 2.0.
+ * Scene format v3: multilayer profiles and releasable locks (architecture §3.2).
  * Unidades: mm, g, s, N, N/mm, N·mm, kPa, rad (ver src/model/units.ts).
  * Pontos são [x, y], no espaço local da peça de referência.
  */
+
+export const ProfileSchema = z.strictObject({
+  id: IdSchema,
+  layer: IdSchema,
+  shape: ShapeSchema,
+  material: LegacyPartSchema.shape.material.optional(),
+  source: LegacyPartSchema.shape.source,
+});
+
+export const PartSchema = LegacyPartSchema.extend({ profiles: z.array(ProfileSchema).optional() });
 
 export const LayerSchema = z.strictObject({
   id: IdSchema,
@@ -74,6 +84,15 @@ export const ScrewSchema = z.strictObject({
   a: anchor,
   b: IdSchema,
   at: Vec2Schema,
+});
+
+export const LockSchema = z.strictObject({
+  ...base,
+  kind: z.literal("lock"),
+  a: anchor,
+  b: IdSchema,
+  at: Vec2Schema,
+  breakForce: positive("A força de soltura").optional(),
 });
 
 export const AxleSchema = z.strictObject({
@@ -160,6 +179,7 @@ export const SlotSchema = z.strictObject({
   pin: IdSchema,
   /** peça com o furo */
   guide: IdSchema,
+  profile: IdSchema.optional(),
   /** índice em shape.holes da peça-guia */
   hole: z.number().int("O índice do furo precisa ser inteiro").nonnegative("Índice de furo inválido"),
   mode: z.enum(["joint", "contact"], { error: 'Modo do rasgo inválido: use "joint" ou "contact"' }),
@@ -278,7 +298,9 @@ export const ChamberSchema = z.strictObject({
 });
 
 export const SensorActionSchema = z.strictObject({
-  do: z.enum(["ignite", "open", "close"], { error: 'Ação inválida: use "ignite", "open" ou "close"' }),
+  do: z.enum(["ignite", "open", "close", "release"], {
+    error: 'Ação inválida: use "ignite", "open", "close" ou "release"',
+  }),
   /** câmara */
   target: IdSchema,
   /** índice do respiro (abrir e fechar) */
@@ -301,6 +323,7 @@ export const LinkSchema = z.discriminatedUnion(
   "kind",
   [
     ScrewSchema,
+    LockSchema,
     AxleSchema,
     RodSchema,
     CableSchema,
@@ -314,12 +337,12 @@ export const LinkSchema = z.discriminatedUnion(
   ],
   {
     error:
-      "Tipo de ligação inválido: use screw, axle, rod, cable, mount, slider, pin, slot, spring, chamber ou sensor",
+      "Tipo de ligação inválido: use screw, axle, rod, cable, mount, slider, pin, slot, spring, chamber, sensor ou lock",
   },
 );
 
 const SceneShape = z.strictObject({
-  version: z.literal(2, { error: "Versão da cena desconhecida: esperava 2" }),
+  version: z.literal(3, { error: "Versão da cena desconhecida: esperava 3" }),
   meta: MetaSchema,
   settings: SettingsSchema,
   layers: z
@@ -361,8 +384,22 @@ function checkReferences(s: SceneIn, ctx: z.RefinementCtx): void {
       if (!layerIds.has(lid)) issue(["links", i, "layers", j], `Camada inexistente: ${lid}`);
     });
 
+  const ids = new Set([...s.layers, ...s.parts, ...s.links].map((x) => x.id));
+  s.parts.forEach((p, i) => {
+    const layers = new Set([p.layer]);
+    p.profiles?.forEach((profile, j) => {
+      const path = ["parts", i, "profiles", j];
+      if (ids.has(profile.id)) issue([...path, "id"], `Id repetido: ${profile.id}`);
+      ids.add(profile.id);
+      if (!layerIds.has(profile.layer)) issue([...path, "layer"], `Camada inexistente: ${profile.layer}`);
+      if (layers.has(profile.layer)) issue([...path, "layer"], "A peça só pode ter um perfil por camada");
+      layers.add(profile.layer);
+    });
+  });
+
   s.links.forEach((l, i) => {
     switch (l.kind) {
+      case "lock":
       case "screw":
       case "axle":
       case "slider":
@@ -393,7 +430,12 @@ function checkReferences(s: SceneIn, ctx: z.RefinementCtx): void {
         l.actions.forEach((a, j) => {
           const t = linkById.get(a.target);
           if (!t) issue(["links", i, "actions", j, "target"], `Ligação inexistente: ${a.target}`);
-          else if (t.kind !== "chamber")
+          else if (a.do === "release") {
+            if (t.kind !== "lock")
+              issue(["links", i, "actions", j, "target"], "Soltar precisa apontar para uma trava");
+            if (a.vent !== undefined)
+              issue(["links", i, "actions", j, "vent"], "Soltar uma trava não usa respiro");
+          } else if (t.kind !== "chamber")
             issue(["links", i, "actions", j, "target"], "O sensor só age sobre câmaras");
           else if (a.do !== "ignite") {
             if (a.vent === undefined)
@@ -412,10 +454,15 @@ function checkReferences(s: SceneIn, ctx: z.RefinementCtx): void {
           issue(["links", i, "guide"], `Peça inexistente: ${l.guide}`);
           break;
         }
+        const profile = l.profile === undefined ? guide : guide.profiles?.find((p) => p.id === l.profile);
+        if (!profile) {
+          issue(["links", i, "profile"], `Perfil inexistente na peça ${guide.ref}: ${l.profile}`);
+          break;
+        }
         if (pin?.kind === "pin") {
           if (pin.host === l.guide)
             issue(["links", i, "guide"], "O pino não pode correr num furo da própria peça");
-          const gi = layerIndex.get(guide.layer);
+          const gi = layerIndex.get(profile.layer);
           const a = layerIndex.get(pin.layers[0]);
           const b = layerIndex.get(pin.layers[1]);
           if (
@@ -426,7 +473,7 @@ function checkReferences(s: SceneIn, ctx: z.RefinementCtx): void {
           )
             issue(["links", i, "pin"], "O pino precisa ocupar a camada da peça-guia");
         }
-        const holes = guide.shape.kind === "gear" ? [] : guide.shape.holes;
+        const holes = profile.shape.kind === "gear" ? [] : profile.shape.holes;
         const hole = holes[l.hole];
         if (!hole) {
           issue(["links", i, "hole"], `Furo inexistente na peça ${guide.ref}: ${l.hole}`);

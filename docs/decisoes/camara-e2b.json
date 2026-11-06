@@ -1,0 +1,86 @@
+{
+  "original": {
+    "id": "k30",
+    "ref": 49,
+    "kind": "chamber",
+    "body": null,
+    "at": [
+      -45.4,
+      0
+    ],
+    "dir": 0,
+    "bore": 6,
+    "length": 100,
+    "walls": [
+      {
+        "part": "p9",
+        "seal": 100
+      },
+      {
+        "part": "p7",
+        "seal": 14.5
+      }
+    ],
+    "vents": [
+      {
+        "at": 7,
+        "d": 0.5,
+        "open": true
+      },
+      {
+        "at": 4,
+        "d": 3,
+        "open": false
+      }
+    ],
+    "ports": [],
+    "gas": {
+      "model": "adiabatic",
+      "gamma": 1.4,
+      "p0": 101.325,
+      "charge": {
+        "amount": 0.5,
+        "burnMs": 1,
+        "shots": 12
+      }
+    }
+  },
+  "detected": {
+    "link": {
+      "id": "kjwxiiglq",
+      "ref": 62,
+      "kind": "chamber",
+      "body": "p8",
+      "at": [
+        -25.4,
+        0
+      ],
+      "dir": 0,
+      "bore": 4.1,
+      "length": 100,
+      "walls": [
+        {
+          "part": "p10",
+          "seal": 100
+        },
+        {
+          "part": "p9",
+          "seal": 100
+        }
+      ],
+      "vents": [],
+      "ports": [],
+      "gas": {
+        "model": "adiabatic",
+        "gamma": 1.4,
+        "p0": 101.325,
+        "charge": {
+          "amount": 0.5,
+          "burnMs": 1,
+          "shots": 1
+        }
+      }
+    }
+  },
+  "host": "Luva"
+}

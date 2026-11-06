@@ -22,7 +22,7 @@ const box = (id: string, layer: string, x: number, size: number, fixed = false):
 
 function scene(parts: Part[]): Scene {
   return {
-    version: 2,
+    version: 3,
     meta: { title: "t", createdAt: NOW, updatedAt: NOW },
     settings: { gravity: { on: true, g: 9810 }, snap: { grid: 1, on: true } },
     layers: ["L1", "L2", "L3"].map((id) => ({ id, name: id, visible: true, locked: false, thickness: 3 })),

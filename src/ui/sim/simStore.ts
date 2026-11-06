@@ -27,6 +27,7 @@ export interface SimControl {
   restart(): void;
   /** o dedo na peça (mundo, mm); devolve se pegou */
   dragAt(p: Vec2): Id | null;
+  releaseAt(p: Vec2): boolean;
   dragMove(p: Vec2): void;
   dragEnd(): void;
   /** arrastar a régua: mostra o quadro gravado do instante t (s) */

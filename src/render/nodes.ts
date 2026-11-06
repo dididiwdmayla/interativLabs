@@ -14,6 +14,7 @@ import { worldOf, type SceneModel } from "./prepare";
 
 /** O que o escritor precisa saber de um quadro. */
 export interface FrameSource {
+  lock?(id: Id): boolean | undefined;
   pose(id: Id): PartPose | undefined;
   /** câmara: pressão absoluta (kPa) e curso de cada parede (mm) */
   chamber(id: Id): { pressure: number; travel: readonly number[] } | undefined;
@@ -95,6 +96,7 @@ export class StageNodes {
   frame: FrameSource;
   parts = new Map<Id, PartNodes>();
   springs = new Map<Id, SpringNodes>();
+  locks = new Map<Id, { el: SVGGElement; released: boolean; animation?: Animation }>();
   rods = new Map<Id, TwoNodes>();
   cables = new Map<Id, TwoNodes>();
   chambers = new Map<Id, ChamberNodes>();
@@ -129,9 +131,9 @@ export class StageNodes {
   }
 
   /** ref de um nó da peça */
-  refPart(id: Id, field: "g" | "wall" | "shadow") {
+  refPart(id: Id, field: "g" | "wall" | "shadow", key = id) {
     return (el: SVGGElement | null) => {
-      this.part(id)[field] = el;
+      this.part(key)[field] = el;
     };
   }
 
@@ -141,6 +143,16 @@ export class StageNodes {
       const set = this.part(id).followers;
       if (el) set.add(el);
       else for (const x of set) if (!x.isConnected) set.delete(x);
+    };
+  }
+
+  refLock(id: Id) {
+    return (el: SVGGElement | null) => {
+      const old = this.locks.get(id);
+      if (old?.el === el) return;
+      old?.animation?.cancel();
+      if (el) this.locks.set(id, { el, released: false });
+      else this.locks.delete(id);
     };
   }
 
@@ -213,7 +225,7 @@ export class StageNodes {
     const { wallMm, shadowMm } = this.ctx;
     for (const m of this.model.partList) {
       if (!all && !m.dynamic) continue;
-      const n = this.parts.get(m.part.id);
+      const n = this.parts.get(m.key);
       const p = frame.pose(m.part.id);
       if (!n || !p) continue;
       const t = poseTransform(p);
@@ -267,6 +279,25 @@ export class StageNodes {
       c.line.setAttribute("d", calloutPath(c.label, [p.x, p.y], this.ctx.px));
       c.dot?.setAttribute("cx", f(p.x));
       c.dot?.setAttribute("cy", f(p.y));
+    }
+    for (const [id, n] of this.locks) {
+      const released = frame.lock?.(id) ?? false;
+      if (released === n.released) continue;
+      n.animation?.cancel();
+      n.released = released;
+      n.el.style.opacity = released ? "0" : "1";
+      if (released && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        n.animation = n.el.animate(
+          [
+            { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
+            {
+              transform: `translate(${12 * this.ctx.px}px, ${-35 * this.ctx.px}px) rotate(35deg)`,
+              opacity: 0,
+            },
+          ],
+          { duration: 250, easing: "ease-out" },
+        );
+      }
     }
     this.writeDrag();
   }

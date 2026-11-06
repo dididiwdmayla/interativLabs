@@ -432,6 +432,32 @@ Onde o texto acima deixava margem, ou o uso mostrou outra coisa:
 - **Paisagem sem coluna (Parte F).** A prancha ocupa a tela toda; cantos (menu, Montar/Testar, desfazer e refazer, pílula da camada), título, abas das bordas e a faixa do Testar flutuam sobre ela com fundo `--color-chrome-float` (o chrome a 84%). O enquadramento (`fitAround` em `src/render/view.ts`) mede os retângulos desses controles e procura a maior escala em que a caixa do mecanismo, com 8 px de folga, não encosta em nenhum deles nem passa das áreas seguras, provando alguns centros perto do meio: desconta só o espaço que os controles cobrem, não faixas inteiras. Sem medida (testes), volta às margens fixas. O lançador de bancada ocupa 94% da altura útil em 844×390 e 86% em 640×360 (entre a fileira de cima e a de baixo; `docs/capturas/fase-1/parte-f/paisagem-*.json`). A "coluna" das capturas da E2a era a borda da placa de base das engrenagens, que não chega à esquerda: fundo vazio, não um painel.
 - **Chamadas:** a camada 1 é a própria folha; as peças fixas dela não contam como obstáculo (o número pode ficar sobre a placa de base e a linha pode cruzá-la). Para cada número, 24 direções; vence a de menos cruzamentos além dos inevitáveis, depois a mais curta e mais voltada para fora.
 
+### Como ficou na implementação (Parte E2b)
+
+O Martelo usa as mesmas regras de encaixe para criar e mover ligações. A prévia do dedo fica 64 px acima do ponto; mouse e caneta ficam no ponto. Pino e rasgo nascem num único comando. O sensor espera a escolha do alvo e da ação antes de gravar. As listas dos cartões usam a prancha para escolher paredes, guias, respiros, portas e alvos. A troca de corpo conserva posição e direção mundiais da câmara.
+
+No cartão da peça, cada camada escolhe uma superfície para editar tamanho/material; posição e ângulo continuam únicos. Separar transfere as ligações da camada escolhida (rasgos pelo perfil explícito) e conserva a origem. Fundir transforma os pontos para a origem da peça escolhida. Primitivas com outra origem/ângulo viram polígonos, porque o formato só admite círculo/engrenagem centrados; formas já alinhadas mantêm seus parâmetros. Remover a principal promove o primeiro perfil, preservando materiais herdados e referências de rasgo. Conjuntos prontos criam a camada extra no mesmo passo de desfazer.
+
+O exemplo Roda e lingueta usa um contrapeso no braço da manivela: sem ele, o próprio braço impedia o retorno pelo peso pendurado. A lingueta usa detecção contínua para o impacto rápido contra os dentes; é movimento de corpo, sem animação imposta à física. A trava e o eixo têm pontos separados no desenho para facilitar o toque.
+
+Trocar uma trava controlada por sensor para parafuso/suporte retira suas ações de soltura no mesmo comando, com aviso; desfazer restaura ambos. Fundir é bloqueado com motivo quando há outra ligação interna além dos parafusos, pois ela passaria a ligar a peça a si mesma. As ligações externas mantêm seus pontos mundiais.
+
+Predefinições finais do item 13.5:
+
+| Controle | Predefinição | Valor |
+| --- | --- | --- |
+| Mola linear, torção e retorno | Macia / média / dura | 4 / 10 / 25 Hz |
+| Amortecimento das molas | Todas | 10% do crítico |
+| Suporte elástico | Firme / macio | 60 / 15 Hz, linear e angular; amortecimento 0,1 |
+| Atrito | Pouco / muito | 5% / 30% do peso efetivo |
+| Atrito no eixo | Torque | Força acima × raio do disco/engrenagem; 10 mm nas outras formas |
+| Câmara didática | Fraca / média / forte | 0,1 / 0,5 / 1,2 mmol por dose |
+| Fusível inicial | Força de soltura | 1,5 × peso efetivo, mínimo 0,001 N; editável |
+
+Rigidez e amortecimento são calculados pela massa reduzida dos corpos distintos; na torção, pela inércia no ponto do eixo. O cálculo inclui perfis e uniões por parafuso, exclui a ligação que está sendo editada e ignora corpos fixos. `k = m·(2πf)²` e `c = 2·0,1·m·2πf`, convertidos para as unidades dos campos. Valores autorais fora dessas predefinições continuam disponíveis em Detalhes. Mudanças consecutivas no mesmo controle se juntam em 1,5 s. As alças gravam apenas ao soltar; batentes angulares avançam de 5° em 5°.
+
+O uso mostrou uma diferença entre a regra geométrica da câmara e a câmara autoral do Lançador: a linha encontra Luva, Esfera e Êmbolo, com vão de 4,1 mm, enquanto o exemplo declara fundo, Êmbolo e Ferrolho, com 6 mm. O cartão permite corrigir corpo e paredes; o aceite de reconstrução exata permanece como falha esperada, com medidas no relatório da E2b.
+
 ## 7. Persistência
 
 - Projetos em IndexedDB: cena, miniatura e data. Autosave a cada comando, com debounce.

@@ -8,6 +8,7 @@ import type { Id } from "@/model/types";
  */
 
 export type ScriptInput =
+  | { kind: "release"; link: Id; t: number }
   /** arrasta o ponto `from` (mundo) da peça até `to` entre t0 e t1; solta em `release` */
   | { kind: "drag"; part: Id; from: Vec2; to: Vec2; t0: number; t1: number; release: number }
   /** arrasta por uma sequência de pontos, com tempo igual entre eles */

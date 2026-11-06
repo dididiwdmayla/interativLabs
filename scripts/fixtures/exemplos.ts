@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { PI } from "@/geometry/dmath";
+import { migrateV2ToV3 } from "@/model/migrations/v2-to-v3";
 import { migrateV1ToV2 } from "@/model/migrations/v1-to-v2";
 import { migrateV0ToV1 } from "@/model/migrations/v0-to-v1";
 import { validateSceneV1 } from "@/model/scene";
@@ -31,7 +32,7 @@ function prototype(name: string, title: string): Scene {
   const v0 = JSON.parse(readFileSync(`reference/prototype-v0/scenes/${name}.json`, "utf8"));
   const v1 = validateSceneV1(migrateV0ToV1(v0, { now: NOW }));
   if (!v1.ok) throw new Error(`${name}: ${JSON.stringify(v1.issues)}`);
-  const s = migrateV1ToV2(v1.scene);
+  const s = migrateV2ToV3(migrateV1ToV2(v1.scene));
   s.meta.title = title;
   s.settings.gravity.g = G_REAL;
   for (const l of s.layers) l.thickness = THICK;

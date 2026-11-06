@@ -11,6 +11,8 @@ import type {
   LinkSchema,
   MotorSchema,
   MountSchema,
+  LockSchema,
+  ProfileSchema,
   PartSchema,
   PinSchema,
   PortSchema,
@@ -29,7 +31,7 @@ import type {
 } from "./schema";
 import type { LinkV1Schema, SceneV1Schema } from "./schema-v1";
 
-/** Tipos da cena v2, derivados do schema (fonte única). */
+/** Tipos da cena v3, derivados do schema (fonte única). */
 export type Vec2 = [number, number];
 export type Id = string;
 export type Scene = z.infer<typeof SceneSchema>;
@@ -63,3 +65,7 @@ export type Port = z.infer<typeof PortSchema>;
 /** Cena v1 (só leitura, para a migração). */
 export type SceneV1 = z.infer<typeof SceneV1Schema>;
 export type LinkV1 = z.infer<typeof LinkV1Schema>;
+
+export type Profile = z.infer<typeof ProfileSchema>;
+export type LockLink = z.infer<typeof LockSchema>;
+export type SceneV2 = z.infer<typeof import("./schema-v2").SceneV2Schema>;

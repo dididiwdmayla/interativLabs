@@ -25,6 +25,7 @@ const sceneFile = import.meta.glob<unknown>("../../../scenes/fixtures/desempenho
 });
 
 interface PerfResult {
+  multilayer: boolean;
   frames: number;
   fpsMedian: number;
   fpsP5: number;
@@ -62,11 +63,12 @@ function device(): Record<string, string | number> {
   };
 }
 
-function summarize(stats: FrameStats[], speed: number): PerfResult {
+function summarize(stats: FrameStats[], speed: number, multilayer = false): PerfResult {
   // o primeiro segundo é aquecimento (compilação do WASM, primeira pintura)
   const s = stats.slice(Math.min(60, Math.floor(stats.length / 10)));
   const fps = s.map((x) => 1000 / Math.max(1, x.interval));
   return {
+    multilayer,
     frames: s.length,
     fpsMedian: q(fps, 0.5),
     fpsP5: q(fps, 0.05),
@@ -104,7 +106,7 @@ function summarize(stats: FrameStats[], speed: number): PerfResult {
 
 function resultText(r: PerfResult): string {
   return [
-    `interativLabs /#perf — 150 peças, 100 ligações, ${speedMode(r.speed).name} (${speedMode(r.speed).frac}), 10 s com arrasto`,
+    `interativLabs /#perf — 150 peças, 100 ligações${r.multilayer ? ", 30 peças com dois perfis" : ""}, ${speedMode(r.speed).name} (${speedMode(r.speed).frac}), 10 s com arrasto`,
     `qps: mediana ${n(r.fpsMedian)} · p5 ${n(r.fpsP5)} (${r.frames} quadros; ${r.long} acima de 20 ms)`,
     `física por quadro: mediana ${n(r.physicsMedian, 2)} ms · p95 ${n(r.physicsP95, 2)} ms (${n(r.stepsPerFrame, 2)} passos)`,
     `desenho por quadro: mediana ${n(r.drawMedian, 2)} ms · p95 ${n(r.drawP95, 2)} ms`,
@@ -114,6 +116,7 @@ function resultText(r: PerfResult): string {
 }
 
 export default function PerfPage() {
+  const [multilayer, setMultilayer] = useState(false);
   const [scene, setScene] = useState<Scene | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
@@ -133,10 +136,23 @@ export default function PerfPage() {
     if (!load) return;
     load().then((raw) => {
       const r = loadScene(raw);
-      if (r.ok) setScene(r.scene);
-      else setError(r.issues.map((i) => i.message).join("; "));
+      if (r.ok) {
+        const scene = r.scene;
+        if (multilayer) {
+          scene.layers.push({ id: "perf-extra", name: "Perfis", visible: true, locked: false, thickness: 3 });
+          scene.parts
+            .filter((p) => !p.fixed)
+            .slice(0, 30)
+            .forEach((p) => {
+              p.profiles = [
+                { id: `perf-profile-${p.id}`, layer: "perf-extra", shape: structuredClone(p.shape) },
+              ];
+            });
+        }
+        setScene(scene);
+      } else setError(r.issues.map((i) => i.message).join("; "));
     }, setError);
-  }, []);
+  }, [multilayer]);
 
   const opts = useMemo(
     () => ({
@@ -171,7 +187,7 @@ export default function PerfPage() {
         held = false;
       }
       if (t >= DURATION) {
-        const r = summarize(stats.current, speed);
+        const r = summarize(stats.current, speed, multilayer);
         setResult(r);
         (window as unknown as { __PERF__?: PerfResult }).__PERF__ = r;
         setRunning(false);
@@ -181,7 +197,7 @@ export default function PerfPage() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [running, ctl, model, speed]);
+  }, [running, ctl, model, speed, multilayer]);
 
   const copy = useCallback(async () => {
     if (!result) return;
@@ -200,8 +216,20 @@ export default function PerfPage() {
     <div className="perf">
       <header className="perf__head">
         <p className="perf__kicker">interativLabs · desempenho</p>
-        <h1 className="perf__title">150 peças, 100 ligações</h1>
+        <h1 className="perf__title">150 peças, 100 ligações{multilayer ? " · 30 com dois perfis" : ""}</h1>
         <div className="perf__actions">
+          <label className="checkfield">
+            <input
+              type="checkbox"
+              checked={multilayer}
+              disabled={running}
+              onChange={(e) => {
+                setResult(null);
+                setMultilayer(e.target.checked);
+              }}
+            />
+            30 peças com dois perfis
+          </label>
           <button
             type="button"
             className="btn btn--primary"

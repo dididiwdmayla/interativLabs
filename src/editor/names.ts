@@ -3,6 +3,7 @@ import type { Link, LinkKind, Part, Scene } from "@/model/types";
 /** Nome de cada tipo de ligação na interface. */
 export const LINK_LABEL: Record<LinkKind, string> = {
   screw: "Parafuso",
+  lock: "Trava",
   axle: "Eixo",
   rod: "Haste",
   cable: "Cabo",

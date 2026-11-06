@@ -280,7 +280,7 @@ function Transfer() {
         value={text}
         onChange={(e) => setText(e.target.value)}
         aria-label="JSON para importar"
-        placeholder='{"version": 2, …}'
+        placeholder='{"version": 3, …}'
         rows={5}
       />
       <div className="card__row">

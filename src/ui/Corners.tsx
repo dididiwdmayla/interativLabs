@@ -24,6 +24,8 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
   const redo = useUiStore((s) => s.redo);
   const active = useUiStore((s) => s.activeLayer);
   const hint = useUiStore((s) => s.hint);
+  const hammer = useUiStore((s) => s.hammer);
+  const setHammer = useUiStore((s) => s.setHammer);
   const editing = mode === "edit";
   const layer = model?.layers[active]?.layer;
   const title = model?.scene.meta.title ?? "";
@@ -71,6 +73,15 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
             onClick={redo}
           >
             <Icon name="redo" uid={`${uid}r`} />
+          </button>
+          <button
+            type="button"
+            className="iconbtn corner__btn hammerbutton"
+            aria-label="Martelo"
+            aria-pressed={hammer !== null}
+            onClick={() => setHammer(hammer ? null : "axle")}
+          >
+            <Icon name="hammer" uid={`${uid}h`} />
           </button>
         </div>
       )}

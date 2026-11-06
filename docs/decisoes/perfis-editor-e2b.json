@@ -1,0 +1,25 @@
+{
+  "steps": 240,
+  "dt": 0.004166666666666667,
+  "part": "p1",
+  "results": [
+    {
+      "name": "perfis",
+      "mass": 1.0568,
+      "inertia": 64.88602129699721,
+      "poseHash": "f047127de804bfdb1f78dcd5b6df73d83e88b76f1073bebe7169483173500143"
+    },
+    {
+      "name": "separada",
+      "mass": 1.0568,
+      "inertia": 64.88602129699721,
+      "poseHash": "f047127de804bfdb1f78dcd5b6df73d83e88b76f1073bebe7169483173500143"
+    },
+    {
+      "name": "fundida",
+      "mass": 1.0568,
+      "inertia": 64.88602129699721,
+      "poseHash": "f047127de804bfdb1f78dcd5b6df73d83e88b76f1073bebe7169483173500143"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+import { surfaces, linkLayer, surfaceAt } from "@/model/profiles";
+import { projectedPart, removeSurface } from "./profileOps";
 import type { Draft } from "immer";
 import { createIdGenerator, nextRef, type Random } from "@/model/ids";
 import { DEFAULT_THICKNESS_MM } from "@/model/units";
@@ -47,7 +49,11 @@ function nameOf(scene: Scene, id: string): string {
 /** Gerador de ids que nunca colide com a cena. */
 export function idsFor(scene: Scene, random?: Random) {
   return createIdGenerator(
-    [...scene.layers.map((l) => l.id), ...scene.parts.map((p) => p.id), ...scene.links.map((l) => l.id)],
+    [
+      ...scene.layers.map((l) => l.id),
+      ...scene.parts.flatMap((p) => surfaces(p).map((s) => s.id)),
+      ...scene.links.map((l) => l.id),
+    ],
     random,
   );
 }
@@ -57,12 +63,15 @@ export function idsFor(scene: Scene, random?: Random) {
 type AnchorRef = { get(): Vec2; set(v: Vec2): void; dir?: { get(): number; set(v: number): void } };
 
 /** Os pontos (e direções) de ligação guardados no espaço local da peça. */
-function anchorsOf(d: Draft<Scene>, partId: string): AnchorRef[] {
+function anchorsOf(d: Draft<Scene>, partId: string, layer?: string): AnchorRef[] {
   const out: AnchorRef[] = [];
   const ref = (o: { at: Vec2 }): AnchorRef => ({ get: () => o.at, set: (v) => (o.at = v) });
   for (const l of d.links) {
+    const part = d.parts.find((p) => p.id === partId);
+    if (layer && part && surfaceAt(part, linkLayer(d, l)).layer !== layer) continue;
     switch (l.kind) {
       case "screw":
+      case "lock":
       case "axle":
       case "mount":
         if (l.b === partId) out.push(ref(l));
@@ -91,8 +100,8 @@ function anchorsOf(d: Draft<Scene>, partId: string): AnchorRef[] {
 }
 
 /** Escala os pontos de ligação da peça junto com a forma (eixos locais). */
-function scaleAnchors(d: Draft<Scene>, partId: string, sx: number, sy: number) {
-  for (const a of anchorsOf(d, partId)) {
+function scaleAnchors(d: Draft<Scene>, partId: string, sx: number, sy: number, layer?: string) {
+  for (const a of anchorsOf(d, partId, layer)) {
     const [x, y] = a.get();
     a.set([x * sx, y * sy]);
   }
@@ -198,14 +207,15 @@ export function renamePart(scene: Scene, id: string, name: string): Command | nu
   };
 }
 
-export function setMaterial(scene: Scene, id: string, material: MaterialId): Command | null {
-  const p = findPart(scene, id);
+export function setMaterial(scene: Scene, id: string, material: MaterialId, layer?: string): Command | null {
+  const owner = findPart(scene, id);
+  const p = owner && projectedPart(owner, layer);
   if (!p || p.material === material) return null;
   return {
     label: `Trocar ${partName(p)} para ${MATERIAL_NAME[material]}`,
     recipe: (d) => {
       const q = findPart(d, id);
-      if (q) q.material = material;
+      if (q) (q.profiles?.find((s) => s.layer === layer) ?? q).material = material;
     },
   };
 }
@@ -246,7 +256,12 @@ export function setShape(
   scene: Scene,
   id: string,
   shape: Shape,
-  opts: { params?: Record<string, number | string>; anchorScale?: [number, number]; verb?: string } = {},
+  opts: {
+    params?: Record<string, number | string>;
+    anchorScale?: [number, number];
+    verb?: string;
+    layer?: string;
+  } = {},
 ): Command | null {
   const p = findPart(scene, id);
   if (!p) return null;
@@ -255,29 +270,32 @@ export function setShape(
     recipe: (d) => {
       const q = findPart(d, id);
       if (!q) return;
-      q.shape = shape as Draft<Shape>;
-      if (opts.params && q.source) q.source.params = { ...opts.params };
-      if (opts.anchorScale) scaleAnchors(d, id, opts.anchorScale[0], opts.anchorScale[1]);
+      const surface = q.profiles?.find((p) => p.layer === opts.layer) ?? q;
+      surface.shape = shape as Draft<Shape>;
+      if (opts.params && surface.source) surface.source.params = { ...opts.params };
+      if (opts.anchorScale) scaleAnchors(d, id, opts.anchorScale[0], opts.anchorScale[1], opts.layer);
     },
   };
 }
 
 /** Escala uniforme ou por eixo de uma peça não paramétrica. */
-export function scalePart(scene: Scene, id: string, sx: number, sy: number): Command | null {
-  const p = findPart(scene, id);
+export function scalePart(scene: Scene, id: string, sx: number, sy: number, layer?: string): Command | null {
+  const owner = findPart(scene, id);
+  const p = owner && projectedPart(owner, layer);
   if (!p || (sx === 1 && sy === 1) || !(sx > 0) || !(sy > 0)) return null;
   const uniform = p.shape.kind !== "poly";
   const kx = uniform ? (sx + sy) / 2 : sx;
   const ky = uniform ? (sx + sy) / 2 : sy;
-  return setShape(scene, id, scaleShape(p.shape, kx, ky), { anchorScale: [kx, ky] });
+  return setShape(scene, id, scaleShape(p.shape, kx, ky), { anchorScale: [kx, ky], layer });
 }
 
 /**
  * Espelha a peça no eixo y local. Peça paramétrica guarda `mirror` nos
  * parâmetros (o gerador refaz a forma espelhada); a forma vem de quem chama.
  */
-export function mirrorPart(scene: Scene, id: string, shape?: Shape): Command | null {
-  const p = findPart(scene, id);
+export function mirrorPart(scene: Scene, id: string, shape?: Shape, layer?: string): Command | null {
+  const owner = findPart(scene, id);
+  const p = owner && projectedPart(owner, layer);
   if (!p) return null;
   const next = shape ?? mirrorShape(p.shape);
   return {
@@ -285,9 +303,14 @@ export function mirrorPart(scene: Scene, id: string, shape?: Shape): Command | n
     recipe: (d) => {
       const q = findPart(d, id);
       if (!q) return;
-      q.shape = next as Draft<Shape>;
-      if (q.source) q.source.params = { ...q.source.params, mirror: q.source.params.mirror === 1 ? 0 : 1 };
-      for (const a of anchorsOf(d, id)) {
+      const surface = q.profiles?.find((s) => s.layer === layer) ?? q;
+      surface.shape = next as Draft<Shape>;
+      if (surface.source)
+        surface.source.params = {
+          ...surface.source.params,
+          mirror: surface.source.params.mirror === 1 ? 0 : 1,
+        };
+      for (const a of anchorsOf(d, id, layer)) {
         const [x, y] = a.get();
         a.set([-x, y]);
         if (a.dir) a.dir.set(Math.PI - a.dir.get());
@@ -303,7 +326,8 @@ export function duplicatePart(
 ): { command: Command; newId: string } | null {
   const p = findPart(scene, id);
   if (!p) return null;
-  const newId = idsFor(scene, opts.random).next("part");
+  const ids = idsFor(scene, opts.random);
+  const newId = ids.next("part");
   const off = opts.offset ?? 6;
   const copy: Part = {
     ...structuredClone(p),
@@ -313,6 +337,7 @@ export function duplicatePart(
     x: p.x + off,
     y: p.y + off,
   };
+  if (copy.profiles) for (const s of copy.profiles) s.id = ids.next("part");
   return {
     newId,
     command: {
@@ -387,15 +412,36 @@ export function deleteLink(scene: Scene, id: string): Command | null {
   };
 }
 
+/** Type changes remove release actions whose target is no longer a lock. */
+export function linksWithReplacement(scene: Scene, next: Link): Link[] {
+  return scene.links.map((l) => {
+    if (l.id === next.id) return next;
+    if (
+      l.kind === "sensor" &&
+      next.kind !== "lock" &&
+      l.actions.some((a) => a.do === "release" && a.target === next.id)
+    )
+      return { ...l, actions: l.actions.filter((a) => !(a.do === "release" && a.target === next.id)) };
+    return l;
+  });
+}
+
 /** Troca a ligação inteira (formulário de detalhes, já validado). */
 export function setLink(scene: Scene, id: string, next: Link): Command | null {
   const l = findLink(scene, id);
   if (!l || JSON.stringify(l) === JSON.stringify(next)) return null;
+  const replacements = linksWithReplacement(scene, next);
+  const changedActions = scene.links.some(
+    (link, i) => link.id !== next.id && link.kind === "sensor" && replacements[i] !== link,
+  );
   return {
     label: `Editar ${linkName(l)}`,
+    notice: changedActions
+      ? "As ações de soltar foram retiradas porque a fixação deixou de ser trava"
+      : undefined,
     recipe: (d) => {
-      const i = d.links.findIndex((x) => x.id === id);
-      if (i >= 0) d.links[i] = next as Draft<Link>;
+      for (let i = 0; i < replacements.length; i++)
+        if (replacements[i] !== scene.links[i]) d.links[i] = replacements[i] as Draft<Link>;
     },
   };
 }
@@ -422,7 +468,7 @@ function pinWarnings(scene: Scene): string[] {
     if (!pin || pin.kind !== "pin" || !guide) continue;
     const a = layerIdx(scene, pin.layers[0]);
     const b = layerIdx(scene, pin.layers[1]);
-    const g = layerIdx(scene, guide.layer);
+    const g = layerIdx(scene, guide.profiles?.find((s) => s.id === l.profile)?.layer ?? guide.layer);
     if (g < Math.min(a, b) || g > Math.max(a, b))
       out.push(`O ${linkName(pin)} não alcança mais a camada ${g + 1}`);
   }
@@ -438,6 +484,19 @@ function warningsAfter(scene: Scene, recipe: Recipe): string | undefined {
   return w.length ? w.join(" · ") : undefined;
 }
 
+export function partLayerReason(scene: Scene, id: string, delta: number): string | undefined {
+  const p = findPart(scene, id);
+  if (!p) return "Peça ausente";
+  if (
+    surfaces(p).some((s) => {
+      const i = layerIdx(scene, s.layer) + delta;
+      return i < 0 || i >= scene.layers.length;
+    })
+  )
+    return "Um perfil sairia da pilha de camadas";
+  return undefined;
+}
+
 export function setPartLayer(scene: Scene, ids: string[], layerId: string): Command | null {
   const li = layerIdx(scene, layerId);
   const moving = ids.filter((id) => {
@@ -446,12 +505,23 @@ export function setPartLayer(scene: Scene, ids: string[], layerId: string): Comm
   });
   if (li < 0 || moving.length === 0) return null;
   const L = scene.layers[li];
-  if (!L) return null;
+  if (
+    !L ||
+    moving.some((id) => partLayerReason(scene, id, li - layerIdx(scene, findPart(scene, id)?.layer ?? "")))
+  )
+    return null;
   const what = moving.length === 1 ? nameOf(scene, moving[0] ?? "") : plural(moving.length, "peça", "peças");
   const recipe: Recipe = (d) => {
     for (const id of moving) {
       const q = findPart(d, id);
-      if (q) q.layer = layerId;
+      if (q) {
+        const delta = li - layerIdx(scene, q.layer);
+        for (const s of q.profiles ?? []) {
+          const layer = scene.layers[layerIdx(scene, s.layer) + delta];
+          if (layer) s.layer = layer.id;
+        }
+        q.layer = layerId;
+      }
     }
   };
   return {
@@ -541,7 +611,7 @@ export function deleteLayer(scene: Scene, id: string): Command | null {
   if (i < 0 || scene.layers.length <= 1) return null;
   const L = scene.layers[i];
   if (!L) return null;
-  const parts = new Set(scene.parts.filter((p) => p.layer === id).map((p) => p.id));
+  const parts = new Set(scene.parts.filter((p) => p.layer === id && !p.profiles?.length).map((p) => p.id));
   const links = dependentLinks(scene, parts);
   // pinos e sensores com a faixa presa nesta camada: a ponta passa para a vizinha dentro da faixa
   const order = scene.layers.map((l) => l.id);
@@ -560,6 +630,7 @@ export function deleteLayer(scene: Scene, id: string): Command | null {
     notice: `Excluída a camada ${L.name}${tail}${links.size ? ` (${plural(links.size, "ligação", "ligações")})` : ""}`,
     recipe: (d) => {
       removeAll(d, parts, links);
+      for (const p of d.parts) if (surfaces(p).some((s) => s.layer === id)) removeSurface(d, p.id, id);
       for (const l of d.links)
         if ((l.kind === "pin" || l.kind === "sensor") && l.layers.includes(id)) {
           const host = findPart(d, l.host);

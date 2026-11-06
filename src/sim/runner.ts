@@ -482,6 +482,9 @@ export function applyInputs(adapter: EngineAdapter, inputs: ScriptInput[], t: nu
       case "velocity":
         if (now(inp.t)) adapter.setVelocity(inp.part, inp.v, inp.omega);
         break;
+      case "release":
+        if (now(inp.t)) adapter.release?.(inp.link);
+        break;
       case "ignite":
         if (now(inp.t)) adapter.ignite(inp.link);
         break;

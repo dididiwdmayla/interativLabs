@@ -1,0 +1,37 @@
+{
+  "id": "multicamada/perfis",
+  "group": "multicamada",
+  "title": "Perfis nas camadas 1 e 3",
+  "runs": [
+    {
+      "name": "só toca nos planos ocupados",
+      "duration": 1,
+      "inputs": [],
+      "assertions": [
+        {
+          "kind": "at",
+          "label": "Atravessa o apoio da camada 2 e repousa em 1 e 3",
+          "q": {
+            "part": "p1",
+            "field": "y"
+          },
+          "t": 0.8,
+          "min": 8.8,
+          "max": 9.1
+        },
+        {
+          "kind": "span",
+          "label": "Repouso estável",
+          "q": {
+            "part": "p1",
+            "field": "y"
+          },
+          "from": 0.5,
+          "to": 1,
+          "max": 0.05
+        }
+      ]
+    }
+  ],
+  "scene": "perfis.scene.json"
+}

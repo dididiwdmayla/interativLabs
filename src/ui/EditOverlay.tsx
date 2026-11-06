@@ -1,5 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import type { PartPose } from "@/engine/types";
+import type { CardPick } from "@/editor/cardPick";
+import type { LinkHandle } from "@/editor/linkHandles";
 import type { Handle } from "@/editor/handles";
 import type { SnapGuide } from "@/editor/snap";
 import type { Vec2 } from "@/geometry/vec";
@@ -28,6 +30,8 @@ interface Props {
   /** mm por px de tela */
   px: number;
   /** pose desenhada da peça selecionada e as alças dela */
+  linkHandles?: LinkHandle[];
+  picking?: CardPick | null;
   selection: { pose: PartPose; handles: Handle[]; d: string } | null;
 }
 
@@ -68,7 +72,7 @@ function guidePath(g: SnapGuide[], px: number): { lines: string; marks: string }
 }
 
 export const EditOverlay = forwardRef<OverlayHandle, Props>(function EditOverlay(
-  { nodes, size, px, selection },
+  { nodes, size, px, selection, linkHandles = [], picking },
   ref,
 ) {
   const sel = useRef<SVGGElement>(null);
@@ -115,6 +119,55 @@ export const EditOverlay = forwardRef<OverlayHandle, Props>(function EditOverlay
       <g className="world" ref={nodes.refWorld("edit")}>
         <path className="snapguide" ref={lines} />
         <path className="snapmark" ref={marks} />
+        {linkHandles.map((h) => {
+          let arc = "";
+          if (h.radius !== undefined && h.angle !== undefined)
+            for (let i = 0; i <= 24; i++) {
+              const start = h.startAngle ?? 0;
+              const a = start + ((h.angle - start) * i) / 24;
+              arc += `${i ? "L" : "M"}${h.origin[0] + h.radius * Math.cos(a)} ${h.origin[1] + h.radius * Math.sin(a)}`;
+            }
+          return (
+            <g key={h.id} data-link-handle={h.field} className="handles">
+              <path
+                className="handles__stem"
+                d={arc || `M${h.origin[0]} ${h.origin[1]}L${h.point[0]} ${h.point[1]}`}
+              />
+              <circle cx={h.point[0]} cy={h.point[1]} r={hr} className="handles__dot" />
+              {h.field === "freeLength" && (
+                <circle cx={h.point[0]} cy={h.point[1]} r={10 * px} className="handles__preview" />
+              )}
+            </g>
+          );
+        })}
+        {picking && (
+          <g className="handles">
+            {picking.kind === "guide" || picking.kind === "wall"
+              ? nodes.model.partList
+                  .filter((m) => picking.kind !== "wall" || m.dynamic)
+                  .map((m) => (
+                    <path
+                      key={m.key}
+                      className="handles__preview"
+                      d={m.d}
+                      transform={poseTransform(m.part)}
+                    />
+                  ))
+              : nodes.model.links
+                  .filter((l) =>
+                    picking.action === "release" ? l.link.kind === "lock" : l.link.kind === "chamber",
+                  )
+                  .map((l) => (
+                    <circle
+                      key={l.link.id}
+                      className="handles__preview"
+                      cx={l.world[0]}
+                      cy={l.world[1]}
+                      r={22 * px}
+                    />
+                  ))}
+          </g>
+        )}
         {selection && (
           <g ref={sel} transform={poseTransform(selection.pose)} className="handles">
             <path className="handles__preview" ref={prev} />

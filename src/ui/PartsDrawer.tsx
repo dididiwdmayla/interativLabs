@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { insertPart } from "@/editor/commands";
+import { buildInsertion } from "@/parts/insert";
 import { useUiStore } from "@/editor/useUiStore";
 import type { Scene } from "@/model/types";
 import { GENERATORS, buildPart, type Generator } from "@/parts";
@@ -22,19 +22,19 @@ const DRAG_PX = 6;
 function sample(g: Generator): Scene {
   const layer = { id: "L", name: "", visible: true, locked: false, thickness: 3 };
   const base: Scene = {
-    version: 2,
+    version: 3,
     meta: { title: g.name, createdAt: "", updatedAt: "" },
     settings: { gravity: { on: true, g: 9810 }, snap: { grid: 1, on: false } },
     layers: [layer],
     parts: [],
     links: [],
   };
-  const part = buildPart({ ...base, layers: [layer, { ...layer, id: "L2" }] }, g.id, {
+  const part = buildPart({ ...base, layers: [layer, { ...layer, id: "L2" }, { ...layer, id: "L3" }] }, g.id, {
     x: 0,
     y: 0,
     layer: "L2",
   });
-  return { ...base, parts: [{ ...part, layer: "L" }] };
+  return { ...base, layers: [layer, { ...layer, id: "L3" }], parts: [{ ...part, layer: "L" }] };
 }
 
 function Tile({
@@ -120,8 +120,14 @@ export function PartsDrawer() {
     const xy = Array.isArray(c) ? { x: c[0], y: c[1] } : c;
     const grid = scene.settings.snap;
     const snap = (v: number) => (at || !grid.on ? v : Math.round(v / grid.grid) * grid.grid);
-    const part = buildPart(scene, g.id, { x: snap(xy.x), y: snap(xy.y), layer: L.id });
-    if (ui.commit(insertPart(scene, part), { selection: { kind: "part", id: part.id } })) {
+    const insertion = buildInsertion(scene, g.id, { x: snap(xy.x), y: snap(xy.y), layer: L.id });
+    if (!insertion) {
+      setError("Não cabe outra camada na pilha (máximo 16)");
+      return;
+    }
+    if (ui.commit(insertion.command, { selection: { kind: "part", id: insertion.id } })) {
+      const part = useUiStore.getState().current?.scene.parts.find((p) => p.id === insertion.id);
+      if (!part) return;
       ui.setSheet(null);
       ui.notify(
         L.locked

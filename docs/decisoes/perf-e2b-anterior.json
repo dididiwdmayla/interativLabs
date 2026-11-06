@@ -1,0 +1,74 @@
+{
+  "commit": "801b2a8",
+  "results": {
+    "Lento": {
+      "frames": 243,
+      "fpsMedian": 30.030030030029867,
+      "fpsP5": 12.00480192076815,
+      "intervalP95": 83.30000000000109,
+      "physicsMedian": 0,
+      "physicsP95": 6.899999998509884,
+      "drawMedian": 1.2000000029802322,
+      "drawP95": 2.8000000044703484,
+      "mixMean": 0.01069958848349842,
+      "mixP95": 0.10000000149011612,
+      "speed": 0.05,
+      "stepsPerFrame": 0.448559670781893,
+      "long": 187,
+      "device": {
+        "navegador": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+        "densidade": 1,
+        "tela": "1440×900",
+        "janela": "1440×900",
+        "núcleos": 3,
+        "memória": "8 GB"
+      }
+    },
+    "Normal": {
+      "frames": 209,
+      "fpsMedian": 29.940119760481,
+      "fpsP5": 10.010010010009864,
+      "intervalP95": 99.90000000000146,
+      "physicsMedian": 5.600000001490116,
+      "physicsP95": 31.799999997019768,
+      "drawMedian": 1.2000000029802322,
+      "drawP95": 5.300000004470348,
+      "mixMean": 0.010526315768084457,
+      "mixP95": 0.10000000149011612,
+      "speed": 0.25,
+      "stepsPerFrame": 2.5167464114832536,
+      "long": 139,
+      "device": {
+        "navegador": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+        "densidade": 1,
+        "tela": "1440×900",
+        "janela": "1440×900",
+        "núcleos": 3,
+        "memória": "8 GB"
+      }
+    },
+    "Real": {
+      "frames": 261,
+      "fpsMedian": 59.88023952095548,
+      "fpsP5": 12.004801920768411,
+      "intervalP95": 83.29999999999927,
+      "physicsMedian": 7.699999995529652,
+      "physicsP95": 102.89999999850988,
+      "drawMedian": 1,
+      "drawP95": 4,
+      "mixMean": 0.007662835163403288,
+      "mixP95": 0.09999999403953552,
+      "speed": 1,
+      "stepsPerFrame": 7.804597701149425,
+      "long": 112,
+      "device": {
+        "navegador": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+        "densidade": 1,
+        "tela": "1440×900",
+        "janela": "1440×900",
+        "núcleos": 3,
+        "memória": "8 GB"
+      }
+    }
+  }
+}

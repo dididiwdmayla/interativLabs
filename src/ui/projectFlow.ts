@@ -1,3 +1,4 @@
+import { parseSceneJson } from "@/model/scene";
 import { create } from "zustand";
 import { createIdGenerator } from "@/model/ids";
 import { G_REAL } from "@/model/units";
@@ -52,7 +53,7 @@ export function blankScene(title: string): Scene {
   const ids = createIdGenerator();
   const now = new Date().toISOString();
   return {
-    version: 2,
+    version: 3,
     meta: { title, createdAt: now, updatedAt: now },
     settings: { gravity: { on: true, g: G_REAL }, snap: { grid: 2, on: true } },
     layers: ["Fundo", "Meio", "Frente"].map((name) => ({
@@ -263,7 +264,6 @@ export type ImportResult = { ok: true } | { ok: false; issues: { path: string; m
 
 /** Importa texto JSON (v0, v1 ou v2) como projeto novo. Erros com o caminho do campo. */
 export async function importText(text: string, fallbackName = "Importado"): Promise<ImportResult> {
-  const { parseSceneJson } = await import("@/model/scene");
   const r = parseSceneJson(text);
   if (!r.ok) return { ok: false, issues: r.issues.slice(0, 8) };
   await flushAutosave();

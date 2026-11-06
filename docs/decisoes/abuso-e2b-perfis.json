@@ -1,0 +1,140 @@
+[
+  {
+    "id": "multicamada/perfis",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.03261566162109375,
+      "where": "Peça multicamada · Real · sacudida 8 Hz · t = 1.017 s · entre Peça multicamada e Apoio frontal"
+    },
+    "results": {
+      "joint": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.1120913028717041,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": "Peça multicamada · Real · fora e volta · t = 1.196 s · entre Peça multicamada e Apoio frontal"
+      },
+      "speed": {
+        "worst": 882.1260744427592,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Peça multicamada · Real · sacudida 8 Hz · t = 0.642 s"
+      },
+      "energy": {
+        "worst": 0.05530793619293499,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Peça multicamada · Real · fora e volta · t = 1.217 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  },
+  {
+    "id": "multicamada/rasgo-no-perfil",
+    "runs": 9,
+    "steps": 5423,
+    "parts": 1,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.002965920139104128,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Cursor · Lento · fora e volta · t = 0.208 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 349.93341064453125,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Cursor · Normal · sacudida 8 Hz · t = 0.379 s"
+      },
+      "energy": {
+        "worst": 1.1641532184213281e-7,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Cursor · Lento · fora e volta · t = 0.263 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  }
+]

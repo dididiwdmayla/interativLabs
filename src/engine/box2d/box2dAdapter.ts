@@ -77,6 +77,7 @@ export function springNeedsNative(
 }
 
 interface ShapeData {
+  bits: number;
   part: Id;
   body: number;
   sensor?: Id;
@@ -264,7 +265,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         bd.delete();
         for (const f of pb.fixtures) {
           const sd = B.b2DefaultShapeDef();
-          sd.density = 0;
+          sd.density = (f.density ?? 0) * L * L;
           sd.updateBodyMass = false;
           sd.material.friction = f.friction;
           sd.material.restitution = f.restitution;
@@ -273,7 +274,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
           sd.isSensor = f.sensor;
           sd.enableSensorEvents = true;
           sd.enableHitEvents = !f.sensor;
-          const data: ShapeData = { part: f.part, body: pb.index };
+          const data: ShapeData = { bits: f.bits, part: f.part, body: pb.index };
           if (f.sensor && f.link) data.sensor = f.link;
           shapeData.push(data);
           sd.userData = shapeData.length;
@@ -489,6 +490,19 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         joints.set(m.id, B.b2CreateWeldJoint(w, jd));
         jd.delete();
       }
+      for (const l of p.locks) {
+        const jd = B.b2DefaultWeldJointDef();
+        jd.base.bodyIdA = bodies[l.a]!;
+        jd.base.bodyIdB = bodies[l.b]!;
+        jd.base.localFrameA.p = local(l.a, l.anchor);
+        jd.base.localFrameB.p = local(l.b, l.anchor);
+        jd.base.collideConnected = false;
+        base(jd);
+        jd.linearHertz = 0;
+        jd.angularHertz = 0;
+        joints.set(l.id, B.b2CreateWeldJoint(w, jd));
+        jd.delete();
+      }
       gasJoints = p.chambers.map((ch) => {
         const front = ch.walls.find((wl) => wl.side > 0);
         const rear = ch.walls.find((wl) => wl.side < 0);
@@ -541,7 +555,19 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         B.b2DistanceJoint_SetRestLength(gj.joint, (len + F / k) / L);
         return true;
       };
-      rt = new Runtime(p, io, { native, jointForce, jointTorque, gasSpring });
+      rt = new Runtime(p, io, {
+        native,
+        jointForce,
+        jointTorque,
+        gasSpring,
+        destroyLock(id) {
+          const joint = joints.get(id);
+          if (joint) {
+            B.b2DestroyJoint(joint);
+            joints.delete(id);
+          }
+        },
+      });
       return {
         warnings,
         bodies: p.bodies.length,
@@ -590,6 +616,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       }
       ce.delete();
       rt.afterStep(dt);
+      rt.checkFuses();
       rt.pushEvents(impacts);
       gasJoints.forEach((gj, ci) => {
         if (!gj || !rt || !gj.active) return;
@@ -678,6 +705,29 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       endDrag();
     },
 
+    contactPairs() {
+      const out: { a: Id; b: Id; bitsA: number; bitsB: number }[] = [];
+      for (const i of dynamic) {
+        const id = bodies[i]!,
+          cap = B.b2Body_GetContactCapacity(id);
+        if (!cap) continue;
+        const list = B.b2Body_GetContactData(id, cap) as {
+          manifold: { pointCount: number };
+          shapeIdA: b2ShapeId;
+          shapeIdB: b2ShapeId;
+          delete(): void;
+        }[];
+        for (const c of list) {
+          const a = shapeInfo(c.shapeIdA),
+            b = shapeInfo(c.shapeIdB);
+          if (c.manifold.pointCount && a && b)
+            out.push({ a: a.part, b: b.part, bitsA: a.bits, bitsB: b.bits });
+          c.delete();
+        }
+      }
+      return out;
+    },
+
     contactsDepthMax() {
       return deepest().depth;
     },
@@ -703,6 +753,10 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
 
     setForce(partId: Id, force: Vec2 | null, at?: Vec2) {
       rt?.setForce(partId, force, at);
+    },
+
+    release(linkId: Id) {
+      rt?.requestRelease(linkId);
     },
 
     ignite(linkId: Id) {

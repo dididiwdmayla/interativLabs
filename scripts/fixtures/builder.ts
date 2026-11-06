@@ -24,7 +24,7 @@ export class Builder {
   private n = 0;
   constructor(title: string, gravity = G) {
     this.scene = {
-      version: 2,
+      version: 3,
       meta: { title, createdAt: NOW, updatedAt: NOW },
       settings: { gravity: { on: gravity > 0, g: gravity > 0 ? gravity : G }, snap: { grid: 1, on: true } },
       layers: [],

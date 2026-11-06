@@ -26,6 +26,12 @@ export default defineConfig({
     timeout: 120_000,
   },
   projects: [
+    { name: "roda-e2b", testMatch: /roda-e2b\.spec\.ts/, timeout: 60000 },
+    { name: "profiles-e2b", testMatch: /profiles-e2b\.spec\.ts/, timeout: 60_000 },
+    { name: "cards-e2b", testMatch: /cards-e2b\.spec\.ts/, timeout: 60_000 },
+    { name: "drag-e2b", testMatch: /drag-e2b\.spec\.ts/, timeout: 60_000 },
+    { name: "hammer-e2b", testMatch: /hammer-e2b\.spec\.ts/, timeout: 60_000 },
+    { name: "motor-e2b", testMatch: /motor-e2b\.spec\.ts/, timeout: 240_000 },
     { name: "capture", testMatch: /capture\.spec\.ts/ },
     { name: "capture-d", testMatch: /parte-d\.spec\.ts/, timeout: 120_000 },
     { name: "e2a", testMatch: /parte-e2a\.spec\.ts/, timeout: 60_000 },

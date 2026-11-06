@@ -5,6 +5,7 @@ import { rotate, transform, type Vec2 } from "@/geometry/vec";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Link, Part, Scene } from "@/model/types";
 import type { PlanChamber } from "./chamber";
+import { surfaces, geometryForLink } from "@/model/profiles";
 import { N } from "@/model/units";
 import { PI, dcos, dhypot, dsin } from "@/geometry/dmath";
 
@@ -31,6 +32,7 @@ export interface PlanFixture {
   friction: number;
   restitution: number;
   sensor: boolean;
+  density?: number;
   /** peça dona (para pinos e sensores, a hospedeira) */
   part: Id;
   /** id da ligação, para pino e sensor */
@@ -93,6 +95,14 @@ export interface PlanMount {
   linearHz: number;
   angularHz: number;
   damping: number;
+}
+
+export interface PlanLock {
+  id: Id;
+  a: number;
+  b: number;
+  anchor: Vec2;
+  breakForce?: number;
 }
 
 export interface PlanSlider {
@@ -169,7 +179,7 @@ export interface PlanSensor {
   center: Vec2;
   r: number;
   minSpeed: number;
-  actions: { do: "ignite" | "open" | "close"; target: Id; vent?: number }[];
+  actions: { do: "ignite" | "open" | "close" | "release"; target: Id; vent?: number }[];
 }
 
 export interface Plan {
@@ -180,6 +190,7 @@ export interface Plan {
   axles: PlanAxle[];
   distances: PlanDistance[];
   mounts: PlanMount[];
+  locks: PlanLock[];
   sliders: PlanSlider[];
   slots: PlanSlot[];
   slotContacts: PlanSlotContact[];
@@ -219,13 +230,14 @@ export function buildPlan(scene: Scene): Plan {
 
   // Geometria de cada peça.
   const geo = new Map<Id, ReturnType<typeof shapeGeometry>>();
-  for (const p of parts) {
-    const g = shapeGeometry(p.shape);
-    geo.set(p.id, g);
-    if (!g.ok) warnings.push(`${p.name || p.id}: ${g.error.message}; a peça ficou fora da simulação`);
-    else for (const w of g.warnings) warnings.push(`${p.name || p.id}: ${w}`);
-  }
-  const valid = parts.filter((p) => geo.get(p.id)?.ok);
+  for (const part of parts)
+    for (const p of surfaces(part)) {
+      const g = shapeGeometry(p.shape);
+      geo.set(p.id, g);
+      if (!g.ok) warnings.push(`${part.name || part.id}: ${g.error.message}; a peça ficou fora da simulação`);
+      else for (const w of g.warnings) warnings.push(`${part.name || part.id}: ${w}`);
+    }
+  const valid = parts.filter((p) => surfaces(p).every((v) => geo.get(v.id)?.ok));
   const validIds = new Set(valid.map((p) => p.id));
 
   // Grupos de parafusos.
@@ -302,11 +314,13 @@ export function buildPlan(scene: Scene): Plan {
       let sy = 0;
       const items: { m: number; c: Vec2; j: number }[] = [];
       for (const p of group) {
-        const g = geo.get(p.id)!;
-        if (!g.ok) continue;
-        const k = massPerArea(MATERIALS[p.material].density, thick(p.layer));
-        const c = transform(g.value.mass.centroid, p.x, p.y, p.angle);
-        items.push({ m: k * g.value.mass.area, c, j: k * g.value.mass.inertia });
+        for (const surface of surfaces(p)) {
+          const g = geo.get(surface.id)!;
+          if (!g.ok) continue;
+          const k = massPerArea(MATERIALS[surface.material].density, thick(surface.layer));
+          const c = transform(g.value.mass.centroid, p.x, p.y, p.angle);
+          items.push({ m: k * g.value.mass.area, c, j: k * g.value.mass.inertia });
+        }
         for (const pin of pinsByHost.get(p.id) ?? []) {
           if (pin.kind !== "pin") continue;
           const pm = massPerArea(PIN_DENSITY, thick(p.layer)) * Math.PI * pin.r * pin.r;
@@ -350,17 +364,22 @@ export function buildPlan(scene: Scene): Plan {
       bodyOfPart.set(p.id, body.index);
       body.parts.push(p.id);
       if (p.fast) body.bullet = true;
-      const mat = MATERIALS[p.material];
-      const bits = 1 << order.get(p.layer)!;
-      for (const piece of g.value.pieces) {
-        body.fixtures.push({
-          piece: toBody(piece, rel),
-          bits,
-          friction: mat.friction,
-          restitution: mat.restitution,
-          sensor: false,
-          part: p.id,
-        });
+      for (const surface of surfaces(p)) {
+        const sg = geo.get(surface.id)!;
+        if (!sg.ok) continue;
+        const mat = MATERIALS[surface.material];
+        const bits = 1 << order.get(surface.layer)!;
+        for (const piece of sg.value.pieces) {
+          body.fixtures.push({
+            piece: toBody(piece, rel),
+            bits,
+            friction: mat.friction,
+            restitution: mat.restitution,
+            sensor: false,
+            part: p.id,
+            density: massPerArea(mat.density, thick(surface.layer)),
+          });
+        }
       }
     }
   }
@@ -387,6 +406,7 @@ export function buildPlan(scene: Scene): Plan {
     axles: [],
     distances: [],
     mounts: [],
+    locks: [],
     sliders: [],
     slots: [],
     slotContacts: [],
@@ -454,6 +474,22 @@ export function buildPlan(scene: Scene): Plan {
         });
         break;
       }
+      case "lock": {
+        const a = bodyIdx(l.a);
+        const b = bodyIdx(l.b);
+        if (a < 0 || b < 0 || a === b) {
+          warnings.push(`Trava ${l.ref}: as peças precisam estar em corpos distintos`);
+          break;
+        }
+        plan.locks.push({
+          id: l.id,
+          a,
+          b,
+          anchor: worldOf(l.b, l.at),
+          ...(l.breakForce === undefined ? {} : { breakForce: l.breakForce }),
+        });
+        break;
+      }
       case "mount": {
         const a = bodyIdx(l.a);
         const b = bodyIdx(l.b);
@@ -513,7 +549,8 @@ export function buildPlan(scene: Scene): Plan {
           const gb = bodyIdx(l.guide);
           const gp = byId.get(l.guide);
           // eixo da guia: eixo principal do contorno da peça-guia, apontando de A para B
-          const ax = gp && gp.shape.kind === "poly" ? principalAxis(gp.shape.outer) : null;
+          const shape = gp && geometryForLink(scene, l, gp);
+          const ax = shape?.kind === "poly" ? principalAxis(shape.outer) : null;
           if (gb >= 0 && gp && ax && dl > 1e-9) {
             const u = rotate(ax.u, gp.angle);
             const sg = u[0] * (wb[0] - wa[0]) + u[1] * (wb[1] - wa[1]) < 0 ? -1 : 1;
@@ -562,7 +599,7 @@ export function buildPlan(scene: Scene): Plan {
         // extremos de cada parede ao longo do eixo, pela geometria da peça
         const ext = l.walls.map((w) => {
           const part = byId.get(w.part);
-          const g = geo.get(w.part);
+          const g = part ? shapeGeometry(geometryForLink(scene, l, part)) : undefined;
           const bi = bodyIdx(w.part);
           if (!part || !g || !g.ok || bi < 0 || bodies[bi]!.static) return null;
           let mn = Infinity;
@@ -628,8 +665,10 @@ export function buildPlan(scene: Scene): Plan {
       case "slot": {
         const pin = scene.links.find((x) => x.id === l.pin);
         const guide = byId.get(l.guide);
-        if (!pin || pin.kind !== "pin" || !guide || guide.shape.kind === "gear") break;
-        const hole = guide.shape.holes[l.hole];
+        if (!pin || pin.kind !== "pin" || !guide) break;
+        const shape = geometryForLink(scene, l, guide);
+        if (shape.kind === "gear") break;
+        const hole = shape.holes[l.hole];
         const a = bodyIdx(l.guide);
         const b = bodyIdx(pin.host);
         if (!hole || a < 0 || b < 0) break;

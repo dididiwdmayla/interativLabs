@@ -3,7 +3,7 @@ import type { Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
 import { partAt } from "@/render/hit";
 import type { StageNodes } from "@/render/nodes";
-import { localOf } from "@/render/prepare";
+import { localOf, worldOf } from "@/render/prepare";
 import { Pacer, blendAt } from "@/sim/pacing";
 import { Recorder, type FrameView, type PendingInput, type SimEvent } from "@/sim/session";
 import type { SimReply, SimRequest } from "./sim.worker";
@@ -85,7 +85,7 @@ class Controller implements SimControl {
     this.worker = worker;
     this.nodes = nodes;
     this.opts = opts;
-    this.rec = new Recorder(ready.partIds, ready.chamberIds, CAPACITY);
+    this.rec = new Recorder(ready.partIds, ready.chamberIds, CAPACITY, ready.lockIds);
     this.rec.recordRaw(0, ready.frame, 0);
     this.mix = new Float32Array(this.rec.stride);
     worker.onmessage = (e: MessageEvent<SimReply>) => this.onReply(e.data);
@@ -313,6 +313,25 @@ class Controller implements SimControl {
     this.nodes.resetPeaks();
     this.state.set({ scrubbed: false, recalculating: false });
     this.post({ t: "restart", id: this.epoch });
+  }
+
+  releaseAt(p: Vec2): boolean {
+    if (this.rewinding || this.shownStep !== null) return false;
+    const frame = this.nodes.frame;
+    for (const lm of this.nodes.model.links) {
+      if (
+        lm.link.kind !== "lock" ||
+        frame.lock?.(lm.link.id) ||
+        this.nodes.model.layers[lm.layer]?.layer.visible === false
+      )
+        continue;
+      const at = worldOf(frame.pose(lm.link.b), lm.link.at);
+      if (Math.hypot(at[0] - p[0], at[1] - p[1]) > 22 * this.nodes.ctx.px) continue;
+      this.queue.push({ kind: "release", link: lm.link.id });
+      if (this.state.paused) this.send();
+      return true;
+    }
+    return false;
   }
 
   dragAt(p: Vec2): Id | null {

@@ -1,0 +1,156 @@
+.hammerbar {
+  position: absolute;
+  z-index: 8;
+  bottom: calc(var(--sa-bottom) + 76px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(430px, calc(100% - 96px));
+  background: var(--color-chrome-float);
+  border: 1px solid var(--color-ink-3);
+  padding: 4px 8px;
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+}
+.hammerbar__groups,
+.hammerbar__tools {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+.hammerbar button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--color-ink-2);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.hammerbar button[aria-pressed="true"] {
+  color: var(--color-gold);
+  box-shadow: inset 0 -1px currentColor;
+}
+.hammerbar button:disabled {
+  opacity: 0.35;
+}
+.hammerbar__tools {
+  flex-wrap: wrap;
+}
+.hammerbar__tools button {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+.hammerbar__phrase {
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 5px 2px;
+  min-height: 16px;
+}
+.hammerbutton {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+}
+.hammerbutton[aria-pressed="true"] {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}
+.hammerpreview {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  color: var(--color-gold);
+  overflow: visible;
+}
+.hammerpreview__outline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6px;
+  vector-effect: non-scaling-stroke;
+}
+.hammerpreview__below {
+  stroke-dasharray: 4 3;
+}
+.hammerpreview__line {
+  stroke: currentColor;
+  stroke-width: 1;
+  fill: none;
+}
+.hammerpreview__head {
+  fill: var(--color-stage);
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.hammerstamp {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: hammer-seat 220ms var(--ease-press) both;
+}
+.hammerstamp--screw {
+  animation-name: hammer-screw;
+}
+.hammerink {
+  animation: hammer-ink 350ms var(--ease-fade) both;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+@keyframes hammer-seat {
+  from {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes hammer-screw {
+  from {
+    transform: rotate(-90deg) scale(1.2);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes hammer-ink {
+  from {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hammerstamp,
+  .hammerink {
+    animation: none;
+  }
+  .hammerink {
+    opacity: 0;
+  }
+}
+@media (max-width: 700px) {
+  .hammerbar {
+    width: min(360px, calc(100% - 96px));
+  }
+}
+
+@media (max-width: 480px) {
+  .hammerbar__tools button {
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+  }
+  .hammerbar button {
+    min-width: 44px;
+    font-size: 11px;
+  }
+}

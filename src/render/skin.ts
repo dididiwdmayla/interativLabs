@@ -63,7 +63,7 @@ export function partSkin(m: PartModel, zoom: number): PartSkin {
 export class SkinCache {
   private map = new Map<string, PartSkin>();
   get(m: PartModel, zoom: number): PartSkin {
-    const key = `${m.part.id}@${zoom.toFixed(4)}`;
+    const key = `${m.key}@${zoom.toFixed(4)}`;
     let s = this.map.get(key);
     if (!s) {
       s = partSkin(m, zoom);

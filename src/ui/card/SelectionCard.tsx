@@ -9,8 +9,10 @@ import { PartCard } from "./PartCard";
 /** O cartão da seleção (peça ou ligação), ou null sem seleção. */
 export function CardBody({ model }: { model: SceneModel }) {
   const sel = useUiStore((s) => s.selection);
+  const layer = useUiStore((s) => s.activeLayer);
   if (sel?.kind === "part") {
-    const m = model.parts.get(sel.id);
+    const m =
+      model.partList.find((m) => m.part.id === sel.id && m.layer === layer) ?? model.parts.get(sel.id);
     return m ? <PartCard key={m.part.id} model={model} m={m} /> : null;
   }
   if (sel?.kind === "link") {

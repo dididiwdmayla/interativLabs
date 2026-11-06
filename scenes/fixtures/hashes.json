@@ -9,6 +9,9 @@
   "fixacoes/cabo": "be117b5930a8450c",
   "fixacoes/parafuso-suporte": "5caf1dfca5a5b187",
   "fixacoes/pendulo": "d891a728a66ded89",
+  "fixacoes/trava": "3b3d161d6eb1e33a",
+  "multicamada/perfis": "2ac2b4c5807dce24",
+  "multicamada/rasgo-no-perfil": "4a79463a93e3e449",
   "molas/apoiada": "d5fc8fd0daabea53",
   "molas/guia": "cd3ff889ff5ebae2",
   "molas/pre-carga": "8f16d7c59e297704",
@@ -27,5 +30,6 @@
   "calibracao/corrente": "007c1ccfc0ee15e4",
   "calibracao/pilha": "7801499766c01642",
   "calibracao/pinhao": "753fcbe7b0464bd4",
-  "desempenho/desempenho": "1d244d257b98cd16"
+  "desempenho/desempenho": "1d244d257b98cd16",
+  "exemplos/roda-e-lingueta": "e9abd8e9599f3d4c"
 }

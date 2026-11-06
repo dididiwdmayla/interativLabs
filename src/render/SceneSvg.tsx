@@ -106,8 +106,8 @@ const Defs = memo(function Defs({ uid, step, woods }: { uid: string; step: numbe
     const off = ((m.part.ref * 0.381) % 1) * WOOD_TILE_PX;
     pats.push(
       <pattern
-        key={`w-${m.part.id}`}
-        id={`${uid}w-${m.part.id}`}
+        key={`w-${m.key}`}
+        id={`${uid}w-${m.key}`}
         patternUnits="userSpaceOnUse"
         width={WOOD_TILE_PX}
         height={WOOD_TILE_PX}
@@ -131,7 +131,7 @@ const Defs = memo(function Defs({ uid, step, woods }: { uid: string; step: numbe
 });
 
 function hatchFill(uid: string, m: PartModel, h: HatchId = m.hatch): string {
-  if (h === "wood") return `url(#${uid}w-${m.part.id})`;
+  if (h === "wood") return `url(#${uid}w-${m.key})`;
   const angle = h === "rubber" || h === "body" ? 0 : m.angle;
   return `url(#${uid}h-${h}-${angle})`;
 }
@@ -154,10 +154,10 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
       className={`part${m.dynamic ? " part--dynamic" : " part--fixed"}${skin.tiny ? " is-tiny" : ""}`}
       data-part={id}
     >
-      <g className="part__wallg" ref={nodes.refPart(id, "wall")}>
+      <g className="part__wallg" ref={nodes.refPart(id, "wall", m.key)}>
         <path className="part__wall" d={m.d} />
       </g>
-      <g ref={nodes.refPart(id, "g")}>
+      <g ref={nodes.refPart(id, "g", m.key)}>
         <path className="part__face" d={m.d} />
         {skin.tiny ? (
           <path className="part__hatch part__tone" d={m.d} style={{ fillOpacity: hatchCoverage(m.hatch) }} />
@@ -225,7 +225,12 @@ export function SceneSvg(props: SceneSvgProps) {
       continue;
     }
     if (lm.carrier === null) worldAt.set(lm.layer, [...(worldAt.get(lm.layer) ?? []), lm]);
-    else carriedBy.set(lm.carrier, [...(carriedBy.get(lm.carrier) ?? []), lm]);
+    else {
+      const surface =
+        model.partList.find((m) => m.part.id === lm.carrier && m.layer === lm.layer) ??
+        model.parts.get(lm.carrier);
+      if (surface) carriedBy.set(surface.key, [...(carriedBy.get(surface.key) ?? []), lm]);
+    }
     if (k === "pin" || k === "sensor") {
       for (let i = lm.span[0]; i <= lm.span[1]; i++)
         if (i !== lm.layer) followersAt.set(i, [...(followersAt.get(i) ?? []), lm]);
@@ -278,7 +283,7 @@ export function SceneSvg(props: SceneSvgProps) {
     if (L.index > 0)
       for (const m of L.parts)
         items[kindOf(m)].push(
-          <g key={`s-${m.part.id}`} ref={nodes.refPart(m.part.id, "shadow")}>
+          <g key={`s-${m.part.id}`} ref={nodes.refPart(m.part.id, "shadow", m.key)}>
             <path className="part__shadow" d={m.d} />
           </g>,
         );
@@ -298,7 +303,7 @@ export function SceneSvg(props: SceneSvgProps) {
           uid={uid}
           nodes={nodes}
           selected={selection?.kind === "part" && selection.id === m.part.id}
-          carried={carriedBy.get(m.part.id) ?? []}
+          carried={carriedBy.get(m.key) ?? []}
           ctx={ctx}
         />,
       );

@@ -2,6 +2,7 @@ import type { PartPose } from "@/engine/types";
 import { ringBounds, type PolyWithHoles } from "@/geometry/polygon";
 import { shapeOutline } from "@/geometry/outline";
 import { transform, type Vec2 } from "@/geometry/vec";
+import { surfaces, linkLayer } from "@/model/profiles";
 import { MATERIALS } from "@/model/materials";
 import type { Id, Layer, Link, Part, Scene } from "@/model/types";
 import type { HatchId } from "./hatch";
@@ -15,6 +16,8 @@ import type { Box } from "./view";
 
 export interface PartModel {
   part: Part;
+  key: Id;
+  profile?: Id;
   /** índice da camada (0 = fundo) */
   layer: number;
   /** ordem da peça dentro da camada */
@@ -143,48 +146,61 @@ export function prepareScene(scene: Scene): SceneModel {
     g1 = Math.max(g1, p[1]);
   };
 
-  for (const part of scene.parts) {
-    const li = layerIndex.get(part.layer) ?? 0;
-    const g = shapeOutline(part.shape);
-    if (!g.ok) continue;
-    const lm = layers[li]!;
-    const outline = g.value.outline;
-    let bx0 = Infinity;
-    let by0 = Infinity;
-    let bx1 = -Infinity;
-    let by1 = -Infinity;
-    for (const s of outline) {
-      const b = ringBounds(s.outer);
-      bx0 = Math.min(bx0, b.minX);
-      by0 = Math.min(by0, b.minY);
-      bx1 = Math.max(bx1, b.maxX);
-      by1 = Math.max(by1, b.maxY);
-      for (const q of s.outer) grow(transform(q, part.x, part.y, part.angle));
+  for (const owner of scene.parts)
+    for (const surface of surfaces(owner)) {
+      const part: Part =
+        surface.id === owner.id
+          ? owner
+          : {
+              ...owner,
+              layer: surface.layer,
+              shape: surface.shape,
+              material: surface.material,
+              source: surface.source,
+            };
+      const li = layerIndex.get(part.layer) ?? 0;
+      const g = shapeOutline(part.shape);
+      if (!g.ok) continue;
+      const lm = layers[li]!;
+      const outline = g.value.outline;
+      let bx0 = Infinity;
+      let by0 = Infinity;
+      let bx1 = -Infinity;
+      let by1 = -Infinity;
+      for (const s of outline) {
+        const b = ringBounds(s.outer);
+        bx0 = Math.min(bx0, b.minX);
+        by0 = Math.min(by0, b.minY);
+        bx1 = Math.max(bx1, b.maxX);
+        by1 = Math.max(by1, b.maxY);
+        for (const q of s.outer) grow(transform(q, part.x, part.y, part.angle));
+      }
+      const dynamic = !part.fixed && !groundScrewed.has(part.id);
+      if (dynamic)
+        for (const s of outline) for (const q of s.outer) growFocus(transform(q, part.x, part.y, part.angle));
+      // paridade entre as peças do mesmo material na camada
+      const same = lm.parts.filter((p) => p.part.material === part.material).length;
+      const hatch: HatchId = part.material;
+      const angled = hatch !== "rubber" && hatch !== "wood";
+      const m: PartModel = {
+        part,
+        key: surface.id,
+        ...(surface.id === owner.id ? {} : { profile: surface.id }),
+        layer: li,
+        slot: lm.parts.length,
+        outline,
+        d: outlinePath(outline),
+        dynamic,
+        body: !dynamic,
+        hatch,
+        angle: angled ? (same % 2 ? 135 : 45) : 0,
+        size: Math.min(bx1 - bx0, by1 - by0),
+        area: g.value.mass.area,
+        mass: g.value.mass.area * MATERIALS[part.material].density * (lm.layer.thickness ?? 3),
+      };
+      lm.parts.push(m);
+      if (surface.id === owner.id) parts.set(part.id, m);
     }
-    const dynamic = !part.fixed && !groundScrewed.has(part.id);
-    if (dynamic)
-      for (const s of outline) for (const q of s.outer) growFocus(transform(q, part.x, part.y, part.angle));
-    // paridade entre as peças do mesmo material na camada
-    const same = lm.parts.filter((p) => p.part.material === part.material).length;
-    const hatch: HatchId = part.material;
-    const angled = hatch !== "rubber" && hatch !== "wood";
-    const m: PartModel = {
-      part,
-      layer: li,
-      slot: lm.parts.length,
-      outline,
-      d: outlinePath(outline),
-      dynamic,
-      body: !dynamic,
-      hatch,
-      angle: angled ? (same % 2 ? 135 : 45) : 0,
-      size: Math.min(bx1 - bx0, by1 - by0),
-      area: g.value.mass.area,
-      mass: g.value.mass.area * MATERIALS[part.material].density * (lm.layer.thickness ?? 3),
-    };
-    lm.parts.push(m);
-    parts.set(part.id, m);
-  }
   for (const l of layers) partList.push(...l.parts);
 
   const layerOf = (id: Id | null) => (id === null ? -1 : (parts.get(id)?.layer ?? -1));
@@ -208,6 +224,7 @@ export function prepareScene(scene: Scene): SceneModel {
   for (const link of scene.links) {
     let lm: LinkModel | null = null;
     switch (link.kind) {
+      case "lock":
       case "screw":
       case "axle":
       case "mount":
@@ -284,7 +301,7 @@ export function prepareScene(scene: Scene): SceneModel {
         const guide = drawn.get(link.guide);
         if (!pin || pin.kind !== "pin" || !guide) break;
         const world = worldOf(drawn.get(pin.host), pin.at);
-        const lg = layerOf(link.guide);
+        const lg = layerIndex.get(linkLayer(scene, link)) ?? layerOf(link.guide);
         lm = {
           link,
           layer: lg,

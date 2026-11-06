@@ -13,7 +13,7 @@ const pkg = (name: string) => JSON.parse(readFileSync(`node_modules/${name}/pack
 const NOW = "2026-11-04T00:00:00.000Z";
 function scene(parts: Scene["parts"], links: Scene["links"]): Scene {
   return {
-    version: 2,
+    version: 3,
     meta: { title: "t", createdAt: NOW, updatedAt: NOW },
     settings: { gravity: { on: true, g: 100 }, snap: { grid: 1, on: true } },
     layers: [

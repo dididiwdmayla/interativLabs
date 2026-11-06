@@ -1,0 +1,149 @@
+[
+  {
+    "id": "fixacoes/trava",
+    "runs": [
+      {
+        "name": "peso preso 3 s",
+        "assertions": [
+          {
+            "label": "Trava segura o peso",
+            "run": "peso preso 3 s",
+            "pass": true,
+            "value": "0,0003 mm"
+          }
+        ],
+        "steps": 720,
+        "stepMedian": 0.03801599999997052,
+        "stepP95": 0.09046299999999974,
+        "maxDepth": 0,
+        "warnings": []
+      },
+      {
+        "name": "toque e queda",
+        "assertions": [
+          {
+            "label": "Uma soltura por toque",
+            "run": "toque e queda",
+            "pass": true,
+            "value": "1 evento"
+          },
+          {
+            "label": "Queda em g ±5%",
+            "run": "toque e queda",
+            "pass": true,
+            "value": "196,4557"
+          }
+        ],
+        "steps": 72,
+        "stepMedian": 0.029803000000129032,
+        "stepP95": 0.0925560000000587,
+        "maxDepth": 0,
+        "warnings": []
+      },
+      {
+        "name": "fusível em rampa",
+        "assertions": [
+          {
+            "label": "Uma soltura pelo fusível",
+            "run": "fusível em rampa",
+            "pass": true,
+            "value": "1 evento"
+          },
+          {
+            "label": "Força ao soltar entre 0,9 e 1,1 do fusível",
+            "run": "fusível em rampa",
+            "pass": true,
+            "value": "0,1005"
+          }
+        ],
+        "steps": 120,
+        "stepMedian": 0.03196699999989505,
+        "stepP95": 0.05531100000007427,
+        "maxDepth": 0,
+        "warnings": []
+      },
+      {
+        "name": "sensor",
+        "assertions": [
+          {
+            "label": "Sensor solta a trava",
+            "run": "sensor",
+            "pass": true,
+            "value": "1 evento"
+          },
+          {
+            "label": "Peso livre depois do sensor",
+            "run": "sensor",
+            "pass": true,
+            "value": "1,0000"
+          }
+        ],
+        "steps": 48,
+        "stepMedian": 0.02931300000000192,
+        "stepP95": 0.04782999999997628,
+        "maxDepth": 0,
+        "warnings": []
+      }
+    ],
+    "hash": "3b3d161d6eb1e33a",
+    "pass": true
+  },
+  {
+    "id": "multicamada/perfis",
+    "runs": [
+      {
+        "name": "só toca nos planos ocupados",
+        "assertions": [
+          {
+            "label": "Atravessa o apoio da camada 2 e repousa em 1 e 3",
+            "run": "só toca nos planos ocupados",
+            "pass": true,
+            "value": "9,0001"
+          },
+          {
+            "label": "Repouso estável",
+            "run": "só toca nos planos ocupados",
+            "pass": true,
+            "value": "0,0000"
+          }
+        ],
+        "steps": 240,
+        "stepMedian": 0.027710999999953856,
+        "stepP95": 0.05071399999997084,
+        "maxDepth": 0.00016021728515625,
+        "warnings": []
+      }
+    ],
+    "hash": "2ac2b4c5807dce24",
+    "pass": true
+  },
+  {
+    "id": "multicamada/rasgo-no-perfil",
+    "runs": [
+      {
+        "name": "curso",
+        "assertions": [
+          {
+            "label": "Pino permanece na linha",
+            "run": "curso",
+            "pass": true,
+            "value": "de -0,0003 a -0,0003"
+          },
+          {
+            "label": "Pino chega ao fim do rasgo do perfil",
+            "run": "curso",
+            "pass": true,
+            "value": "20,1003"
+          }
+        ],
+        "steps": 120,
+        "stepMedian": 0.02331400000002759,
+        "stepP95": 0.04841200000009849,
+        "maxDepth": 0,
+        "warnings": []
+      }
+    ],
+    "hash": "4a79463a93e3e449",
+    "pass": true
+  }
+]

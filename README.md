@@ -17,7 +17,9 @@ Uso pessoal. Roda no navegador, no celular e no computador.
 
 ## Estado
 
-Fase 1 (fundação) em andamento. A Parte C trouxe o motor definitivo (Box2D v3 calibrado para gravidade real, determinístico entre Node e navegador), o formato de cena v2 e as ligações 2.0. A Parte D trouxe o palco vivo: o app abre com um mecanismo montado na pele da Prancha índigo, que se simula, opera com o dedo, vê em câmera lenta e volta na linha do tempo. A Parte E2a trouxe a base do editor tátil: desfazer em tudo, layout de paisagem com tela cheia e app instalável, menus circulares de borda, seleção com alças e encaixe, cartão da peça, gaveta de peças prontas, pilha de camadas e projetos salvos no aparelho. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
+Fase 1 (fundação) em andamento. A Parte C trouxe o motor definitivo (Box2D v3 calibrado para gravidade real, determinístico entre Node e navegador), o formato de cena v2 e as ligações 2.0. A Parte D trouxe o palco vivo: o app abre com um mecanismo montado na pele da Prancha índigo, que se simula, opera com o dedo, vê em câmera lenta e volta na linha do tempo. A Parte E2a trouxe a base do editor tátil: desfazer em tudo, layout de paisagem com tela cheia e app instalável, menus circulares de borda, seleção com alças e encaixe, cartão da peça, gaveta de peças prontas, pilha de camadas e projetos salvos no aparelho. A Parte F trouxe as velocidades Lento, Normal e Real, a mão com força limitada e o Lançador de bancada. A Parte E2b acrescentou o formato v3, Martelo, cartões de ligação, trava e peça multicamada, com o exemplo Roda e lingueta. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
+
+Medidas, capturas e aceites pendentes da E2b estão no [relatório de verificação](docs/verificacao-fase-1-parte-e2b.md).
 
 ## Rodar
 
@@ -29,7 +31,7 @@ npm run assets       # WebP 1x/2x, registro e folhas de contato do lote visual
 npm run icons        # ícone provisório do app (SVG → PNG em public/icons/)
 npm run lint && npm run typecheck && npm test
 npm run capture      # capturas Playwright (390×844 e 1440×900) em docs/capturas/fase-1/
-npm run check:overflow  # reprova rolagem lateral em 360, 390, 412 px e 844×390 (com as folhas abertas)
+npm run check:overflow  # reprova rolagem lateral em 360, 390, 412 px, 844×390 e 640×360 (com folhas e Martelo abertos)
 npm run bench        # comparativo de motores no Node → docs/decisoes/bench-node.json
 npm run bench:browser   # o mesmo no Chromium headless (/#bench) → docs/decisoes/bench-chromium.json
 npm run bench:scenes # regenera as cenas de medição em scenes/fixtures/bench/
@@ -58,15 +60,19 @@ Celular deitado é o layout principal. Nos cantos: menu (☰) com projetos, exem
 
 - **Peça:** toque escolhe (a mais alta da camada ativa sob o dedo); arrastar move, com encaixe em centros, vértices, bordas, eixos das ligações e grade; as alças em ouro giram (passos de 15°) e esticam. O botão redondo ao lado da peça (ou um toque longo) abre o cartão: nome, camada, tamanho, material, fixa ou solta, girar, espelhar, duplicar, excluir, ligações e detalhes.
 - **Vista:** um dedo no fundo (ou numa peça de outra camada) move; dois dedos dão zoom e movem; roda do mouse dá zoom.
-- **Menus de borda:** arraste do fundo até a borda e segure 1 s (o anel de ouro se completa) ou toque nas abas no meio das bordas. Direita: **Inserir** (peças prontas, nova camada, duplicar e excluir a seleção). Esquerda: **Vista** (enquadrar, raio-x, tela cheia, exemplos, dicas, canhoto). Deslize até o item e solte, ou toque nele.
+- **Menus de borda:** arraste do fundo até a borda e segure 1 s (o anel de ouro se completa) ou toque nas abas no meio das bordas. Direita: **Inserir** (Martelo, peças prontas, nova camada, duplicar e excluir a seleção). Esquerda: **Vista** (enquadrar, raio-x, tela cheia, exemplos, dicas, canhoto). Deslize até o item e solte, ou toque nele.
 - **Desfazer:** toque com dois dedos; refazer com três; Ctrl+Z e Ctrl+Shift+Z no computador.
-- **Testar** liga a física: pausa, um passo, 0,05×/0,25×/1×, reiniciar, arrastar peças e a régua da linha do tempo.
-- **Projetos** ficam salvos no aparelho a cada edição. Abrir um exemplo cria uma cópia. **Arquivo** exporta (copiar ou baixar o JSON) e importa cenas v0, v1 e v2.
+- **Martelo:** botão redondo junto ao desfazer, só no Montar; também no menu Inserir. Escolha Fixar (parafuso, eixo, pino, trava), Ligar (mola, haste, cabo), Guiar (trilho) ou Gás (câmara, sensor). Toque para fixar; arraste para desenhar ligações e cursos. A prévia sobe acima do dedo; soltar crava. Centros de discos, engrenagens e furos puxam o encaixe. Esc sai no computador.
+- **Cartão da ligação:** toque na ferragem com o Martelo para abrir. Predefinições vêm antes dos números de Detalhes. As alças ajustam batentes, curso, comprimento livre e raio. Listas de paredes, respiros, portas e ações pedem o alvo na prancha. Cada edição tem desfazer.
+- **Peça multicamada:** no cartão, abra **Camadas desta peça** e **Estender para outra camada**. Escolha camada e forma. Mover/girar age na peça inteira; tamanho e alças de esticar editam o perfil ativo. Tocar num perfil ativa sua camada. Também é possível tirar um perfil, separar em peça ou fundir peças aparafusadas em camadas distintas. A gaveta oferece came, engrenagem com catraca e pinhão com manivela.
+- **Testar** liga a física: pausa, um passo, **Lento**, **Normal** e **Real**, reiniciar, arrastar peças e a régua da linha do tempo. A mão tem força limitada; não teletransporta as peças.
+- **Trava:** toque na argola no Testar para soltar. Também pode responder a sensor ou funcionar como fusível pela força configurada. Só volta ao reiniciar; a soltura fica gravada na linha do tempo. No exemplo **Roda e lingueta**, solte a trava e gire o punho da manivela.
+- **Projetos** ficam salvos no aparelho a cada edição. Abrir um exemplo cria uma cópia. **Arquivo** exporta (copiar ou baixar o JSON) e importa cenas v0, v1, v2 e v3; a exportação grava v3.
 
 Três páginas de trabalho, carregadas sob demanda:
 
 - `/#perf`: a medição de desempenho. A cena de 150 peças e 100 ligações no palco real por 10 s; tocar em "Rodar 10 s" e depois em "Copiar resultado".
-- `/#lab`: o laboratório. Lista as cenas de teste e os exemplos, roda cada um no motor do app (Box2D) com um desenho simples, deixa pausar, ver em câmera lenta (0,05×, 0,25×, 1×), reiniciar e arrastar as peças com o dedo, e mostra ao lado se as afirmações da cena passam. Uma cena direto: `/#lab/<grupo>/<nome>`, por exemplo `/#lab/exemplos/cilindro-dois-pistoes`.
+- `/#lab`: o laboratório. Lista as cenas de teste e os exemplos, roda cada um no motor do app (Box2D) com um desenho simples, deixa pausar, ver em Lento, Normal ou Real, reiniciar e arrastar as peças com o dedo, e mostra ao lado se as afirmações da cena passam. Uma cena direto: `/#lab/<grupo>/<nome>`, por exemplo `/#lab/exemplos/cilindro-dois-pistoes`.
 - `/#bench`: o comparativo de motores (Planck, Rapier e Box2D). No celular: abrir, esperar o "Pronto", tocar em "Copiar resultado".
 
 Playwright usa o Chromium indicado por `PLAYWRIGHT_BROWSERS_PATH`; para outro binário, defina `PW_CHROMIUM=/caminho/do/chrome`.
