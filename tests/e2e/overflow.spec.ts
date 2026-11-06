@@ -67,7 +67,7 @@ for (const { width, height } of SIZES) {
 }
 
 /** As folhas e o menu de borda abertos também não fazem rolagem lateral e têm alvos de 44 px. */
-const SHEETS = ["main", "drawer", "layers", "card", "edge"] as const;
+const SHEETS = ["main", "drawer", "layers", "card", "edge", "hammer"] as const;
 for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSCAPE]) {
   for (const sheet of SHEETS) {
     test(`folha ${sheet} em ${width}×${height}`, async ({ page }) => {
@@ -84,6 +84,7 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
                   current: { scene: { parts: { id: string }[] } } | null;
                   select(s: { kind: "part"; id: string }): void;
                   setSheet(s: string): void;
+                  setHammer(s: string): void;
                   setEdgeMenu(m: { side: "left" | "right"; cy: number; hover: null }): void;
                 };
               };
@@ -93,6 +94,7 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
         const p = ui.current?.scene.parts.at(-1);
         if (p) ui.select({ kind: "part", id: p.id });
         if (sh === "edge") ui.setEdgeMenu({ side: "left", cy: 200, hover: null });
+        else if (sh === "hammer") ui.setHammer("axle");
         else ui.setSheet(sh);
       }, sheet);
       await page.waitForTimeout(400);

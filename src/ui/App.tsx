@@ -61,6 +61,7 @@ const FLOATING = [
   ".corner--br > *",
   ".corner__title",
   ".corner__hint",
+  ".hammerbar",
   ".edgetab__mark",
   ".testbar > *",
 ].join(",");

@@ -1,8 +1,7 @@
 /**
  * Itens dos menus circulares de borda, como dado (docs/arquitetura.md §6).
- * O mecanismo do menu (src/ui/EdgeMenu.tsx) só lê esta lista; a Parte E2b
- * acrescenta Ligações, Molas, Gás e sensor, Desenhar, Camadas em cores,
- * Isolar camada e Rastro aqui, com a ação em src/ui/menuActions.ts.
+ * O mecanismo do menu lê esta lista. O Martelo reúne fixações, ligações,
+ * guias e gás na Parte E2b; o Lápis fica para a Parte E2c.
  */
 
 /** "insert" fica à direita (à esquerda no canhoto); "view", do outro lado. */
@@ -42,6 +41,7 @@ export const MENUS: Record<MenuId, MenuDef> = {
     title: "Inserir",
     modes: ["edit"],
     items: [
+      { id: "hammer", label: "Martelo", icon: "hammer" },
       { id: "parts", label: "Peças prontas", icon: "parts" },
       { id: "layer-new", label: "Nova camada", icon: "layerAdd" },
       { id: "duplicate", label: "Duplicar seleção", icon: "duplicate", when: (c) => c.hasSelection },

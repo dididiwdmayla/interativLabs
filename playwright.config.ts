@@ -26,6 +26,7 @@ export default defineConfig({
     timeout: 120_000,
   },
   projects: [
+    { name: "hammer-e2b", testMatch: /hammer-e2b\.spec\.ts/, timeout: 60_000 },
     { name: "motor-e2b", testMatch: /motor-e2b\.spec\.ts/, timeout: 240_000 },
     { name: "capture", testMatch: /capture\.spec\.ts/ },
     { name: "capture-d", testMatch: /parte-d\.spec\.ts/, timeout: 120_000 },

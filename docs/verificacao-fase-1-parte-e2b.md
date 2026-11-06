@@ -40,10 +40,20 @@ Chromium do sistema, headless, renderização por software, 1440×900. O binári
 
 A cena original não perdeu a mediana de quadros nesta comparação. **O alvo de 60 fps com perfis em Real não passou neste ambiente**; não foi relaxado. O p95 de desenho aumentou 1,4 ms em relação à base atual. O resultado oscila entre cadências de 30 e 60 fps no Chromium sem GPU; precisa ser repetido em celular intermediário. Os dois relatórios brutos preservam aparelho, navegador e tempos. O roteiro limpa o resultado anterior antes de cada rodada e confere 180 superfícies na variante.
 
+## 13.3 — Martelo: Fixar
+
+Botão de 52 px junto ao desfazer, lado invertido para canhoto, oculto no Testar e acessível pelo menu Inserir. Quatro grupos na faixa; nesta etapa as ferramentas Ligar, Guiar e Gás ainda não são ativadas. A abertura reenquadra a cena na área livre acima da faixa. Mouse mostra prévia antes do clique; dedo a desloca 64 px, com linha até o ponto e contornos das duas peças. Esc sai.
+
+Parafuso, eixo, pino e trava são comandos únicos. Pino detecta furo/rasgo num perfil e cria a ligação `slot` no mesmo comando; material atravessado bloqueia a cravada com aviso. Ligação existente abre o cartão sem duplicar. A animação usa transform/opacity, com corte para movimento reduzido e vibração de 12 ms quando suportada.
+
+Playwright: 11 testes em toque 844×390 e mouse 1440×900, mais faixa/prévia em 640×360; eixo tocado a 30% do raio termina em `[0, 0]`, erro 0 mm. Parafuso sem apoio aponta ao fundo; pino gera `slot.profile` e modo `joint`; todas as cravadas desfazem/refazem para JSON idêntico. Retângulos da faixa e cantos não se interceptam. A física das ligações criadas foi conferida no teste de comando: eixo gira com carga tangencial, parafuso fica fixo, pino corre sem sair da linha.
+
+Verificação: lint, typecheck e build; 679 testes Vitest passando e quatro falhas esperadas anteriores; 13 testes de assets; 48 testes de overflow, incluindo Martelo aberto em 360×800, 844×390 e 640×360. Capturas em `docs/capturas/fase-1/parte-e2b/martelo-*`.
+
 ## Pedidos ao coordenador visual
 
 Ferragem própria da trava com argola de soltura. Até a entrega, a implementação usa exclusivamente as ferragens existentes do lote 01 e a marca desenhada no código. Nenhum asset foi gerado ou substituído.
 
 ## Ainda em andamento
 
-13.3–13.8: Martelo, cartões, operações multicamada, exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.
+13.4–13.8: ferramentas Ligar/Guiar/Gás, cartões, operações multicamada, exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.

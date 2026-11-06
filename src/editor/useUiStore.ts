@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
+import type { HammerTool } from "./hammer";
 import type { Command } from "./commands";
 import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
 
@@ -41,6 +42,8 @@ export interface EdgeMenuState {
 
 interface UiState {
   mode: Mode;
+  hammer: HammerTool | null;
+  setHammer: (tool: HammerTool | null) => void;
   current: OpenScene | null;
   history: HistoryState;
   selection: Selection;
@@ -120,6 +123,8 @@ const hasWindow = typeof window !== "undefined";
  */
 export const useUiStore = create<UiState>()((set, get) => ({
   mode: "edit",
+  hammer: null,
+  setHammer: (hammer) => set({ hammer, sheet: null, edgeMenu: null, selection: null }),
   current: null,
   history: emptyHistory(),
   selection: null,
@@ -135,13 +140,20 @@ export const useUiStore = create<UiState>()((set, get) => ({
 
   drawerAway: false,
   setDrawerAway: (drawerAway) => set({ drawerAway }),
-  setMode: (mode) => set({ mode, edgeMenu: null, sheet: mode === "simulate" ? null : get().sheet }),
+  setMode: (mode) =>
+    set({
+      mode,
+      hammer: mode === "simulate" ? null : get().hammer,
+      edgeMenu: null,
+      sheet: mode === "simulate" ? null : get().sheet,
+    }),
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
   openScene: (id, scene, figure, history) =>
     set((s) => ({
       current: { id, scene, figure, serial: (s.current?.serial ?? 0) + 1 },
       history: history ?? emptyHistory(),
       mode: "edit",
+      hammer: null,
       selection: null,
       sheet: null,
       details: false,

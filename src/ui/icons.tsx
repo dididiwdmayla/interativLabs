@@ -10,6 +10,12 @@ import type { ReactNode } from "react";
  */
 
 export type IconName =
+  | "hammer"
+  | "latch"
+  | "rod"
+  | "cable"
+  | "mount"
+  | "slot"
   | "select"
   | "rect"
   | "circle"
@@ -112,6 +118,44 @@ interface DrawCtx {
 }
 
 const ICONS: Record<IconName, (c: DrawCtx) => ReactNode> = {
+  hammer: () => (
+    <>
+      <path d="m5 4 8-1 5 4-2 3-4-2-7 11-3-2 7-11-4 1Z" />
+      <path d="m6 5 4 2M4 16l3 2" />
+    </>
+  ),
+  latch: () => (
+    <>
+      <circle cx="12" cy="7" r="4" />
+      <path d="M12 11v9M8 16h8M9 19h6" />
+    </>
+  ),
+  rod: () => (
+    <>
+      <circle cx="5" cy="17" r="3" />
+      <circle cx="19" cy="7" r="3" />
+      <path d="m6 14 10-7M8 17l10-7" />
+    </>
+  ),
+  cable: () => (
+    <>
+      <circle cx="4" cy="7" r="2" />
+      <circle cx="20" cy="7" r="2" />
+      <path d="M4 9c1 13 15 13 16 0M5 12l2-1m1 5 2-1m2 3 1-2m3 0-1-2" />
+    </>
+  ),
+  mount: () => (
+    <>
+      <path d="M4 4h16M4 20h16M8 4v3l8 3-8 4 8 3v3M3 2l3 2m4-2 3 2m4-2 3 2" />
+    </>
+  ),
+  slot: () => (
+    <>
+      <path d="M7 5h10a5 5 0 0 1 0 10H7A5 5 0 0 1 7 5Z" />
+      <circle cx="9" cy="10" r="3" />
+      <path d="M5 19h14m-3-2 3 2-3 2" />
+    </>
+  ),
   select: (c) => {
     const d = "M6.5 3.5V18.5L10.4 15L13 20.75L15.4 19.7L12.85 14H17.75Z";
     return (

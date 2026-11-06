@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
+import { hammerPoint, hammerFix, type HammerPoint } from "@/editor/hammer";
+import { HammerBar } from "./HammerBar";
+import { HammerPreview } from "./HammerPreview";
 import { MultiTap } from "@/editor/gestures";
 import { MENUS, menuAt } from "@/editor/menus";
 import { useUiStore } from "@/editor/useUiStore";
@@ -94,6 +97,7 @@ const HANDLE_PX = 22;
 const SNAP_PX = 10;
 
 type Gesture =
+  | { kind: "hammer"; last: HammerPoint; touch: boolean }
   | { kind: "none" }
   | { kind: "menu" }
   | { kind: "drag" }
@@ -218,6 +222,13 @@ export function Stage({
   const uid = useId().replace(/:/g, "");
   const ctl = useSimStore((s) => s.ctl);
   const editing = mode === "edit";
+  const hammer = useUiStore((s) => s.hammer);
+  const [hammerPreview, setHammerPreview] = useState<{
+    hit: HammerPoint;
+    view: View;
+    touch: boolean;
+    stamped: boolean;
+  } | null>(null);
 
   const nodes = useMemo(() => (model ? new StageNodes(model) : null), [model]);
   useEffect(() => {
@@ -248,23 +259,25 @@ export function Stage({
     const pad = editing ? (fitPad?.edit ?? FIT_PAD_EDIT) : (fitPad?.sim ?? FIT_PAD_SIM);
     const rect = box.current?.getBoundingClientRect();
     const obs = rect && obstacles ? obstacles(rect) : null;
+    const bar = box.current?.querySelector(".hammerbar")?.getBoundingClientRect();
+    const freeHeight = hammer && bar && rect ? Math.max(100, bar.top - rect.top - 8) : height;
     const v = obs
-      ? fitAround(model.focus, width, height, obs.rects, obs.edge)
-      : fitView(model.focus, width, height, pad);
+      ? fitAround(model.focus, width, freeHeight, obs.rects, obs.edge)
+      : fitView(model.focus, width, freeHeight, pad);
     view.current = v;
     setFitZoom(v.zoom);
     writeView();
     settle();
-  }, [model, width, height, editing, writeView, settle, fitPad, obstacles]);
+  }, [model, width, height, editing, writeView, settle, fitPad, obstacles, hammer]);
 
   // enquadra ao abrir a cena e na primeira medida do palco
   const fitted = useRef<string>("");
   useLayoutEffect(() => {
-    const key = `${serial}:${width > 0 && height > 0}:${model !== null}`;
+    const key = `${serial}:${width > 0 && height > 0}:${model !== null}:${!!hammer}`;
     if (fitted.current === key || width <= 0) return;
     fitted.current = key;
     fit();
-  }, [serial, width, height, model, fit]);
+  }, [serial, width, height, model, fit, hammer]);
 
   useLayoutEffect(() => {
     nodes?.setRoot(sheets.current);
@@ -528,6 +541,7 @@ export function Stage({
       const g = gesture.current;
       if (g.kind === "menu") return;
       if (g.kind === "drag") ctl?.dragEnd();
+      if (g.kind === "hammer") setHammerPreview(null);
       if (g.kind === "press") window.clearTimeout(g.timer);
       if (g.kind === "move" || g.kind === "rotate" || g.kind === "stretch") {
         // o segundo dedo cancela a edição em curso: a peça volta
@@ -549,6 +563,30 @@ export function Stage({
         return;
       }
     } else if (!bare) {
+      if (hammer) {
+        const link = pickLink(w);
+        if (link) {
+          const ui = useUiStore.getState();
+          ui.select({ kind: "link", id: link });
+          ui.setSheet("card");
+          setHammerPreview(null);
+          gesture.current = { kind: "none" };
+          return;
+        }
+        const hit = hammerPoint(model, hammer, w, activeLayer, mmPerPx(view.current.zoom));
+        setHammerPreview({
+          view: { ...view.current },
+          hit,
+          touch: e.pointerType === "touch",
+          stamped: false,
+        });
+        if (hit.b) {
+          gesture.current = { kind: "hammer", last: hit, touch: e.pointerType === "touch" };
+          return;
+        }
+        gesture.current = { kind: "pan", start: { ...view.current }, tap: true };
+        return;
+      }
       const h = hitHandle(x, y);
       if (h && selModel) {
         const pose = { x: selModel.part.x, y: selModel.part.y, angle: selModel.part.angle };
@@ -594,14 +632,32 @@ export function Stage({
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const p = pointers.current.get(e.pointerId);
-    if (!p) return;
     const [x, y] = local(e);
+    if (!p) {
+      if (editing && hammer && model && e.pointerType !== "touch")
+        setHammerPreview({
+          view: { ...view.current },
+          hit: hammerPoint(
+            model,
+            hammer,
+            toWorld(view.current, x, y),
+            activeLayer,
+            mmPerPx(view.current.zoom),
+          ),
+          touch: false,
+          stamped: false,
+        });
+      return;
+    }
     p.x = x;
     p.y = y;
     if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
     const w = toWorld(view.current, x, y);
-    if (g.kind === "menu") {
+    if (g.kind === "hammer" && model && hammer) {
+      g.last = hammerPoint(model, hammer, w, activeLayer, mmPerPx(view.current.zoom));
+      setHammerPreview({ view: { ...view.current }, hit: g.last, touch: g.touch, stamped: false });
+    } else if (g.kind === "menu") {
       const ui = useUiStore.getState();
       const hover = hitEdgeMenu(x, y);
       if (ui.edgeMenu && ui.edgeMenu.hover !== hover) ui.setEdgeMenu({ ...ui.edgeMenu, hover });
@@ -698,6 +754,30 @@ export function Stage({
     const ui = useUiStore.getState();
     const scene = ui.current?.scene;
     switch (g.kind) {
+      case "hammer": {
+        gesture.current = { kind: "none" };
+        if (!up || !model || !ui.hammer) {
+          setHammerPreview(null);
+          return;
+        }
+        if (g.last.b && model.layers[g.last.b.layer]?.layer.locked) {
+          ui.notify("Destrave a camada antes de cravar", { warn: true });
+          setHammerPreview(null);
+          return;
+        }
+        const stamp = hammerFix(model, ui.hammer, g.last);
+        if (stamp?.warning) {
+          ui.notify(stamp.warning, { warn: true });
+          setHammerPreview(null);
+          return;
+        }
+        if (stamp && ui.commit(stamp.command, { selection: { kind: "link", id: stamp.id } })) {
+          setHammerPreview({ view: { ...view.current }, hit: g.last, touch: false, stamped: true });
+          vibrate(12);
+          window.setTimeout(() => setHammerPreview(null), 350);
+        }
+        return;
+      }
       case "menu": {
         // deslizar e soltar: escolhe o item sob o dedo; sem item, o menu fica aberto
         const hover = ui.edgeMenu?.hover;
@@ -817,6 +897,20 @@ export function Stage({
       onPointerCancel={onPointerUp}
     >
       <div className="stage__vignette" aria-hidden="true" />
+      {editing && !bare && hammer && (
+        <>
+          <HammerBar phrase={hammerPreview?.hit.phrase} />
+          {hammerPreview && (
+            <HammerPreview
+              hit={hammerPreview.hit}
+              tool={hammer}
+              view={hammerPreview.view}
+              touch={hammerPreview.touch}
+              stamped={hammerPreview.stamped}
+            />
+          )}
+        </>
+      )}
       <div className="holdring" ref={ring} aria-hidden="true">
         <span className="holdring__track" />
         <span className="holdring__fill" />
@@ -886,7 +980,7 @@ export function Stage({
           )}
         </svg>
       )}
-      {selEditable && selModel && ready && (
+      {selEditable && selModel && ready && !hammer && (
         <button
           type="button"
           ref={partBtn}
