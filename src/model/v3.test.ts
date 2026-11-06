@@ -156,8 +156,15 @@ describe("v3 integrity", () => {
 
 describe("v2 examples retain their physics hashes", () => {
   const hashes = JSON.parse(readFileSync("scenes/fixtures/hashes.json", "utf8")) as Record<string, string>;
-  for (const file of readdirSync("scenes/examples").filter(
-    (f) => f.endsWith(".json") && f !== "index.json",
+  for (const file of readdirSync("scenes/examples").filter((f) =>
+    [
+      "lancador-bancada.json",
+      "cilindro-dois-pistoes.json",
+      "engrenagens.json",
+      "biela-manivela.json",
+      "trava.json",
+      "lancador.json",
+    ].includes(f),
   )) {
     it(file, { timeout: 60000 }, async () => {
       const current = JSON.parse(readFileSync(`scenes/examples/${file}`, "utf8")) as Scene;

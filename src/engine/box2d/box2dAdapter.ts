@@ -77,6 +77,7 @@ export function springNeedsNative(
 }
 
 interface ShapeData {
+  bits: number;
   part: Id;
   body: number;
   sensor?: Id;
@@ -273,7 +274,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
           sd.isSensor = f.sensor;
           sd.enableSensorEvents = true;
           sd.enableHitEvents = !f.sensor;
-          const data: ShapeData = { part: f.part, body: pb.index };
+          const data: ShapeData = { bits: f.bits, part: f.part, body: pb.index };
           if (f.sensor && f.link) data.sensor = f.link;
           shapeData.push(data);
           sd.userData = shapeData.length;
@@ -702,6 +703,29 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         }
       }
       endDrag();
+    },
+
+    contactPairs() {
+      const out: { a: Id; b: Id; bitsA: number; bitsB: number }[] = [];
+      for (const i of dynamic) {
+        const id = bodies[i]!,
+          cap = B.b2Body_GetContactCapacity(id);
+        if (!cap) continue;
+        const list = B.b2Body_GetContactData(id, cap) as {
+          manifold: { pointCount: number };
+          shapeIdA: b2ShapeId;
+          shapeIdB: b2ShapeId;
+          delete(): void;
+        }[];
+        for (const c of list) {
+          const a = shapeInfo(c.shapeIdA),
+            b = shapeInfo(c.shapeIdB);
+          if (c.manifold.pointCount && a && b)
+            out.push({ a: a.part, b: b.part, bitsA: a.bits, bitsB: b.bits });
+          c.delete();
+        }
+      }
+      return out;
     },
 
     contactsDepthMax() {

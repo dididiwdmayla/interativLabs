@@ -86,10 +86,32 @@ Os testes de comando cobrem todas as formas/destinos, edição isolada, duplica�
 
 Verificação do item 13.6: 725 testes Vitest passaram, cinco falhas esperadas preservadas; três testes Playwright passaram, incluindo toque num perfil e ativação da sua camada. Lint, typecheck e build limpos.
 
+## 13.7 — Exemplo “Roda e lingueta”
+
+Segundo exemplo do menu, com a frase pedida. Cinco peças: placa fixa; roda de 36 dentes com catraca de 24 no perfil; pinhão de 12 dentes com braço, punho e contrapeso no perfil; lingueta com mola de torção e trava; peso por cabo numa quinta camada. A relação é mecânica por contato dos dentes. A lingueta tem detecção contínua: sem ela os impactos rápidos nos dentes penetravam momentaneamente até 0,65 mm; com ela o pico na volta da manivela caiu para 0,00166 mm.
+
+| Aceite | Medido na cena exportada |
+| --- | --- |
+| Trava presa, peso retorna ≥30° em 1 s | 122,6773° |
+| Toque em 0,1 s; retorno ≤17° | Pico 15,3828°; repouso 14,7210° |
+| Parada durante 3 s | Variação 0,0741° entre 0,5 e 3,5 s |
+| Uma volta da manivela em 2 s, roda 120° ±5% | Avanço 120,0401° (erro +0,033%); manivela percorreu 359,2467°. Posição final da roda −116,8601° em relação ao desenho |
+| Um estalo por dente ±1 | 8 quedas físicas da lingueta, esperado 8 ±1 |
+| Contatos entre camadas diferentes | 0 em 13 362 amostras de contato ativo nos três roteiros |
+| Abuso | 36 execuções, quatro peças móveis, três velocidades e três manobras; todos os invariantes passaram |
+
+O estalo medido é a queda mecânica após cada dente levantar a lingueta; não foi gerado áudio. A mão percorre uma volta completa no punho entre 0,1 e 2,1 s; a pequena volta anterior ao início do arrasto aparece separada nas medidas. O roteiro confere também a posição absoluta, com a tolerância original de 5%.
+
+A composição foi conferida no app em 844×390 e 1440×900 usando o frame oficial como referência: papel índigo, hachuras, chanfros, ferragens e chamadas. Cabo encurtado para caber melhor em paisagem, contrapeso no braço para o peso pendurado conseguir retornar a roda, trava afastada do eixo para distinguir os alvos. Capturas Montar, raio-x, trava saltando e lingueta em movimento em `roda-*`. São capturas do app; nenhum asset foi gerado/substituído e esta revisão não substitui a aprovação do coordenador visual.
+
+Dados: `docs/decisoes/roda-e-lingueta-e2b.json`, `abuso-e2b-roda.json`; roteiro reprodutível `scripts/measure-roda.ts`. A compilação não gera avisos de geometria. O manifesto ganhou apenas o hash do exemplo; os 32 hashes anteriores continuam iguais.
+
+Verificação do item 13.7: os 33 hashes coincidiram entre Node e Chromium; dois fluxos de navegador passaram em 844×390 e 1440×900; lint, typecheck e build limpos.
+
 ## Pedidos ao coordenador visual
 
 Ferragem própria da trava com argola de soltura. Até a entrega, a implementação usa exclusivamente as ferragens existentes do lote 01 e a marca desenhada no código. Nenhum asset foi gerado ou substituído.
 
 ## Ainda em andamento
 
-13.7–13.8: exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.
+13.8: revisão das capturas, documentação de uso e verificação final. Este registro não declara esses itens entregues.

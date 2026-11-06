@@ -438,6 +438,8 @@ O Martelo usa as mesmas regras de encaixe para criar e mover ligações. A prév
 
 No cartão da peça, cada camada escolhe uma superfície para editar tamanho/material; posição e ângulo continuam únicos. Separar transfere as ligações da camada escolhida (rasgos pelo perfil explícito) e conserva a origem. Fundir transforma os pontos para a origem da peça escolhida. Primitivas com outra origem/ângulo viram polígonos, porque o formato só admite círculo/engrenagem centrados; formas já alinhadas mantêm seus parâmetros. Remover a principal promove o primeiro perfil, preservando materiais herdados e referências de rasgo. Conjuntos prontos criam a camada extra no mesmo passo de desfazer.
 
+O exemplo Roda e lingueta usa um contrapeso no braço da manivela: sem ele, o próprio braço impedia o retorno pelo peso pendurado. A lingueta usa detecção contínua para o impacto rápido contra os dentes; é movimento de corpo, sem animação imposta à física. A trava e o eixo têm pontos separados no desenho para facilitar o toque.
+
 Predefinições finais do item 13.5:
 
 | Controle | Predefinição | Valor |

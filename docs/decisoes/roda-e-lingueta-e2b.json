@@ -1,0 +1,104 @@
+{
+  "fixture": {
+    "id": "exemplos/roda-e-lingueta",
+    "runs": [
+      {
+        "name": "trava presa",
+        "assertions": [
+          {
+            "label": "O peso retorna a roda pelo menos 30° em 1 s",
+            "run": "trava presa",
+            "pass": true,
+            "value": "2,1411"
+          }
+        ],
+        "steps": 240,
+        "stepMedian": 0,
+        "stepP95": 0,
+        "maxDepth": 0.0008384883403778076,
+        "warnings": []
+      },
+      {
+        "name": "soltura por toque",
+        "assertions": [
+          {
+            "label": "A volta para em até um dente (17°)",
+            "run": "soltura por toque",
+            "pass": true,
+            "value": "de 0,0503 a 0,2685"
+          },
+          {
+            "label": "Fica parada por 3 s (variação abaixo de 1°)",
+            "run": "soltura por toque",
+            "pass": true,
+            "value": "0,0013"
+          }
+        ],
+        "steps": 840,
+        "stepMedian": 0,
+        "stepP95": 0,
+        "maxDepth": 0.059448108077049255,
+        "warnings": []
+      },
+      {
+        "name": "uma volta na manivela",
+        "assertions": [
+          {
+            "label": "A roda avança 1/3 de volta ±5%",
+            "run": "uma volta na manivela",
+            "pass": true,
+            "value": "-2,0396"
+          }
+        ],
+        "steps": 528,
+        "stepMedian": 0,
+        "stepP95": 0,
+        "maxDepth": 0.0016559930518269539,
+        "warnings": []
+      }
+    ],
+    "hash": "e9abd8e9599f3d4c",
+    "pass": true
+  },
+  "runs": [
+    {
+      "name": "trava presa",
+      "finalWheelDeg": 122.67732650237804,
+      "maxReverseDeg": 122.67732650237804,
+      "stationarySpanDeg": 74.73325099210476,
+      "angleAtDriveEnd": 0,
+      "pinionAtDriveEnd": 0,
+      "wheelTravelDeg": -2.8794410605047815,
+      "pinionTravelDeg": 7.830208253383896,
+      "clicks": 0,
+      "contactSamples": 1416,
+      "mismatchedContacts": 0
+    },
+    {
+      "name": "soltura por toque",
+      "finalWheelDeg": 14.721016332267478,
+      "maxReverseDeg": 15.382831932511065,
+      "stationarySpanDeg": 0.07414445827615346,
+      "angleAtDriveEnd": 14.72111567446869,
+      "pinionAtDriveEnd": -43.57845003558109,
+      "wheelTravelDeg": 11.841674613963908,
+      "pinionTravelDeg": -35.7482417821972,
+      "clicks": 0,
+      "contactSamples": 8232,
+      "mismatchedContacts": 0
+    },
+    {
+      "name": "uma volta na manivela",
+      "finalWheelDeg": -117.34569697829185,
+      "maxReverseDeg": 3.3608396926827804,
+      "stationarySpanDeg": 96.60925573354758,
+      "angleAtDriveEnd": -116.86006276234517,
+      "pinionAtDriveEnd": 350.5817551776286,
+      "wheelTravelDeg": -120.04014873834524,
+      "pinionTravelDeg": 359.24668188544376,
+      "clicks": 8,
+      "contactSamples": 3714,
+      "mismatchedContacts": 0
+    }
+  ]
+}

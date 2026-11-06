@@ -1,0 +1,71 @@
+[
+  {
+    "id": "exemplos/roda-e-lingueta",
+    "runs": 36,
+    "steps": 21692,
+    "parts": 4,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.004410803318023682,
+      "where": "Peso · Lento · fora e volta · t = 0.254 s · entre Roda composta e Pinhão com manivela"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.0069866663105571155,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Peso · Real · soltura no meio · t = 0.446 s"
+      },
+      "cable": {
+        "worst": 0.0033576254887677237,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Peso · Real · fora e volta · t = 0.229 s"
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0.05305004492402077,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": "Peso · Normal · fora e volta · t = 0.362 s · entre Roda composta e Pinhão com manivela"
+      },
+      "speed": {
+        "worst": 826.2320937434495,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Peso · Real · sacudida 8 Hz · t = 1.221 s"
+      },
+      "energy": {
+        "worst": 0.25165800364715174,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Peso · Normal · sacudida 8 Hz · t = 2.450 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    }
+  }
+]

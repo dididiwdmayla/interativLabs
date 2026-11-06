@@ -151,6 +151,8 @@ export interface EngineAdapter {
   dragEnd(): void;
   /** Maior penetração entre peças no último passo, mm. */
   contactsDepthMax(): number;
+  /** Active contact pairs and their layer masks (diagnostics only). */
+  contactPairs?(): { a: Id; b: Id; bitsA: number; bitsB: number }[];
   /** O contato mais fundo do último passo e as duas peças (diagnóstico; só o motor do app). */
   contactsDeepest?(): { depth: number; a: Id; b: Id } | null;
   /** Muda a velocidade-alvo do motor de um eixo (rad/s). */

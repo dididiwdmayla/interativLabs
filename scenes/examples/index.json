@@ -2,6 +2,7 @@
   "default": "lancador-bancada",
   "order": [
     "lancador-bancada",
+    "roda-e-lingueta",
     "cilindro-dois-pistoes",
     "engrenagens",
     "biela-manivela",
@@ -14,6 +15,7 @@
     "engrenagens": "Motor, par de engrenagens e uma catraca com lingueta que só deixa girar para um lado.",
     "biela-manivela": "A manivela gira e a haste transforma a rotação no vaivém da cruzeta.",
     "trava": "Girar a maçaneta recolhe a lingueta pelo pino; as molas devolvem tudo.",
-    "lancador": "Puxe o gatilho: o retém solta o percussor, que acende a carga e lança a esfera."
+    "lancador": "Puxe o gatilho: o retém solta o percussor, que acende a carga e lança a esfera.",
+    "roda-e-lingueta": "Solte a trava e gire a manivela: a roda só anda para um lado."
   }
 }
