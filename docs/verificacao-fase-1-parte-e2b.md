@@ -50,10 +50,22 @@ Playwright: 11 testes em toque 844×390 e mouse 1440×900, mais faixa/prévia em
 
 Verificação: lint, typecheck e build; 679 testes Vitest passando e quatro falhas esperadas anteriores; 13 testes de assets; 48 testes de overflow, incluindo Martelo aberto em 360×800, 844×390 e 640×360. Capturas em `docs/capturas/fase-1/parte-e2b/martelo-*`.
 
+## 13.4 — Martelo: Ligar, Guiar e Gás
+
+Mola, haste e cabo nascem entre as pontas desenhadas, inclusive com uma ponta no fundo. A mola usa 10 Hz e 10% do amortecimento crítico, calculados pela massa efetiva; o diâmetro das espiras acompanha o comprimento. A prévia reutiliza as espiras do lote 01. Trilho usa curso `[0, comprimento]`, encaixe de 15° e eixo principal da peça. A ferragem selecionada pode ser arrastada mantendo suas peças; sair de um contorno dá aviso.
+
+Sensor pede o alvo, realça câmaras e travas, e oferece a ação (acender, abrir/fechar respiro ou soltar trava). Toque no fundo cria sem ação. O sensor detecta na camada ativa, mesmo hospedado numa peça abaixo. Câmara mede interseções da linha com as peças móveis, junta paredes do mesmo corpo, ordena as duas primeiras pela frente e mede a largura livre na transversal do meio. Sem parede encontrada, aguarda a escolha na prancha antes de gravar uma cena válida. Diâmetro não encontrado abre o cartão com aviso.
+
+Testes: 20 fluxos de ferramentas com mouse/toque, mais faixa 640×360 e câmara controlada. Mola de 30 mm, trilho de 20 mm, desfazer/refazer com JSON idêntico; sensor criado pela interface solta a trava no Testar. Câmara controlada detecta corpo, duas paredes na ordem correta e diâmetro de 6 mm. Na física, uma mola inicialmente deslocada cruza os dois lados do comprimento livre de 20 mm.
+
+**Falha esperada preservada: recriar exatamente a câmara do Lançador de bancada.** Com início e fim idênticos ao exemplo, a regra geométrica encontra a Luva (`p8`) sob o começo, não o fundo (`null`) gravado no exemplo. O vão livre da Luva é 4,1 mm, enquanto a câmara do exemplo declara 6 mm (erro 1,9 mm). As duas peças móveis à frente que cruzam a linha são Esfera 1 e Êmbolo (`p10`, `p9`), em vez de Êmbolo e Ferrolho (`p9`, `p7`); Ferrolho e Luva pertencem ao mesmo corpo aparafusado. A posição mundial e direção foram recuperadas sem erro (−45,4; 0 mm e 0°), comprimento 100 mm. Alterar a tolerância não resolve essa diferença entre a regra de detecção e o dado autoral. O teste mantém o aceite original como falha esperada; números e peças estão em `docs/decisoes/camara-e2b.json`. O cartão precisa permitir corrigir corpo e paredes (item 13.5).
+
+Verificação do item 13.4: 686 testes Vitest passaram, cinco falhas esperadas (quatro herdadas e a reconstrução da câmara acima); 13 testes de assets passaram; lint, typecheck e build limpos. Os 22 testes Playwright das ferramentas passaram.
+
 ## Pedidos ao coordenador visual
 
 Ferragem própria da trava com argola de soltura. Até a entrega, a implementação usa exclusivamente as ferragens existentes do lote 01 e a marca desenhada no código. Nenhum asset foi gerado ou substituído.
 
 ## Ainda em andamento
 
-13.4–13.8: ferramentas Ligar/Guiar/Gás, cartões, operações multicamada, exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.
+13.5–13.8: cartões, operações multicamada, exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.

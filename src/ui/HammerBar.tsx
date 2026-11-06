@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { HAMMER_GROUPS, type HammerTool } from "@/editor/hammer";
 import { LINK_LABEL } from "@/editor/names";
 import { useUiStore } from "@/editor/useUiStore";
@@ -18,7 +18,7 @@ const TOOL_ICONS: Record<HammerTool, IconName> = {
   sensor: "sensor",
 };
 
-export function HammerBar({ phrase }: { phrase?: string }) {
+export function HammerBar({ phrase, actions }: { phrase?: string; actions?: ReactNode }) {
   const ui = useUiStore();
   const uid = useId();
   const [group, setGroup] = useState(0);
@@ -53,7 +53,6 @@ export function HammerBar({ phrase }: { phrase?: string }) {
             type="button"
             key={tool}
             aria-pressed={ui.hammer === tool}
-            disabled={!["screw", "axle", "pin", "lock"].includes(tool)}
             onClick={() => ui.setHammer(tool)}
           >
             <Icon name={TOOL_ICONS[tool]} uid={`${uid}${tool}`} size={22} />
@@ -61,6 +60,7 @@ export function HammerBar({ phrase }: { phrase?: string }) {
           </button>
         ))}
       </div>
+      {actions && <div className="hammerbar__tools">{actions}</div>}
       <p className="hammerbar__phrase" aria-live="polite">
         {phrase ?? `${LINK_LABEL[ui.hammer]}: toque sobre uma peça · Esc sai`}
       </p>

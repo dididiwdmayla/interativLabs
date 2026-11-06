@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
 import { hammerPoint, hammerFix, type HammerPoint } from "@/editor/hammer";
+import { dragLink, insertLink, sensorLink } from "@/editor/hammerDrag";
+import { LINK_LABEL } from "@/editor/names";
+import { moveLink } from "@/editor/moveLink";
 import { HammerBar } from "./HammerBar";
 import { HammerPreview } from "./HammerPreview";
 import { MultiTap } from "@/editor/gestures";
@@ -13,7 +16,7 @@ import { snapAngle, snapMove, type SnapFeature, type SnapTargets } from "@/edito
 import { snapFeatures, snapTargets } from "@/editor/snapScene";
 import { shapeOutline } from "@/geometry/outline";
 import type { Vec2 } from "@/geometry/vec";
-import type { Part, Shape } from "@/model/types";
+import type { Part, Shape, Link, ChamberLink, SensorAction } from "@/model/types";
 import { clampParams, paramsOf, regenerate } from "@/parts";
 import { linkAt, partHit } from "@/render/hit";
 import { StageNodes, drawnFrame, overrideFrame } from "@/render/nodes";
@@ -97,7 +100,8 @@ const HANDLE_PX = 22;
 const SNAP_PX = 10;
 
 type Gesture =
-  | { kind: "hammer"; last: HammerPoint; touch: boolean }
+  | { kind: "hammer"; start: HammerPoint; last: HammerPoint; touch: boolean }
+  | { kind: "linkmove"; id: string; last: HammerPoint | null; start: Vec2 }
   | { kind: "none" }
   | { kind: "menu" }
   | { kind: "drag" }
@@ -225,10 +229,37 @@ export function Stage({
   const hammer = useUiStore((s) => s.hammer);
   const [hammerPreview, setHammerPreview] = useState<{
     hit: HammerPoint;
+    start?: HammerPoint;
     view: View;
     touch: boolean;
     stamped: boolean;
   } | null>(null);
+
+  const [pending, setPending] = useState<
+    { kind: "sensor"; hit: HammerPoint; target?: Link } | { kind: "chamber"; link: ChamberLink } | null
+  >(null);
+  useEffect(
+    () =>
+      useUiStore.subscribe((next, prev) => {
+        if (
+          next.hammer !== prev.hammer ||
+          next.mode !== prev.mode ||
+          next.current?.serial !== prev.current?.serial
+        ) {
+          setPending(null);
+          setHammerPreview(null);
+        }
+      }),
+    [],
+  );
+  const waiting = pending?.kind === hammer ? pending : null;
+  const finishSensor = (actions: SensorAction[] = []) => {
+    if (!model || waiting?.kind !== "sensor") return;
+    const link = sensorLink(model, waiting.hit, actions, activeLayer);
+    if (link) useUiStore.getState().commit(insertLink(link), { selection: { kind: "link", id: link.id } });
+    setPending(null);
+    setHammerPreview(null);
+  };
 
   const nodes = useMemo(() => (model ? new StageNodes(model) : null), [model]);
   useEffect(() => {
@@ -541,7 +572,10 @@ export function Stage({
       const g = gesture.current;
       if (g.kind === "menu") return;
       if (g.kind === "drag") ctl?.dragEnd();
-      if (g.kind === "hammer") setHammerPreview(null);
+      if (g.kind === "hammer" || g.kind === "linkmove") {
+        setHammerPreview(null);
+        overlay.current?.guides([]);
+      }
       if (g.kind === "press") window.clearTimeout(g.timer);
       if (g.kind === "move" || g.kind === "rotate" || g.kind === "stretch") {
         // o segundo dedo cancela a edição em curso: a peça volta
@@ -564,7 +598,32 @@ export function Stage({
       }
     } else if (!bare) {
       if (hammer) {
+        if (waiting) {
+          if (waiting.kind === "sensor") {
+            const target = model.linkById.get(pickLink(w) ?? "")?.link;
+            if (target?.kind === "chamber" || target?.kind === "lock") setPending({ ...waiting, target });
+            else if (!pickPart(w)) finishSensor();
+            else
+              useUiStore.getState().notify("Toque numa câmara ou trava; toque no fundo para deixar sem ação");
+          } else {
+            const hit = hammerPoint(model, "pin", w, activeLayer, mmPerPx(view.current.zoom));
+            if (hit.b?.dynamic && hit.b.part.id !== waiting.link.body) {
+              const link = { ...waiting.link, walls: [{ part: hit.b.part.id, seal: waiting.link.length }] };
+              const ui = useUiStore.getState();
+              ui.commit(insertLink(link), { selection: { kind: "link", id: link.id } });
+              ui.setSheet("card");
+              setPending(null);
+              setHammerPreview(null);
+            } else useUiStore.getState().notify("Toque numa parede móvel da câmara", { warn: true });
+          }
+          gesture.current = { kind: "none" };
+          return;
+        }
         const link = pickLink(w);
+        if (link && selection?.kind === "link" && selection.id === link) {
+          gesture.current = { kind: "linkmove", id: link, last: null, start: w };
+          return;
+        }
         if (link) {
           const ui = useUiStore.getState();
           ui.select({ kind: "link", id: link });
@@ -580,8 +639,8 @@ export function Stage({
           touch: e.pointerType === "touch",
           stamped: false,
         });
-        if (hit.b) {
-          gesture.current = { kind: "hammer", last: hit, touch: e.pointerType === "touch" };
+        if (hit.b || ["spring", "rod", "cable", "chamber"].includes(hammer)) {
+          gesture.current = { kind: "hammer", start: hit, last: hit, touch: e.pointerType === "touch" };
           return;
         }
         gesture.current = { kind: "pan", start: { ...view.current }, tap: true };
@@ -603,6 +662,10 @@ export function Stage({
         return;
       }
       const link = pickLink(w);
+      if (link && selection?.kind === "link" && selection.id === link) {
+        gesture.current = { kind: "linkmove", id: link, last: null, start: w };
+        return;
+      }
       const part = link ? null : pickPart(w);
       if (link || part) {
         const target: NonNullable<Selection> = link
@@ -654,9 +717,25 @@ export function Stage({
     if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
     const w = toWorld(view.current, x, y);
-    if (g.kind === "hammer" && model && hammer) {
+    if (g.kind === "linkmove" && model) {
+      if (Math.hypot(w[0] - g.start[0], w[1] - g.start[1]) < 3 * mmPerPx(view.current.zoom)) return;
+      g.last = hammerPoint(model, "axle", w, activeLayer, mmPerPx(view.current.zoom));
+      overlay.current?.guides(g.last.guides);
+      setHammerPreview({
+        view: { ...view.current },
+        hit: g.last,
+        touch: e.pointerType === "touch",
+        stamped: false,
+      });
+    } else if (g.kind === "hammer" && model && hammer) {
       g.last = hammerPoint(model, hammer, w, activeLayer, mmPerPx(view.current.zoom));
-      setHammerPreview({ view: { ...view.current }, hit: g.last, touch: g.touch, stamped: false });
+      setHammerPreview({
+        view: { ...view.current },
+        hit: g.last,
+        start: ["spring", "rod", "cable", "slider", "chamber"].includes(hammer) ? g.start : undefined,
+        touch: g.touch,
+        stamped: false,
+      });
     } else if (g.kind === "menu") {
       const ui = useUiStore.getState();
       const hover = hitEdgeMenu(x, y);
@@ -754,6 +833,14 @@ export function Stage({
     const ui = useUiStore.getState();
     const scene = ui.current?.scene;
     switch (g.kind) {
+      case "linkmove": {
+        gesture.current = { kind: "none" };
+        setHammerPreview(null);
+        overlay.current?.guides([]);
+        if (up && model && g.last) ui.commit(moveLink(model, g.id, g.last.point));
+        else if (up) ui.setSheet("card");
+        return;
+      }
       case "hammer": {
         gesture.current = { kind: "none" };
         if (!up || !model || !ui.hammer) {
@@ -762,6 +849,30 @@ export function Stage({
         }
         if (g.last.b && model.layers[g.last.b.layer]?.layer.locked) {
           ui.notify("Destrave a camada antes de cravar", { warn: true });
+          setHammerPreview(null);
+          return;
+        }
+        if (ui.hammer === "sensor") {
+          setPending({ kind: "sensor", hit: g.last });
+          return;
+        }
+        if (["spring", "rod", "cable", "slider", "chamber"].includes(ui.hammer)) {
+          const created = dragLink(model, ui.hammer, g.start, g.last, activeLayer);
+          if (!created) {
+            ui.notify("Arraste entre duas pontas distintas", { warn: true });
+            setHammerPreview(null);
+            return;
+          }
+          if (created.link.kind === "chamber" && !created.link.walls.length) {
+            setPending({ kind: "chamber", link: created.link });
+            return;
+          }
+          ui.commit(insertLink(created.link), { selection: { kind: "link", id: created.link.id } });
+          if (created.warning) {
+            ui.notify(created.warning, { warn: true });
+            ui.setSheet("card");
+          }
+          vibrate(12);
           setHammerPreview(null);
           return;
         }
@@ -897,12 +1008,85 @@ export function Stage({
       onPointerCancel={onPointerUp}
     >
       <div className="stage__vignette" aria-hidden="true" />
+      {editing && !bare && !hammer && hammerPreview && (
+        <HammerPreview
+          hit={hammerPreview.hit}
+          tool="axle"
+          view={hammerPreview.view}
+          touch={hammerPreview.touch}
+          stamped={false}
+        />
+      )}
       {editing && !bare && hammer && (
         <>
-          <HammerBar phrase={hammerPreview?.hit.phrase} />
+          <HammerBar
+            phrase={
+              waiting?.kind === "sensor"
+                ? waiting.target
+                  ? "Escolha a ação do sensor"
+                  : "Sensor: toque numa câmara, respiro ou trava; no fundo, fica sem ação"
+                : waiting?.kind === "chamber"
+                  ? "Toque na parede"
+                  : hammerPreview?.start
+                    ? `${LINK_LABEL[hammer]}: ${Math.hypot(hammerPreview.hit.point[0] - hammerPreview.start.point[0], hammerPreview.hit.point[1] - hammerPreview.start.point[1]).toFixed(1)} mm · solte para cravar`
+                    : hammerPreview?.hit.phrase
+            }
+            actions={
+              waiting?.kind === "sensor" && waiting.target ? (
+                <>
+                  {waiting.target.kind === "lock" && (
+                    <button
+                      type="button"
+                      onClick={() => finishSensor([{ do: "release", target: waiting.target?.id ?? "" }])}
+                    >
+                      Soltar trava
+                    </button>
+                  )}
+                  {waiting.target.kind === "chamber" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => finishSensor([{ do: "ignite", target: waiting.target?.id ?? "" }])}
+                      >
+                        Acender carga
+                      </button>
+                      {waiting.target.vents.flatMap((_, i) =>
+                        ["open", "close"].map((action) => (
+                          <button
+                            type="button"
+                            key={`${i}-${action}`}
+                            onClick={() =>
+                              finishSensor([
+                                { do: action as "open" | "close", target: waiting.target?.id ?? "", vent: i },
+                              ])
+                            }
+                          >
+                            {action === "open" ? "Abrir" : "Fechar"} respiro {i + 1}
+                          </button>
+                        )),
+                      )}
+                    </>
+                  )}
+                </>
+              ) : undefined
+            }
+          />
+          {waiting?.kind === "sensor" && model && hammerPreview && (
+            <svg className="hammerpreview" width="100%" height="100%" aria-hidden="true">
+              {model.links
+                .filter((l) => l.link.kind === "lock" || l.link.kind === "chamber")
+                .map((l) => {
+                  const p = toScreen(hammerPreview.view, l.world);
+                  return (
+                    <circle key={l.link.id} cx={p[0]} cy={p[1]} r="23" className="hammerpreview__line" />
+                  );
+                })}
+            </svg>
+          )}
           {hammerPreview && (
             <HammerPreview
               hit={hammerPreview.hit}
+              start={hammerPreview.start}
               tool={hammer}
               view={hammerPreview.view}
               touch={hammerPreview.touch}

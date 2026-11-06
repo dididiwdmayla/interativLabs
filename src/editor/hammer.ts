@@ -52,7 +52,7 @@ export function hammerPoint(
 ): HammerPoint {
   let at: Vec2;
   let guides: SnapGuide[];
-  const solid = tool === "screw" || tool === "axle" || tool === "lock";
+  const solid = tool === "screw" || tool === "axle" || tool === "lock" || tool === "chamber";
   const candidate = hammerStack(model, point, active, solid)[0];
   let center: Vec2 | undefined;
   if (candidate && (tool === "screw" || tool === "axle")) {
