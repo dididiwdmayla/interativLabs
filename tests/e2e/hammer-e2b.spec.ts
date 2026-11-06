@@ -83,6 +83,7 @@ for (const viewport of [
       await expect.poll(async () => (await current(page)).links.length).toBe(1);
       const stamped = await current(page);
       expect(stamped.links[0]).toMatchObject({ kind: "axle", at: [0, 0] });
+      await page.screenshot({ path: `${DIR}/martelo-axle-${viewport.width}.png` });
       await page.getByRole("button", { name: "Desfazer", exact: true }).click();
       expect(await current(page)).toEqual(initial);
       await page.getByRole("button", { name: "Refazer", exact: true }).click();

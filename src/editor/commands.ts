@@ -412,15 +412,36 @@ export function deleteLink(scene: Scene, id: string): Command | null {
   };
 }
 
+/** Type changes remove release actions whose target is no longer a lock. */
+export function linksWithReplacement(scene: Scene, next: Link): Link[] {
+  return scene.links.map((l) => {
+    if (l.id === next.id) return next;
+    if (
+      l.kind === "sensor" &&
+      next.kind !== "lock" &&
+      l.actions.some((a) => a.do === "release" && a.target === next.id)
+    )
+      return { ...l, actions: l.actions.filter((a) => !(a.do === "release" && a.target === next.id)) };
+    return l;
+  });
+}
+
 /** Troca a ligação inteira (formulário de detalhes, já validado). */
 export function setLink(scene: Scene, id: string, next: Link): Command | null {
   const l = findLink(scene, id);
   if (!l || JSON.stringify(l) === JSON.stringify(next)) return null;
+  const replacements = linksWithReplacement(scene, next);
+  const changedActions = scene.links.some(
+    (link, i) => link.id !== next.id && link.kind === "sensor" && replacements[i] !== link,
+  );
   return {
     label: `Editar ${linkName(l)}`,
+    notice: changedActions
+      ? "As ações de soltar foram retiradas porque a fixação deixou de ser trava"
+      : undefined,
     recipe: (d) => {
-      const i = d.links.findIndex((x) => x.id === id);
-      if (i >= 0) d.links[i] = next as Draft<Link>;
+      for (let i = 0; i < replacements.length; i++)
+        if (replacements[i] !== scene.links[i]) d.links[i] = replacements[i] as Draft<Link>;
     },
   };
 }

@@ -1,6 +1,17 @@
 # Fase 1 · Parte E2b — verificação
 
-Em implementação no branch `work`. O PR #7 está no histórico do `main` (merge `1c206fa`). Os itens seguintes só são marcados como concluídos depois de suas verificações.
+Implementação no branch `work`, destinada a um único PR para `main`. O PR #7 está no histórico do `main` (merge `1c206fa`). Dois aceites permanecem reprovados, sem alteração de tolerância: a reconstrução exata da câmara autoral e 60 fps na variante multicamada em Real no Chromium sem GPU. As medidas estão abaixo.
+
+| Item | Estado | Commit |
+| --- | --- | --- |
+| 13.1 — formato v3 | Implementado e verificado | `801b2a8` |
+| 13.2 — motor, perfis e trava | Implementado; ressalva de desempenho | `2bfc97f` |
+| 13.3 — Martelo: Fixar | Implementado e verificado | `357bd76` |
+| 13.4 — Ligar, Guiar e Gás | Implementado; reconstrução exata da câmara reprovada | `5d9bd6e` |
+| 13.5 — cartões e alças | Implementado e verificado | `ba7b43c` |
+| 13.6 — editor multicamada | Implementado e verificado | `1be6677` |
+| 13.7 — Roda e lingueta | Aceites físicos e abuso passaram | `6eb882b` |
+| 13.8 — verificação e documentação | Registro consolidado neste commit | `Fase 1 · item 13.8` |
 
 ## 13.1 — formato v3
 
@@ -68,6 +79,16 @@ Os 12 cartões têm predefinições antes de Detalhes e ícones próprios. Troca
 
 Tabela final em §6 da arquitetura: molas 4/10/25 Hz com amortecimento 0,1 do crítico; suporte 60/15 Hz; atrito 0,05/0,30 do peso efetivo. Os testes conferem frequência linear e angular em duas massas, as 18 combinações de troca de tipo, alças e desfazer, além da escolha de paredes, respiros, portas e ações. São 22 testes de unidade novos. As alças de eixo, trilho, mola e sensor alteram somente o campo correspondente; eixo encaixa em 5°.
 
+| Predefinição | Valor final |
+| --- | --- |
+| Mola linear, torção e retorno: macia / média / dura | 4 / 10 / 25 Hz, amortecimento 10% do crítico |
+| Suporte: firme / macio | 60 / 15 Hz, amortecimento 10% do crítico |
+| Atrito: pouco / muito | 5% / 30% do peso efetivo; torque multiplica pelo raio (10 mm nas demais formas) |
+| Câmara: fraca / média / forte | 0,1 / 0,5 / 1,2 mmol por dose |
+| Fusível inicial | 1,5 × peso efetivo, mínimo 0,001 N |
+
+Massas/inércias incluem perfis e corpos aparafusados; usa-se a massa reduzida dos corpos móveis, excluindo a ligação editada. Frequência igual em duas massas diferentes é verificada em teste.
+
 Playwright: 17 testes passaram, incluindo captura dos 12 cartões em 844×390, agrupamento do desfazer no mesmo controle e arrasto real das quatro alças em 1440×900. Capturas `cartao-*` e `alca-*`. As cenas passam por `parseScene` antes de entrar no editor, como na importação do app.
 
 Verificação do item 13.5: 708 testes Vitest passaram, cinco falhas esperadas preservadas; 13 testes de assets; lint, typecheck e build limpos.
@@ -112,6 +133,40 @@ Verificação do item 13.7: os 33 hashes coincidiram entre Node e Chromium; dois
 
 Ferragem própria da trava com argola de soltura. Até a entrega, a implementação usa exclusivamente as ferragens existentes do lote 01 e a marca desenhada no código. Nenhum asset foi gerado ou substituído.
 
-## Ainda em andamento
+## 13.8 — Verificação e documentação
 
-13.8: revisão das capturas, documentação de uso e verificação final. Este registro não declara esses itens entregues.
+README atualizado com Lento/Normal/Real, Martelo, cartões, trava, perfis e importação/exportação v3. §6 da arquitetura registra decisões de implementação e a tabela final de predefinições. O comentário de `menus.ts` descreve as ferramentas disponíveis.
+
+A revisão final corrigiu a troca de uma trava com sensor para outra fixação: as ações `release` são removidas no mesmo comando e restauradas no desfazer. Editar o sensor não mostra esse aviso. Fundir peças com outra ligação interna além dos parafusos fica bloqueado com motivo, evitando uma ligação da peça consigo mesma. Os casos têm regressão de unidade.
+
+Os quatro botões de ação do sensor usam duas colunas, mantendo as frases legíveis no cartão estreito. O ajuste foi conferido nas capturas do cartão e da alça.
+
+Verificação consolidada:
+
+- `npm run lint`, `npm run typecheck` e `npm run build`: passaram, sem avisos do projeto.
+- `npm test`: 734 testes Vitest passaram; cinco falhas esperadas mantidas; 13 testes de assets passaram.
+- Regressão ampla de navegador: 175/176 passaram inicialmente. A falha revelou o aviso indevido ao editar o raio do sensor; corrigido e coberto em unidade. A repetição dos 45 casos E2b/determinismo passou integralmente. As duas rodadas cobrem 179 casos distintos, incluindo os fluxos antigos do editor, palco, laboratório e Parte F.
+- Após o ajuste visual das ações do sensor, os 17 testes de cartões e os 48 de overflow passaram novamente (65/65), incluindo 640×360 e 844×390 com o Martelo aberto. Retângulos da faixa e dos cantos também são medidos nos testes de ferramentas.
+- Determinismo: 33 hashes iguais entre Node e Chromium; as 29 entradas anteriores ao v3 permaneceram idênticas. As quatro entradas novas são perfis, rasgo no perfil, trava e Roda e lingueta.
+- Abuso nas cenas novas: 18 execuções de perfis/rasgo, 18 da trava e 36 de Roda e lingueta, sem falha nova. Desempenho e alvo de 44 px da trava foram verificados no item 13.2; as limitações de desempenho permanecem registradas.
+
+O comparativo histórico de três motores em `/#bench` não foi repetido no navegador nesta revisão final; seus testes de física continuam incluídos no Vitest. A medição específica desta entrega é `/#perf`, com relatórios preservados acima.
+
+As capturas desta entrega ficam exclusivamente em `docs/capturas/fase-1/parte-e2b/`: faixa em 640×360, 844×390 e 1440×900; prévia acima do dedo; dez ferramentas; doze cartões e quatro alças; cartão de camadas, três perfis em Montar/raio-x e exemplo em movimento/soltura. Capturas históricas das outras partes não são substituídas.
+
+### Roteiro do Will depois do merge
+
+1. Abrir o app no celular deitado.
+2. No Lançador de bancada, tirar uma mola e recolocar com o Martelo.
+3. Numa cena nova, pôr um disco sobre uma placa e cravar um eixo no centro.
+4. No Roda e lingueta, soltar a trava e girar a manivela pelo punho.
+5. Estender uma peça para outra camada pelo cartão.
+6. Dizer o que ficou difícil de achar ou de acertar com o dedo.
+
+### Riscos e pendências
+
+- Reconstrução automática da câmara do Lançador: diâmetro 4,1 mm em vez de 6 mm e par de paredes diferente. Corpo, paredes e diâmetro podem ser corrigidos no cartão; o aceite exato continua reprovado.
+- Variante com 30 perfis extras: 30 fps em Real no Chromium por software; a cena original manteve 59,9 fps. Falta medir em celular intermediário; o alvo permanece 60 fps.
+- Fusão de primitivas com origens/ângulos diferentes preserva contorno como polígono e perde seus parâmetros. A equivalência física foi medida no caso alinhado, sem extrapolar para todas as geometrias.
+- Ferragem própria da trava e revisão de direção de arte dependem do coordenador visual. O som do estalo não faz parte desta entrega; a contagem é mecânica.
+- As quatro falhas físicas esperadas herdadas continuam registradas em `scenes/fixtures/bench/bench.test.ts`: retorno da catraca antiga nos três motores (aproximadamente 28°/34°/35° para limite 25,7°) e razão de engrenagens no Rapier (erro 2,08% para limite 2%). A quinta é a câmara acima. O novo exemplo Roda e lingueta passa no Box2D. O Lápis continua reservado à E2c.

@@ -184,7 +184,7 @@ export function LinkLists({ model, link: l }: { model: SceneModel; link: Link })
             </div>
           );
         })}
-        <div className="linkpresets">
+        <div className="linkpresets linkpresets--actions">
           {ACTIONS.map(([action, label]) => (
             <button
               type="button"

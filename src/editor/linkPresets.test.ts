@@ -8,7 +8,7 @@ import { prepareScene } from "@/render/prepare";
 import { effective, frequencyPreset, SPRING_HZ } from "./linkPresets";
 import { switchLink } from "./presetActions";
 import { linkHandles, adjustLinkHandle } from "./linkHandles";
-import { setLink } from "./commands";
+import { setLink, linksWithReplacement } from "./commands";
 import { run, undo, push, emptyHistory } from "./history";
 import { lockScene } from "../../scripts/fixtures/multicamada";
 
@@ -105,6 +105,7 @@ it("each stage handle changes its own field and undoes", () => {
       expect(next).not.toEqual(link);
       const cmd = setLink(scene, link.id, next)!,
         result = run(scene, cmd.label, cmd.recipe)!;
+      expect(cmd.notice).toBeUndefined();
       expect(undo(result.scene, push(emptyHistory(), result.entry))!.scene).toEqual(scene);
       if (next.kind === "axle")
         expect(next.limit![handle.field as "lower" | "upper"] / (Math.PI / 36)).toBeCloseTo(
@@ -119,4 +120,18 @@ it("presets can be applied to a loaded multilayer scene", () => {
   const s = JSON.parse(readFileSync("scenes/fixtures/multicamada/perfis.scene.json", "utf8")) as Scene;
   const id = s.parts[0]!.id;
   expect(effective(s, null, id)).toBeGreaterThan(0);
+});
+
+it("converting a sensor-controlled lock removes its release action in the same undo", () => {
+  const { scene, lock, sensor } = lockScene();
+  const target = scene.links.find((l) => l.id === sensor.id);
+  if (target?.kind !== "sensor") throw new Error("Sensor ausente");
+  target.actions.push({ do: "release", target: lock.id });
+  const next = switchLink(scene, lock, "screw")!;
+  expect(validateScene({ ...scene, links: linksWithReplacement(scene, next) }).ok).toBe(true);
+  const command = setLink(scene, lock.id, next)!;
+  expect(command.notice).toMatch(/ações de soltar/);
+  const result = run(scene, command.label, command.recipe)!;
+  expect(result.scene.links.find((l) => l.id === sensor.id)).toMatchObject({ actions: [] });
+  expect(undo(result.scene, push(emptyHistory(), result.entry))!.scene).toEqual(scene);
 });

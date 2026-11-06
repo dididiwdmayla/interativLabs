@@ -1,4 +1,4 @@
-import { setLink } from "@/editor/commands";
+import { setLink, linksWithReplacement } from "@/editor/commands";
 import { useUiStore } from "@/editor/useUiStore";
 import { validateScene } from "@/model/scene";
 import type { Link } from "@/model/types";
@@ -10,8 +10,7 @@ export function applyLink(next: Link, control: string): string | null {
   if (!scene) return null;
   const index = scene.links.findIndex((l) => l.id === next.id);
   if (index < 0) return "A ligação não está mais na cena";
-  const links = scene.links.slice();
-  links[index] = next;
+  const links = linksWithReplacement(scene, next);
   const result = validateScene({ ...scene, links });
   if (!result.ok)
     return (

@@ -1,7 +1,9 @@
 /**
- * Itens dos menus circulares de borda, como dado (docs/arquitetura.md §6).
- * O mecanismo do menu lê esta lista. O Martelo reúne fixações, ligações,
- * guias e gás na Parte E2b; o Lápis fica para a Parte E2c.
+ * Edge-menu entries as data (docs/arquitetura.md §6).
+ * The menu reads this list. Hammer contains fasteners, links, guides and gas;
+ * Insert opens Hammer or the drawer (including multilayer parts and cams).
+ * Tapping overlapping parts still selects; only Hammer creates links.
+ * Pencil remains reserved for Part E2c.
  */
 
 /** "insert" fica à direita (à esquerda no canhoto); "view", do outro lado. */

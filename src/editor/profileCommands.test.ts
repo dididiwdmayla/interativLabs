@@ -129,6 +129,9 @@ it("merging offsets preserves world anchors and rejects overlapping layers", () 
   expect(axle).toMatchObject({ kind: "axle", b: piece.id });
   if (axle.kind !== "axle") throw new Error("missing axle");
   expect(axle.at[0]).toBeCloseTo(8 + Math.cos(0.2) - 2 * Math.sin(0.2), 8);
+  scene.links.push({ kind: "lock", id: "internal", ref: 92, a: piece.id, b: other.id, at: [0, 0] });
+  expect(mergeCandidates(scene, piece.id).reason).toMatch(/outras ligações/);
+  expect(mergeProfiles(scene, piece.id)).toBeNull();
   other.layer = piece.layer;
   expect(mergeCandidates(scene, piece.id).reason).toMatch(/mesma camada/);
 });

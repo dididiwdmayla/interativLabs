@@ -440,6 +440,8 @@ No cartão da peça, cada camada escolhe uma superfície para editar tamanho/mat
 
 O exemplo Roda e lingueta usa um contrapeso no braço da manivela: sem ele, o próprio braço impedia o retorno pelo peso pendurado. A lingueta usa detecção contínua para o impacto rápido contra os dentes; é movimento de corpo, sem animação imposta à física. A trava e o eixo têm pontos separados no desenho para facilitar o toque.
 
+Trocar uma trava controlada por sensor para parafuso/suporte retira suas ações de soltura no mesmo comando, com aviso; desfazer restaura ambos. Fundir é bloqueado com motivo quando há outra ligação interna além dos parafusos, pois ela passaria a ligar a peça a si mesma. As ligações externas mantêm seus pontos mundiais.
+
 Predefinições finais do item 13.5:
 
 | Controle | Predefinição | Valor |

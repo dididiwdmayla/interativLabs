@@ -84,6 +84,7 @@ for (const width of [844, 1440])
         const stamped = await current(page),
           link = stamped.links[0]!;
         expect(link.kind).toBe(tool);
+        await page.screenshot({ path: `${DIR}/martelo-${tool}-cravado-${width}.png` });
         if (link.kind === "spring") expect(link.freeLength).toBeCloseTo(30, 1);
         if (link.kind === "slider") {
           expect(link.travel[0]).toBe(0);
@@ -111,6 +112,7 @@ for (const width of [844, 1440])
       await page.getByRole("button", { name: "Soltar trava", exact: true }).click();
       const made = (await current(page)).links.find((l) => l.kind === "sensor");
       expect(made).toMatchObject({ actions: [{ do: "release" }] });
+      await page.screenshot({ path: `${DIR}/martelo-sensor-${width}.png` });
       await page.keyboard.press("Escape");
       await page.getByRole("button", { name: "Testar: ligar a física" }).click();
       await page.waitForFunction(() => (window as unknown as W).__IL__.sim.getState().ctl !== null);
@@ -162,6 +164,7 @@ test("câmara detecta duas paredes e a largura livre de 6 mm", async ({ page }) 
   await page.screenshot({ path: `${DIR}/martelo-camara-previa-1440.png` });
   await page.mouse.up();
   await expect.poll(async () => (await current(page)).links.length).toBe(1);
+  await page.screenshot({ path: `${DIR}/martelo-camara-cravada-1440.png` });
   const c = (await current(page)).links[0]!;
   expect(c).toMatchObject({
     kind: "chamber",

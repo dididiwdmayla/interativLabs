@@ -208,6 +208,12 @@ export function mergeCandidates(scene: Scene, id: string): { parts: Part[]; reas
   if (parts.length < 2) return { parts, reason: "A peça precisa estar aparafusada a outra" };
   const layers = parts.flatMap((p) => surfaces(p).map((s) => s.layer));
   if (new Set(layers).size !== layers.length) return { parts, reason: "Duas formas ocupam a mesma camada" };
+  if (
+    scene.links.some(
+      (l) => l.kind !== "screw" && "a" in l && l.a && l.b && connected.has(l.a) && connected.has(l.b),
+    )
+  )
+    return { parts, reason: "Retire as outras ligações entre essas peças antes de fundir" };
   return { parts };
 }
 
