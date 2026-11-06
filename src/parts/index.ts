@@ -1,3 +1,4 @@
+import { projectedPart } from "@/editor/profileOps";
 import { setShape, idsFor, type Command } from "@/editor/commands";
 import { nextPartName } from "@/editor/names";
 import { rack, ratchet } from "@/geometry/gear";
@@ -50,6 +51,7 @@ export interface Generator {
   handles: HandleDef[];
   /** detecção contínua (esfera) */
   fast?: boolean;
+  compound?: "ratchet" | "crank";
   build: (p: Params) => Shape;
 }
 
@@ -313,6 +315,97 @@ export const GENERATORS: Generator[] = [
       return poly(roundedRect(p.w!, p.h!, 2), [slotRing([-sl / 2 + sw / 2, 0], [sl / 2 - sw / 2, 0], sw)]);
     },
   },
+  {
+    id: "cam",
+    name: "Came",
+    blurb: "Came excêntrico ou caracol",
+    material: "steel",
+    params: [
+      { key: "d", label: "Diâmetro", unit: "mm", min: 6, max: 200, step: 1, default: 30 },
+      { key: "rise", label: "Elevação", unit: "mm", min: 1, max: 40, step: 0.5, default: 5 },
+      {
+        key: "snail",
+        label: "Caracol (0: excêntrico, 1: caracol)",
+        unit: "",
+        min: 0,
+        max: 1,
+        step: 1,
+        default: 0,
+        integer: true,
+      },
+    ],
+    main: ["d", "rise", "snail"],
+    handles: [{ param: "d", axis: "x", ...half("d") }],
+    build: (p) => {
+      const r = p.d! / 2,
+        rise = Math.min(p.rise!, r * 0.75);
+      return poly(
+        p.snail
+          ? Array.from({ length: 97 }, (_, i) => {
+              const a = (i / 96) * 2 * Math.PI,
+                radius = r - rise + (rise * i) / 96;
+              return [radius * Math.cos(a), radius * Math.sin(a)] as Vec2;
+            })
+          : circleRing([rise, 0], r),
+      );
+    },
+  },
+  {
+    id: "gear-ratchet",
+    name: "Engrenagem com catraca",
+    blurb: "Uma roda em dois planos",
+    material: "steel",
+    compound: "ratchet",
+    params: [
+      { key: "module", label: "Módulo", unit: "mm", min: 0.5, max: 4, step: 0.1, default: 1 },
+      { key: "teeth", label: "Dentes", unit: "", min: 12, max: 80, step: 1, default: 36, integer: true },
+    ],
+    main: ["module", "teeth"],
+    handles: [
+      {
+        param: "module",
+        axis: "x",
+        dist: (p) => (p.module! * p.teeth!) / 2,
+        value: (d, p) => (2 * d) / p.teeth!,
+      },
+    ],
+    build: (p) => ({
+      kind: "gear",
+      module: p.module!,
+      teeth: p.teeth!,
+      pressureAngle: 20 * DEG,
+      profile: "involute",
+      bore: 0,
+    }),
+  },
+  {
+    id: "pinion-crank",
+    name: "Pinhão com manivela",
+    blurb: "Pinhão e braço numa peça em dois planos",
+    material: "steel",
+    compound: "crank",
+    params: [
+      { key: "module", label: "Módulo", unit: "mm", min: 0.5, max: 4, step: 0.1, default: 1 },
+      { key: "teeth", label: "Dentes", unit: "", min: 8, max: 36, step: 1, default: 12, integer: true },
+    ],
+    main: ["module", "teeth"],
+    handles: [
+      {
+        param: "module",
+        axis: "x",
+        dist: (p) => (p.module! * p.teeth!) / 2,
+        value: (d, p) => (2 * d) / p.teeth!,
+      },
+    ],
+    build: (p) => ({
+      kind: "gear",
+      module: p.module!,
+      teeth: p.teeth!,
+      pressureAngle: 20 * DEG,
+      profile: "involute",
+      bore: 0,
+    }),
+  },
 ];
 
 const BY_ID = new Map(GENERATORS.map((g) => [g.id, g] as const));
@@ -365,8 +458,9 @@ export function buildPart(scene: Scene, generatorId: string, o: BuildOptions): P
   if (!g) throw new Error(`Gerador desconhecido: ${generatorId}`);
   const params = clampParams(g, { ...defaults(g), ...o.params });
   const fixed = scene.layers.findIndex((l) => l.id === o.layer) === 0;
-  return {
-    id: idsFor(scene, o.random).next("part"),
+  const ids = idsFor(scene, o.random);
+  const part: Part = {
+    id: ids.next("part"),
     ref: nextRef(scene),
     name: nextPartName(scene, g.name),
     layer: o.layer,
@@ -378,6 +472,27 @@ export function buildPart(scene: Scene, generatorId: string, o: BuildOptions): P
     fixed,
     fast: g.fast ?? false,
     source: { generator: g.id, params },
+  };
+  const nextLayer = scene.layers[scene.layers.findIndex((l) => l.id === o.layer) + 1];
+  if (g.compound && nextLayer) {
+    const r = (params.module! * params.teeth!) / 2;
+    const shape: Shape =
+      g.compound === "ratchet"
+        ? ratchetProfile(r, 24)
+        : poly(slotRing([0, 0], [r * 2.5, 0], Math.max(3, r * 0.65)));
+    part.profiles = [{ id: ids.next("part"), layer: nextLayer.id, shape, material: "brass" }];
+  }
+  return part;
+}
+
+function ratchetProfile(r: number, teeth: number): Shape {
+  return {
+    kind: "gear",
+    module: r / (teeth / 2 + 0.2 * Math.PI),
+    teeth,
+    pressureAngle: 20 * DEG,
+    profile: "ratchet",
+    bore: 0,
   };
 }
 
@@ -401,8 +516,15 @@ function halfSize(shape: Shape): [number, number] {
  * Comando que muda parâmetros de uma peça paramétrica e refaz a forma; os
  * pontos de ligação acompanham a mudança de tamanho em cada eixo.
  */
-export function regenerate(scene: Scene, partId: string, change: Params, verb?: string): Command | null {
-  const part = scene.parts.find((p) => p.id === partId);
+export function regenerate(
+  scene: Scene,
+  partId: string,
+  change: Params,
+  verb?: string,
+  layer?: string,
+): Command | null {
+  const owner = scene.parts.find((p) => p.id === partId);
+  const part = owner && projectedPart(owner, layer);
   const cur = part && paramsOf(part);
   if (!part || !cur) return null;
   const mirror = part.source?.params.mirror;
@@ -414,6 +536,7 @@ export function regenerate(scene: Scene, partId: string, change: Params, verb?: 
   const [x1, y1] = halfSize(shape);
   return setShape(scene, partId, shape, {
     params: withMirror,
+    layer,
     anchorScale: [x0 > 0 ? x1 / x0 : 1, y0 > 0 ? y1 / y0 : 1],
     verb: verb ?? "Esticar",
   });

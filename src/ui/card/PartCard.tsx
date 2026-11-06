@@ -10,6 +10,7 @@ import {
   setMaterial,
   setPartFields,
   setPartLayer,
+  partLayerReason,
 } from "@/editor/commands";
 import { localBox } from "@/editor/handles";
 import { LINK_LABEL, linkParts } from "@/editor/names";
@@ -19,6 +20,7 @@ import type { PartModel, SceneModel } from "@/render/prepare";
 import { Icon, type IconName } from "../icons";
 import { NumberField, Stepper } from "./fields";
 import { fmt } from "./format";
+import { PartLayers } from "./PartLayers";
 import { Swatches } from "./Swatches";
 
 const DEG = 180 / Math.PI;
@@ -75,6 +77,9 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
   const ui = useUiStore();
   const scene = model.scene;
   const p = m.part;
+  const owner = scene.parts.find((q) => q.id === p.id) ?? p;
+  const upReason = partLayerReason(scene, p.id, 1),
+    downReason = partLayerReason(scene, p.id, -1);
   const li = m.layer;
   const below = model.layers[li - 1]?.layer;
   const above = model.layers[li + 1]?.layer;
@@ -84,11 +89,13 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
   const thickness = model.layers[li]?.layer.thickness ?? 3;
 
   const toLayer = (i: number) => {
-    const L = model.layers[i]?.layer;
-    if (L) ui.commit(setPartLayer(scene, [p.id], L.id), { activeLayer: i });
+    const target = scene.layers[scene.layers.findIndex((l) => l.id === owner.layer) + i - li];
+    if (target) ui.commit(setPartLayer(scene, [p.id], target.id), { activeLayer: i });
   };
   const setParam = (key: string, v: number) =>
-    ui.commit(regenerate(scene, p.id, { [key]: v }), undefined, { merge: `param:${p.id}:${key}` });
+    ui.commit(regenerate(scene, p.id, { [key]: v }, undefined, p.layer), undefined, {
+      merge: `param:${p.id}:${p.layer}:${key}`,
+    });
 
   return (
     <div className="card">
@@ -107,7 +114,8 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
           <button
             type="button"
             className="btn btn--outline btn--small card__layer"
-            disabled={!above}
+            disabled={!!upReason}
+            title={upReason}
             onClick={() => toLayer(li + 1)}
           >
             <Icon name="up" uid={`${uid}u`} size={20} />
@@ -116,15 +124,20 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
           <button
             type="button"
             className="btn btn--outline btn--small card__layer"
-            disabled={!below}
+            disabled={!!downReason}
+            title={downReason}
             onClick={() => toLayer(li - 1)}
           >
             <Icon name="down" uid={`${uid}d`} size={20} />
             {below ? `Descer · ${li} ${below.name}` : "No fundo"}
           </button>
         </div>
+        {(upReason || downReason) && owner.profiles?.length ? (
+          <p className="card__empty">{upReason ?? downReason}</p>
+        ) : null}
       </section>
 
+      <PartLayers scene={scene} part={owner} layer={p.layer} />
       <section className="card__sec" aria-label="Tamanho">
         <h3 className="card__k">Tamanho</h3>
         {pp ? (
@@ -154,7 +167,9 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
                 className="tool stepper__btn"
                 aria-label="Diminuir 10%"
                 onClick={() =>
-                  ui.commit(scalePart(scene, p.id, 0.9, 0.9), undefined, { merge: `scale:${p.id}` })
+                  ui.commit(scalePart(scene, p.id, 0.9, 0.9, p.layer), undefined, {
+                    merge: `scale:${p.id}:${p.layer}`,
+                  })
                 }
               >
                 <Icon name="minus" uid={`${uid}sm`} />
@@ -168,7 +183,9 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
                 className="tool stepper__btn"
                 aria-label="Aumentar 10%"
                 onClick={() =>
-                  ui.commit(scalePart(scene, p.id, 1.1, 1.1), undefined, { merge: `scale:${p.id}` })
+                  ui.commit(scalePart(scene, p.id, 1.1, 1.1, p.layer), undefined, {
+                    merge: `scale:${p.id}:${p.layer}`,
+                  })
                 }
               >
                 <Icon name="plus" uid={`${uid}sp`} />
@@ -180,7 +197,7 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
 
       <section className="card__sec" aria-label="Material">
         <h3 className="card__k">Material</h3>
-        <Swatches value={p.material} onPick={(mat) => ui.commit(setMaterial(scene, p.id, mat))} />
+        <Swatches value={p.material} onPick={(mat) => ui.commit(setMaterial(scene, p.id, mat, p.layer))} />
       </section>
 
       <section className="card__sec" aria-label="Fixação">
@@ -213,7 +230,7 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
         <Action
           icon="mirror"
           label="Espelhar"
-          onClick={() => ui.commit(mirrorPart(scene, p.id, mirroredShape(p)))}
+          onClick={() => ui.commit(mirrorPart(scene, p.id, mirroredShape(p), p.layer))}
         />
         <Action
           icon="duplicate"
@@ -293,7 +310,7 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
                   value={pp.params[d.key] ?? d.default}
                   onCommit={(v) => {
                     if (v < d.min || v > d.max) return `Entre ${fmt(d.min)} e ${fmt(d.max)} ${d.unit}`.trim();
-                    ui.commit(regenerate(scene, p.id, { [d.key]: v }));
+                    ui.commit(regenerate(scene, p.id, { [d.key]: v }, undefined, p.layer));
                     return null;
                   }}
                 />
@@ -306,7 +323,7 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
             note={`Herdada da camada ${li + 1}; muda na pilha de camadas`}
           />
           <NumberField
-            label="Massa"
+            label={owner.profiles?.length ? "Massa do perfil" : "Massa"}
             unit="g"
             value={m.mass}
             digits={m.mass < 10 ? 2 : 1}

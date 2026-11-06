@@ -436,6 +436,8 @@ Onde o texto acima deixava margem, ou o uso mostrou outra coisa:
 
 O Martelo usa as mesmas regras de encaixe para criar e mover ligações. A prévia do dedo fica 64 px acima do ponto; mouse e caneta ficam no ponto. Pino e rasgo nascem num único comando. O sensor espera a escolha do alvo e da ação antes de gravar. As listas dos cartões usam a prancha para escolher paredes, guias, respiros, portas e alvos. A troca de corpo conserva posição e direção mundiais da câmara.
 
+No cartão da peça, cada camada escolhe uma superfície para editar tamanho/material; posição e ângulo continuam únicos. Separar transfere as ligações da camada escolhida (rasgos pelo perfil explícito) e conserva a origem. Fundir transforma os pontos para a origem da peça escolhida. Primitivas com outra origem/ângulo viram polígonos, porque o formato só admite círculo/engrenagem centrados; formas já alinhadas mantêm seus parâmetros. Remover a principal promove o primeiro perfil, preservando materiais herdados e referências de rasgo. Conjuntos prontos criam a camada extra no mesmo passo de desfazer.
+
 Predefinições finais do item 13.5:
 
 | Controle | Predefinição | Valor |

@@ -31,7 +31,7 @@ const AREA: Record<string, [number, number]> = {
 };
 
 describe("peças prontas", () => {
-  it("são onze, com nome, parâmetros com faixa e unidade, e padrões dentro da faixa", () => {
+  it("incluem came e peças multicamada, com nome, parâmetros com faixa e unidade, e padrões dentro da faixa", () => {
     expect(GENERATORS.map((g) => g.id)).toEqual([
       "plate",
       "bar",
@@ -44,6 +44,9 @@ describe("peças prontas", () => {
       "rack",
       "plate-hole",
       "plate-slot",
+      "cam",
+      "gear-ratchet",
+      "pinion-crank",
     ]);
     for (const g of GENERATORS) {
       expect(g.name.length).toBeGreaterThan(2);

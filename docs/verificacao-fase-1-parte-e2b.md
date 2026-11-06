@@ -72,10 +72,24 @@ Playwright: 17 testes passaram, incluindo captura dos 12 cartões em 844×390, a
 
 Verificação do item 13.5: 708 testes Vitest passaram, cinco falhas esperadas preservadas; 13 testes de assets; lint, typecheck e build limpos.
 
+## 13.6 — Peça multicamada no editor
+
+O cartão lista as camadas ocupadas e ativa o perfil tocado. Esticar, tamanho paramétrico, material e espelhamento atuam nesse perfil; mover e girar mantêm uma pose única. Subir/descer desloca todos os perfis e bloqueia a borda da pilha com motivo. Apagar a camada principal promove o primeiro perfil restante, preservando materiais e referências de rasgo; apagar um perfil com rasgo remove essa ligação.
+
+Estender oferece cópia, disco, engrenagem, catraca, came e alavanca; pode criar uma camada acima/abaixo no mesmo comando. Separar conserva a origem e cria um parafuso num ponto comum dos contornos; sem interseção usa o centroide com aviso. Fundir percorre o conjunto aparafusado, exige camadas distintas e transforma formas/pontos para a origem da peça selecionada. Uma primitiva deslocada ou girada vira polígono porque círculo/engrenagem no formato são centrados na origem; perde os parâmetros dessa forma, conservando o contorno. Nos casos já alinhados, mantém a primitiva e os parâmetros.
+
+Gaveta: came excêntrico/caracol, engrenagem com catraca e pinhão com manivela. Os conjuntos criam a camada de cima quando necessário, com desfazer único. Duplicar também cria identificadores novos para os perfis.
+
+A cena `multicamada/perfis`, separada e fundida novamente, manteve **1,0568 g** e **64,886021297 g·mm²**. O SHA-256 das poses da peça original em 240 passos de 1/240 s é idêntico nas três versões: `f047127de804bfdb1f78dcd5b6df73d83e88b76f1073bebe7169483173500143`. O hash do JSON difere por conter uma peça/parafuso adicional ou identificadores de perfis novos; o comportamento físico medido é igual. Dados em `docs/decisoes/perfis-editor-e2b.json` e roteiro `scripts/measure-profiles.ts`.
+
+Os testes de comando cobrem todas as formas/destinos, edição isolada, duplicação, deslocamento/borda, remoção/promoção, rasgo separado/fundido, transformação de pontos, bloqueio de camadas sobrepostas e os dois presets; cada comando desfaz e refaz para o hash anterior/posterior exato. Playwright percorre estender, redimensionar, separar, fundir e desfazer em 844×390 e 1440×900. Capturas `cartao-camadas-*`, `perfis-montar-*` e `perfis-raio-x-*`.
+
+Verificação do item 13.6: 725 testes Vitest passaram, cinco falhas esperadas preservadas; três testes Playwright passaram, incluindo toque num perfil e ativação da sua camada. Lint, typecheck e build limpos.
+
 ## Pedidos ao coordenador visual
 
 Ferragem própria da trava com argola de soltura. Até a entrega, a implementação usa exclusivamente as ferragens existentes do lote 01 e a marca desenhada no código. Nenhum asset foi gerado ou substituído.
 
 ## Ainda em andamento
 
-13.6–13.8: operações multicamada, exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.
+13.7–13.8: exemplo Roda e lingueta, capturas e verificação final. Este registro não declara esses itens entregues.

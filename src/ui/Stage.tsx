@@ -129,7 +129,14 @@ type Gesture =
       targets: SnapTargets;
     }
   | { kind: "rotate"; id: string; pose: PartPose; a0: number; last: PartPose | null }
-  | { kind: "stretch"; id: string; pose: PartPose; handle: Handle; last: StretchResult | null };
+  | {
+      kind: "stretch";
+      id: string;
+      layer: string;
+      pose: PartPose;
+      handle: Handle;
+      last: StretchResult | null;
+    };
 
 function vibrate(ms: number) {
   try {
@@ -699,7 +706,14 @@ export function Stage({
                 a0: Math.atan2(w[1] - pose.y, w[0] - pose.x),
                 last: pose,
               }
-            : { kind: "stretch", id: selModel.part.id, pose, handle: h, last: null };
+            : {
+                kind: "stretch",
+                id: selModel.part.id,
+                layer: selModel.part.layer,
+                pose,
+                handle: h,
+                last: null,
+              };
         return;
       }
       const link = pickLink(w);
@@ -825,7 +839,7 @@ export function Stage({
       snapTo(r.snapped ? `a:${r.angle.toFixed(4)}` : null);
       showPose(g.id, g.last, y);
     } else if (g.kind === "stretch" && model) {
-      const part = model.parts.get(g.id)?.part;
+      const part = model.partList.find((m) => m.part.id === g.id && m.part.layer === g.layer)?.part;
       if (!part) return;
       const res = stretchTo(part, g.handle, localOf(g.pose, w));
       g.last = res;
@@ -980,8 +994,8 @@ export function Stage({
         if (!up || !res || !scene) return;
         ui.commit(
           res.kind === "params"
-            ? regenerate(scene, g.id, res.params)
-            : scalePart(scene, g.id, res.sx, res.sy),
+            ? regenerate(scene, g.id, res.params, undefined, g.layer)
+            : scalePart(scene, g.id, res.sx, res.sy, g.layer),
         );
         return;
       }
