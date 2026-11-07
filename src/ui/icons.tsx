@@ -66,7 +66,14 @@ export type IconName =
   | "loose"
   | "pencil"
   | "up"
-  | "down";
+  | "down"
+  | "contour"
+  | "stroke"
+  | "add"
+  | "cut"
+  | "ruler"
+  | "swap"
+  | "check";
 
 /** Linhas a 45° cobrindo a grade inteira; recortadas pela forma de cada ícone. */
 function hatchLines(spacing: number, offset = 0): string {
@@ -495,6 +502,58 @@ const ICONS: Record<IconName, (c: DrawCtx) => ReactNode> = {
       <path d="M4 20H20" className="thin" />
     </>
   ),
+  // Lápis: contorno (laço tracejado sobre a chapa), traço (linha larga de pontas redondas)
+  contour: (c) => (
+    <>
+      {c.hatch(
+        <path d="M5 9C5 5.5 9 4 12.5 4.5C17 5 20 8 19.5 12.5C19 17 15 19.5 11 19.5C7 19.5 5 16 5 13Z" />,
+        "ct",
+      )}
+      <path
+        d="M5 9C5 5.5 9 4 12.5 4.5C17 5 20 8 19.5 12.5C19 17 15 19.5 11 19.5C7 19.5 5 16 5 13Z"
+        strokeDasharray="2.5 1.75"
+      />
+    </>
+  ),
+  stroke: () => (
+    <>
+      <path
+        d="M4.5 16.5C8 9 12 15.5 19.5 7.5"
+        strokeWidth="5"
+        strokeLinecap="round"
+        className="thin"
+        opacity="0.35"
+      />
+      <path d="M4.5 16.5C8 9 12 15.5 19.5 7.5" />
+    </>
+  ),
+  add: (c) => (
+    <>
+      {c.hatch(<rect x="3.75" y="8.75" width="11" height="11" />, "ad")}
+      <rect x="3.75" y="8.75" width="11" height="11" />
+      <path d="M17.5 3.5V10.5M14 7H21" />
+    </>
+  ),
+  cut: (c) => (
+    <>
+      {c.hatch(<path d="M3.75 3.75H20.25V20.25H3.75Z M15 12A3 3 0 1 0 9 12A3 3 0 1 0 15 12Z" />, "cu")}
+      <path d="M3.75 3.75H20.25V20.25H3.75Z" />
+      <circle cx="12" cy="12" r="3" />
+    </>
+  ),
+  ruler: () => (
+    <>
+      <path d="M3 16.5L16.5 3L21 7.5L7.5 21Z" />
+      <path d="M7 12.5L9 14.5M9.5 10L12.5 13M12 7.5L14 9.5M14.5 5L17.5 8" className="thin" />
+    </>
+  ),
+  swap: () => (
+    <>
+      <path d="M4 8.5H18M15 5L18.5 8.5L15 12" />
+      <path d="M20 15.5H6M9 12L5.5 15.5L9 19" />
+    </>
+  ),
+  check: () => <path d="M4.5 12.5L9.5 17.5L19.5 6.5" />,
   up: () => (
     <>
       <path d="M12 20V5" />

@@ -3,7 +3,7 @@
  * The menu reads this list. Hammer contains fasteners, links, guides and gas;
  * Insert opens Hammer or the drawer (including multilayer parts and cams).
  * Tapping overlapping parts still selects; only Hammer creates links.
- * Pencil remains reserved for Part E2c.
+ * Pencil draws and cuts the shape of a part (Part E2c).
  */
 
 /** "insert" fica à direita (à esquerda no canhoto); "view", do outro lado. */
@@ -44,6 +44,7 @@ export const MENUS: Record<MenuId, MenuDef> = {
     modes: ["edit"],
     items: [
       { id: "hammer", label: "Martelo", icon: "hammer" },
+      { id: "pencil", label: "Lápis", icon: "pencil" },
       { id: "parts", label: "Peças prontas", icon: "parts" },
       { id: "layer-new", label: "Nova camada", icon: "layerAdd" },
       { id: "duplicate", label: "Duplicar seleção", icon: "duplicate", when: (c) => c.hasSelection },

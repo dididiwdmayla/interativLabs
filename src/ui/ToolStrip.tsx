@@ -38,7 +38,7 @@ export interface StripGroup {
 const W_LABEL = 56;
 const W_ICON = 44;
 const W_SEP = 9;
-const W_SELECTOR = 56;
+const W_SELECTOR = 50;
 const W_PAD = 8;
 const W_TEXT = 92;
 const GAP = 8;
@@ -99,6 +99,7 @@ export function ToolStrip({
   mode,
   actions,
   phrase,
+  popover,
 }: {
   label: string;
   groups: StripGroup[];
@@ -106,6 +107,8 @@ export function ToolStrip({
   /** botões que tomam o lugar das ferramentas (escolher ação, trocar lado) */
   actions?: StripItem[];
   phrase?: string;
+  /** painel pequeno acima da frase (detalhes) */
+  popover?: ReactNode;
 }) {
   const uid = useId();
   const ref = useRef<HTMLElement>(null);
@@ -271,6 +274,7 @@ export function ToolStrip({
       data-placed={slot !== null}
       style={style}
     >
+      {popover && <div className="toolstrip__popover">{popover}</div>}
       <p className="toolstrip__phrase" aria-live="polite" title={phrase}>
         {phrase}
       </p>

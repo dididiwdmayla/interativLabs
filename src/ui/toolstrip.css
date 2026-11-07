@@ -140,7 +140,7 @@
 }
 
 .toolstrip__selector {
-  width: 52px;
+  width: 46px;
   color: var(--color-ink);
 }
 
@@ -187,7 +187,7 @@
 
 /* com uma ferramenta aberta, a pílula da camada encolhe para dar lugar à faixa */
 .shell[data-tool="true"] .pill {
-  max-width: 132px;
+  max-width: 116px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -196,4 +196,45 @@
   .toolstrip__action {
     transition: none;
   }
+}
+
+/* painel pequeno acima da frase (detalhes do Lápis: largura livre) */
+.toolstrip__popover {
+  position: absolute;
+  bottom: calc(100% + 18px);
+  left: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-chrome-float);
+  border: var(--stroke-frame-thick) solid var(--color-ink-3);
+  box-shadow:
+    inset 0 0 0 2px var(--color-chrome-float),
+    inset 0 0 0 2.75px var(--color-ink-faint);
+}
+
+.pencildetails {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-title);
+  font-variant: small-caps;
+  font-size: 12px;
+  letter-spacing: var(--tracking-label);
+  text-transform: lowercase;
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+
+.pencildetails input {
+  width: 140px;
+  min-height: var(--touch-min);
+  accent-color: var(--color-gold);
+}
+
+.pencildetails output {
+  min-width: 52px;
+  font-family: var(--font-callout);
+  font-style: italic;
+  font-variant: normal;
+  font-size: 14px;
+  color: var(--color-ink);
 }

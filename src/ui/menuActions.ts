@@ -53,6 +53,7 @@ export function partsAction(): void {
 const ACTIONS: Record<string, () => void> = {
   parts: partsAction,
   hammer: () => useUiStore.getState().setHammer("axle"),
+  pencil: () => useUiStore.getState().setPencil(true),
   "layer-new": newLayerAction,
   duplicate: duplicateSelectionAction,
   delete: deleteSelectionAction,

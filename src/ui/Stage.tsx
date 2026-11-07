@@ -6,6 +6,7 @@ import {
   cursorLit,
   cursorPoint,
   holdCursor,
+  isQuickTap,
   moveCursor,
   startCursor,
   type OffsetCursor,
@@ -17,6 +18,9 @@ import { applyLink } from "./card/applyLink";
 import { LINK_LABEL } from "@/editor/names";
 import { moveLink } from "@/editor/moveLink";
 import { HammerBar } from "./HammerBar";
+import { PencilBar } from "./PencilBar";
+import "./pencil.css";
+import { commitPlan, pencilPlan, pencilTarget, planAreas, sideAt, type PencilPlan } from "@/editor/pencil";
 import { HammerPreview } from "./HammerPreview";
 import { MultiTap } from "@/editor/gestures";
 import { MENUS, menuAt } from "@/editor/menus";
@@ -98,6 +102,7 @@ type Pad = [number, number, number, number];
 const FIT_PAD_EDIT: Pad = [64, 44, 64, 44];
 const FIT_PAD_SIM: Pad = [56, 32, 92, 32];
 const TAP_PX = 8;
+const NO_HANDLES: Handle[] = [];
 /** ferramentas do Martelo que se arrastam de um ponto a outro */
 const DRAG_TOOLS: string[] = ["spring", "rod", "cable", "slider", "chamber"];
 /** faixa lateral do gesto do menu, fração da largura da prancha */
@@ -134,6 +139,7 @@ type Gesture =
       /** dedo quando o cursor acendeu: a ferragem só sai do lugar depois que ele anda */
       litAt?: Vec2;
     }
+  | { kind: "pencil"; stroke: PencilStroke }
   | { kind: "none" }
   | { kind: "menu" }
   | { kind: "drag" }
@@ -181,6 +187,19 @@ function sensorActions(target: Link): { label: string; action: SensorAction }[] 
     ),
   ];
 }
+
+/** Rastro do Lápis em andamento (dedo ou caneta). */
+interface PencilStroke {
+  id: number;
+  /** mm, no mundo */
+  points: Vec2[];
+  cursor: OffsetCursor;
+  timer: number;
+  /** dedo (px do palco) */
+  finger: Vec2;
+}
+
+type PencilPending = { plan: Exclude<PencilPlan, { kind: "none" }>; offer?: string };
 
 function vibrate(ms: number) {
   try {
@@ -282,6 +301,9 @@ export function Stage({
   const ctl = useSimStore((s) => s.ctl);
   const editing = mode === "edit";
   const hammer = useUiStore((s) => s.hammer);
+  const pencilOn = useUiStore((s) => s.pencil);
+  const pencilTool = useUiStore((s) => s.pencilTool);
+  const tool = hammer !== null || pencilOn;
   const picking = useUiStore((s) => s.pick);
   const [linkPreview, setLinkPreview] = useState<Link | null>(null);
   useEffect(() => {
@@ -301,6 +323,7 @@ export function Stage({
     stamped: boolean;
   } | null>(null);
 
+  const [pencilPending, setPencilPending] = useState<PencilPending | null>(null);
   const [pending, setPending] = useState<
     { kind: "sensor"; hit: HammerPoint; target?: Link } | { kind: "chamber"; link: ChamberLink } | null
   >(null);
@@ -315,6 +338,14 @@ export function Stage({
           setPending(null);
           setHammerPreview(null);
         }
+        if (
+          next.pencil !== prev.pencil ||
+          next.mode !== prev.mode ||
+          next.current?.scene !== prev.current?.scene ||
+          next.activeLayer !== prev.activeLayer ||
+          next.pencilTool !== prev.pencilTool
+        )
+          setPencilPending(null);
       }),
     [],
   );
@@ -333,6 +364,16 @@ export function Stage({
   }, [nodes, onNodes]);
 
   const view = useRef<View>({ zoom: 1, tx: 0, ty: 0 });
+  const pencilWorld = useRef<SVGGElement>(null);
+  const pencilLive = useRef<SVGPathElement>(null);
+  const pencilLiveOut = useRef<SVGPathElement>(null);
+  /** contorno da peça-alvo (Tirar): a parte do traço sobre ela aparece em brasa */
+  const [liveClip, setLiveClip] = useState<{ d: string; transform: string } | null>(null);
+  const pencilCursor = useRef<SVGGElement>(null);
+  const pencilTether = useRef<SVGPathElement>(null);
+  /** uma caneta já desenhou nesta sessão: o dedo só move a vista no Lápis */
+  const penSeen = useRef(false);
+  const penStroke = useRef<PencilStroke | null>(null);
   /** chamado a cada mudança da vista (o botão da peça acompanha) */
   const onView = useRef<(() => void) | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -342,6 +383,7 @@ export function Stage({
     const v = view.current;
     const m = viewMatrix(v);
     if (nodes) for (const g of nodes.worlds.values()) g.setAttribute("transform", m);
+    pencilWorld.current?.setAttribute("transform", m);
     if (box.current) box.current.style.backgroundPosition = `${v.tx}px ${v.ty}px`;
     onView.current?.();
   }, [nodes]);
@@ -513,10 +555,12 @@ export function Stage({
       ? linkHandles(model, linkPreview?.id === selectedLink.id ? linkPreview : selectedLink, mmPerPx(zoom))
       : [];
   const selEditable = editing && !bare && !!selModel && layerOk(selModel.layer);
-  const handles = useMemo(
+  // com o Lápis, as alças saem: o dedo desenha
+  const allHandles = useMemo(
     () => (selEditable && selModel ? handlesFor(selModel, mmPerPx(zoom)) : []),
     [selEditable, selModel, zoom],
   );
+  const handles = pencilOn ? NO_HANDLES : allHandles;
   const hitHandle = (x: number, y: number): Handle | null => {
     if (!selModel || handles.length === 0) return null;
     let best: Handle | null = null;
@@ -665,9 +709,128 @@ export function Stage({
       showHammer(hit, undefined, c, f.x, f.y);
     }, CURSOR_HOLD_MS);
   };
-  const beginLinkMove = (id: string, w: Vec2, x: number, y: number, pointerType: string) => {
-    const cursor = startCursor(x, y, performance.now(), pointerType);
+  const beginLinkMove = (id: string, w: Vec2, x: number, y: number, pointerType: string, t: number) => {
+    const cursor = startCursor(x, y, t, pointerType);
     gesture.current = { kind: "linkmove", id, last: null, start: w, cursor, timer: armCursor(cursor) };
+  };
+
+  // ——— Lápis (docs/arquitetura.md §6): o rastro, a prévia ao vivo e o comando ———
+  const drawStroke = (st: PencilStroke | null) => {
+    const pts = st?.points ?? [];
+    const d =
+      pts.length === 1
+        ? `M${pts[0]?.[0]} ${pts[0]?.[1]}h0.001`
+        : pts.map((q, i) => `${i ? "L" : "M"}${q[0].toFixed(3)} ${q[1].toFixed(3)}`).join("");
+    pencilLive.current?.setAttribute("d", d);
+    pencilLiveOut.current?.setAttribute("d", d);
+    const lit = st && cursorLit(st.cursor);
+    const ring = pencilCursor.current;
+    const tether = pencilTether.current;
+    if (ring) {
+      if (lit && st) {
+        const c = cursorPoint(st.cursor, st.finger[0], st.finger[1]);
+        ring.setAttribute("transform", `translate(${c[0]} ${c[1]})`);
+        ring.style.opacity = "1";
+        tether?.setAttribute("d", `M${c[0]} ${c[1] + 13}L${st.finger[0]} ${st.finger[1] - 6}`);
+      } else {
+        ring.style.opacity = "0";
+        tether?.setAttribute("d", "");
+      }
+    }
+  };
+  const startStroke = (id: number, x: number, y: number, pointerType: string, t: number): PencilStroke => {
+    const cursor = startCursor(x, y, t, pointerType);
+    const st: PencilStroke = { id, points: [toWorld(view.current, x, y)], cursor, timer: 0, finger: [x, y] };
+    if (model && pencilTool.op === "cut") {
+      const sel = selection?.kind === "part" ? selection.id : null;
+      const t = pencilTarget(model, activeLayer, sel, st.points[0] ?? null);
+      const m = t && model.partList.find((q) => q.part.id === t.part.id && q.layer === activeLayer);
+      setLiveClip(
+        m
+          ? {
+              d: m.d,
+              transform: `translate(${m.part.x} ${m.part.y}) rotate(${(m.part.angle * 180) / Math.PI})`,
+            }
+          : null,
+      );
+    } else setLiveClip(null);
+    if (cursor.touch)
+      st.timer = window.setTimeout(() => {
+        if (!holdCursor(cursor)) return;
+        // segurar antes de traçar: o traço começa no cursor
+        vibrate(8);
+        const c = cursorPoint(cursor, st.finger[0], st.finger[1]);
+        st.points = [toWorld(view.current, c[0], c[1])];
+        drawStroke(st);
+      }, CURSOR_HOLD_MS);
+    drawStroke(st);
+    return st;
+  };
+  const moveStroke = (st: PencilStroke, x: number, y: number) => {
+    st.finger = [x, y];
+    if (moveCursor(st.cursor, x, y)) window.clearTimeout(st.timer);
+    const c = cursorPoint(st.cursor, x, y);
+    const w = toWorld(view.current, c[0], c[1]);
+    const last = st.points[st.points.length - 1];
+    if (!last || Math.hypot(w[0] - last[0], w[1] - last[1]) > 0.5 * mmPerPx(view.current.zoom))
+      st.points.push(w);
+    drawStroke(st);
+  };
+  const endStroke = (st: PencilStroke, up: boolean, t = Infinity) => {
+    window.clearTimeout(st.timer);
+    drawStroke(null);
+    if (!up) return;
+    const tap =
+      isQuickTap(st.cursor, st.finger[0], st.finger[1], t) ||
+      (!cursorLit(st.cursor) && !st.cursor.moved && st.points.length < 3);
+    finishStroke(tap ? st.points.slice(0, 1) : st.points, tap);
+  };
+  const finishStroke = (points: Vec2[], tap: boolean) => {
+    if (!model) return;
+    const ui = useUiStore.getState();
+    const tool = ui.pencilTool;
+    const first = points[0];
+    if (!first) return;
+    if (tap && tool.form === "contour") {
+      // no Contorno, um toque escolhe a peça em que o Lápis vai agir
+      const part = pickPart(first);
+      if (part) selectPart(part);
+      else onSelect?.(null);
+      return;
+    }
+    if (model.layers[activeLayer]?.layer.locked) {
+      ui.notify("Destrave a camada antes de desenhar", { warn: true });
+      return;
+    }
+    const sel = ui.selection?.kind === "part" ? ui.selection.id : null;
+    const plan = pencilPlan(model, tool, { points, tap, px: mmPerPx(view.current.zoom) }, activeLayer, sel);
+    if (plan.kind === "none") {
+      ui.notify(plan.reason, { warn: true });
+      return;
+    }
+    if (plan.kind === "sides") {
+      setPencilPending({ plan });
+      return;
+    }
+    commitPencil(plan, false);
+  };
+  const commitPencil = (plan: Exclude<PencilPlan, { kind: "none" }>, separate: boolean) => {
+    const ui = useUiStore.getState();
+    const scene = ui.current?.scene;
+    const layer = scene?.layers[activeLayer]?.id;
+    if (!scene || !layer) return;
+    const c = commitPlan(scene, plan, layer, { separate });
+    if (c.kind === "offer") {
+      setPencilPending({ plan, offer: c.reason });
+      return;
+    }
+    setPencilPending(null);
+    if (c.kind === "none") {
+      ui.notify(c.reason, { warn: true });
+      return;
+    }
+    if (ui.commit(c.command, c.selection ? { selection: { kind: "part", id: c.selection } } : undefined))
+      vibrate(12);
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -675,6 +838,18 @@ export function Stage({
     if (!model || !nodes) return;
     onFirstTouch?.();
     const [x, y] = local(e);
+    if (e.pointerType === "pen") penSeen.current = true;
+    // caneta no Lápis: desenha à parte, e os dedos continuam movendo a vista ao mesmo tempo
+    if (editing && !bare && pencilOn && e.pointerType === "pen" && !penStroke.current) {
+      box.current?.setPointerCapture(e.pointerId);
+      if (pencilPending?.plan.kind === "sides") {
+        const side = sideAt(pencilPending.plan, toWorld(view.current, x, y));
+        if (side !== null) setPencilPending({ plan: { ...pencilPending.plan, pick: side } });
+        return;
+      }
+      penStroke.current = startStroke(e.pointerId, x, y, "pen", e.timeStamp);
+      return;
+    }
     box.current?.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { id: e.pointerId, x, y, x0: x, y0: y, t0: performance.now() });
     if (e.pointerType === "touch") {
@@ -693,6 +868,7 @@ export function Stage({
         overlay.current?.guides([]);
       }
       if (g.kind === "press") window.clearTimeout(g.timer);
+      if (g.kind === "pencil") endStroke(g.stroke, false);
       if (g.kind === "move" || g.kind === "rotate" || g.kind === "stretch") {
         // o segundo dedo cancela a edição em curso: a peça volta
         showPose(g.id, null);
@@ -713,6 +889,28 @@ export function Stage({
         return;
       }
     } else if (!bare) {
+      // Lápis com o dedo (ou mouse): desenha; com caneta presente, o dedo só move a vista
+      if (pencilOn && !picking && !(e.pointerType === "touch" && penSeen.current)) {
+        if (pencilPending?.plan.kind === "sides") {
+          const side = sideAt(pencilPending.plan, w);
+          if (side !== null) {
+            setPencilPending({ plan: { ...pencilPending.plan, pick: side } });
+            gesture.current = { kind: "none" };
+            return;
+          }
+        }
+        if (!pencilPending) {
+          gesture.current = {
+            kind: "pencil",
+            stroke: startStroke(e.pointerId, x, y, e.pointerType, e.timeStamp),
+          };
+          return;
+        }
+      }
+      if (pencilOn) {
+        gesture.current = { kind: "pan", start: { ...view.current }, tap: false };
+        return;
+      }
       if (picking) {
         const result = pickLinkEdit(model, picking, w, mmPerPx(view.current.zoom));
         const error = result.link ? applyLink(result.link, picking.kind) : result.error;
@@ -763,7 +961,7 @@ export function Stage({
         }
         const link = pickLink(w);
         if (link && selection?.kind === "link" && selection.id === link) {
-          beginLinkMove(link, w, x, y, e.pointerType);
+          beginLinkMove(link, w, x, y, e.pointerType, e.timeStamp);
           return;
         }
         if (link) {
@@ -774,7 +972,7 @@ export function Stage({
           gesture.current = { kind: "none" };
           return;
         }
-        const cursor = startCursor(x, y, performance.now(), e.pointerType);
+        const cursor = startCursor(x, y, e.timeStamp, e.pointerType);
         const hit = hammerAt(hammer, [x, y], model);
         // dedo: nada aparece antes de acender o cursor (ou de arrastar); mouse e caneta: prévia no ponto
         if (!cursor.touch) showHammer(hit, undefined, cursor, x, y);
@@ -816,7 +1014,7 @@ export function Stage({
       }
       const link = pickLink(w);
       if (link && selection?.kind === "link" && selection.id === link) {
-        beginLinkMove(link, w, x, y, e.pointerType);
+        beginLinkMove(link, w, x, y, e.pointerType, e.timeStamp);
         return;
       }
       const part = link ? null : pickPart(w);
@@ -849,6 +1047,10 @@ export function Stage({
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const p = pointers.current.get(e.pointerId);
     const [x, y] = local(e);
+    if (penStroke.current?.id === e.pointerId) {
+      moveStroke(penStroke.current, x, y);
+      return;
+    }
     if (!p) {
       if (editing && hammer && model && e.pointerType !== "touch")
         setHammerPreview({
@@ -902,6 +1104,8 @@ export function Stage({
       }
       g.last = hammerAt(hammer, cursorPoint(g.cursor, x, y), model);
       showHammer(g.last, DRAG_TOOLS.includes(hammer) ? g.start : undefined, g.cursor, x, y);
+    } else if (g.kind === "pencil") {
+      moveStroke(g.stroke, x, y);
     } else if (g.kind === "menu") {
       const ui = useUiStore.getState();
       const hover = hitEdgeMenu(x, y);
@@ -972,6 +1176,12 @@ export function Stage({
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const pen = penStroke.current;
+    if (pen?.id === e.pointerId) {
+      penStroke.current = null;
+      endStroke(pen, e.type === "pointerup", e.timeStamp);
+      return;
+    }
     const p = pointers.current.get(e.pointerId);
     pointers.current.delete(e.pointerId);
     if (!p) return;
@@ -1127,6 +1337,10 @@ export function Stage({
         gesture.current = { kind: "none" };
         settle();
         return;
+      case "pencil":
+        gesture.current = { kind: "none" };
+        endStroke(g.stroke, up, e.timeStamp);
+        return;
       case "none":
         return;
     }
@@ -1165,6 +1379,29 @@ export function Stage({
     setRestep((r) => (r === "a" ? "b" : "a"));
   }, [step]);
 
+  const pencilPhrase = (): string => {
+    const t = pencilTool;
+    const mm = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+    if (pencilPending?.offer) return `${pencilPending.offer}: separar em peça?`;
+    if (pencilPending) {
+      const a = planAreas(pencilPending.plan);
+      return pencilPending.plan.op === "cut"
+        ? `Vai sair ${mm(a.removed)} mm² (em brasa) · toque num lado para escolher`
+        : `Vai entrar ${mm(a.added)} mm² · toque num lado para escolher`;
+    }
+    const target =
+      selection?.kind === "part" && model?.parts.get(selection.id)
+        ? (model.parts.get(selection.id)?.part.name ?? "")
+        : "";
+    const on = target ? ` em ${target}` : "";
+    if (t.form === "contour")
+      return t.op === "cut"
+        ? `Tirar${on}: feche um laço, ou corte de borda a borda${t.ruler ? " · régua" : ""}`
+        : `Somar${on}: feche um laço; no vazio, vira peça nova${t.ruler ? " · régua" : ""}`;
+    return t.op === "cut"
+      ? `Borracha de ${mm(t.width)} mm${on} · um toque faz furo${t.ruler ? " · reta vira rasgo" : ""}`
+      : `Pincel de ${mm(t.width)} mm${on}: barra ou alavanca à mão${t.ruler ? " · régua" : ""}`;
+  };
   const ready = width > 0 && height > 0;
   const inset = 8;
   const gap = 3;
@@ -1254,6 +1491,74 @@ export function Stage({
           )}
         </>
       )}
+      {editing && !bare && pencilOn && model && (
+        <>
+          <PencilBar
+            phrase={pencilPhrase()}
+            pending={pencilPending ? (pencilPending.offer ? "offer" : pencilPending.plan.kind) : null}
+            op={pencilPending?.plan.op ?? pencilTool.op}
+            onSwap={() =>
+              setPencilPending((p) =>
+                p?.plan.kind === "sides" ? { plan: { ...p.plan, pick: p.plan.pick === 0 ? 1 : 0 } } : p,
+              )
+            }
+            onCommit={() => pencilPending && commitPencil(pencilPending.plan, !!pencilPending.offer)}
+            onCancel={() => setPencilPending(null)}
+          />
+          <svg
+            className="pencilpreview"
+            width="100%"
+            height="100%"
+            aria-hidden="true"
+            data-pencil-preview
+            data-pending={pencilPending ? (pencilPending.offer ? "offer" : pencilPending.plan.kind) : "none"}
+            data-pick={pencilPending?.plan.kind === "sides" ? pencilPending.plan.pick : undefined}
+          >
+            <defs>
+              <pattern
+                id={`${uid}-out`}
+                patternUnits="userSpaceOnUse"
+                width={5 * mmPerPx(zoom)}
+                height={5 * mmPerPx(zoom)}
+                patternTransform="rotate(45)"
+              >
+                <path
+                  className="pencilpreview__hatch"
+                  d={`M0 0V${5 * mmPerPx(zoom)}`}
+                  strokeWidth={1.4 * mmPerPx(zoom)}
+                />
+              </pattern>
+              {liveClip && (
+                <clipPath id={`${uid}-clip`}>
+                  <path d={liveClip.d} transform={liveClip.transform} clipRule="evenodd" />
+                </clipPath>
+              )}
+            </defs>
+            {/* a matriz da vista vem do writeView, como no grupo do mundo */}
+            <g ref={pencilWorld}>
+              {pencilPending && <PencilPendingPaths pending={pencilPending} uid={uid} />}
+              <path
+                ref={pencilLive}
+                className={`pencilpreview__live pencilpreview__live--${pencilTool.form} pencilpreview__live--${pencilTool.op}`}
+                strokeWidth={pencilTool.form === "stroke" ? pencilTool.width : undefined}
+              />
+              {liveClip && (
+                <path
+                  ref={pencilLiveOut}
+                  className={`pencilpreview__liveout pencilpreview__live--${pencilTool.form}`}
+                  strokeWidth={pencilTool.form === "stroke" ? pencilTool.width : undefined}
+                  clipPath={`url(#${uid}-clip)`}
+                />
+              )}
+            </g>
+            <path ref={pencilTether} className="hammerpreview__line hammerpreview__tether" />
+            <g ref={pencilCursor} className="pencilcursor" style={{ opacity: 0 }}>
+              <circle r="13" className="hammercursor__ring" />
+              <path className="hammercursor__cross" d="M-21 0H-15M15 0H21M0-21V-15M0 15V21M-3 0H3M0-3V3" />
+            </g>
+          </svg>
+        </>
+      )}
       <div className="holdring" ref={ring} aria-hidden="true">
         <span className="holdring__track" />
         <span className="holdring__fill" />
@@ -1318,14 +1623,14 @@ export function Stage({
             width={width - 2 * (inset + gap)}
             height={height - 2 * (inset + gap)}
           />
-          {editing && !bare && !hammer && (
+          {editing && !bare && !tool && (
             <text className="stage__fig" x={width / 2} y={height - inset - gap - 14} textAnchor="middle">
               <tspan className="stage__fig-script">Fig. {figure}</tspan>
             </text>
           )}
         </svg>
       )}
-      {selEditable && selModel && ready && !hammer && (
+      {selEditable && selModel && ready && !tool && (
         <button
           type="button"
           ref={partBtn}
@@ -1338,5 +1643,38 @@ export function Stage({
         </button>
       )}
     </main>
+  );
+}
+
+/** Prévia de um corte ou soma esperando a escolha do lado: o que sai em brasa com hachura, o que entra em ouro. */
+function PencilPendingPaths({ pending, uid }: { pending: PencilPending; uid: string }) {
+  const plan = pending.plan;
+  const line = plan.line.map((q, i) => `${i ? "L" : "M"}${q[0]} ${q[1]}`).join("");
+  if (plan.kind === "ready")
+    return (
+      <>
+        {plan.removed.length > 0 && (
+          <path className="pencilpreview__out" d={outlinePath(plan.removed)} fill={`url(#${uid}-out)`} />
+        )}
+        {plan.added.length > 0 && <path className="pencilpreview__in" d={outlinePath(plan.added)} />}
+      </>
+    );
+  const chosen = plan.sides[plan.pick];
+  const other = plan.sides[plan.pick === 0 ? 1 : 0];
+  return (
+    <>
+      {plan.op === "cut" ? (
+        <>
+          <path className="pencilpreview__keep" d={outlinePath(other)} />
+          <path className="pencilpreview__out" d={outlinePath(chosen)} fill={`url(#${uid}-out)`} />
+        </>
+      ) : (
+        <>
+          {other.length > 0 && <path className="pencilpreview__keep" d={outlinePath(other)} />}
+          <path className="pencilpreview__in" d={outlinePath(chosen)} />
+        </>
+      )}
+      <path className="pencilpreview__line" d={line} />
+    </>
   );
 }

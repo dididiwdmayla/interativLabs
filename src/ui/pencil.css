@@ -1,0 +1,93 @@
+/*
+ * Prévia do Lápis (docs/arquitetura.md §6): o traço ao vivo em ouro, com a
+ * largura no Traço; a parte sobre a peça que vai sair em brasa; a escolha de
+ * lado com hachura em brasa ("vai sair") ou ouro ("vai entrar").
+ * Só `transform` e `opacity` se animam.
+ */
+
+.pencilpreview {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: visible;
+}
+
+.pencilpreview__live,
+.pencilpreview__liveout,
+.pencilpreview__line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pencilpreview__live {
+  stroke: var(--color-gold);
+}
+
+.pencilpreview__liveout {
+  stroke: var(--color-ember);
+}
+
+.pencilpreview__live--contour {
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.pencilpreview__live--stroke {
+  stroke-opacity: 0.6;
+}
+
+.pencilpreview__liveout.pencilpreview__live--stroke {
+  stroke-opacity: 0.85;
+}
+
+.pencilpreview__line {
+  stroke: var(--color-gold);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.pencilpreview__out {
+  fill-rule: evenodd;
+  stroke: var(--color-ember);
+  stroke-width: 1.25px;
+  vector-effect: non-scaling-stroke;
+}
+
+.pencilpreview__hatch {
+  stroke: var(--color-ember);
+}
+
+.pencilpreview__in {
+  fill: var(--color-gold);
+  fill-opacity: 0.22;
+  fill-rule: evenodd;
+  stroke: var(--color-gold);
+  stroke-width: 1.25px;
+  vector-effect: non-scaling-stroke;
+}
+
+.pencilpreview__keep {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1px;
+  stroke-dasharray: 3 2;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.6;
+}
+
+.pencilcursor {
+  transition: opacity var(--dur-quick) var(--ease-settle);
+}
+
+.pencilbutton {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+}
+
+.pencilbutton[aria-pressed="true"] {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}

@@ -82,7 +82,7 @@ function Workbench() {
   const sheet = useUiStore((s) => s.sheet);
   const hint = useUiStore((s) => s.hint);
   const edgeOpen = useUiStore((s) => s.edgeMenu !== null);
-  const tool = useUiStore((s) => s.hammer !== null);
+  const tool = useUiStore((s) => s.hammer !== null || s.pencil);
   const wide = useMedia(WIDE_QUERY);
   const sa = useSafeArea();
   const portrait = useMedia("(orientation: portrait) and (max-width: 700px)");

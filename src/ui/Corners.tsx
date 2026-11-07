@@ -26,6 +26,8 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
   const hint = useUiStore((s) => s.hint);
   const hammer = useUiStore((s) => s.hammer);
   const setHammer = useUiStore((s) => s.setHammer);
+  const pencil = useUiStore((s) => s.pencil);
+  const setPencil = useUiStore((s) => s.setPencil);
   const editing = mode === "edit";
   const layer = model?.layers[active]?.layer;
   const title = model?.scene.meta.title ?? "";
@@ -82,6 +84,15 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
             onClick={() => setHammer(hammer ? null : "axle")}
           >
             <Icon name="hammer" uid={`${uid}h`} />
+          </button>
+          <button
+            type="button"
+            className="iconbtn corner__btn pencilbutton"
+            aria-label="Lápis"
+            aria-pressed={pencil}
+            onClick={() => setPencil(!pencil)}
+          >
+            <Icon name="pencil" uid={`${uid}p`} />
           </button>
         </div>
       )}
