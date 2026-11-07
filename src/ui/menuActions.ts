@@ -1,6 +1,15 @@
 import { addLayer, deleteLink, deleteParts, duplicatePart } from "@/editor/commands";
 import { useUiStore } from "@/editor/useUiStore";
-import { examplesAction, fitAction, fullscreenAction, leftyAction, tipsAction, xrayAction } from "./actions";
+import {
+  fitAction,
+  fullscreenAction,
+  hideModeAction,
+  layersAction,
+  leftyAction,
+  tipsAction,
+  trailAction,
+  xrayAction,
+} from "./actions";
 
 /** Novo nome de camada que não repete os existentes. */
 function freshLayerName(names: string[]): string {
@@ -60,7 +69,9 @@ const ACTIONS: Record<string, () => void> = {
   fit: fitAction,
   xray: xrayAction,
   fullscreen: () => void fullscreenAction(),
-  examples: examplesAction,
+  layers: layersAction,
+  hide: hideModeAction,
+  trail: trailAction,
   tips: tipsAction,
   lefty: leftyAction,
 };

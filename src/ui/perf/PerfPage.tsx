@@ -8,6 +8,7 @@ import type { FrameStats } from "../sim/controller";
 import { useSimStore } from "../sim/simStore";
 import { useSimulation } from "../sim/useSimulation";
 import { Stage } from "../Stage";
+import type { Look } from "@/render/look";
 import "./perf.css";
 
 /**
@@ -26,6 +27,10 @@ const sceneFile = import.meta.glob<unknown>("../../../scenes/fixtures/desempenho
 
 interface PerfResult {
   multilayer: boolean;
+  /** camadas em cores e afastadas (Parte E2d) */
+  colors: boolean;
+  /** rastro do movimento ligado (Parte E2d) */
+  trail: boolean;
   frames: number;
   fpsMedian: number;
   fpsP5: number;
@@ -63,12 +68,20 @@ function device(): Record<string, string | number> {
   };
 }
 
-function summarize(stats: FrameStats[], speed: number, multilayer = false): PerfResult {
+function summarize(
+  stats: FrameStats[],
+  speed: number,
+  multilayer = false,
+  colors = false,
+  trail = false,
+): PerfResult {
   // o primeiro segundo é aquecimento (compilação do WASM, primeira pintura)
   const s = stats.slice(Math.min(60, Math.floor(stats.length / 10)));
   const fps = s.map((x) => 1000 / Math.max(1, x.interval));
   return {
     multilayer,
+    colors,
+    trail,
     frames: s.length,
     fpsMedian: q(fps, 0.5),
     fpsP5: q(fps, 0.05),
@@ -106,7 +119,7 @@ function summarize(stats: FrameStats[], speed: number, multilayer = false): Perf
 
 function resultText(r: PerfResult): string {
   return [
-    `interativLabs /#perf — 150 peças, 100 ligações${r.multilayer ? ", 30 peças com dois perfis" : ""}, ${speedMode(r.speed).name} (${speedMode(r.speed).frac}), 10 s com arrasto`,
+    `interativLabs /#perf — 150 peças, 100 ligações${r.multilayer ? ", 30 peças com dois perfis" : ""}${r.colors ? ", camadas em cores e afastadas" : ""}${r.trail ? ", rastro" : ""}, ${speedMode(r.speed).name} (${speedMode(r.speed).frac}), 10 s com arrasto`,
     `qps: mediana ${n(r.fpsMedian)} · p5 ${n(r.fpsP5)} (${r.frames} quadros; ${r.long} acima de 20 ms)`,
     `física por quadro: mediana ${n(r.physicsMedian, 2)} ms · p95 ${n(r.physicsP95, 2)} ms (${n(r.stepsPerFrame, 2)} passos)`,
     `desenho por quadro: mediana ${n(r.drawMedian, 2)} ms · p95 ${n(r.drawP95, 2)} ms`,
@@ -117,6 +130,12 @@ function resultText(r: PerfResult): string {
 
 export default function PerfPage() {
   const [multilayer, setMultilayer] = useState(false);
+  const [colors, setColors] = useState(false);
+  const [trail, setTrail] = useState(false);
+  const look = useMemo<Look>(
+    () => ({ colors, spread: colors ? 28 : 0, isolate: false, hidden: new Set() }),
+    [colors],
+  );
   const [scene, setScene] = useState<Scene | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
@@ -187,7 +206,7 @@ export default function PerfPage() {
         held = false;
       }
       if (t >= DURATION) {
-        const r = summarize(stats.current, speed, multilayer);
+        const r = summarize(stats.current, speed, multilayer, colors, trail);
         setResult(r);
         (window as unknown as { __PERF__?: PerfResult }).__PERF__ = r;
         setRunning(false);
@@ -197,7 +216,7 @@ export default function PerfPage() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [running, ctl, model, speed, multilayer]);
+  }, [running, ctl, model, speed, multilayer, colors, trail]);
 
   const copy = useCallback(async () => {
     if (!result) return;
@@ -229,6 +248,30 @@ export default function PerfPage() {
               }}
             />
             30 peças com dois perfis
+          </label>
+          <label className="checkfield">
+            <input
+              type="checkbox"
+              checked={colors}
+              disabled={running}
+              onChange={(e) => {
+                setResult(null);
+                setColors(e.target.checked);
+              }}
+            />
+            Camadas em cores e afastadas
+          </label>
+          <label className="checkfield">
+            <input
+              type="checkbox"
+              checked={trail}
+              disabled={running}
+              onChange={(e) => {
+                setResult(null);
+                setTrail(e.target.checked);
+              }}
+            />
+            Rastro
           </label>
           <button
             type="button"
@@ -276,6 +319,7 @@ export default function PerfPage() {
           layerMode="all"
           activeLayer={3}
           onNodes={setNodes}
+          look={look}
           bare
         />
       </div>

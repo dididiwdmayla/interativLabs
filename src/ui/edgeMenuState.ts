@@ -23,7 +23,13 @@ export function useMenuContext(): MenuContext {
   const xray = useUiStore((s) => s.xray);
   const hint = useUiStore((s) => s.hint);
   const lefty = useUiStore((s) => s.lefty);
+  const layers = useUiStore((s) => s.look.open);
+  const hideMode = useUiStore((s) => s.hideMode);
+  const trail = useUiStore((s) => s.trail);
   return {
+    layers,
+    hideMode,
+    trail,
     mode,
     hasSelection,
     xray,

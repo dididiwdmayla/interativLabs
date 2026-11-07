@@ -51,3 +51,20 @@ export function examplesAction(): void {
   ui.setMainTab("examples");
   ui.setSheet("main");
 }
+
+export function layersAction(): void {
+  const ui = useUiStore.getState();
+  ui.setLook({ open: !ui.look.open });
+  if (ui.look.open) ui.notify("Camadas como desenhadas");
+}
+
+export function hideModeAction(): void {
+  const ui = useUiStore.getState();
+  ui.setHideMode(!ui.hideMode);
+}
+
+export function trailAction(): void {
+  const ui = useUiStore.getState();
+  ui.setTrail(!ui.trail);
+  ui.notify(ui.trail ? "Rastro desligado" : "Rastro: o caminho recente das peças que se movem");
+}

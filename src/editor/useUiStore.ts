@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Scene } from "@/model/types";
+import type { Id, LinkKind, Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
 import type { CardPick } from "./cardPick";
 import type { HammerTool } from "./hammer";
@@ -42,6 +42,35 @@ export interface EdgeMenuState {
   hover: string | null;
 }
 
+/**
+ * Camadas em cores (Parte E2d): estado de vista, fora da cena e do desfazer.
+ * `open` é o modo (a faixa à vista); dentro dele, cores, afastar e isolar.
+ */
+export interface LayerLook {
+  open: boolean;
+  colors: boolean;
+  spread: boolean;
+  /** afastamento entre camadas vizinhas, px de tela */
+  distance: number;
+  isolate: boolean;
+}
+
+export const LOOK_OFF: LayerLook = {
+  open: false,
+  colors: false,
+  spread: false,
+  distance: 28,
+  isolate: false,
+};
+export const SPREAD_MIN = 12;
+export const SPREAD_MAX = 64;
+
+/** Estado de vista salvo com o projeto (fora do formato da cena). */
+export interface ProjectView {
+  /** peças escondidas */
+  hidden?: Id[];
+}
+
 interface UiState {
   mode: Mode;
   pick: CardPick | null;
@@ -80,12 +109,29 @@ interface UiState {
   /** "Dedo desenha" no Lápis, mesmo depois de ver a caneta (salvo no aparelho) */
   fingerDraws: boolean;
   setFingerDraws: (on: boolean) => void;
+  /** camadas em cores, afastar e isolar */
+  look: LayerLook;
+  setLook: (patch: Partial<LayerLook>) => void;
+  /** modo "Esconder peças": cada toque esconde a peça tocada */
+  hideMode: boolean;
+  setHideMode: (on: boolean) => void;
+  /** peças escondidas do projeto aberto (estado de vista, salvo com o projeto) */
+  hidden: Id[];
+  hide: (id: Id) => void;
+  unhide: (id: Id) => void;
+  unhideAll: () => void;
+  /** rastro do movimento no Testar */
+  trail: boolean;
+  setTrail: (on: boolean) => void;
+  /** cartão "o que é" aberto */
+  explain: LinkKind | null;
+  setExplain: (k: LinkKind | null) => void;
   /** a gaveta sai da frente enquanto uma peça é arrastada dela */
   drawerAway: boolean;
   setDrawerAway: (on: boolean) => void;
   setMode: (mode: Mode) => void;
   toggleMode: () => void;
-  openScene: (id: string, scene: Scene, figure: number, history?: HistoryState) => void;
+  openScene: (id: string, scene: Scene, figure: number, history?: HistoryState, view?: ProjectView) => void;
   select: (s: Selection) => void;
   setActiveLayer: (i: number) => void;
   setXray: (on: boolean) => void;
@@ -149,6 +195,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
     set((s) => ({
       hammer,
       pencil: hammer ? false : s.pencil,
+      hideMode: hammer ? false : s.hideMode,
       pick: null,
       sheet: null,
       edgeMenu: null,
@@ -158,7 +205,13 @@ export const useUiStore = create<UiState>()((set, get) => ({
   pencilTool: DEFAULT_PENCIL,
   // o Lápis age na peça escolhida: a seleção fica
   setPencil: (pencil) =>
-    set((s) => ({ pencil, hammer: pencil ? null : s.hammer, pick: null, edgeMenu: null })),
+    set((s) => ({
+      pencil,
+      hammer: pencil ? null : s.hammer,
+      hideMode: pencil ? false : s.hideMode,
+      pick: null,
+      edgeMenu: null,
+    })),
   setPencilTool: (patch) => set((s) => ({ pencilTool: { ...s.pencilTool, ...patch } })),
   current: null,
   history: emptyHistory(),
@@ -186,6 +239,32 @@ export const useUiStore = create<UiState>()((set, get) => ({
     set({ fingerDraws });
   },
 
+  look: LOOK_OFF,
+  setLook: (patch) =>
+    set((s) => {
+      const look = { ...s.look, ...patch };
+      // abrir o modo liga as cores; fechar volta tudo ao normal
+      if (patch.open === true && !s.look.open) look.colors = true;
+      if (patch.open === false) return { look: { ...LOOK_OFF, distance: s.look.distance } };
+      return { look };
+    }),
+  hideMode: false,
+  setHideMode: (hideMode) =>
+    set((s) => ({
+      hideMode,
+      hammer: hideMode ? null : s.hammer,
+      pencil: hideMode ? false : s.pencil,
+      pick: null,
+      edgeMenu: null,
+    })),
+  hidden: [],
+  hide: (id) => set((s) => (s.hidden.includes(id) ? {} : { hidden: [...s.hidden, id] })),
+  unhide: (id) => set((s) => ({ hidden: s.hidden.filter((x) => x !== id) })),
+  unhideAll: () => set({ hidden: [] }),
+  trail: false,
+  setTrail: (trail) => set({ trail }),
+  explain: null,
+  setExplain: (explain) => set({ explain }),
   drawerAway: false,
   setDrawerAway: (drawerAway) => set({ drawerAway }),
   setMode: (mode) =>
@@ -198,8 +277,13 @@ export const useUiStore = create<UiState>()((set, get) => ({
       sheet: mode === "simulate" ? null : get().sheet,
     }),
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
-  openScene: (id, scene, figure, history) =>
+  openScene: (id, scene, figure, history, view) =>
     set((s) => ({
+      // estado de vista: o do projeto (peças que ainda existem); um exemplo começa sem nada escondido
+      hidden: (view?.hidden ?? []).filter((h) => scene.parts.some((p) => p.id === h)),
+      hideMode: false,
+      look: { ...LOOK_OFF, distance: s.look.distance },
+      explain: null,
       current: { id, scene, figure, serial: (s.current?.serial ?? 0) + 1 },
       history: history ?? emptyHistory(),
       mode: "edit",

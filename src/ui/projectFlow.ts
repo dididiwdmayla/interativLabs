@@ -16,7 +16,7 @@ import {
   type ProjectMeta,
 } from "@/editor/projects";
 import { dropHistory, loadHistory, saveHistory } from "@/editor/sessionHistory";
-import { useUiStore } from "@/editor/useUiStore";
+import { useUiStore, type ProjectView } from "@/editor/useUiStore";
 import { prepareScene } from "@/render/prepare";
 import { thumbnailSvg } from "@/render/thumbnail";
 import { DEFAULT_EXAMPLE, EXAMPLES, loadExample } from "./scenes/examples";
@@ -85,7 +85,9 @@ function figureOf(list: ProjectMeta[], id: string): number {
 
 function show(p: Project, list: ProjectMeta[]): void {
   const scene: Scene = { ...p.scene, meta: { ...p.scene.meta, title: p.name } };
-  useUiStore.getState().openScene(p.id, scene, figureOf(list, p.id), loadHistory(p.id, scene) ?? undefined);
+  useUiStore
+    .getState()
+    .openScene(p.id, scene, figureOf(list, p.id), loadHistory(p.id, scene) ?? undefined, p.view);
   void setLast(p.id);
 }
 
@@ -191,7 +193,12 @@ export async function removeProject(id: string): Promise<void> {
 let timer = 0;
 let pending: (() => Promise<void>) | null = null;
 
-async function save(id: string, scene: Scene): Promise<void> {
+/** Estado de vista do projeto aberto (peças escondidas). */
+function viewNow(): ProjectView {
+  return { hidden: useUiStore.getState().hidden };
+}
+
+async function save(id: string, scene: Scene, view: ProjectView): Promise<void> {
   const p = await getProject(id);
   const now = new Date().toISOString();
   await putProject({
@@ -201,8 +208,15 @@ async function save(id: string, scene: Scene): Promise<void> {
     thumb: thumbFor(scene),
     createdAt: p?.createdAt ?? now,
     updatedAt: now,
+    view,
   });
   await useProjects.getState().refresh();
+}
+
+/** Só o estado de vista mudou: a cena e as datas ficam. */
+async function saveView(id: string, view: ProjectView): Promise<void> {
+  const p = await getProject(id);
+  if (p) await putProject({ ...p, view });
 }
 
 export async function flushAutosave(): Promise<void> {
@@ -223,10 +237,20 @@ export function startAutosave(): () => void {
     const c = s.current;
     if (!c) return;
     if (c.id === prev.current?.id && s.history !== prev.history) saveHistory(c.id, c.scene, s.history);
-    if (c.id !== prev.current?.id || c.scene === prev.current?.scene) return;
+    if (c.id !== prev.current?.id) return;
     const id = c.id;
     const scene = c.scene;
-    pending = () => save(id, scene);
+    if (c.scene === prev.current?.scene) {
+      if (s.hidden === prev.hidden) return;
+      // peças escondidas: estado de vista, salvo à parte da cena
+      if (!pending) {
+        pending = () => saveView(id, viewNow());
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => void flushAutosave(), AUTOSAVE_MS);
+      }
+      return;
+    }
+    pending = () => save(id, scene, viewNow());
     window.clearTimeout(timer);
     timer = window.setTimeout(() => void flushAutosave(), AUTOSAVE_MS);
   });

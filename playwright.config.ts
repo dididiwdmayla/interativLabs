@@ -33,6 +33,7 @@ export default defineConfig({
     { name: "hammer-e2b", testMatch: /hammer-e2b\.spec\.ts/, timeout: 60_000 },
     { name: "hand-e2c", testMatch: /hand-e2c\.spec\.ts/, timeout: 60_000 },
     { name: "pencil-e2c", testMatch: /pencil-e2c\.spec\.ts/, timeout: 60_000 },
+    { name: "perf-e2d", testMatch: /perf-e2d\.spec\.ts/, timeout: 600_000 },
     { name: "understand-e2d", testMatch: /understand-e2d\.spec\.ts/, timeout: 90_000 },
     { name: "motor-e2b", testMatch: /motor-e2b\.spec\.ts/, timeout: 240_000 },
     { name: "capture", testMatch: /capture\.spec\.ts/ },

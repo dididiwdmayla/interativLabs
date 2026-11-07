@@ -20,14 +20,22 @@ export interface TimelineState {
   events: number[];
 }
 
+/** Que peças o toque alcança no Testar (camadas afastadas, peças escondidas). */
+export interface SimPick {
+  /** só esta camada */
+  layer?: number;
+  /** peças escondidas: não recebem toque */
+  exclude?: ReadonlySet<Id>;
+}
+
 export interface SimControl {
   togglePause(): void;
   stepOnce(): void;
   setSpeed(s: Speed): void;
   restart(): void;
-  /** o dedo na peça (mundo, mm); devolve se pegou */
-  dragAt(p: Vec2): Id | null;
-  releaseAt(p: Vec2): boolean;
+  /** o dedo na peça (mundo, mm); devolve se pegou. `pick` limita a camada e tira as escondidas */
+  dragAt(p: Vec2, pick?: SimPick): Id | null;
+  releaseAt(p: Vec2, pick?: SimPick): boolean;
   dragMove(p: Vec2): void;
   dragEnd(): void;
   /** arrastar a régua: mostra o quadro gravado do instante t (s) */

@@ -7,7 +7,7 @@ import { localOf, worldOf } from "@/render/prepare";
 import { Pacer, blendAt } from "@/sim/pacing";
 import { Recorder, type FrameView, type PendingInput, type SimEvent } from "@/sim/session";
 import type { SimReply, SimRequest } from "./sim.worker";
-import { useSimStore, type SimControl, type Speed, type TimelineState } from "./simStore";
+import { useSimStore, type SimControl, type SimPick, type Speed, type TimelineState } from "./simStore";
 
 /**
  * Controlador do modo Simular, carregado sob demanda. A física roda num
@@ -315,14 +315,16 @@ class Controller implements SimControl {
     this.post({ t: "restart", id: this.epoch });
   }
 
-  releaseAt(p: Vec2): boolean {
+  releaseAt(p: Vec2, pick: SimPick = {}): boolean {
     if (this.rewinding || this.shownStep !== null) return false;
     const frame = this.nodes.frame;
     for (const lm of this.nodes.model.links) {
       if (
         lm.link.kind !== "lock" ||
         frame.lock?.(lm.link.id) ||
-        this.nodes.model.layers[lm.layer]?.layer.visible === false
+        this.nodes.model.layers[lm.layer]?.layer.visible === false ||
+        (pick.layer !== undefined && lm.layer !== pick.layer) ||
+        (pick.exclude?.has(lm.link.b) && (lm.link.a === null || pick.exclude.has(lm.link.a)))
       )
         continue;
       const at = worldOf(frame.pose(lm.link.b), lm.link.at);
@@ -334,11 +336,18 @@ class Controller implements SimControl {
     return false;
   }
 
-  dragAt(p: Vec2): Id | null {
+  dragAt(p: Vec2, pick: SimPick = {}): Id | null {
     if (this.rewinding || this.shownStep !== null) return null;
     const f = this.view(this.step);
     if (!f) return null;
-    const id = partAt(this.nodes.model, f, p, { dynamicOnly: true, tol: 10 * this.nodes.ctx.px });
+    const model = this.nodes.model;
+    const id = partAt(model, f, p, {
+      dynamicOnly: true,
+      tol: 10 * this.nodes.ctx.px,
+      layer: (i) =>
+        model.layers[i]?.layer.visible !== false && (pick.layer === undefined || i === pick.layer),
+      exclude: pick.exclude,
+    });
     if (!id) return null;
     this.dragging = { part: id, local: localOf(f.pose(id), p) };
     this.finger = p;

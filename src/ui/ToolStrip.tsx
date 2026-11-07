@@ -65,6 +65,39 @@ interface Slot {
   above: boolean;
 }
 
+/**
+ * Espaço entre os cantos de cima (faixa presa à borda de cima: no Testar, a
+ * de baixo é da simulação). `bottom` aqui é a distância da borda de cima.
+ */
+function measureTop(el: HTMLElement): { avail: Slot; full: Slot } | null {
+  const stage = el.closest(".stage");
+  const bench = el.closest(".workbench");
+  if (!stage || !bench) return null;
+  const s = stage.getBoundingClientRect();
+  const mid = s.left + s.width / 2;
+  const frame = parseFloat(getComputedStyle(el).getPropertyValue("--strip-edge")) || 8;
+  let left = s.left + 2 * frame;
+  let right = s.right - 2 * frame;
+  let cornerBottom = s.top;
+  for (const c of bench.querySelectorAll<HTMLElement>(".corner--tl > *, .corner--tr > *")) {
+    const r = c.getBoundingClientRect();
+    if (r.width < 1 || r.height < 1) continue;
+    cornerBottom = Math.max(cornerBottom, r.bottom);
+    if (r.left + r.width / 2 < mid) left = Math.max(left, r.right + GAP);
+    else right = Math.min(right, r.left - GAP);
+  }
+  return {
+    avail: { left: left - s.left, room: left - s.left, width: right - left, bottom: frame, above: false },
+    full: {
+      left: 2 * frame,
+      room: 2 * frame,
+      width: s.width - 4 * frame,
+      bottom: cornerBottom - s.top + GAP,
+      above: true,
+    },
+  };
+}
+
 /** Espaço entre os cantos de baixo, medido no palco (px relativos a ele). */
 function measure(el: HTMLElement): { avail: Slot; full: Slot } | null {
   const stage = el.closest(".stage");
@@ -76,7 +109,8 @@ function measure(el: HTMLElement): { avail: Slot; full: Slot } | null {
   let left = s.left + 2 * frame;
   let right = s.right - 2 * frame;
   let cornerTop = s.bottom;
-  for (const c of bench.querySelectorAll<HTMLElement>(".corner--bl > *, .corner--br > *")) {
+  // no Testar, a faixa da simulação ocupa a borda de baixo: a faixa sobe para cima dela
+  for (const c of bench.querySelectorAll<HTMLElement>(".corner--bl > *, .corner--br > *, .testbar > *")) {
     const r = c.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) continue;
     cornerTop = Math.min(cornerTop, r.top);
@@ -102,7 +136,10 @@ export function ToolStrip({
   actions,
   phrase,
   popover,
+  edge = "bottom",
 }: {
+  /** borda onde a faixa fica presa (no Testar, a de cima: a de baixo é da simulação) */
+  edge?: "bottom" | "top";
   label: string;
   groups: StripGroup[];
   mode: "select" | "cycle";
@@ -125,7 +162,7 @@ export function ToolStrip({
     const el = ref.current;
     if (!el) return;
     const place = () => {
-      const m = measure(el);
+      const m = edge === "top" ? measureTop(el) : measure(el);
       if (!m) return;
       const tiers: Tier[] = ["full", "label", "icon"];
       for (const where of [m.avail, m.full]) {
@@ -150,7 +187,7 @@ export function ToolStrip({
     const bench = el.closest(".workbench");
     if (bench) {
       ro.observe(bench);
-      for (const c of bench.querySelectorAll(".corner--bl, .corner--br")) ro.observe(c);
+      for (const c of bench.querySelectorAll(".corner--bl, .corner--br, .testbar")) ro.observe(c);
     }
     window.addEventListener("resize", place);
     return () => {
@@ -274,6 +311,7 @@ export function ToolStrip({
       data-tier={tier}
       data-above={slot?.slot.above ?? false}
       data-placed={slot !== null}
+      data-edge={edge}
       style={style}
     >
       {popover && <div className="toolstrip__popover">{popover}</div>}

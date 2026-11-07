@@ -264,3 +264,34 @@
   font-size: 14px;
   color: var(--color-ink);
 }
+
+/* o deslizante da distância (camadas afastadas): compacto, para não cobrir o mecanismo */
+.toolstrip[aria-label="Camadas em cores"] .toolstrip__popover {
+  bottom: calc(100% + 16px);
+  padding: 0 var(--space-2);
+}
+
+.toolstrip[aria-label="Camadas em cores"] .pencildetails input {
+  width: 104px;
+}
+
+/* presa à borda de cima (camadas em cores no Testar): a frase e o deslizante descem */
+.toolstrip[data-edge="top"] {
+  bottom: auto;
+  top: calc(var(--sa-top, 0px) + var(--strip-bottom, var(--frame-inset)));
+}
+
+.toolstrip[data-edge="top"] .toolstrip__phrase {
+  bottom: auto;
+  top: calc(100% + 2px);
+}
+
+.toolstrip[data-edge="top"] .toolstrip__popover {
+  bottom: auto;
+  top: calc(100% + 18px);
+}
+
+/* a faixa de cima toma o lugar do nome do projeto */
+.shell[data-topstrip="true"] .corner--top {
+  visibility: hidden;
+}

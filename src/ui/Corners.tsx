@@ -117,7 +117,11 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
               setSheet(sheet === "layers" ? null : "layers");
             }}
           >
-            <span className="pill__plates" aria-hidden="true">
+            <span
+              className="pill__plates"
+              aria-hidden="true"
+              style={{ "--lrow-color": `var(--layer-${(active % 16) + 1})` } as React.CSSProperties}
+            >
               <span />
               <span />
               <span />

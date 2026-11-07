@@ -61,7 +61,8 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
 svg class=stage__sheet scene stage__sheet--static data-mode=edit
   g class=world
     g class=layer layer--below data-layer=1
-      path class=ground
+      g class=linkwrap is-shown
+        path class=ground
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=1
@@ -77,13 +78,15 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k5
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
-            path class=motor-arrow
-          g class=link link--pin data-link=k8
-            use href=#Ua-hw-pin class=hw
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k5
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
+              path class=motor-arrow
+          g class=linkwrap is-shown
+            g class=link link--pin data-link=k8
+              use href=#Ua-hw-pin class=hw
 svg class=stage__sheet scene stage__sheet--static data-mode=edit
   g class=world
     g class=layer layer--active data-layer=2
@@ -105,12 +108,14 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__face
           path class=part__hatch part__tone
           path class=part__outline
-      g class=link link--slider data-link=k9
-        path class=slider-guide
-        path class=centerline
-        rect class=slider-stop
-        rect class=slider-stop
-      path class=ground
+      g class=linkwrap is-shown
+        g class=link link--slider data-link=k9
+          path class=slider-guide
+          path class=centerline
+          rect class=slider-stop
+          rect class=slider-stop
+      g class=linkwrap is-shown
+        path class=ground
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--active data-layer=2
@@ -126,11 +131,12 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-      g class=link link--rod data-link=k7
-        rect class=rod-bar
-        path class=rod-line
-        circle class=rod-eye
-        circle class=rod-eye
+      g class=linkwrap is-shown
+        g class=link link--rod data-link=k7
+          rect class=rod-bar
+          path class=rod-line
+          circle class=rod-eye
+          circle class=rod-eye
 svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
   g class=world
     g class=overlay
@@ -236,10 +242,11 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--sensor link--strong data-link=k10
-            circle class=sensor-zone
-            path class=sensor-ticks
-            use href=#Ua-hw-sensor class=hw
+          g class=linkwrap is-shown
+            g class=link link--sensor link--strong data-link=k10
+              circle class=sensor-zone
+              path class=sensor-ticks
+              use href=#Ua-hw-sensor class=hw
       g class=part part--fixed is-tiny data-part=p8
         g class=part__wallg
           path class=part__wall
@@ -247,20 +254,24 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__face
           path class=part__hatch part__tone
           path class=part__outline
-      g class=link link--slider data-link=k5
-        path class=slider-guide
-        path class=centerline
-        rect class=slider-stop
-        rect class=slider-stop
-      g class=link link--chamber data-link=k6
-        path class=chamber-bore
-        rect class=chamber-cap
-        path class=centerline
-      path class=ground
+      g class=linkwrap is-shown
+        g class=link link--slider data-link=k5
+          path class=slider-guide
+          path class=centerline
+          rect class=slider-stop
+          rect class=slider-stop
+      g class=linkwrap is-shown
+        g class=link link--chamber data-link=k6
+          path class=chamber-bore
+          rect class=chamber-cap
+          path class=centerline
+      g class=linkwrap is-shown
+        path class=ground
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--active data-layer=0
-      polygon class=gas
+      g class=linkwrap is-shown
+        polygon class=gas
       g class=part part--dynamic data-part=p3
         g class=part__wallg
           path class=part__wall
@@ -390,11 +401,12 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k10
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
-            path class=motor-arrow
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k10
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
+              path class=motor-arrow
       g class=part part--dynamic data-part=p6
         g class=part__wallg
           path class=part__wall
@@ -405,10 +417,11 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k11
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k11
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
       g class=part part--dynamic data-part=p7
         g class=part__wallg
           path class=part__wall
@@ -436,14 +449,16 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--screw link--strong data-link=k12
-            circle class=hw-shadow
-            circle class=hw-seat
-            use href=#Ua-hw-screw-slot class=hw
-          g class=link link--axle link--strong data-link=k13
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--screw link--strong data-link=k12
+              circle class=hw-shadow
+              circle class=hw-seat
+              use href=#Ua-hw-screw-slot class=hw
+          g class=linkwrap is-shown
+            g class=link link--axle link--strong data-link=k13
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
       g class=part part--dynamic data-part=p9
         g class=part__wallg
           path class=part__wall
@@ -454,10 +469,11 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle link--strong data-link=k14
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--axle link--strong data-link=k14
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
 svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
   g class=world
     g class=overlay
@@ -545,11 +561,12 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--slider data-link=k16
-            path class=slider-guide
-            path class=centerline
-            rect class=slider-stop
-            rect class=slider-stop
+          g class=linkwrap is-shown
+            g class=link link--slider data-link=k16
+              path class=slider-guide
+              path class=centerline
+              rect class=slider-stop
+              rect class=slider-stop
       g class=part part--fixed data-part=p6
         g class=part__wallg
           path class=part__wall
@@ -590,14 +607,16 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__face
           path class=part__hatch part__tone
           path class=part__outline
-          g class=link link--chamber data-link=k14
-            path class=chamber-bore
-            rect class=chamber-cap
-            path class=centerline
-          g class=link link--sensor data-link=k15
-            circle class=sensor-zone
-            path class=sensor-ticks
-            use href=#Ua-hw-sensor class=hw
+          g class=linkwrap is-shown
+            g class=link link--chamber data-link=k14
+              path class=chamber-bore
+              rect class=chamber-cap
+              path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--sensor data-link=k15
+              circle class=sensor-zone
+              path class=sensor-ticks
+              use href=#Ua-hw-sensor class=hw
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=1
@@ -605,7 +624,8 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
         path class=part__shadow
       g
         path class=part__shadow
-      polygon class=gas
+      g class=linkwrap is-shown
+        polygon class=gas
       g class=part part--dynamic is-tiny data-part=p10
         g class=part__wallg
           path class=part__wall
@@ -620,16 +640,18 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__face
           path class=part__hatch part__tone
           path class=part__outline
-          g class=link link--pin data-link=k18
-            use href=#Ua-hw-pin class=hw
-      g class=link link--spring data-link=k17
-        g
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-        use href=#Ua-spring-end
-        g
+          g class=linkwrap is-shown
+            g class=link link--pin data-link=k18
+              use href=#Ua-hw-pin class=hw
+      g class=linkwrap is-shown
+        g class=link link--spring data-link=k17
+          g
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
           use href=#Ua-spring-end
+          g
+            use href=#Ua-spring-end
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=2
@@ -645,18 +667,21 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k19
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
-      g class=follower
-        g class=link link--pin data-link=k18
-          use href=#Ua-hw-pin class=hw
-          circle class=pin-ring
-      g class=follower link--strong
-        g class=link link--pin link--strong data-link=k21
-          use href=#Ua-hw-pin class=hw
-          circle class=pin-ring
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k19
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
+      g class=linkwrap is-shown
+        g class=follower
+          g class=link link--pin data-link=k18
+            use href=#Ua-hw-pin class=hw
+            circle class=pin-ring
+      g class=linkwrap is-shown
+        g class=follower link--strong
+          g class=link link--pin link--strong data-link=k21
+            use href=#Ua-hw-pin class=hw
+            circle class=pin-ring
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--active data-layer=3
@@ -672,12 +697,14 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle link--strong data-link=k20
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
-          g class=link link--pin link--strong data-link=k21
-            use href=#Ua-hw-pin class=hw
+          g class=linkwrap is-shown
+            g class=link link--axle link--strong data-link=k20
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--pin link--strong data-link=k21
+              use href=#Ua-hw-pin class=hw
 svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
   g class=world
     g class=overlay
@@ -780,15 +807,17 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--slider data-link=k26
-            path class=slider-guide
-            path class=centerline
-            rect class=slider-stop
-            rect class=slider-stop
-          g class=link link--sensor data-link=k36
-            circle class=sensor-zone
-            path class=sensor-ticks
-            use href=#Ua-hw-sensor class=hw
+          g class=linkwrap is-shown
+            g class=link link--slider data-link=k26
+              path class=slider-guide
+              path class=centerline
+              rect class=slider-stop
+              rect class=slider-stop
+          g class=linkwrap is-shown
+            g class=link link--sensor data-link=k36
+              circle class=sensor-zone
+              path class=sensor-ticks
+              use href=#Ua-hw-sensor class=hw
       g class=part part--fixed data-part=p2
         g class=part__wallg
           path class=part__wall
@@ -800,14 +829,16 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--screw data-link=k24
-            circle class=hw-shadow
-            circle class=hw-seat
-            use href=#Ua-hw-screw-slot class=hw
-          g class=link link--sensor data-link=k37
-            circle class=sensor-zone
-            path class=sensor-ticks
-            use href=#Ua-hw-sensor class=hw
+          g class=linkwrap is-shown
+            g class=link link--screw data-link=k24
+              circle class=hw-shadow
+              circle class=hw-seat
+              use href=#Ua-hw-screw-slot class=hw
+          g class=linkwrap is-shown
+            g class=link link--sensor data-link=k37
+              circle class=sensor-zone
+              path class=sensor-ticks
+              use href=#Ua-hw-sensor class=hw
       g class=part part--fixed is-tiny data-part=p3
         g class=part__wallg
           path class=part__wall
@@ -818,10 +849,11 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=0
-      g class=follower link--strong
-        g class=link link--pin link--strong data-link=k40
-          use href=#Ua-hw-pin class=hw
-          circle class=pin-ring
+      g class=linkwrap is-shown
+        g class=follower link--strong
+          g class=link link--pin link--strong data-link=k40
+            use href=#Ua-hw-pin class=hw
+            circle class=pin-ring
 svg class=stage__sheet scene stage__sheet--static data-mode=edit
   g class=world
     g class=layer layer--below data-layer=1
@@ -838,19 +870,22 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--screw data-link=k23
-            circle class=hw-shadow
-            circle class=hw-seat
-            use href=#Ua-hw-screw-hex class=hw
-      g class=follower
-        g class=link link--sensor data-link=k37
-          circle class=sensor-zone
-          path class=sensor-ticks
-          circle class=pin-ring
-      g class=link link--chamber data-link=k30
-        path class=chamber-bore
-        rect class=chamber-cap
-        path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--screw data-link=k23
+              circle class=hw-shadow
+              circle class=hw-seat
+              use href=#Ua-hw-screw-hex class=hw
+      g class=linkwrap is-shown
+        g class=follower
+          g class=link link--sensor data-link=k37
+            circle class=sensor-zone
+            path class=sensor-ticks
+            circle class=pin-ring
+      g class=linkwrap is-shown
+        g class=link link--chamber data-link=k30
+          path class=chamber-bore
+          rect class=chamber-cap
+          path class=centerline
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=1
@@ -878,7 +913,8 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
         path class=part__shadow
       g
         path class=part__shadow
-      polygon class=gas
+      g class=linkwrap is-shown
+        polygon class=gas
       g class=part part--dynamic data-part=p4
         g class=part__wallg
           path class=part__wall
@@ -889,10 +925,11 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--screw data-link=k21
-            circle class=hw-shadow
-            circle class=hw-seat
-            use href=#Ua-hw-screw-hex class=hw
+          g class=linkwrap is-shown
+            g class=link link--screw data-link=k21
+              circle class=hw-shadow
+              circle class=hw-seat
+              use href=#Ua-hw-screw-hex class=hw
       g class=part part--dynamic data-part=p5
         g class=part__wallg
           path class=part__wall
@@ -903,15 +940,17 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--screw data-link=k22
-            circle class=hw-shadow
-            circle class=hw-seat
-            use href=#Ua-hw-screw-slot class=hw
-          g class=link link--slider data-link=k31
-            path class=slider-guide
-            path class=centerline
-            rect class=slider-stop
-            rect class=slider-stop
+          g class=linkwrap is-shown
+            g class=link link--screw data-link=k22
+              circle class=hw-shadow
+              circle class=hw-seat
+              use href=#Ua-hw-screw-slot class=hw
+          g class=linkwrap is-shown
+            g class=link link--slider data-link=k31
+              path class=slider-guide
+              path class=centerline
+              rect class=slider-stop
+              rect class=slider-stop
       g class=part part--dynamic data-part=p7
         g class=part__wallg
           path class=part__wall
@@ -922,16 +961,18 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--slider data-link=k29
-            path class=slider-guide
-            path class=centerline
-            rect class=slider-stop
-            rect class=slider-stop
-          g class=link link--slider data-link=k33
-            path class=slider-guide
-            path class=centerline
-            rect class=slider-stop
-            rect class=slider-stop
+          g class=linkwrap is-shown
+            g class=link link--slider data-link=k29
+              path class=slider-guide
+              path class=centerline
+              rect class=slider-stop
+              rect class=slider-stop
+          g class=linkwrap is-shown
+            g class=link link--slider data-link=k33
+              path class=slider-guide
+              path class=centerline
+              rect class=slider-stop
+              rect class=slider-stop
       g class=part part--dynamic data-part=p8
         g class=part__wallg
           path class=part__wall
@@ -942,10 +983,11 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--screw data-link=k25
-            circle class=hw-shadow
-            circle class=hw-seat
-            use href=#Ua-hw-screw-hex class=hw
+          g class=linkwrap is-shown
+            g class=link link--screw data-link=k25
+              circle class=hw-shadow
+              circle class=hw-seat
+              use href=#Ua-hw-screw-hex class=hw
       g class=part part--dynamic data-part=p9
         g class=part__wallg
           path class=part__wall
@@ -1023,85 +1065,90 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__face
           path class=part__hatch part__tone
           path class=part__outline
-      g class=follower link--strong
-        g class=link link--pin link--strong data-link=k40
-          use href=#Ua-hw-pin class=hw
-          circle class=pin-ring
-      g class=link link--spring data-link=k27
-        g
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-        use href=#Ua-spring-end
-        g
+      g class=linkwrap is-shown
+        g class=follower link--strong
+          g class=link link--pin link--strong data-link=k40
+            use href=#Ua-hw-pin class=hw
+            circle class=pin-ring
+      g class=linkwrap is-shown
+        g class=link link--spring data-link=k27
+          g
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
           use href=#Ua-spring-end
-      g class=link link--spring data-link=k28
-        g
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-        use href=#Ua-spring-end
-        g
+          g
+            use href=#Ua-spring-end
+      g class=linkwrap is-shown
+        g class=link link--spring data-link=k28
+          g
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
           use href=#Ua-spring-end
-      g class=link link--spring data-link=k32
-        g
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-        use href=#Ua-spring-end
-        g
+          g
+            use href=#Ua-spring-end
+      g class=linkwrap is-shown
+        g class=link link--spring data-link=k32
+          g
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
           use href=#Ua-spring-end
+          g
+            use href=#Ua-spring-end
 svg class=stage__sheet scene stage__sheet--static data-mode=edit
   g class=world
     g class=layer layer--below data-layer=2
-      g class=follower
-        g class=link link--sensor data-link=k36
-          circle class=sensor-zone
-          path class=sensor-ticks
-          circle class=pin-ring
+      g class=linkwrap is-shown
+        g class=follower
+          g class=link link--sensor data-link=k36
+            circle class=sensor-zone
+            path class=sensor-ticks
+            circle class=pin-ring
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=2
@@ -1129,27 +1176,31 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k35
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
-      g class=follower link--strong
-        g class=link link--pin link--strong data-link=k40
-          use href=#Ua-hw-pin class=hw
-          circle class=pin-ring
-      g class=follower link--strong
-        g class=link link--pin link--strong data-link=k42
-          use href=#Ua-hw-pin class=hw
-          circle class=pin-ring
-      g class=link link--spring data-link=k34
-        g
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-          use href=#Ua-spring-coil
-        use href=#Ua-spring-end
-        g
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k35
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
+      g class=linkwrap is-shown
+        g class=follower link--strong
+          g class=link link--pin link--strong data-link=k40
+            use href=#Ua-hw-pin class=hw
+            circle class=pin-ring
+      g class=linkwrap is-shown
+        g class=follower link--strong
+          g class=link link--pin link--strong data-link=k42
+            use href=#Ua-hw-pin class=hw
+            circle class=pin-ring
+      g class=linkwrap is-shown
+        g class=link link--spring data-link=k34
+          g
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
+            use href=#Ua-spring-coil
           use href=#Ua-spring-end
+          g
+            use href=#Ua-spring-end
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--active data-layer=3
@@ -1167,10 +1218,11 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle link--strong data-link=k38
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--axle link--strong data-link=k38
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
       g class=part part--dynamic is-tiny data-part=p20
         g class=part__wallg
           path class=part__wall
@@ -1178,14 +1230,17 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__face
           path class=part__hatch part__tone
           path class=part__outline
-          g class=link link--axle link--strong data-link=k39
-            g class=hw-symbol
-              circle
-            path class=centerline
-          g class=link link--pin link--strong data-link=k40
-            use href=#Ua-hw-pin class=hw
-          g class=link link--pin link--strong data-link=k42
-            use href=#Ua-hw-pin class=hw
+          g class=linkwrap is-shown
+            g class=link link--axle link--strong data-link=k39
+              g class=hw-symbol
+                circle
+              path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--pin link--strong data-link=k40
+              use href=#Ua-hw-pin class=hw
+          g class=linkwrap is-shown
+            g class=link link--pin link--strong data-link=k42
+              use href=#Ua-hw-pin class=hw
 svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
   g class=world
     g class=overlay
@@ -1357,10 +1412,11 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k5
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k5
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
       g class=part part--dynamic data-part=p3
         g class=part__wallg
           path class=part__wall
@@ -1371,10 +1427,11 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k6
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k6
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=2
@@ -1402,17 +1459,19 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle data-link=k7
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
-          g class=link link--lock data-link=k8
-            g
-              title
-              use href=#Ua-hw-pin class=hw
-              g class=hw-symbol
-                circle
-                path
+          g class=linkwrap is-shown
+            g class=link link--axle data-link=k7
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
+          g class=linkwrap is-shown
+            g class=link link--lock data-link=k8
+              g
+                title
+                use href=#Ua-hw-pin class=hw
+                g class=hw-symbol
+                  circle
+                  path
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--below data-layer=3
@@ -1440,7 +1499,8 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__face
           path class=part__hatch part__tone
           path class=part__outline
-      path class=link link--cable data-link=k10
+      g class=linkwrap is-shown
+        path class=link link--cable data-link=k10
 svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
   g class=world
     g class=overlay
@@ -1536,11 +1596,12 @@ svg class=stage__sheet scene stage__sheet--static data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--slider data-link=k10
-            path class=slider-guide
-            path class=centerline
-            rect class=slider-stop
-            rect class=slider-stop
+          g class=linkwrap is-shown
+            g class=link link--slider data-link=k10
+              path class=slider-guide
+              path class=centerline
+              rect class=slider-stop
+              rect class=slider-stop
 svg class=stage__sheet scene stage__sheet--static data-mode=edit
   g class=world
     g class=layer layer--below data-layer=1
@@ -1594,9 +1655,10 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--pin link--strong data-link=k11
-            g class=hw-symbol
-              circle
+          g class=linkwrap is-shown
+            g class=link link--pin link--strong data-link=k11
+              g class=hw-symbol
+                circle
 svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
   g class=world
     g class=layer layer--active data-layer=2
@@ -1612,15 +1674,17 @@ svg class=stage__sheet scene stage__sheet--dynamic data-mode=edit
           path class=part__faint
           path class=part__innerline
           path class=part__outline
-          g class=link link--axle link--strong data-link=k12
-            circle class=hw-seat
-            use href=#Ua-hw-axle class=hw
-            path class=centerline
-      g class=follower link--strong
-        g class=link link--pin link--strong data-link=k11
-          g class=hw-symbol
-            circle
-          circle class=pin-ring
+          g class=linkwrap is-shown
+            g class=link link--axle link--strong data-link=k12
+              circle class=hw-seat
+              use href=#Ua-hw-axle class=hw
+              path class=centerline
+      g class=linkwrap is-shown
+        g class=follower link--strong
+          g class=link link--pin link--strong data-link=k11
+            g class=hw-symbol
+              circle
+            circle class=pin-ring
 svg class=stage__sheet scene stage__sheet--overlay data-mode=edit
   g class=world
     g class=overlay

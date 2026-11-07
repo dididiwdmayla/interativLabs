@@ -20,6 +20,7 @@ type UiState = {
   setPencilTool(p: Record<string, unknown>): void;
   select(s: { kind: "part" | "link"; id: string } | null): void;
   setHint(on: boolean): void;
+  history: { past: unknown[] };
   setFingerDraws(on: boolean): void;
   fingerDraws: boolean;
   penSeen: boolean;
@@ -204,3 +205,151 @@ test.describe("16.1 — Dedo desenha (caneta e dedo)", () => {
     await page.evaluate(() => (window as unknown as W).__IL__.ui.getState().setFingerDraws(false));
   });
 });
+
+// ——— 16.2 ———
+
+type Sim = {
+  ctl: {
+    preview(t: number): void;
+    scrub(t: number): void;
+    setSpeed(s: number): void;
+    dragAt(p: [number, number]): string | null;
+    dragMove(p: [number, number]): void;
+    dragEnd(): void;
+    releaseAt(p: [number, number]): boolean;
+    timeline(): { latest: number; events: number[] };
+  } | null;
+  status: string;
+};
+
+const setLook = (page: Page, patch: Record<string, unknown>) =>
+  page.evaluate((p) => {
+    const s = (window as unknown as W).__IL__.ui.getState() as unknown as {
+      setLook(p: Record<string, unknown>): void;
+    };
+    s.setLook(p);
+  }, patch);
+
+const VARIANTS: { name: string; patch: Record<string, unknown> }[] = [
+  { name: "cores", patch: { open: true, colors: true, spread: false, isolate: false } },
+  { name: "afastadas", patch: { open: true, colors: true, spread: true, isolate: false } },
+  { name: "isolada", patch: { open: true, colors: true, spread: false, isolate: true } },
+];
+
+/** Puxa o gatilho do Lançador em Real e devolve o instante do tiro (s). */
+async function fireLancador(page: Page): Promise<number> {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __IL__: { sim: { getState(): Sim } } }).__IL__.sim.getState().status,
+      ),
+    )
+    .toBe("ready");
+  return page.evaluate(async () => {
+    const ctl = (window as unknown as { __IL__: { sim: { getState(): Sim } } }).__IL__.sim.getState().ctl!;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    await wait(300);
+    ctl.setSpeed(1);
+    const t0 = ctl.timeline().latest;
+    ctl.dragAt([16, 35.5]);
+    for (let i = 1; i <= 12; i++) {
+      await wait(16);
+      ctl.dragMove([16 - (18 * i) / 12, 35.5 - i / 12]);
+    }
+    await wait(700);
+    ctl.dragEnd();
+    await wait(300);
+    ctl.setSpeed(0.05);
+    return Math.min(...ctl.timeline().events.filter((e) => e > t0));
+  });
+}
+
+/** Solta a trava da Roda e gira a manivela meia volta; devolve um instante no meio do giro. */
+async function turnRoda(page: Page, scene: Scene): Promise<number> {
+  const lock = scene.links.find((l) => l.kind === "lock") as { b: string; at: [number, number] };
+  const host = scene.parts.find((p) => p.id === lock.b)!;
+  const c = Math.cos(host.angle);
+  const s = Math.sin(host.angle);
+  const at: [number, number] = [
+    host.x + lock.at[0] * c - lock.at[1] * s,
+    host.y + lock.at[0] * s + lock.at[1] * c,
+  ];
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __IL__: { sim: { getState(): Sim } } }).__IL__.sim.getState().status,
+      ),
+    )
+    .toBe("ready");
+  return page.evaluate(async (at) => {
+    const ctl = (window as unknown as { __IL__: { sim: { getState(): Sim } } }).__IL__.sim.getState().ctl!;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    await wait(300);
+    ctl.setSpeed(1);
+    ctl.releaseAt(at);
+    await wait(100);
+    // a manivela gira em volta do pinhão (-24, 0), raio 18
+    const p = (a: number): [number, number] => [-24 + 18 * Math.cos(a), 18 * Math.sin(a)];
+    const a0 = Math.PI * 0.72;
+    ctl.dragAt(p(a0));
+    let mid = 0;
+    for (let i = 1; i <= 40; i++) {
+      await wait(16);
+      ctl.dragMove(p(a0 + (i / 40) * Math.PI));
+      if (i === 24) mid = ctl.timeline().latest;
+    }
+    ctl.dragEnd();
+    await wait(200);
+    return mid;
+  }, at);
+}
+
+for (const vp of [
+  { name: "844x390", width: 844, height: 390, mobile: true },
+  { name: "1440x900", width: 1440, height: 900, mobile: false },
+]) {
+  test.describe(`16.2 — camadas em cores ${vp.name}`, () => {
+    test.use({
+      viewport: { width: vp.width, height: vp.height },
+      deviceScaleFactor: 2,
+      hasTouch: vp.mobile,
+      isMobile: vp.mobile,
+    });
+    for (const ex of [
+      { id: "lancador", file: LANCADOR },
+      { id: "roda", file: "scenes/examples/roda-e-lingueta.json" },
+    ]) {
+      test(`${ex.id}: cores, afastadas e isolada, no Montar e no meio do ciclo`, async ({ page }) => {
+        test.setTimeout(120_000);
+        const scene = sceneOf(ex.file);
+        await open(page, scene);
+        const before = await current(page);
+        for (const v of VARIANTS) {
+          await setLook(page, v.patch);
+          await page.waitForTimeout(700);
+          await page.screenshot({ path: `${DIR}/${v.name}-${ex.id}-montar-${vp.name}.png` });
+        }
+        await setLook(page, { open: false });
+        // modo de vista: a cena (e o hash dela) não muda, nem a pilha de desfazer
+        expect(await current(page)).toEqual(before);
+        expect(
+          await page.evaluate(() => (window as unknown as W).__IL__.ui.getState().history.past.length),
+        ).toBe(0);
+        await page.evaluate(() => (window as unknown as W).__IL__.ui.getState().setMode("simulate"));
+        const t = ex.id === "lancador" ? (await fireLancador(page)) + 3 / 240 : await turnRoda(page, scene);
+        await page.evaluate(
+          (x) =>
+            (window as unknown as { __IL__: { sim: { getState(): Sim } } }).__IL__.sim
+              .getState()
+              .ctl!.scrub(x),
+          t,
+        );
+        for (const v of VARIANTS) {
+          await setLook(page, v.patch);
+          await page.waitForTimeout(700);
+          await page.screenshot({ path: `${DIR}/${v.name}-${ex.id}-testar-${vp.name}.png` });
+        }
+      });
+    }
+  });
+}

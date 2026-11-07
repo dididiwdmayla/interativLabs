@@ -38,11 +38,13 @@ import { linkAt, partHit } from "@/render/hit";
 import { StageNodes, drawnFrame, overrideFrame } from "@/render/nodes";
 import { localOf, outlinePath, worldOf, type PartModel, type SceneModel } from "@/render/prepare";
 import { SceneSvg, type LayerMode, type Selection } from "@/render/SceneSvg";
+import { NO_LOOK, spreadBox, spreadOffset, touchModel, type Look } from "@/render/look";
 import {
   fitAround,
   fitView,
   type ScreenRect,
   hatchStep,
+  PX_PER_MM,
   mmPerPx,
   panBy,
   toScreen,
@@ -94,6 +96,12 @@ interface StageProps {
   obstacles?: (stage: DOMRect) => { rects: ScreenRect[]; edge: Pad };
   /** primeiro toque na prancha (a dica some) */
   onFirstTouch?: () => void;
+  /** camadas em cores, afastadas, isoladas e peças escondidas (estado de vista) */
+  look?: Look;
+  /** modo "Esconder peças": o toque esconde a peça mais alta sob o dedo */
+  onHide?: (id: string) => void;
+  /** faixas e pílulas que vivem dentro da prancha (camadas em cores, escondidas) */
+  children?: React.ReactNode;
 }
 
 type Pad = [number, number, number, number];
@@ -142,7 +150,8 @@ type Gesture =
   | { kind: "pencil"; stroke: PencilStroke }
   | { kind: "none" }
   | { kind: "menu" }
-  | { kind: "drag" }
+  | { kind: "drag"; shift: Vec2 }
+  | { kind: "hide"; start: View; x0: number; y0: number; moved: boolean }
   | { kind: "pan"; start: View; tap: boolean }
   | { kind: "pinch"; start: View; d0: number; m0: Vec2 }
   | {
@@ -280,7 +289,7 @@ function paperStyle(): React.CSSProperties {
 }
 
 export function Stage({
-  model,
+  model: drawModel,
   figure,
   serial,
   mode,
@@ -293,7 +302,22 @@ export function Stage({
   fitPad,
   obstacles,
   onFirstTouch,
+  look = NO_LOOK,
+  onHide,
+  children,
 }: StageProps) {
+  // o desenho usa a cena inteira; o toque, o modelo sem as peças escondidas (e só a ativa no isolar)
+  const model = useMemo(
+    () => (drawModel ? touchModel(drawModel, look, activeLayer) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [drawModel, look.hidden, look.isolate, activeLayer],
+  );
+  /** deslocamento da folha da camada ativa (afastar), px: o toque age nela */
+  const activeOff = spreadOffset(activeLayer, look.spread);
+  const offRef = useRef(activeOff);
+  useLayoutEffect(() => {
+    offRef.current = activeOff;
+  });
   const box = useRef<HTMLDivElement>(null);
   const sheets = useRef<HTMLDivElement>(null);
   const { width, height } = useElementSize(box);
@@ -358,7 +382,7 @@ export function Stage({
     setHammerPreview(null);
   };
 
-  const nodes = useMemo(() => (model ? new StageNodes(model) : null), [model]);
+  const nodes = useMemo(() => (drawModel ? new StageNodes(drawModel) : null), [drawModel]);
   useEffect(() => {
     onNodes?.(nodes);
   }, [nodes, onNodes]);
@@ -447,7 +471,10 @@ export function Stage({
     ring.current?.classList.remove("is-on");
   };
   /** começa (ou recomeça) a contar o segundo parado, se o dedo está na faixa lateral */
-  const armHold = (x: number, y: number) => {
+  const armHold = (lx: number, ly: number) => {
+    // o menu de borda é da tela, não da folha da camada: volta ao ponto do palco
+    const x = lx + offRef.current[0];
+    const y = ly + offRef.current[1];
     clearHold();
     if (bare || width <= 0) return;
     const side = x < width * EDGE_ZONE ? "left" : x > width * (1 - EDGE_ZONE) ? "right" : null;
@@ -496,9 +523,48 @@ export function Stage({
   };
   useEffect(() => () => clearHold(), []);
 
+  // ——— afastar: enquadra o conjunto afastado ao ligar e volta ao desligar ———
+  const spreadView = useRef<View | null>(null);
+  const spreadTimer = useRef(0);
+  useEffect(() => {
+    spreadView.current = null;
+  }, [serial]);
+  useEffect(() => {
+    if (!drawModel || width <= 0 || height <= 0 || bare) return;
+    const spread = look.spread;
+    window.clearTimeout(spreadTimer.current);
+    if (spread <= 0) {
+      if (spreadView.current) animateView(spreadView.current);
+      spreadView.current = null;
+      return;
+    }
+    const first = !spreadView.current;
+    if (first) spreadView.current = { ...view.current };
+    // no deslizante, reenquadra quando a mão para
+    spreadTimer.current = window.setTimeout(
+      () => {
+        const rect = box.current?.getBoundingClientRect();
+        const obs = rect && obstacles ? obstacles(rect) : null;
+        const pad = editing ? (fitPad?.edit ?? FIT_PAD_EDIT) : (fitPad?.sim ?? FIT_PAD_SIM);
+        const n = drawModel.layers.length;
+        let v = view.current;
+        for (let k = 0; k < 3; k++) {
+          const b = spreadBox(drawModel.focus, n, spread, PX_PER_MM * v.zoom);
+          v = obs ? fitAround(b, width, height, obs.rects, obs.edge) : fitView(b, width, height, pad);
+        }
+        animateView(v);
+      },
+      first ? 0 : 220,
+    );
+    // só quando o afastamento muda (animateView e o resto leem refs)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [look.spread]);
+
+  /** ponto do palco no espaço da camada ativa (afastadas, a folha dela fica deslocada) */
   const local = (e: { clientX: number; clientY: number }): Vec2 => {
     const r = box.current?.getBoundingClientRect();
-    return r ? [e.clientX - r.left, e.clientY - r.top] : [0, 0];
+    const o = offRef.current;
+    return r ? [e.clientX - r.left - o[0], e.clientY - r.top - o[1]] : [0, 0];
   };
 
   const beginPinch = () => {
@@ -585,8 +651,9 @@ export function Stage({
   const placePartButton = (pose: PartPose | null, fingerY?: number) => {
     const el = partBtn.current;
     if (!el || !selModel || !pose) return;
+    const o = offRef.current;
     const pos = partButtonPos(selModel, pose, view.current, width, height, fingerY);
-    el.style.transform = `translate(${Math.round(pos[0])}px, ${Math.round(pos[1])}px)`;
+    el.style.transform = `translate(${Math.round(pos[0] + o[0])}px, ${Math.round(pos[1] + o[1])}px)`;
   };
   useLayoutEffect(() => {
     onView.current = selModel ? () => placePartButton(selModel.part) : null;
@@ -611,12 +678,14 @@ export function Stage({
       view: () => view.current,
       clientToWorld: (x, y) => {
         const r = rect();
-        return toWorld(view.current, x - (r?.left ?? 0), y - (r?.top ?? 0));
+        const o = offRef.current;
+        return toWorld(view.current, x - (r?.left ?? 0) - o[0], y - (r?.top ?? 0) - o[1]);
       },
       worldToClient: (p) => {
         const r = rect();
+        const o = offRef.current;
         const q = toScreen(view.current, p);
-        return [q[0] + (r?.left ?? 0), q[1] + (r?.top ?? 0)];
+        return [q[0] + (r?.left ?? 0) + o[0], q[1] + (r?.top ?? 0) + o[1]];
       },
       overStage: (x, y) => {
         const r = rect();
@@ -831,6 +900,37 @@ export function Stage({
       vibrate(12);
   };
 
+  /**
+   * Camadas que o toque tenta no Testar e no esconder, da de cima para a de
+   * baixo, com o deslocamento da folha de cada uma em relação à ativa
+   * (afastadas). Juntas, uma tentativa só, com todas as camadas.
+   */
+  const layerTries = (): { layer: number | undefined; shift: Vec2 }[] => {
+    if (!model || look.spread <= 0) return [{ layer: undefined, shift: [0, 0] }];
+    const a = offRef.current;
+    return model.layers
+      .map((L) => L.index)
+      .reverse()
+      .map((i) => {
+        const o = spreadOffset(i, look.spread);
+        return { layer: i, shift: [a[0] - o[0], a[1] - o[1]] as Vec2 };
+      });
+  };
+  /** A peça mais alta sob o ponto, em qualquer camada visível (as escondidas não contam). */
+  const hidePick = (x: number, y: number): string | null => {
+    if (!model || !nodes) return null;
+    const tol = 6 * mmPerPx(view.current.zoom);
+    for (const t of layerTries()) {
+      const wt = toWorld(view.current, x + t.shift[0], y + t.shift[1]);
+      const m = partHit(model, nodes.frame, wt, {
+        tol,
+        layer: (i) => model.layers[i]?.layer.visible !== false && (t.layer === undefined || i === t.layer),
+      });
+      if (m) return m.part.id;
+    }
+    return null;
+  };
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as Element).closest(".stage__ui")) return;
     if (!model || !nodes) return;
@@ -877,14 +977,24 @@ export function Stage({
     }
     if (pointers.current.size > 2) return;
     const w = toWorld(view.current, x, y);
+    if (onHide && !bare) {
+      // modo "Esconder peças": um toque esconde a peça mais alta sob o dedo; arrastar move a vista
+      gesture.current = { kind: "hide", start: { ...view.current }, x0: x, y0: y, moved: false };
+      return;
+    }
     if (!editing) {
-      if (ctl?.releaseAt(w)) {
-        gesture.current = { kind: "none" };
-        return;
-      }
-      if (ctl && ctl.dragAt(w)) {
-        gesture.current = { kind: "drag" };
-        return;
+      // afastadas, cada camada tem a sua folha: tenta da de cima para a de baixo
+      for (const t of layerTries()) {
+        const wt = toWorld(view.current, x + t.shift[0], y + t.shift[1]);
+        const pick = { layer: t.layer, exclude: look.hidden };
+        if (ctl?.releaseAt(wt, pick)) {
+          gesture.current = { kind: "none" };
+          return;
+        }
+        if (ctl && ctl.dragAt(wt, pick)) {
+          gesture.current = { kind: "drag", shift: t.shift };
+          return;
+        }
       }
     } else if (!bare) {
       // Lápis com o dedo (ou mouse): desenha; com caneta presente, o dedo só move a vista
@@ -1109,10 +1219,16 @@ export function Stage({
       moveStroke(g.stroke, x, y);
     } else if (g.kind === "menu") {
       const ui = useUiStore.getState();
-      const hover = hitEdgeMenu(x, y);
+      const hover = hitEdgeMenu(x + offRef.current[0], y + offRef.current[1]);
       if (ui.edgeMenu && ui.edgeMenu.hover !== hover) ui.setEdgeMenu({ ...ui.edgeMenu, hover });
     } else if (g.kind === "drag") {
-      ctl?.dragMove(w);
+      ctl?.dragMove(toWorld(view.current, x + g.shift[0], y + g.shift[1]));
+    } else if (g.kind === "hide") {
+      if (Math.hypot(x - g.x0, y - g.y0) > TAP_PX) g.moved = true;
+      if (g.moved) {
+        view.current = panBy(g.start, x - g.x0, y - g.y0);
+        writeView();
+      }
     } else if (g.kind === "press") {
       const moved = Math.hypot(x - p.x0, y - p.y0);
       if (g.target.kind === "part" && g.movable && moved > MOVE_PX && model) {
@@ -1164,7 +1280,9 @@ export function Stage({
         writeView();
       }
       const h = hold.current;
-      if (pointers.current.size === 1 && (!h || Math.hypot(x - h.ax, y - h.ay) > HOLD_PX)) armHold(x, y);
+      const rx = x + offRef.current[0];
+      const ry = y + offRef.current[1];
+      if (pointers.current.size === 1 && (!h || Math.hypot(rx - h.ax, ry - h.ay) > HOLD_PX)) armHold(x, y);
     } else if (g.kind === "pinch") {
       const [a, b] = [...pointers.current.values()];
       if (!a || !b) return;
@@ -1285,6 +1403,18 @@ export function Stage({
         ctl?.dragEnd();
         gesture.current = { kind: "none" };
         return;
+      case "hide": {
+        gesture.current = { kind: "none" };
+        if (g.moved) {
+          settle();
+          return;
+        }
+        if (up) {
+          const id = hidePick(g.x0, g.y0);
+          if (id) onHide?.(id);
+        }
+        return;
+      }
       case "press":
         window.clearTimeout(g.timer);
         if (up) {
@@ -1356,7 +1486,8 @@ export function Stage({
       e.preventDefault();
       const r = el.getBoundingClientRect();
       const k = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015));
-      view.current = zoomAt(view.current, k, e.clientX - r.left, e.clientY - r.top);
+      const o = offRef.current;
+      view.current = zoomAt(view.current, k, e.clientX - r.left - o[0], e.clientY - r.top - o[1]);
       writeView();
       window.clearTimeout(wheelTimer.current);
       wheelTimer.current = window.setTimeout(settle, WHEEL_SETTLE_MS);
@@ -1402,7 +1533,13 @@ export function Stage({
       className="stage"
       ref={box}
       data-mode={mode}
-      style={paperStyle()}
+      style={
+        {
+          ...paperStyle(),
+          "--active-x": `${activeOff[0]}px`,
+          "--active-y": `${activeOff[1]}px`,
+        } as React.CSSProperties
+      }
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -1555,6 +1692,7 @@ export function Stage({
           </svg>
         </>
       )}
+      {children}
       <div className="holdring" ref={ring} aria-hidden="true">
         <span className="holdring__track" />
         <span className="holdring__fill" />
@@ -1567,9 +1705,10 @@ export function Stage({
           role="img"
           aria-label={`Prancha: ${title}`}
         >
-          {model && nodes && (
+          {drawModel && nodes && (
             <SceneSvg
-              model={model}
+              model={drawModel}
+              look={look}
               nodes={nodes}
               uid={uid}
               zoom={zoom}
@@ -1619,7 +1758,7 @@ export function Stage({
             width={width - 2 * (inset + gap)}
             height={height - 2 * (inset + gap)}
           />
-          {editing && !bare && !tool && (
+          {editing && !bare && !tool && !children && (
             <text className="stage__fig" x={width / 2} y={height - inset - gap - 14} textAnchor="middle">
               <tspan className="stage__fig-script">Fig. {figure}</tspan>
             </text>

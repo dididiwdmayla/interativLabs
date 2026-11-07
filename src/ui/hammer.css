@@ -124,3 +124,10 @@
     animation: none;
   }
 }
+
+/* afastadas (Parte E2d): o que é desenhado no espaço da camada ativa acompanha a folha dela */
+.stage__sheet--edit,
+.hammerpreview,
+.pencilpreview {
+  translate: var(--active-x, 0) var(--active-y, 0);
+}

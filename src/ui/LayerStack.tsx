@@ -46,7 +46,12 @@ function Row({
   return (
     <li
       className={`lrow${active ? " is-active" : ""}${!layer.visible ? " is-hidden" : ""}`}
-      style={offset ? { transform: `translateY(${offset}px)` } : undefined}
+      style={
+        {
+          "--lrow-color": `var(--layer-${(index % 16) + 1})`,
+          ...(offset ? { transform: `translateY(${offset}px)` } : {}),
+        } as React.CSSProperties
+      }
       data-dragging={offset ? true : undefined}
     >
       <div className="lrow__main">

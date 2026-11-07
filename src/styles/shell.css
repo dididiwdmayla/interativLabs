@@ -2432,3 +2432,17 @@
   color: var(--color-gold);
   font-size: 13px;
 }
+
+/* camadas em cores (Parte E2d): a pilha e a pílula usam as cores das camadas */
+.shell[data-colors="true"] .lrow .lrow__sheet {
+  background:
+    radial-gradient(circle at 4px 4px, var(--color-ink) 1px, transparent 1.5px),
+    radial-gradient(circle at calc(100% - 4px) 4px, var(--color-ink) 1px, transparent 1.5px),
+    radial-gradient(circle at 4px calc(100% - 4px), var(--color-ink) 1px, transparent 1.5px),
+    radial-gradient(circle at calc(100% - 4px) calc(100% - 4px), var(--color-ink) 1px, transparent 1.5px),
+    var(--lrow-color);
+}
+
+.shell[data-colors="true"] .pill__plates span:nth-child(3) {
+  background: var(--lrow-color);
+}

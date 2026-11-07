@@ -226,10 +226,20 @@ function ChamberArt({ ctx, lm, gold }: { ctx: ArtContext; lm: LinkModel; gold: b
 }
 
 /** Ligações de duas pontas (mola, haste, cabo), escritas a cada quadro pelo StageNodes. */
-export function TwoEndArt({ ctx, lm }: { ctx: ArtContext; lm: LinkModel }) {
+export function TwoEndArt({
+  ctx,
+  lm,
+  ghost = null,
+}: {
+  ctx: ArtContext;
+  lm: LinkModel;
+  /** ponta presa a uma peça escondida: anel tracejado nela */
+  ghost?: "a" | "b" | null;
+}) {
   const l = lm.link;
   const gold = ctx.selected === l.id;
   const nodes = ctx.nodes;
+  const ring = Math.max(1.6, 7 * ctx.px);
   if (l.kind === "spring") {
     const D = l.coil.outerD;
     const m = coilMetrics(D);
@@ -262,8 +272,10 @@ export function TwoEndArt({ ctx, lm }: { ctx: ArtContext; lm: LinkModel }) {
       >
         <g ref={nodes.refSpring(l.id, entry, "coils")}>{coils}</g>
         <use href={assetRef(ctx, "spring-end", gold)} transform={`scale(${f(m.s)})`} />
+        {ghost === "a" && <circle className="link-ghost" r={ring} />}
         <g ref={nodes.refSpring(l.id, entry, "endB")}>
           <use href={assetRef(ctx, "spring-end", gold)} transform={`scale(${f(-m.s)} ${f(m.s)})`} />
+          {ghost === "b" && <circle className="link-ghost" r={ring} />}
         </g>
       </g>
     );
@@ -287,20 +299,24 @@ export function TwoEndArt({ ctx, lm }: { ctx: ArtContext; lm: LinkModel }) {
         <path className="rod-line" d={`M${f(w * 0.2)} 0H${f(len - w * 0.2)}`} />
         <circle className="rod-eye" r={w * 0.28} />
         <circle className="rod-eye" cx={len} r={w * 0.28} />
+        {ghost && <circle className="link-ghost" cx={ghost === "a" ? 0 : len} r={ring} />}
       </g>
     );
   }
   if (l.kind === "cable") {
     return (
-      <path
-        className={`link link--cable${gold ? " is-selected" : ""}`}
-        data-link={l.id}
-        ref={nodes.refTwo("cables", l.id, {
-          a: { part: l.a, at: l.atA },
-          b: { part: l.b, at: l.atB },
-          max: l.maxLength,
-        })}
-      />
+      <>
+        <path
+          className={`link link--cable${gold ? " is-selected" : ""}`}
+          data-link={l.id}
+          ref={nodes.refTwo("cables", l.id, {
+            a: { part: l.a, at: l.atA },
+            b: { part: l.b, at: l.atB },
+            max: l.maxLength,
+          })}
+        />
+        {ghost && <circle className="link-ghost" r={ring} ref={nodes.refCableGhost(l.id, ghost)} />}
+      </>
     );
   }
   return null;
