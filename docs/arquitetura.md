@@ -404,6 +404,7 @@ Dois botões redondos flutuantes, só no Montar, na fileira de baixo junto do de
 ### Entender
 
 - **Modo camadas em cores:** cada camada ganha uma cor ordenada (do fundo para o topo), número na peça e, opcionalmente, as camadas afastadas em 2,5D para ver o que está em cima e embaixo. Isolar camada mostra só ela.
+- **Esconder peça** com um toque (como o "clique e esconda" dos simuladores de desmontagem): a peça some da vista para mostrar o que está atrás, sem sair da cena nem da simulação; um toque na lista de escondidas traz de volta.
 - **Cartões "o que é"** para cada ligação, com uma animação curta.
 - **Oficina guiada** (decidida em 07/11, substitui o tutorial sobre o objeto padrão): a pessoa escolhe o que montar (trinco de porta, catraca, gatilho com retém, par de engrenagens e outros) e é levada passo a passo. Cada receita é dado (`src/learn/`): a frase do passo, o gabarito fantasma em ouro tracejado de onde vai a peça ou a ligação, a ferramenta a usar realçada, e a conferência automática quando a cena satisfaz o passo (forma parecida, ligação do tipo certo entre as peças certas, com tolerância generosa). Passo cumprido ganha selo e o próximo entra; no fim, Testar com a frase do que observar. Sair a qualquer hora mantém o projeto. Cada receita tem uma cena de teste: os passos feitos por roteiro dão um mecanismo que passa nas afirmações dela.
 - **Rastro do movimento** no Testar: as peças em movimento deixam um rastro curto, para ver a trajetória.
@@ -490,5 +491,6 @@ O uso mostrou uma diferença entre a regra geométrica da câmara e a câmara au
 | Peça multicamada e trava (formato v3) | 05/11 | Fechada (§3.2); implementação na Fase 1 · Parte E2b |
 | Ferramentas da mão: Martelo e Lápis | 05/11 | Fechada (§6); Martelo na Parte E2b, Lápis na E2c. Substitui o "conectar por toque na sobreposição" |
 | Cursor deslocado, faixa na borda sem mexer na vista | 07/11 | Fechada (§6), depois do teste do Will; entra na E2c |
-| Oficina guiada (receitas) | 07/11 | Fechada (§6, Entender); substitui o tutorial sobre o objeto padrão |
+| Oficina guiada (receitas) | 07/11 | Fechada (§6, Entender); substitui o tutorial sobre o objeto padrão; entra na Fase 3, depois da Mecânica 2.0 |
+| Ordem das fases | 07/11 | Fecha a Fase 1 (E2c, E2d, S, E3) → Mecânica 2.0 → oficina guiada → acabamento visual (`docs/roadmap.md`) |
 | Som mínimo | 07/11 | Fechada (§6, Som): uma música em laço e uns oito efeitos; lote som-01 pelo coordenador sonoro |
