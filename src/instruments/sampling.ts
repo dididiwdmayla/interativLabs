@@ -15,6 +15,7 @@ export interface Series {
 /** Exact samples stay in the worker; chronological extrema preserve narrow peaks. */
 export class Samples {
   probes: Probe[] = [];
+  private origin: Snapshot["parts"] = {};
   private data = new Map<string, Sample[]>();
   configure(probes: Probe[]) {
     this.probes = probes.slice(0, 4);
@@ -22,12 +23,19 @@ export class Samples {
     for (const id of this.data.keys()) if (!this.probes.some((p) => p.id === id)) this.data.delete(id);
   }
   record(step: number, snapshot: Snapshot, engine: EngineAdapter) {
+    if (step === 0) this.origin = snapshot.parts;
     for (const p of this.probes)
       this.data.get(p.id)?.push({
         step,
-        value: sample(p, snapshot, engine),
+        value: this.value(p, snapshot, engine),
         ...(p.countDrops ? { angle: snapshot.links[p.target]?.angle } : {}),
       });
+  }
+  private value(p: Probe, snapshot: Snapshot, engine: EngineAdapter) {
+    const value = sample(p, snapshot, engine);
+    if (value === null || (p.quantity !== "x" && p.quantity !== "y")) return value;
+    const origin = this.origin[p.target]?.[p.quantity];
+    return origin === undefined ? null : value - origin;
   }
   truncate(step: number) {
     for (const [id, points] of this.data)

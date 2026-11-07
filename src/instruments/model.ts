@@ -2,8 +2,10 @@ import type { EngineAdapter, Snapshot } from "@/engine/types";
 import type { LinkKind } from "@/model/types";
 
 export const quantities = {
-  x: ["Posição x", "mm"],
-  y: ["Posição y", "mm"],
+  x: ["Deslocamento x", "mm"],
+  absoluteX: ["Posição absoluta x", "mm"],
+  y: ["Deslocamento y", "mm"],
+  absoluteY: ["Posição absoluta y", "mm"],
   angle: ["Ângulo", "°"],
   speed: ["Velocidade", "mm/s"],
   velocity: ["Velocidade", "m/s"],
@@ -31,7 +33,8 @@ export interface Probe {
   countDrops?: boolean;
 }
 export function available(kind: LinkKind | "part"): Quantity[] {
-  if (kind === "part") return ["x", "y", "angle", "speed", "velocity", "angular", "rpm"];
+  if (kind === "part")
+    return ["x", "y", "absoluteX", "absoluteY", "angle", "speed", "velocity", "angular", "rpm"];
   if (kind === "axle") return ["relative", "torque"];
   if (kind === "chamber") return ["pressure", "volume"];
   if (kind === "spring") return ["force", "length"];
@@ -44,6 +47,8 @@ export function sample(probe: Probe, s: Snapshot, engine: EngineAdapter): number
   const l = s.links[target];
   const deg = 180 / Math.PI;
   if (q === "clearance") return engine.clearance?.(target, probe.other ?? "") ?? null;
+  if (q === "absoluteX") return p?.x ?? null;
+  if (q === "absoluteY") return p?.y ?? null;
   if (q === "x" || q === "y") return p?.[q] ?? null;
   if (q === "angle") return p ? p.angle * deg : null;
   if (["speed", "velocity", "angular", "rpm"].includes(q)) {

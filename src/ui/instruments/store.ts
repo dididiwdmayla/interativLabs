@@ -2,6 +2,8 @@ import type { EventTick } from "@/instruments/events";
 import { create } from "zustand";
 import type { Series } from "@/instruments/sampling";
 interface InstrumentsState {
+  window: number | null;
+  setWindow: (width: number | null) => void;
   series: Series[];
   ticks: EventTick[];
   shown: number;
@@ -10,6 +12,8 @@ interface InstrumentsState {
   setSeries: (series: Series[]) => void;
 }
 export const useInstruments = create<InstrumentsState>((set) => ({
+  window: 0.5,
+  setWindow: (width) => set({ window: width === null ? null : Math.max(0.05, Math.min(10, width)) }),
   series: [],
   ticks: [],
   shown: 0,
