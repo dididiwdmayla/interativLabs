@@ -64,10 +64,10 @@ Snapshot (`time`, `steps`, `parts[id] = { x, y, angle }`, `links[id]`, `events`)
 | Suporte elástico | `offset` (deslocamento do ponto, mm), `angle` |
 | Rasgo | modo junta: `position` (ao longo do rasgo, a partir do meio) e `deviation` (transversal); modo contato: `clearance` (folga até a parede; negativa = penetrando) |
 | Mola | `length`, `force` (+ empurra; inclui o batente das espiras), `stopForce` (só o batente), `sideForce` (transversal ao eixo da guia) |
-| Câmara | `pressure` (absoluta), `volume` (mm³), `gas`, `fired`, `burning`, `walls[] = { part, force, impulse (N·s), work, travel, sealed }`, `vents[] = { open, exposed }`, `ports[] = { exposed }` |
+| Câmara | `pressure` (absoluta), `volume` (mm³), `gas`, `fired`, `flow` (vazão por respiros abertos e portas, mmol/s; só leitura, para o som), `burning`, `walls[] = { part, force, impulse (N·s), work, travel, sealed }`, `vents[] = { open, exposed }`, `ports[] = { exposed }` |
 | Sensor | `count` |
 
-Eventos do passo: `sensor` (peça e velocidade de aproximação), `chamber-fired`, `wall-unsealed`, `vent-opened` (pela parede que passa ou pelo sensor), `vent-closed`, `port-opened` e `impact` (duas peças, velocidade de aproximação acima de 100 mm/s e o ponto; para som e faíscas futuros).
+Eventos do passo: `sensor` (peça e velocidade de aproximação), `chamber-fired` (com a dose que acendeu, em mmol), `wall-unsealed`, `vent-opened` (pela parede que passa ou pelo sensor), `vent-closed`, `port-opened` e `impact` (duas peças, velocidade de aproximação acima de 100 mm/s e o ponto; para som e faíscas futuros).
 
 - Parte comum a todos os motores: `plan.ts` (cena → corpos compostos, peças convexas, massa pela geometria e pela espessura da camada, ligações em unidades internas g·mm·s), `runtime.ts` (forças explícitas, sensor, arrasto de reserva, snapshot) e `chamber.ts` (o gás). O adaptador traduz o plano e lê e escreve nos corpos.
 - Corpo dinâmico com origem no centro de massa e ângulo 0 na pose desenhada; cada grupo fixo é um corpo estático próprio (uma junta com uma peça fixa só desliga o contato com aquela peça). O índice 0 é o fundo, ponta das ligações com `a: null`.

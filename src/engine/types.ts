@@ -78,6 +78,8 @@ export interface LinkState {
   volume?: number;
   gas?: number;
   fired?: boolean;
+  /** câmara: vazão de gás por respiros abertos e portas neste passo, mmol/s (só para o som; fora do hash) */
+  flow?: number;
   /** câmara: quantas doses da carga já acenderam */
   shots?: number;
   burning?: boolean;
@@ -93,7 +95,8 @@ export interface LinkState {
 export type EngineEvent =
   | { kind: "lock-released"; lock: Id; by: "touch" | "sensor" | "force"; force: number; time: number }
   | { kind: "sensor"; sensor: Id; part: Id; speed: number; time: number }
-  | { kind: "chamber-fired"; chamber: Id; time: number }
+  /** `charge`: a dose que acendeu (mmol) */
+  | { kind: "chamber-fired"; chamber: Id; charge: number; time: number }
   | { kind: "wall-unsealed"; chamber: Id; part: Id; time: number }
   | { kind: "vent-opened"; chamber: Id; vent: number; by: "wall" | "sensor"; time: number }
   | { kind: "vent-closed"; chamber: Id; vent: number; time: number }
