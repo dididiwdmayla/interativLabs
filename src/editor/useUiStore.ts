@@ -43,6 +43,10 @@ export interface EdgeMenuState {
 }
 
 interface UiState {
+  layerColors: boolean;
+  layerSpread: number;
+  layerIsolate: boolean;
+  setLayerView: (patch: Partial<Pick<UiState, "layerColors" | "layerSpread" | "layerIsolate">>) => void;
   penSeen: boolean;
   fingerDraws: boolean;
   lastInput: string;
@@ -137,6 +141,10 @@ const hasWindow = typeof window !== "undefined";
  * por comandos (`commit`), com desfazer e refazer por patches do Immer.
  */
 export const useUiStore = create<UiState>()((set, get) => ({
+  layerColors: false,
+  layerSpread: 0,
+  layerIsolate: false,
+  setLayerView: (patch) => set(patch),
   penSeen: false,
   fingerDraws: hasWindow && readPref("il.fingerDraws") === "1",
   lastInput: "mouse",

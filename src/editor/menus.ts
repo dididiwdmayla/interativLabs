@@ -59,7 +59,7 @@ export const MENUS: Record<MenuId, MenuDef> = {
       { id: "fit", label: "Enquadrar", icon: "fit" },
       { id: "xray", label: "Raio-x", icon: "xray", on: (c) => c.xray },
       { id: "fullscreen", label: "Tela cheia", icon: "fullscreen", on: (c) => c.fullscreen },
-      { id: "examples", label: "Exemplos", icon: "examples" },
+      { id: "layer-colors", label: "Camadas em cores", icon: "layers" },
       { id: "tips", label: "Dicas", icon: "tips", on: (c) => c.hint },
       { id: "lefty", label: "Canhoto", icon: "lefty", on: (c) => c.lefty },
     ],

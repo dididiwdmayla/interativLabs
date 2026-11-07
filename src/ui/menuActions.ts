@@ -51,6 +51,7 @@ export function partsAction(): void {
 }
 
 const ACTIONS: Record<string, () => void> = {
+  "layer-colors": () => { const s = useUiStore.getState(); s.setHammer(null); s.setPencil(false); s.setLayerView({ layerColors: !s.layerColors }); },
   parts: partsAction,
   hammer: () => useUiStore.getState().setHammer("axle"),
   pencil: () => useUiStore.getState().setPencil(true),

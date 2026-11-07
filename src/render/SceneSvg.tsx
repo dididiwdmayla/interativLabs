@@ -1,3 +1,5 @@
+import { useUiStore } from "@/editor/useUiStore";
+import { layerOffset } from "@/editor/layerView";
 import { memo, useLayoutEffect, useMemo, type ReactNode } from "react";
 import { assets, type Asset } from "@/assets/registry";
 import { layoutCallouts, type CalloutTarget } from "./callouts";
@@ -148,6 +150,7 @@ interface PartArtProps {
 
 /** Uma peça: parede (cópia deslocada no mundo) e o grupo com face, hachura, chanfro e contorno. */
 function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) {
+  const colors = useUiStore((s) => s.layerColors);
   const id = m.part.id;
   return (
     <g
@@ -159,6 +162,7 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
       </g>
       <g ref={nodes.refPart(id, "g", m.key)}>
         <path className="part__face" d={m.d} />
+        {colors && <text className="layer-seal" x={m.outline[0]?.outer[0]?.[0] ?? 0} y={(m.outline[0]?.outer[0]?.[1] ?? 0) + 12 * ctx.px} fontSize={11 * ctx.px}>{m.layer + 1}</text>}
         {skin.tiny ? (
           <path className="part__hatch part__tone" d={m.d} style={{ fillOpacity: hatchCoverage(m.hatch) }} />
         ) : m.body ? (
@@ -187,6 +191,9 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
 }
 
 export function SceneSvg(props: SceneSvgProps) {
+  const colors = useUiStore((s) => s.layerColors);
+  const spread = useUiStore((s) => s.layerColors ? s.layerSpread : 0);
+  const isolate = useUiStore((s) => s.layerColors && s.layerIsolate);
   const { model, nodes, uid, zoom, fitZoom, mode, selection, size } = props;
   const px = mmPerPx(zoom);
   const step = hatchStep(zoom);
@@ -219,6 +226,7 @@ export function SceneSvg(props: SceneSvgProps) {
   const worldAt = new Map<number, LinkModel[]>();
   const followersAt = new Map<number, LinkModel[]>();
   for (const lm of model.links) {
+    if (isolate && !(lm.span[0] <= props.active && props.active <= lm.span[1])) continue;
     const k = lm.link.kind;
     if (k === "spring" || k === "rod" || k === "cable" || k === "slot") {
       if (k !== "slot") worldAt.set(lm.layer, [...(worldAt.get(lm.layer) ?? []), lm]);
@@ -241,7 +249,7 @@ export function SceneSvg(props: SceneSvgProps) {
 
   // chamadas: ligações no Editar; a peça selecionada (no Simular, só se ela se move)
   const callouts = useMemo(() => {
-    if (props.callouts === false) return [];
+    if (props.callouts === false || colors) return [];
     const targets: CalloutTarget[] = [];
     if (mode === "edit")
       for (const lm of model.links) {
@@ -263,10 +271,11 @@ export function SceneSvg(props: SceneSvgProps) {
     }
     // espaço livre e cruzamentos: contornos das peças visíveis no mundo
     return layoutCallouts(targets, calloutGeo.bounds, px, calloutGeo.geo);
-  }, [model, mode, selection, px, props.active, props.callouts, calloutGeo]);
+  }, [model, mode, selection, px, props.active, props.callouts, calloutGeo, colors]);
 
   // depois de cada montagem, reaplica o quadro atual (as poses não passam pelo React)
   useLayoutEffect(() => {
+    nodes.spread = spread;
     nodes.setContext({ ...writeCtx, walls: !heavy });
     nodes.write(nodes.frame, true);
   });
@@ -276,11 +285,12 @@ export function SceneSvg(props: SceneSvgProps) {
   // só as folhas que se movem são repintadas; as placas fixas ficam em cache.
   const sheets: { key: string; layer: number; kind: "static" | "dynamic"; items: ReactNode[] }[] = [];
   for (const L of model.layers) {
-    const st = layerState(L.index, props);
+    const st = colors ? "full" : layerState(L.index, props);
+    const visible = !isolate || L.index === props.active;
     const strong = (lm: LinkModel) => lm.span[0] <= props.active && props.active <= lm.span[1];
     const items: Record<"static" | "dynamic", ReactNode[]> = { static: [], dynamic: [] };
     const kindOf = (m: PartModel | undefined) => (m?.dynamic ? "dynamic" : "static");
-    if (L.index > 0)
+    if (L.index > 0 && visible)
       for (const m of L.parts)
         items[kindOf(m)].push(
           <g key={`s-${m.part.id}`} ref={nodes.refPart(m.part.id, "shadow", m.key)}>
@@ -294,7 +304,7 @@ export function SceneSvg(props: SceneSvgProps) {
         <polygon key={`gas-${lm.link.id}`} className="gas" ref={nodes.refChamber(lm.link.id, geo, "gas")} />,
       );
     }
-    for (const m of L.parts)
+    for (const m of visible ? L.parts : [])
       items[kindOf(m)].push(
         <PartArt
           key={m.part.id}
@@ -307,6 +317,10 @@ export function SceneSvg(props: SceneSvgProps) {
           ctx={ctx}
         />,
       );
+    if (!visible) for (const m of L.parts) {
+      const carried = carriedBy.get(m.key) ?? [];
+      if (carried.length) items[kindOf(m)].push(<g key={`isolated-${m.key}`} ref={nodes.refPart(m.part.id, "g", m.key)}>{carried.map((lm) => <CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />)}</g>);
+    }
     for (const lm of followersAt.get(L.index) ?? [])
       items[kindOf(model.parts.get(lm.carrier ?? ""))].push(
         <g
@@ -337,6 +351,8 @@ export function SceneSvg(props: SceneSvgProps) {
               key="layer"
               className={`layer layer--${st}${L.layer.visible === false ? " is-hidden" : ""}`}
               data-layer={L.index}
+              transform={`translate(${layerOffset(L.index, spread).join(" ")})`}
+              style={colors ? { "--layer-color": `var(--layer-${L.index + 1})` } as React.CSSProperties : undefined}
             >
               {items[kind]}
             </g>,
@@ -350,7 +366,7 @@ export function SceneSvg(props: SceneSvgProps) {
   const svg = (key: string, cls: string, children: ReactNode) => (
     <svg
       key={key}
-      className={`stage__sheet scene${zoom >= 3 ? " is-close" : ""}${heavy ? " is-heavy" : ""} ${cls}`}
+      className={`stage__sheet scene${colors ? " scene--colors" : ""}${zoom >= 3 ? " is-close" : ""}${heavy ? " is-heavy" : ""} ${cls}`}
       width={size.width}
       height={size.height}
       viewBox={`0 0 ${size.width} ${size.height}`}
@@ -371,6 +387,7 @@ export function SceneSvg(props: SceneSvgProps) {
         "overlay",
         "stage__sheet--overlay",
         <g className="overlay">
+          {spread > 0 && model.links.filter((lm) => (lm.link.kind === "pin" || lm.link.kind === "sensor") && (!isolate || (lm.span[0] <= props.active && props.active <= lm.span[1]))).map((lm) => <path key={`shaft-${lm.link.id}`} className="layer-shaft" ref={nodes.refShaft(lm.link.id)} />)}
           {model.links.map((lm) =>
             lm.link.kind === "chamber" ? (
               <text

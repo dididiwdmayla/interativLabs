@@ -91,6 +91,11 @@ export const poseTransform = (p: PartPose, dx = 0, dy = 0) =>
 
 export class StageNodes {
   model: SceneModel;
+  spread = 0;
+  shafts = new Map<Id, SVGPathElement>();
+  refShaft(id: Id) {
+    return (el: SVGPathElement | null) => { if (el) this.shafts.set(id, el); else this.shafts.delete(id); };
+  }
   ctx: WriteContext = { wallMm: 0.4, shadowMm: 0.6, px: 0.2 };
   /** quadro mostrado agora (o laço troca; o React reaplica depois de cada montagem) */
   frame: FrameSource;
@@ -235,11 +240,15 @@ export class StageNodes {
       n.shadow?.setAttribute("transform", poseTransform(p, shadowMm, shadowMm));
       for (const fl of n.followers) fl.setAttribute("transform", t);
     }
-    const at = (e: { part: Id | null; at: Vec2 }) =>
-      worldOf(e.part === null ? null : frame.pose(e.part), e.at);
-    for (const s of this.springs.values()) {
-      const a = at(s.a);
-      const b = at(s.b);
+    const at = (e: { part: Id | null; at: Vec2 }, layer: number) => {
+      const q = worldOf(e.part === null ? null : frame.pose(e.part), e.at);
+      const d = ((e.part ? this.model.parts.get(e.part)?.layer ?? layer : layer) - layer) * this.spread;
+      return [q[0] + d, q[1] - d] as Vec2;
+    };
+    for (const [id, s] of this.springs) {
+      const layer = this.model.linkById.get(id)?.layer ?? 0;
+      const a = at(s.a, layer);
+      const b = at(s.b, layer);
       const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
       const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
       s.g?.setAttribute("transform", `translate(${f(a[0])} ${f(a[1])}) rotate(${f(deg(ang))})`);
@@ -249,13 +258,17 @@ export class StageNodes {
       );
       s.endB?.setAttribute("transform", `translate(${f(L)} 0)`);
     }
-    for (const r of this.rods.values()) {
-      const a = at(r.a);
-      const b = at(r.b);
+    for (const [id, r] of this.rods) {
+      const layer = this.model.linkById.get(id)?.layer ?? 0;
+      const a = at(r.a, layer);
+      const b = at(r.b, layer);
       const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
       r.el?.setAttribute("transform", `translate(${f(a[0])} ${f(a[1])}) rotate(${f(deg(ang))})`);
     }
-    for (const c of this.cables.values()) c.el?.setAttribute("d", cablePath(at(c.a), at(c.b), c.max));
+    for (const [id, c] of this.cables) {
+      const layer = this.model.linkById.get(id)?.layer ?? 0;
+      c.el?.setAttribute("d", cablePath(at(c.a, layer), at(c.b, layer), c.max));
+    }
     for (const [id, c] of this.chambers) {
       const st = frame.chamber(id);
       if (!st) continue;
@@ -298,6 +311,13 @@ export class StageNodes {
           { duration: 250, easing: "ease-out" },
         );
       }
+    }
+    for (const [id, el] of this.shafts) {
+      const lm = this.model.linkById.get(id);
+      if (!lm) continue;
+      const q = worldOf(lm.carrier ? frame.pose(lm.carrier) : null, lm.at);
+      const a = lm.span[0] * this.spread, b = lm.span[1] * this.spread;
+      el.setAttribute("d", `M${q[0] + a} ${q[1] - a}L${q[0] + b} ${q[1] - b}`);
     }
     this.writeDrag();
   }

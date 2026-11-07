@@ -1,3 +1,4 @@
+import { useUiStore } from "@/editor/useUiStore";
 import { FIXED_STEP } from "@/engine/common";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
@@ -338,7 +339,10 @@ class Controller implements SimControl {
     if (this.rewinding || this.shownStep !== null) return null;
     const f = this.view(this.step);
     if (!f) return null;
-    const id = partAt(this.nodes.model, f, p, { dynamicOnly: true, tol: 10 * this.nodes.ctx.px });
+    const ui = useUiStore.getState();
+    const id = partAt(this.nodes.model, f, p, { dynamicOnly: true, tol: 10 * this.nodes.ctx.px,
+      layer: (i) => this.nodes.model.layers[i]?.layer.visible !== false && (!(ui.layerColors && (ui.layerSpread || ui.layerIsolate)) || i === ui.activeLayer),
+    });
     if (!id) return null;
     this.dragging = { part: id, local: localOf(f.pose(id), p) };
     this.finger = p;

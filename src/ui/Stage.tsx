@@ -1,3 +1,5 @@
+import { LayerViewBar } from "./LayerViewBar";
+import { spreadBounds } from "@/editor/layerView";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
 import { hammerPoint, hammerFix, type HammerPoint, type HammerTool } from "@/editor/hammer";
@@ -299,6 +301,7 @@ export function Stage({
   const { width, height } = useElementSize(box);
   const uid = useId().replace(/:/g, "");
   const ctl = useSimStore((s) => s.ctl);
+  const spread = useUiStore((s) => s.layerColors ? s.layerSpread : 0);
   const editing = mode === "edit";
   const hammer = useUiStore((s) => s.hammer);
   const pencilOn = useUiStore((s) => s.pencil);
@@ -310,8 +313,10 @@ export function Stage({
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") useUiStore.getState().setPick(null);
     };
+    const pointer = (e: PointerEvent) => useUiStore.getState().noteInput(e.pointerType);
+    window.addEventListener("pointerdown", pointer, true);
     window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
+    return () => { window.removeEventListener("keydown", key); window.removeEventListener("pointerdown", pointer, true); };
   }, []);
   const [hammerPreview, setHammerPreview] = useState<{
     hit: HammerPoint;
@@ -496,6 +501,19 @@ export function Stage({
     };
     anim.current = requestAnimationFrame(step);
   };
+  const beforeSpread = useRef<View | null>(null);
+  useEffect(() => {
+    if (!model || !width || !height) return;
+    if (spread) {
+      beforeSpread.current ??= { ...view.current };
+      animateView(fitView(spreadBounds(model.bounds, model.layers.length, spread), width, height, editing ? FIT_PAD_EDIT : FIT_PAD_SIM));
+    } else if (beforeSpread.current) {
+      animateView(beforeSpread.current);
+      beforeSpread.current = null;
+    }
+    // Only a change in separation changes this framing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spread]);
   useEffect(() => () => clearHold(), []);
 
   const local = (e: { clientX: number; clientY: number }): Vec2 => {
@@ -517,7 +535,7 @@ export function Stage({
   // ——— edição: peça mais alta sob o dedo, alças, pose durante o gesto ———
   const layerOk = (i: number) => {
     const L = model?.layers[i]?.layer;
-    return !!L && L.visible && !L.locked;
+    return !!L && L.visible && !L.locked && (!spread || i === activeLayer);
   };
   const pickedSurface = useRef<{ id: string; layer: number } | null>(null);
   const pickPart = (w: Vec2): string | null => {
@@ -879,6 +897,8 @@ export function Stage({
     }
     if (pointers.current.size > 2) return;
     const w = toWorld(view.current, x, y);
+    w[0] -= activeLayer * spread;
+    w[1] += activeLayer * spread;
     if (!editing) {
       if (ctl?.releaseAt(w)) {
         gesture.current = { kind: "none" };
@@ -1071,6 +1091,8 @@ export function Stage({
     if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
     const w = toWorld(view.current, x, y);
+    w[0] -= activeLayer * spread;
+    w[1] += activeLayer * spread;
     if (g.kind === "linkhandle" && model) {
       g.last = adjustLinkHandle(model, g.link, g.handle, w);
       setLinkPreview(g.last);
@@ -1491,6 +1513,7 @@ export function Stage({
           )}
         </>
       )}
+      {!bare && <LayerViewBar />}
       {editing && !bare && pencilOn && model && (
         <>
           <PencilBar

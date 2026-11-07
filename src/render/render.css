@@ -436,3 +436,13 @@
 .layer.is-hidden {
   display: none;
 }
+
+/* Watercolour faces retain the engraved material marks. */
+.scene--colors .part__face { fill: var(--layer-color); }
+.scene--colors .part__hatch { opacity: .22; }
+.scene--colors .part__light, .scene--colors .part__faint { opacity: .25; }
+.layer-seal { fill: var(--color-shadow); font-family: var(--font-ui); font-weight: 700; paint-order: stroke; stroke: var(--layer-color); stroke-width: 1px; }
+.scene--colors .layer { transition: transform var(--dur-quick) var(--ease-press); }
+@media (prefers-reduced-motion: reduce) { .scene--colors .layer { transition: none; } }
+
+.layer-shaft { fill: none; stroke: var(--color-ink-2); stroke-width: var(--stroke-hardware); stroke-dasharray: var(--dash-hidden); }
