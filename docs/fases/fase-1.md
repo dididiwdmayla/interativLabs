@@ -1,6 +1,6 @@
 # Fase 1 — Fundação
 
-Branch: `fase-1` (ou o da sessão do executor). A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt e o seu PR para o `main`: **A** (itens 1–2), **B** (3–4), **C** (item 5: motor definitivo e ligações 2.0), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo), **E1** (item 10: pipeline de assets), **E2a** (itens 7–9: base do editor tátil), **F** (item 14: correções do teste real e exemplo-vitrine), **E2b** (item 13: Martelo, cartões de ligação, peça multicamada e trava; PR #8), todas feitas; **E2c** (item 15: acertos do teste da E2b, Lápis e caneta; PR #9), **E2d** (item 16: camadas em cores, esconder peça, cartões "o que é" e rastro), **S** (item 18: som mínimo) e **E3** (item 11: verificação), nesta ordem. A oficina guiada (antes item 17) foi para a Fase 3, depois da Mecânica 2.0 (`docs/roadmap.md`). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit.
+Branch: `fase-1` (ou o da sessão do executor). A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt e o seu PR para o `main`: **A** (itens 1–2), **B** (3–4), **C** (item 5: motor definitivo e ligações 2.0), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo), **E1** (item 10: pipeline de assets), **E2a** (itens 7–9: base do editor tátil), **F** (item 14: correções do teste real e exemplo-vitrine), **E2b** (item 13: Martelo, cartões de ligação, peça multicamada e trava; PR #8), todas feitas; **E2c** (item 15: acertos do teste da E2b, Lápis e caneta; PR #9), **E2d** (item 16: camadas em cores, esconder peça, cartões "o que é" e rastro; versão do Opus, PR #11, depois da reversão da versão do Astra no PR #12), e por fim **S** (item 18: som mínimo) junto com **E3** (item 11: verificação da fase), numa sessão só. A oficina guiada (antes item 17) foi para a Fase 3, depois da Mecânica 2.0 (`docs/roadmap.md`). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit.
 
 Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual já usa os tokens, a paleta e as fontes da Prancha índigo (`docs/identidade/identidade.md`), mas sem hachuras, texturas nem ferragens: isso é da Fase 2. Alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 completa a pele, não refaz a estrutura.
 
@@ -123,19 +123,9 @@ Subitens e aceites no prompt da Parte F.
 - 15.4 Caneta, forma livre, perfil da camada ativa e a física das formas novas.
 - 15.5 Verificação.
 
-## Item 16 — Entender (Parte E2d, em duas sessões)
+## Item 16 — Entender (Parte E2d)
 
-Primeira parte rodada no Modo Astra (`docs/coordenacao/papeis.md`): uma sessão de criação e outra de verificação, no mesmo PR.
-
-- **A · criação** (GPT-6 Astra, esforço médio):
-  - 16.1 acertos da revisão da E2c (frases do Martelo, "Esc sai" só com teclado, pílula da camada, "Dedo desenha");
-  - 16.2 modo camadas em cores (paleta provisória em tokens, Afastar 2,5D, Isolar);
-  - 16.3 esconder peça;
-  - 16.4 cartões "o que é" e rastro.
-- **B · verificação** (Claude Sonnet 5.5, esforço alto, no branch da A):
-  - 16.5 bateria completa, testes que faltarem e `/#perf` com os modos novos;
-  - 16.6 câmara do Lançador coerente com o desenho (saída 10,3 ±0,3 m/s);
-  - 16.7 capturas e documentação.
+Acertos da revisão da E2c, modo camadas em cores (paleta provisória em tokens, Afastar 2,5D, Isolar), esconder peça, cartões "o que é" e rastro. Rodou duas vezes por engano, no Opus (PR #11) e no Astra (PR #10, mergeado). O Will escolheu a do Opus, que já veio verificada (804 testes, determinismo, `/#perf` sem perda); a do Astra foi revertida no PR #12. O cartão "o que é" do Astra, em figura de patente, fica de referência para a Fase 4.
 
 ## Item 17 — (movido)
 
