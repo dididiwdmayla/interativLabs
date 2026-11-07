@@ -26,8 +26,6 @@ export function PencilBar({
   onCommit: () => void;
   onCancel: () => void;
 }) {
-  const penSeen = useUiStore((s) => s.penSeen);
-  const fingerDraws = useUiStore((s) => s.fingerDraws);
   const on = useUiStore((s) => s.pencil);
   const mode = useUiStore((s) => s.mode);
   const tool = useUiStore((s) => s.pencilTool);
@@ -82,22 +80,6 @@ export function PencilBar({
         ) : undefined
       }
       groups={[
-        ...(penSeen
-          ? [
-              {
-                name: "Toque",
-                items: [
-                  {
-                    id: "finger",
-                    label: "Dedo desenha",
-                    glyph: "Dedo",
-                    pressed: fingerDraws,
-                    onClick: () => useUiStore.getState().setFingerDraws(!fingerDraws),
-                  },
-                ],
-              },
-            ]
-          : []),
         {
           name: "Forma",
           items: [

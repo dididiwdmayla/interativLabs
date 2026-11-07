@@ -5,24 +5,6 @@
  */
 
 :root {
-  /* Provisional layer palette: equal lightness/chroma, outside gold and ember hues. */
-  --layer-1: oklch(72% 0.065 150);
-  --layer-2: oklch(72% 0.065 205);
-  --layer-3: oklch(72% 0.065 270);
-  --layer-4: oklch(72% 0.065 330);
-  --layer-5: oklch(72% 0.065 175);
-  --layer-6: oklch(72% 0.065 235);
-  --layer-7: oklch(72% 0.065 300);
-  --layer-8: oklch(72% 0.065 125);
-  --layer-9: oklch(72% 0.065 190);
-  --layer-10: oklch(72% 0.065 255);
-  --layer-11: oklch(72% 0.065 315);
-  --layer-12: oklch(72% 0.065 345);
-  --layer-13: oklch(72% 0.065 160);
-  --layer-14: oklch(72% 0.065 220);
-  --layer-15: oklch(72% 0.065 285);
-  --layer-16: oklch(72% 0.065 140);
-
   /* Cor — eixo índigo → branco frio (matiz 232–234°) */
   --color-chrome: #171a37;
   /* controles que flutuam sobre a prancha (cantos, abas, faixa do Testar): o chrome translúcido */
@@ -131,24 +113,6 @@
 
 @media (min-width: 1024px) {
   :root {
-    /* Provisional layer palette: equal lightness/chroma, outside gold and ember hues. */
-    --layer-1: oklch(72% 0.065 150);
-    --layer-2: oklch(72% 0.065 205);
-    --layer-3: oklch(72% 0.065 270);
-    --layer-4: oklch(72% 0.065 330);
-    --layer-5: oklch(72% 0.065 175);
-    --layer-6: oklch(72% 0.065 235);
-    --layer-7: oklch(72% 0.065 300);
-    --layer-8: oklch(72% 0.065 125);
-    --layer-9: oklch(72% 0.065 190);
-    --layer-10: oklch(72% 0.065 255);
-    --layer-11: oklch(72% 0.065 315);
-    --layer-12: oklch(72% 0.065 345);
-    --layer-13: oklch(72% 0.065 160);
-    --layer-14: oklch(72% 0.065 220);
-    --layer-15: oklch(72% 0.065 285);
-    --layer-16: oklch(72% 0.065 140);
-
     --text-body: 14px;
     --leading-body: 20px;
   }
@@ -156,24 +120,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-    /* Provisional layer palette: equal lightness/chroma, outside gold and ember hues. */
-    --layer-1: oklch(72% 0.065 150);
-    --layer-2: oklch(72% 0.065 205);
-    --layer-3: oklch(72% 0.065 270);
-    --layer-4: oklch(72% 0.065 330);
-    --layer-5: oklch(72% 0.065 175);
-    --layer-6: oklch(72% 0.065 235);
-    --layer-7: oklch(72% 0.065 300);
-    --layer-8: oklch(72% 0.065 125);
-    --layer-9: oklch(72% 0.065 190);
-    --layer-10: oklch(72% 0.065 255);
-    --layer-11: oklch(72% 0.065 315);
-    --layer-12: oklch(72% 0.065 345);
-    --layer-13: oklch(72% 0.065 160);
-    --layer-14: oklch(72% 0.065 220);
-    --layer-15: oklch(72% 0.065 285);
-    --layer-16: oklch(72% 0.065 140);
-
     --dur-tick: 0ms;
     --dur-quick: var(--dur-reduced);
     --dur-base: var(--dur-reduced);

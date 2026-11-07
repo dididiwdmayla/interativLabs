@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { LinkKind, Scene } from "@/model/types";
-import type { Selection } from "@/render/selection";
+import type { Scene } from "@/model/types";
+import type { Selection } from "@/render/SceneSvg";
 import type { CardPick } from "./cardPick";
 import type { HammerTool } from "./hammer";
 import { DEFAULT_PENCIL, type PencilTool } from "./pencil";
@@ -8,7 +8,7 @@ import type { Command } from "./commands";
 import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
 
 export type Mode = "edit" | "simulate";
-export type { Selection } from "@/render/selection";
+export type { Selection } from "@/render/SceneSvg";
 
 export interface OpenScene {
   /** projeto (IndexedDB) ou exemplo de onde veio */
@@ -43,27 +43,6 @@ export interface EdgeMenuState {
 }
 
 interface UiState {
-  trails: boolean;
-  setTrails: (on: boolean) => void;
-  explain: LinkKind | null;
-  setExplain: (kind: LinkKind | null) => void;
-  hiddenParts: string[];
-  hideMode: boolean;
-  hiddenList: boolean;
-  setHideMode: (on: boolean) => void;
-  setHiddenList: (on: boolean) => void;
-  hidePart: (id: string) => void;
-  showPart: (id?: string) => void;
-  restoreHidden: (ids: string[]) => void;
-  layerColors: boolean;
-  layerSpread: number;
-  layerIsolate: boolean;
-  setLayerView: (patch: Partial<Pick<UiState, "layerColors" | "layerSpread" | "layerIsolate">>) => void;
-  penSeen: boolean;
-  fingerDraws: boolean;
-  lastInput: string;
-  noteInput: (kind: string) => void;
-  setFingerDraws: (on: boolean) => void;
   mode: Mode;
   pick: CardPick | null;
   setPick: (pick: CardPick | null) => void;
@@ -153,34 +132,6 @@ const hasWindow = typeof window !== "undefined";
  * por comandos (`commit`), com desfazer e refazer por patches do Immer.
  */
 export const useUiStore = create<UiState>()((set, get) => ({
-  trails: false,
-  setTrails: (trails) => set({ trails }),
-  explain: null,
-  setExplain: (explain) => set({ explain }),
-  hiddenParts: [],
-  hideMode: false,
-  hiddenList: false,
-  setHideMode: (hideMode) => set({ hideMode, hammer: null, pencil: false }),
-  setHiddenList: (hiddenList) => set({ hiddenList }),
-  hidePart: (id) =>
-    set((s) => ({
-      hiddenParts: s.hiddenParts.includes(id) ? s.hiddenParts : [...s.hiddenParts, id],
-      selection: s.selection?.id === id ? null : s.selection,
-    })),
-  showPart: (id) => set((s) => ({ hiddenParts: id ? s.hiddenParts.filter((p) => p !== id) : [] })),
-  restoreHidden: (hiddenParts) => set({ hiddenParts }),
-  layerColors: false,
-  layerSpread: 0,
-  layerIsolate: false,
-  setLayerView: (patch) => set(patch),
-  penSeen: false,
-  fingerDraws: hasWindow && readPref("il.fingerDraws") === "1",
-  lastInput: "mouse",
-  noteInput: (kind) => set((s) => ({ lastInput: kind, penSeen: s.penSeen || kind === "pen" })),
-  setFingerDraws: (fingerDraws) => {
-    writePref("il.fingerDraws", fingerDraws ? "1" : "0");
-    set({ fingerDraws });
-  },
   mode: "edit",
   pick: null,
   setPick: (pick) => set({ pick, sheet: null, edgeMenu: null, hammer: null }),
@@ -227,9 +178,6 @@ export const useUiStore = create<UiState>()((set, get) => ({
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
   openScene: (id, scene, figure, history) =>
     set((s) => ({
-      hiddenParts: [],
-      hideMode: false,
-      hiddenList: false,
       current: { id, scene, figure, serial: (s.current?.serial ?? 0) + 1 },
       history: history ?? emptyHistory(),
       mode: "edit",

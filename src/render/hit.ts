@@ -1,5 +1,3 @@
-import { useUiStore } from "@/editor/useUiStore";
-import { hiddenLinkState } from "@/editor/hiddenParts";
 import { containsPoint } from "@/geometry/polygon";
 import { distToSegment, type Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
@@ -28,10 +26,7 @@ export function partHit(
   opts: HitOptions = {},
 ): PartModel | null {
   const layerOk = opts.layer ?? ((i: number) => model.layers[i]?.layer.visible !== false);
-  const hidden = useUiStore.getState().hiddenParts;
-  const list = model.partList.filter(
-    (m) => !hidden.includes(m.part.id) && (!opts.dynamicOnly || m.dynamic) && layerOk(m.layer),
-  );
+  const list = model.partList.filter((m) => (!opts.dynamicOnly || m.dynamic) && layerOk(m.layer));
   const locals = list.map((m) => localOf(frame.pose(m.part.id), p));
   for (let i = list.length - 1; i >= 0; i--) {
     const m = list[i]!;
@@ -55,11 +50,7 @@ export function linkAt(model: SceneModel, p: Vec2, tol: number): Id | null {
   let best: Id | null = null;
   let bd = tol;
   for (const lm of model.links) {
-    if (
-      lm.link.kind === "slot" ||
-      hiddenLinkState(lm.link, useUiStore.getState().hiddenParts, model.scene) === "hidden"
-    )
-      continue;
+    if (lm.link.kind === "slot") continue;
     const d = Math.hypot(lm.world[0] - p[0], lm.world[1] - p[1]);
     if (d <= bd) {
       bd = d;
