@@ -60,6 +60,7 @@ describe("vista para entender (E2d)", () => {
       layers: false,
       hideMode: false,
       trail: false,
+      sound: false,
     };
     for (const mode of ["edit", "simulate"] as const)
       expect(menuItems("view", { ...ctx, mode }).length).toBeLessThanOrEqual(VIEW_MENU_MAX);

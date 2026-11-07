@@ -85,7 +85,7 @@ O modelo de interação está em `docs/arquitetura.md` §6. A Parte E2a entrega:
 
 ## Item 11 — Verificação
 
-`docs/verificacao-fase-1.md`: o que foi feito, o que ficou de fora e por quê, as medidas dos itens 4 e 6, e as capturas em `docs/capturas/fase-1/`. Abra o PR.
+`docs/verificacao-fase-1.md`: o que foi feito, o que ficou de fora e por quê, as medidas dos itens 4 e 6, e as capturas em `docs/capturas/fase-1/`. Abra o PR. Feito na Parte S + E3 (capturas finais em `docs/capturas/fase-1/final/`).
 
 ## Item 12 — Objeto padrão (Parte C2)
 
@@ -133,4 +133,4 @@ A oficina guiada foi para a Fase 3, depois da Mecânica 2.0, para as receitas j�
 
 ## Item 18 — Som mínimo (Parte S)
 
-Lote som-01 (uma música em laço e uns oito efeitos, pelo coordenador sonoro), pipeline `npm run audio`, motor enxuto e os gatilhos de §6 (Som), com liga e desliga no menu Vista.
+Lote som-01 (uma música em laço e 25 efeitos, 20 com gatilho agora, pelo coordenador sonoro), pipeline `npm run audio`, motor enxuto e os gatilhos de §6 (Som), com liga e desliga no menu Vista. Feito (relatório em `docs/verificacao-som-01.md`).

@@ -6,6 +6,8 @@ import type { HammerTool } from "./hammer";
 import { DEFAULT_PENCIL, type PencilTool } from "./pencil";
 import type { Command } from "./commands";
 import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
+import { sound } from "@/sound";
+import { commitSound } from "@/sound/tools";
 
 export type Mode = "edit" | "simulate";
 export type { Selection } from "@/render/SceneSvg";
@@ -123,6 +125,9 @@ interface UiState {
   /** rastro do movimento no Testar */
   trail: boolean;
   setTrail: (on: boolean) => void;
+  /** faixa do Som (Música e Efeitos) */
+  soundBar: boolean;
+  setSoundBar: (on: boolean) => void;
   /** cartão "o que é" aberto */
   explain: LinkKind | null;
   setExplain: (k: LinkKind | null) => void;
@@ -191,27 +196,34 @@ export const useUiStore = create<UiState>()((set, get) => ({
   pick: null,
   setPick: (pick) => set({ pick, sheet: null, edgeMenu: null, hammer: null }),
   hammer: null,
-  setHammer: (hammer) =>
+  setHammer: (hammer) => {
+    // abrir a faixa do Martelo (não trocar de ferramenta dentro dela)
+    if (hammer && !get().hammer) sound.play("sfx-ui");
     set((s) => ({
       hammer,
       pencil: hammer ? false : s.pencil,
       hideMode: hammer ? false : s.hideMode,
+      soundBar: hammer ? false : s.soundBar,
       pick: null,
       sheet: null,
       edgeMenu: null,
       selection: null,
-    })),
+    }));
+  },
   pencil: false,
   pencilTool: DEFAULT_PENCIL,
   // o Lápis age na peça escolhida: a seleção fica
-  setPencil: (pencil) =>
+  setPencil: (pencil) => {
+    if (pencil && !get().pencil) sound.play("sfx-ui");
     set((s) => ({
       pencil,
       hammer: pencil ? null : s.hammer,
       hideMode: pencil ? false : s.hideMode,
+      soundBar: pencil ? false : s.soundBar,
       pick: null,
       edgeMenu: null,
-    })),
+    }));
+  },
   setPencilTool: (patch) => set((s) => ({ pencilTool: { ...s.pencilTool, ...patch } })),
   current: null,
   history: emptyHistory(),
@@ -240,34 +252,60 @@ export const useUiStore = create<UiState>()((set, get) => ({
   },
 
   look: LOOK_OFF,
-  setLook: (patch) =>
+  setLook: (patch) => {
+    if (patch.open === true && !get().look.open) sound.play("sfx-ui");
     set((s) => {
       const look = { ...s.look, ...patch };
       // abrir o modo liga as cores; fechar volta tudo ao normal
       if (patch.open === true && !s.look.open) look.colors = true;
       if (patch.open === false) return { look: { ...LOOK_OFF, distance: s.look.distance } };
-      return { look };
-    }),
+      return { look, soundBar: patch.open === true ? false : s.soundBar };
+    });
+  },
   hideMode: false,
-  setHideMode: (hideMode) =>
+  setHideMode: (hideMode) => {
+    if (hideMode && !get().hideMode) sound.play("sfx-ui");
     set((s) => ({
       hideMode,
       hammer: hideMode ? null : s.hammer,
       pencil: hideMode ? false : s.pencil,
+      soundBar: hideMode ? false : s.soundBar,
       pick: null,
       edgeMenu: null,
-    })),
+    }));
+  },
   hidden: [],
   hide: (id) => set((s) => (s.hidden.includes(id) ? {} : { hidden: [...s.hidden, id] })),
   unhide: (id) => set((s) => ({ hidden: s.hidden.filter((x) => x !== id) })),
   unhideAll: () => set({ hidden: [] }),
   trail: false,
   setTrail: (trail) => set({ trail }),
+  soundBar: false,
+  setSoundBar: (soundBar) => {
+    if (soundBar && !get().soundBar) sound.play("sfx-ui");
+    set((s) =>
+      soundBar
+        ? {
+            soundBar,
+            hammer: null,
+            pencil: false,
+            hideMode: false,
+            look: { ...LOOK_OFF, distance: s.look.distance },
+            pick: null,
+            edgeMenu: null,
+          }
+        : { soundBar },
+    );
+  },
   explain: null,
-  setExplain: (explain) => set({ explain }),
+  setExplain: (explain) => {
+    if (explain && !get().explain) sound.play("sfx-ui");
+    set({ explain });
+  },
   drawerAway: false,
   setDrawerAway: (drawerAway) => set({ drawerAway }),
-  setMode: (mode) =>
+  setMode: (mode) => {
+    if (mode !== get().mode) sound.play("sfx-mode");
     set({
       mode,
       pick: null,
@@ -275,7 +313,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
       pencil: mode === "simulate" ? false : get().pencil,
       edgeMenu: null,
       sheet: mode === "simulate" ? null : get().sheet,
-    }),
+    });
+  },
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
   openScene: (id, scene, figure, history, view) =>
     set((s) => ({
@@ -323,6 +362,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
       selection,
       activeLayer: clampLayer(r.scene, after?.activeLayer ?? s.activeLayer),
     });
+    // o som segue o comando registrado (ligação carimbada), não o clique
+    const tone = commitSound(s.current.scene, r.scene);
+    if (tone) sound.play(tone);
     if (cmd.warning) s.notify(cmd.warning, { warn: true, undo: true });
     else if (cmd.notice) s.notify(cmd.notice, { undo: true });
     return true;
@@ -355,7 +397,11 @@ export const useUiStore = create<UiState>()((set, get) => ({
   },
   notify: (text, opts) => set({ notice: { id: ++noticeSeq, text, ...opts } }),
   clearNotice: () => set({ notice: null }),
-  setSheet: (sheet) => set({ sheet, edgeMenu: null }),
+  setSheet: (sheet) => {
+    // abrir o cartão (não trocar de folha para o mesmo cartão)
+    if (sheet === "card" && get().sheet !== "card") sound.play("sfx-ui");
+    set({ sheet, edgeMenu: null });
+  },
   setMainTab: (mainTab) => set({ mainTab }),
   setDetails: (details) => set({ details }),
   setEdgeMenu: (edgeMenu) => set({ edgeMenu }),

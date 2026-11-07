@@ -80,6 +80,9 @@ export type IconName =
   | "isolate"
   | "hide"
   | "trail"
+  | "sound"
+  | "music"
+  | "effects"
   | "explain";
 
 /** Linhas a 45° cobrindo a grade inteira; recortadas pela forma de cada ícone. */
@@ -609,6 +612,31 @@ const ICONS: Record<IconName, (c: DrawCtx) => ReactNode> = {
       <path d="M9 13C11 11 12.5 12.5 14.5 10.5" className="thin" />
       <circle cx="17.5" cy="7.5" r="3.25" />
       <path d="M14.5 10.5L15.2 9.8" />
+    </>
+  ),
+  // som: o alto-falante com as ondas saindo
+  sound: () => (
+    <>
+      <path d="M3.75 9.75H7.75L12.75 5.75V18.25L7.75 14.25H3.75Z" />
+      <path d="M15.5 9.25C16.6 10.5 16.6 13.5 15.5 14.75" />
+      <path d="M18 6.75C20.4 9.4 20.4 14.6 18 17.25" className="thin" />
+    </>
+  ),
+  // música: duas notas ligadas pela barra
+  music: () => (
+    <>
+      <path d="M8.75 17V6.25L18.25 4.75V15.5" />
+      <path d="M8.75 9.5L18.25 8" className="thin" />
+      <ellipse cx="6.5" cy="17" rx="2.25" ry="1.75" />
+      <ellipse cx="16" cy="15.5" rx="2.25" ry="1.75" />
+    </>
+  ),
+  // efeitos: o estalo, com os raios saindo do ponto
+  effects: () => (
+    <>
+      <circle cx="12" cy="12" r="2.25" />
+      <path d="M12 3.75V7M12 17V20.25M3.75 12H7M17 12H20.25" />
+      <path d="M6.2 6.2L8.4 8.4M15.6 15.6L17.8 17.8M17.8 6.2L15.6 8.4M8.4 15.6L6.2 17.8" className="thin" />
     </>
   ),
   // "o que é?": o ponto de interrogação em versalete, dentro do círculo da chamada

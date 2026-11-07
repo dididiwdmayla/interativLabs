@@ -17,9 +17,9 @@ Uso pessoal. Roda no navegador, no celular e no computador.
 
 ## Estado
 
-Fase 1 (fundação) em andamento. A Parte C trouxe o motor definitivo (Box2D v3 calibrado para gravidade real, determinístico entre Node e navegador), o formato de cena v2 e as ligações 2.0. A Parte D trouxe o palco vivo: o app abre com um mecanismo montado na pele da Prancha índigo, que se simula, opera com o dedo, vê em câmera lenta e volta na linha do tempo. A Parte E2a trouxe a base do editor tátil: desfazer em tudo, layout de paisagem com tela cheia e app instalável, menus circulares de borda, seleção com alças e encaixe, cartão da peça, gaveta de peças prontas, pilha de camadas e projetos salvos no aparelho. A Parte F trouxe as velocidades Lento, Normal e Real, a mão com força limitada e o Lançador de bancada. A Parte E2b acrescentou o formato v3, Martelo, cartões de ligação, trava e peça multicamada, com o exemplo Roda e lingueta. A Parte E2c acertou o que o teste no celular mostrou (a vista não se mexe ao abrir o Martelo, o cursor deslocado crava de verdade, a faixa das ferramentas virou um carimbo preso à borda de baixo, a câmara detectada bate com a do Lançador) e trouxe o Lápis, com a caneta. A coordenação (briefing, decisões, prompts) vive no Project do Claude.
+**Fase 1 (fundação) concluída; a Fase 2 (Mecânica 2.0) está começando**, pelos instrumentos (M1). A fase entregou, em partes: o motor definitivo (Box2D v3 calibrado para gravidade real, determinístico entre Node e navegador) e o formato de cena (v3, com migrações); o palco vivo na pele da Prancha índigo, com câmera lenta, linha do tempo e arrasto com o dedo; o editor tátil (desfazer em tudo, menus de borda, cartões, gaveta de peças, camadas, projetos salvos); o Martelo, as ligações, a trava e a peça multicamada; o Lápis e a caneta; o modo de entender (camadas em cores e afastadas, esconder peça, cartões "o que é", rastro); os exemplos Lançador de bancada e Roda e lingueta; e, por último, o som mínimo (uma música em laço e efeitos que marcam o que acontece). A coordenação (briefing, decisões, prompts) vive no Project do Claude.
 
-Medidas, capturas e pendências da E2c estão no [relatório de verificação](docs/verificacao-fase-1-parte-e2c.md); as da E2b, no [relatório anterior](docs/verificacao-fase-1-parte-e2b.md).
+O balanço da fase, com as medidas, o que ficou de fora e as capturas finais, está em [docs/verificacao-fase-1.md](docs/verificacao-fase-1.md); o do som, em [docs/verificacao-som-01.md](docs/verificacao-som-01.md). A verificação de cada parte tem o seu relatório em `docs/verificacao-fase-1-parte-*.md`.
 
 ## Rodar
 
@@ -29,6 +29,7 @@ npm run dev          # servidor local
 npm run build        # build estático em dist/
 npm run assets       # WebP 1x/2x, registro e folhas de contato do lote visual
 npm run icons        # ícone provisório do app (SVG → PNG em public/icons/)
+npm run audio        # som: extrai o zip do lote, normaliza, converte (m4a e wav) e gera public/audio/, o registro e as medidas
 npm run lint && npm run typecheck && npm test
 npm run capture      # capturas Playwright (390×844 e 1440×900) em docs/capturas/fase-1/
 npm run check:overflow  # reprova rolagem lateral em 360, 390, 412 px, 844×390 e 640×360 (com folhas e Martelo abertos)
@@ -42,6 +43,8 @@ npm run calibrate    # tabela da calibração do Box2D para gravidade real → d
 npm run test:e2e     # determinismo: o Chromium dá o mesmo hash que o Node em todas as cenas de teste
 npx playwright test --project=lab   # capturas do laboratório em docs/capturas/fase-1/parte-c/
 npx playwright test --project=capture-d   # capturas do palco em docs/capturas/fase-1/parte-d/
+npx playwright test --project=sound-s     # som: nada antes do primeiro toque, música, aba escondida, preferências
+npx playwright test --project=sound-fisica-s  # som da física e das ferramentas no navegador
 npx playwright test --project=e2a         # o editor tátil só com toque emulado (vários dedos), em 844×390
 npx playwright test --project=capture-e2a # capturas do editor em docs/capturas/fase-1/parte-e2a/
 ```
@@ -60,7 +63,7 @@ Celular deitado é o layout principal. Nos cantos: menu (☰) com projetos, exem
 
 - **Peça:** toque escolhe (a mais alta da camada ativa sob o dedo); arrastar move, com encaixe em centros, vértices, bordas, eixos das ligações e grade; as alças em ouro giram (passos de 15°) e esticam. O botão redondo ao lado da peça (ou um toque longo) abre o cartão: nome, camada, tamanho, material, fixa ou solta, girar, espelhar, duplicar, excluir, ligações e detalhes.
 - **Vista:** um dedo no fundo (ou numa peça de outra camada) move; dois dedos dão zoom e movem; roda do mouse dá zoom.
-- **Menus de borda:** arraste do fundo até a borda e segure 1 s (o anel de ouro se completa) ou toque nas abas no meio das bordas. Direita: **Inserir** (Martelo, Lápis, peças prontas, nova camada, duplicar e excluir a seleção). Esquerda: **Vista** (enquadrar, camadas em cores, raio-x, esconder peças, rastro no Testar, tela cheia, dicas, canhoto). Deslize até o item e solte, ou toque nele.
+- **Menus de borda:** arraste do fundo até a borda e segure 1 s (o anel de ouro se completa) ou toque nas abas no meio das bordas. Direita: **Inserir** (Martelo, Lápis, peças prontas, nova camada, duplicar e excluir a seleção). Esquerda: **Vista** (enquadrar, camadas em cores, raio-x, esconder peças, rastro no Testar, tela cheia, som, dicas no Montar, canhoto). Deslize até o item e solte, ou toque nele.
 - **Desfazer:** toque com dois dedos; refazer com três; Ctrl+Z e Ctrl+Shift+Z no computador.
 - **Martelo:** botão redondo junto ao desfazer, só no Montar; também no menu Inserir. Abrir ou fechar não mexe na vista. A faixa presa à borda de baixo mostra Fixar (parafuso, eixo, pino, trava), Ligar (mola, haste, cabo), Guiar (trilho) e Gás (câmara, sensor); em tela pequena, o botão na ponta da faixa troca de grupo. Toque rápido crava sob o dedo; arraste para desenhar ligações e cursos. Centros de discos, engrenagens e furos puxam o encaixe. Câmara: arraste do fundo à boca; uma peça solta sob o começo é a parede de trás, a primeira peça solta que fecha o furo é a da frente. Esc sai no computador. Segure uma ferramenta da faixa para abrir o cartão "o que é" dela.
 - **Cursor deslocado:** com o dedo, segure parado 300 ms: acende uma mira em ouro 64 px acima do dedo (abaixo, se faltar espaço), com uma vibração curta no Android. Daí em diante o ponto é a mira: o dedo a move, o encaixe e a frase seguem a mira e soltar crava nela. Vale no Martelo inteiro, para mover uma ferragem e para começar um traço no Lápis. Mouse e caneta não têm deslocamento.
@@ -79,6 +82,7 @@ Celular deitado é o layout principal. Nos cantos: menu (☰) com projetos, exem
   - **Esconder peças:** cada toque esconde a peça de cima sob o dedo, para ver o que está atrás (também "Esconder" no cartão da peça). A pílula "N escondidas" abre a lista; um toque traz de volta, "Mostrar todas" traz todas. Fica salvo com o projeto.
   - **O que é?** no cartão da ligação: três frases e uma animação curta de como ela funciona.
   - **Rastro** (só no Testar): as peças que se movem deixam um caminho curto em ouro.
+- **Som:** menu Vista → **Som** abre uma faixa com **Música** e **Efeitos**, que ligam e desligam separados e ficam salvos no aparelho. Nada toca antes do primeiro toque na tela; a aba fora de foco cala tudo. A música é um fundo baixo em laço (a emenda acontece depois de ~2 min 11 s). Os efeitos marcam o que acontece: cravar parafuso, trava, eixo e pino, ligar mola, haste e cabo, soltar a trava, trocar entre Montar e Testar, concluir um corte do Lápis e abrir uma faixa ou um cartão; e, no Testar, os impactos (pelo material e pela massa, com volume e tom pela velocidade), os estalos da catraca, o gás acendendo (sopro nas cargas fraca e média, estouro seco na forte) e o chiado de gás pelos respiros. Desfazer, refazer, navegar e arrastar a régua não tocam nada.
 - **Projetos** ficam salvos no aparelho a cada edição. Abrir um exemplo cria uma cópia. **Arquivo** exporta (copiar ou baixar o JSON) e importa cenas v0, v1, v2 e v3; a exportação grava v3.
 
 Três páginas de trabalho, carregadas sob demanda:

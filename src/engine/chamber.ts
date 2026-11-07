@@ -110,6 +110,10 @@ export class ChamberSim {
   portExposed: number[];
   /** área total de escape para o ambiente no passo (mm²) */
   private outArea = 0;
+  /** parte dela que sai por respiros abertos (mm²) */
+  private ventArea = 0;
+  /** vazão por respiros e portas no passo, mmol/s (só leitura: alimenta o som) */
+  flow = 0;
   /** alguma parede saiu do furo (de lado): o cilindro está aberto e o gás não empurra */
   breached = false;
 
@@ -163,6 +167,7 @@ export class ChamberSim {
    */
   update(g: ChamberGeometry, h: number, time: number, events: EngineEvent[]): void {
     const p = this.p;
+    this.flow = 0;
     const [front, rear] = this.span(g);
     const L = Math.max(front - rear, L_MIN);
     const V = p.area * L;
@@ -204,6 +209,7 @@ export class ChamberSim {
       this.ventExposed[i] = e;
       if (this.ventOpen[i]) area += e * v.area;
     });
+    this.ventArea = area;
     this.walls.forEach((ws) => {
       if (!ws.sealed) area += p.area;
     });
@@ -235,8 +241,11 @@ export class ChamberSim {
     const rt = this.rtNow();
     const nEq = (pOut * this.V) / rt;
     const tau = this.V / (ORIFICE_K * area * rt);
+    const n0 = this.n;
     const n1 = nEq + (this.n - nEq) * dexp(-h / tau);
     this.setGas(n1, this.rt0);
+    // só o que passa pelos respiros conta como vazão (a boca aberta é o tiro, não o chiado)
+    if (h > 0) this.flow += (Math.abs(n0 - n1) / h) * (this.ventArea / area);
   }
 
   /** Muda a quantidade de gás: saída expande o que fica (isentrópico); entrada traz gás a R·T. */
@@ -304,7 +313,7 @@ export class ChamberSim {
       this.n += this.p.charge;
       this.U += (this.p.charge * this.rt0) / (this.p.gamma - 1 || 1);
     }
-    events.push({ kind: "chamber-fired", chamber: this.p.id, time });
+    events.push({ kind: "chamber-fired", chamber: this.p.id, charge: this.p.charge, time });
     return true;
   }
 
@@ -330,6 +339,7 @@ export class ChamberSim {
       gas: this.n,
       fired: this.fired,
       shots: this.shotsFired,
+      flow: this.flow,
       burning: this.burning,
       walls: this.p.walls.map((w, i) => {
         const ws = this.walls[i]!;
@@ -363,10 +373,16 @@ export function exchange(a: ChamberSim, b: ChamberSim, area: number, h: number):
   // equilíbrio de pressão com a mesma temperatura: n proporcional a V
   const aEq = (total * a.V) / (a.V + b.V);
   const rate = ORIFICE_K * area * rt * (1 / a.V + 1 / b.V);
+  const aBefore = a.n;
   const a1 = aEq + (a.n - aEq) * dexp(-rate * h);
   const b1 = total - a1;
   a.setGas(a1, rt);
   b.setGas(b1, rt);
+  if (h > 0) {
+    const f = Math.abs(a.n - aBefore) / h;
+    a.flow += f;
+    b.flow += f;
+  }
   a.pressure();
   b.pressure();
 }

@@ -82,6 +82,9 @@ const SHEETS = [
   "hide",
   "hidden",
   "explain",
+  // Parte S: a faixa do Som (Música e Efeitos), no Montar e no Testar
+  "sound",
+  "sound-sim",
 ] as const;
 for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSCAPE]) {
   for (const sheet of SHEETS) {
@@ -107,6 +110,7 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
                   setHideMode(on: boolean): void;
                   hide(id: string): void;
                   setExplain(k: string): void;
+                  setSoundBar(on: boolean): void;
                 };
               };
             };
@@ -124,7 +128,11 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
         } else if (sh === "hide") ui.setHideMode(true);
         else if (sh === "hidden") for (const q of ui.current?.scene.parts.slice(0, 5) ?? []) ui.hide(q.id);
         else if (sh === "explain") ui.setExplain("spring");
-        else ui.setSheet(sh);
+        else if (sh === "sound") ui.setSoundBar(true);
+        else if (sh === "sound-sim") {
+          ui.setMode("simulate");
+          ui.setSoundBar(true);
+        } else ui.setSheet(sh);
       }, sheet);
       if (sheet === "hidden") await page.locator(".hiddenpill__btn").click();
       await page.waitForTimeout(400);
