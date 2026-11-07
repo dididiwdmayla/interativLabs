@@ -1,3 +1,4 @@
+import { instrumentPreset } from "@/instruments/presets";
 import { useId } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import { DEFAULT_SPEED, REAL_NOTICE, SPEEDS, speedMode, type Speed } from "@/sim/pacing";
@@ -28,6 +29,8 @@ function chooseSpeed(set: (s: Speed) => void, s: Speed): void {
  */
 export function SimControls() {
   const uid = useId();
+  const scene = useUiStore((s) => s.current?.scene);
+  const preset = scene ? instrumentPreset(scene) : [];
   const st = useSimStore();
   const ctl = st.ctl;
   const off = !ctl || st.recalculating;
@@ -93,6 +96,14 @@ export function SimControls() {
       >
         <Icon name="restart" uid={`${uid}r`} />
       </button>
+      {preset.length > 0 && (
+        <button
+          className="btn btn--outline btn--small instruments-open"
+          onClick={() => useUiStore.getState().setProbes(preset)}
+        >
+          Ver instrumentos
+        </button>
+      )}
       {st.status === "loading" && <span className="simctl__status">Carregando o motor…</span>}
       {st.status === "error" && <span className="simctl__status simctl__status--error">{st.error}</span>}
     </div>

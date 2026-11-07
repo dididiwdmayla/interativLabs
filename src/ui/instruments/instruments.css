@@ -1,0 +1,162 @@
+.instruments {
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  right: 0;
+  width: min(100%, 960px);
+  background: var(--color-chrome-float);
+  border: 1px solid var(--color-ink-faint);
+  color: var(--color-ink);
+}
+.instruments__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--space-2);
+  border-bottom: 1px solid var(--color-ink-faint);
+  gap: var(--space-2);
+}
+.instruments__head button {
+  min-height: 44px;
+  background: none;
+  border: 0;
+  color: var(--color-ink);
+  font: var(--text-panel-title) var(--font-title);
+  letter-spacing: var(--tracking-label);
+  cursor: pointer;
+}
+.instruments__head small {
+  font: var(--text-label) var(--font-ui);
+  color: var(--color-ink-2);
+}
+.instruments__charts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.instrument-chart {
+  min-width: 0;
+  padding: 0 var(--space-2) var(--space-1);
+  border-right: 1px solid var(--color-ink-faint);
+}
+.instrument-chart:last-child {
+  border-right: 0;
+}
+.instrument-chart header {
+  display: flex;
+  align-items: center;
+}
+.instrument-chart h3 {
+  font: var(--text-label) var(--font-ui);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  flex: 1;
+}
+.instrument-chart header button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--color-ink-2);
+  cursor: pointer;
+}
+.instrument-chart__reading {
+  display: flex;
+  gap: var(--space-1);
+  align-items: baseline;
+  font: var(--text-value) var(--font-callout);
+}
+.instrument-chart__reading span,
+.instrument-chart__reading small {
+  font-size: var(--text-label);
+}
+.instrument-chart__reading small {
+  margin-left: auto;
+  color: var(--color-ink-2);
+}
+.instrument-chart svg {
+  display: block;
+  width: 100%;
+  touch-action: none;
+  overflow: visible;
+}
+.instrument-chart text {
+  fill: var(--color-ink-2);
+  font: 11px var(--font-callout);
+}
+.instrument-chart__grid {
+  fill: none;
+  stroke: var(--color-ink-faint);
+  stroke-width: 0.4;
+}
+.instrument-chart__axis {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: 0.6;
+}
+.instrument-chart__curve {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.instrument-chart--energy .instrument-chart__curve {
+  stroke: var(--color-ember);
+}
+.instrument-chart__cursor {
+  stroke: var(--color-gold);
+  fill: var(--color-gold);
+  stroke-width: 1;
+}
+.instrument-chart__peak {
+  fill: var(--color-ink);
+  stroke: var(--color-stage);
+}
+.instrument-chart__limit {
+  stroke: var(--color-ember);
+  stroke-width: 0.7;
+  stroke-dasharray: 4 3;
+}
+.instrument-chart__limit text {
+  stroke: none;
+  fill: var(--color-ember);
+}
+.measure__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-2) 0;
+}
+.measure > button {
+  margin-right: var(--space-1);
+}
+@media (orientation: portrait) and (max-width: 700px) {
+  .instruments__charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.instrument-chart {
+  position: relative;
+}
+.instrument-chart__threshold {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  min-height: 44px;
+  max-width: 100%;
+  background: var(--color-chrome);
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold);
+  font: var(--text-label) var(--font-ui);
+}
+.timeline__event-name {
+  position: absolute;
+  right: var(--space-2);
+  top: 0;
+  font: var(--text-label) var(--font-ui);
+  color: var(--color-ember);
+}
+.timeline__event[role="button"] {
+  cursor: pointer;
+}

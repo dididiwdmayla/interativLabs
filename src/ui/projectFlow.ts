@@ -195,7 +195,7 @@ let pending: (() => Promise<void>) | null = null;
 
 /** Estado de vista do projeto aberto (peças escondidas). */
 function viewNow(): ProjectView {
-  return { hidden: useUiStore.getState().hidden };
+  return { hidden: useUiStore.getState().hidden, probes: useUiStore.getState().probes };
 }
 
 async function save(id: string, scene: Scene, view: ProjectView): Promise<void> {
@@ -241,7 +241,7 @@ export function startAutosave(): () => void {
     const id = c.id;
     const scene = c.scene;
     if (c.scene === prev.current?.scene) {
-      if (s.hidden === prev.hidden) return;
+      if (s.hidden === prev.hidden && s.probes === prev.probes) return;
       // peças escondidas: estado de vista, salvo à parte da cena
       if (!pending) {
         pending = () => saveView(id, viewNow());

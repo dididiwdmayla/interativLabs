@@ -1,3 +1,7 @@
+import { eventTick, type EventTick, type TickKind } from "@/instruments/events";
+export { STRONG_IMPACT } from "@/instruments/events";
+import { Samples } from "@/instruments/sampling";
+import type { Probe } from "@/instruments/model";
 import { FIXED_STEP } from "@/engine/common";
 import type { EngineAdapter, PartPose, Snapshot } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
@@ -29,14 +33,8 @@ export type SimInput =
 
 type Pending = PendingInput;
 
-export type SimEventKind = "sensor" | "chamber-fired" | "impact" | "lock-released";
-
-export interface SimEvent {
-  step: number;
-  kind: SimEventKind;
-  /** sensor, câmara ou a primeira peça do impacto */
-  id: Id;
-}
+export type SimEventKind = TickKind;
+export type SimEvent = EventTick;
 
 /**
  * O que o som precisa da física (só saída: não entra na gravação nem no hash).
@@ -57,9 +55,6 @@ const FLOW_EVERY = 6;
 export const SOUND_FLOW_MIN = 0.02;
 /** A vazão segurada cai a esta fração por passo. */
 const FLOW_DECAY = 0.9;
-
-/** Choque acima disto (mm/s) vira marca de "impacto forte" na linha do tempo. */
-export const STRONG_IMPACT = 600;
 
 /** Uma câmara no quadro gravado. */
 export interface ChamberFrame {
@@ -227,9 +222,11 @@ export interface Rewind {
 export interface SessionOptions {
   /** passos gravados (padrão: 10 s) */
   capacity?: number;
+  probes?: Probe[];
 }
 
 export class SimSession {
+  readonly samples = new Samples();
   readonly scene: Scene;
   readonly h = FIXED_STEP;
   private make: () => EngineAdapter;
@@ -261,9 +258,11 @@ export class SimSession {
       opts.capacity ?? Math.round(10 / FIXED_STEP),
       scene.links.filter((l) => l.kind === "lock").map((l) => l.id),
     );
+    this.samples.configure(opts.probes ?? []);
     this.adapter = this.compile();
     this.last = this.adapter.snapshot();
     this.rec.record(0, this.last);
+    this.samples.record(0, this.last, this.adapter);
   }
 
   private compile(): EngineAdapter {
@@ -324,20 +323,11 @@ export class SimSession {
     const s = this.adapter.snapshot();
     this.last = s;
     this.rec.record(this.step, s);
+    this.samples.record(this.step, s, this.adapter);
     for (const e of s.events) {
-      if (e.kind === "lock-released")
-        this.events.push({ step: this.step, kind: "lock-released", id: e.lock });
-      else if (e.kind === "sensor") this.events.push({ step: this.step, kind: "sensor", id: e.sensor });
-      else if (e.kind === "chamber-fired")
-        this.events.push({ step: this.step, kind: "chamber-fired", id: e.chamber });
-      else if (e.kind === "impact" && e.speed >= STRONG_IMPACT) {
-        const prev = this.events[this.events.length - 1];
-        if (!prev || prev.kind !== "impact" || this.step - prev.step > 12)
-          this.events.push({ step: this.step, kind: "impact", id: e.a });
-      }
+      const tick = eventTick(e, this.step);
+      if (tick) this.events.push(tick);
     }
-    if (this.events.length && this.events[0]!.step < this.rec.oldest)
-      this.events = this.events.filter((e) => e.step >= this.rec.oldest);
     this.collectSound(s);
     return s;
   }
@@ -418,6 +408,7 @@ export class SimSession {
       this.queue.length = 0;
       this.step = target;
       this.rec.truncate(target);
+      this.samples.truncate(target);
       this.events = this.events.filter((e) => e.step <= target);
       this.sound = [];
       this.flowSent = 0;
@@ -456,6 +447,7 @@ export class SimSession {
     this.target = null;
     this.step = 0;
     this.events = [];
+    this.samples.clear();
     this.sound = [];
     this.flowSent = 0;
     this.flowHold = 0;
@@ -463,6 +455,7 @@ export class SimSession {
     this.rec.oldest = 0;
     this.last = this.adapter.snapshot();
     this.rec.record(0, this.last);
+    this.samples.record(0, this.last, this.adapter);
   }
 
   /** Poses atuais direto do motor (precisão total; testes de determinismo). */

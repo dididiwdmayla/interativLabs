@@ -1,3 +1,4 @@
+import { Measure } from "../instruments/Measure";
 import { useId, useState } from "react";
 import {
   deleteParts,
@@ -137,6 +138,7 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
         ) : null}
       </section>
 
+      <Measure target={p.id} name={p.name} kind="part" />
       <PartLayers scene={scene} part={owner} layer={p.layer} />
       <section className="card__sec" aria-label="Tamanho">
         <h3 className="card__k">Tamanho</h3>

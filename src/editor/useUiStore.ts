@@ -1,3 +1,4 @@
+import type { Probe } from "@/instruments/model";
 import { create } from "zustand";
 import type { Id, LinkKind, Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
@@ -71,6 +72,7 @@ export const SPREAD_MAX = 64;
 export interface ProjectView {
   /** peças escondidas */
   hidden?: Id[];
+  probes?: Probe[];
 }
 
 interface UiState {
@@ -119,6 +121,10 @@ interface UiState {
   setHideMode: (on: boolean) => void;
   /** peças escondidas do projeto aberto (estado de vista, salvo com o projeto) */
   hidden: Id[];
+  gapTarget: string | null;
+  setGapTarget: (target: string | null) => void;
+  probes: Probe[];
+  setProbes: (probes: Probe[]) => void;
   hide: (id: Id) => void;
   unhide: (id: Id) => void;
   unhideAll: () => void;
@@ -274,6 +280,10 @@ export const useUiStore = create<UiState>()((set, get) => ({
       edgeMenu: null,
     }));
   },
+  gapTarget: null,
+  setGapTarget: (gapTarget) => set({ gapTarget }),
+  probes: [],
+  setProbes: (probes) => set({ probes: probes.slice(0, 4) }),
   hidden: [],
   hide: (id) => set((s) => (s.hidden.includes(id) ? {} : { hidden: [...s.hidden, id] })),
   unhide: (id) => set((s) => ({ hidden: s.hidden.filter((x) => x !== id) })),
@@ -319,6 +329,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   openScene: (id, scene, figure, history, view) =>
     set((s) => ({
       // estado de vista: o do projeto (peças que ainda existem); um exemplo começa sem nada escondido
+      gapTarget: null,
+      probes: view?.probes ?? [],
       hidden: (view?.hidden ?? []).filter((h) => scene.parts.some((p) => p.id === h)),
       hideMode: false,
       look: { ...LOOK_OFF, distance: s.look.distance },

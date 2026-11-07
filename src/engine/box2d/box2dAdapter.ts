@@ -637,6 +637,72 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       return rt ? rt.snapshot() : { time: 0, steps: 0, parts: {}, links: {}, events: [] };
     },
 
+    velocity(partId) {
+      const r = plan?.partRel.get(partId);
+      if (!r || !rt) return null;
+      const state = rt.body(r.body);
+      const p = rt.pose(partId)!;
+      return {
+        x: state.vx - state.w * (p.y - state.y),
+        y: state.vy + state.w * (p.x - state.x),
+        omega: state.w,
+      };
+    },
+    reaction(id) {
+      const joint = joints.get(id);
+      if (!joint) return null;
+      const f = jointForce(id)!;
+      return { force: Math.hypot(...f) / 1e6, torque: (B.b2Joint_GetConstraintTorque(joint) * L * L) / 1e6 };
+    },
+    clearance(a, b) {
+      if (!plan || !rt) return null;
+      const fixtures = (id: Id) =>
+        plan!.bodies.flatMap((body) =>
+          body.fixtures.filter((f) => f.part === id && !f.sensor).map((f) => ({ f, body: body.index })),
+        );
+      let distance = Infinity;
+      for (const fa of fixtures(a))
+        for (const fb of fixtures(b)) {
+          if (!(fa.f.bits & fb.f.bits)) continue;
+          const proxy = (item: typeof fa) => {
+            const p = new B.b2ShapeProxy();
+            const shape = item.f.piece;
+            const points = shape.kind === "circle" ? [shape.c] : shape.points;
+            p.count = points.length;
+            p.radius = shape.kind === "circle" ? shape.r / L : 0;
+            points.forEach((pt, i) => {
+              const w = rt!.world(item.body, pt);
+              const v = new B.b2Vec2(w[0] / L, w[1] / L);
+              p.setPoint(i, v);
+              v.delete();
+            });
+            return p;
+          };
+          const pa = proxy(fa),
+            pb = proxy(fb);
+          const input = new B.b2DistanceInput();
+          const transform = new B.b2Transform();
+          const zero = new B.b2Vec2(0, 0),
+            rotation = rot(0);
+          transform.p = zero;
+          transform.q = rotation;
+          input.transform = transform;
+          input.proxyA = pa;
+          input.proxyB = pb;
+          input.useRadii = true;
+          const out = B.b2ComputeShapeDistance(input, null);
+          distance = Math.min(distance, out.distance * L);
+          out.delete();
+          input.delete();
+          pa.delete();
+          pb.delete();
+          transform.delete();
+          zero.delete();
+          rotation.delete();
+        }
+      return Number.isFinite(distance) ? distance : null;
+    },
+
     pose(partId: Id): PartPose | null {
       return rt ? rt.pose(partId) : null;
     },
