@@ -284,6 +284,9 @@
 .toolstrip[data-edge="top"] .toolstrip__phrase {
   bottom: auto;
   top: calc(100% + 2px);
+  left: 0;
+  width: 100%;
+  background: var(--color-chrome-float);
 }
 
 .toolstrip[data-edge="top"] .toolstrip__popover {

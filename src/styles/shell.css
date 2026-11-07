@@ -2446,3 +2446,100 @@
 .shell[data-colors="true"] .pill__plates span:nth-child(3) {
   background: var(--lrow-color);
 }
+
+/* ---------- peças escondidas (Parte E2d) ---------- */
+
+.hiddenpill {
+  position: relative;
+  display: flex;
+}
+
+.hiddenpill__btn {
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+}
+
+.hiddenpill__btn .pill__name {
+  text-transform: lowercase;
+  font-variant: small-caps;
+  letter-spacing: var(--tracking-label);
+}
+
+.hiddenlist {
+  position: absolute;
+  z-index: 9;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  width: min(260px, 70vw);
+  max-height: min(60vh, 300px);
+  overflow-y: auto;
+  padding: var(--space-2);
+  background: var(--color-chrome-float);
+  border: var(--stroke-frame-thick) solid var(--color-ink-3);
+  box-shadow:
+    inset 0 0 0 2px var(--color-chrome-float),
+    inset 0 0 0 2.75px var(--color-ink-faint);
+  animation: fade-in var(--dur-quick) var(--ease-develop);
+}
+
+/* no Testar a pílula fica em cima: a lista desce */
+.corner--tr .hiddenlist {
+  bottom: auto;
+  top: calc(100% + var(--space-2));
+}
+
+.hiddenlist ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hiddenlist__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 2px var(--space-1);
+  border: 0;
+  border-bottom: var(--stroke-construction) solid var(--color-ink-faint);
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hiddenlist__item:active {
+  background: var(--color-raised);
+}
+
+.hiddenlist__thumb {
+  flex: none;
+}
+
+.hiddenlist__shape {
+  fill: var(--color-wall);
+  stroke: var(--color-ink);
+  stroke-width: 1px;
+  stroke-dasharray: 2 1.5;
+}
+
+.hiddenlist__ref {
+  font-family: var(--font-callout);
+  font-style: italic;
+  color: var(--color-ink-2);
+}
+
+.hiddenlist__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hiddenlist__all {
+  width: 100%;
+  margin-top: var(--space-2);
+}

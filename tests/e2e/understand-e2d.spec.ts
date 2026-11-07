@@ -24,6 +24,8 @@ type UiState = {
   setFingerDraws(on: boolean): void;
   fingerDraws: boolean;
   penSeen: boolean;
+  hidden: string[];
+  selection: unknown;
 };
 type W = {
   __IL__: {
@@ -353,3 +355,144 @@ for (const vp of [
     }
   });
 }
+
+// ——— 16.3 ———
+
+test.describe("16.3 — esconder peça", () => {
+  test.use({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+
+  test("Ferrolho escondido no Testar: percussor e retém à vista, mesma cena no motor", async ({ page }) => {
+    test.setTimeout(120_000);
+    // a cena que cada simulação manda ao worker da física
+    await page.addInitScript(() => {
+      const sent: string[] = [];
+      (window as unknown as { __SENT__: string[] }).__SENT__ = sent;
+      const post = Worker.prototype.postMessage;
+      Worker.prototype.postMessage = function (this: Worker, m: unknown, ...rest: unknown[]) {
+        const msg = m as { t?: string; scene?: unknown };
+        if (msg?.t === "init") sent.push(JSON.stringify(msg.scene));
+        return (post as (...a: unknown[]) => void).call(this, m, ...rest);
+      };
+    });
+    const scene = sceneOf(LANCADOR);
+    const ferrolho = scene.parts.find((p) => p.name === "Ferrolho")!.id;
+    await open(page, scene);
+    const mode = (m: "edit" | "simulate") =>
+      page.evaluate((m) => (window as unknown as W).__IL__.ui.getState().setMode(m), m);
+    await mode("simulate");
+    const tf = await fireLancador(page);
+    const scrub = (t: number) =>
+      page.evaluate(
+        (x) =>
+          (window as unknown as { __IL__: { sim: { getState(): Sim } } }).__IL__.sim.getState().ctl!.scrub(x),
+        t,
+      );
+    await scrub(tf + 3 / 240);
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${DIR}/esconder-antes-lancador-testar-844x390.png` });
+    // modo "Esconder peças" pelo menu Vista, e um toque no Ferrolho (onde ele está agora)
+    await page.getByRole("button", { name: "Menu Vista" }).tap();
+    await page.getByRole("menuitem", { name: "Esconder peças" }).tap();
+    await expect(page.locator('.toolstrip[aria-label="Esconder peças"]')).toBeVisible();
+    // onde o Ferrolho está agora: a pose escrita no grupo dele, mais o ponto da pega (-65, -5)
+    const bolt = scene.parts.find((p) => p.id === ferrolho)!;
+    const pose = await page.locator(`[data-part="${ferrolho}"] > g`).nth(1).getAttribute("transform");
+    const [, tx, ty] = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(pose!)!.map(Number) as [
+      number,
+      number,
+      number,
+    ];
+    const grip = await toClient(page, [tx + (-65 - bolt.x), ty + (-5 - bolt.y)]);
+    await page.touchscreen.tap(grip[0], grip[1]);
+    await expect.poll(async () => (await ui(page)).hidden).toEqual([ferrolho]);
+    await page.waitForTimeout(300);
+    await expect(page.locator(`[data-part="${ferrolho}"]`).first()).toHaveCSS("visibility", "hidden");
+    await page.screenshot({ path: `${DIR}/esconder-depois-lancador-testar-844x390.png` });
+    // a simulação de novo, com o Ferrolho escondido: a cena mandada ao motor é a mesma
+    await mode("edit");
+    await mode("simulate");
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __SENT__: string[] }).__SENT__.length))
+      .toBe(2);
+    const sent = await page.evaluate(() => (window as unknown as { __SENT__: string[] }).__SENT__);
+    expect(sent[1]).toBe(sent[0]);
+    expect(JSON.parse(sent[0]!).parts.some((p: { id: string }) => p.id === ferrolho)).toBe(true);
+  });
+
+  test("toque esconde, a escondida não recebe toque, a lista restaura, fica com o projeto", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await page.goto("/");
+    await page.locator(".stage__sheet--static").first().waitFor();
+    await page.evaluate(() =>
+      (window as unknown as { __IL__: { openExample(id: string): Promise<void> } }).__IL__.openExample(
+        "lancador-bancada",
+      ),
+    );
+    await expect(page.getByRole("heading", { name: "Lançador de bancada" })).toBeVisible();
+    await page.evaluate(() => (window as unknown as W).__IL__.ui.getState().setHint(false));
+    const scene = await current(page);
+    const gatilho = scene.parts.find((p) => p.name === "Gatilho")!;
+    // o modo pelo menu: um toque no Gatilho o esconde
+    await page.getByRole("button", { name: "Menu Vista" }).tap();
+    await page.getByRole("menuitem", { name: "Esconder peças" }).tap();
+    const pull = await toClient(page, [16.0, 35.5]);
+    await page.touchscreen.tap(pull[0], pull[1]);
+    await expect.poll(async () => (await ui(page)).hidden).toEqual([gatilho.id]);
+    await page.getByRole("button", { name: "Pronto" }).tap();
+    // escondida, não recebe toque: o toque no mesmo ponto escolhe a placa de baixo
+    await page.waitForTimeout(400);
+    await page.touchscreen.tap(pull[0], pull[1]);
+    await page.waitForTimeout(200);
+    const sel = (await ui(page)).selection as { id: string } | null;
+    expect(sel?.id).not.toBe(gatilho.id);
+    // a cena não mudou e o desfazer está vazio
+    expect(await current(page)).toEqual(scene);
+    await page.screenshot({ path: `${DIR}/esconder-pilula-844x390.png` });
+    // fica com o projeto
+    await page.evaluate(() =>
+      (
+        window as unknown as { __IL__: { projects: { flushAutosave(): Promise<void> } } }
+      ).__IL__.projects.flushAutosave(),
+    );
+    await page.waitForTimeout(700);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Lançador de bancada" })).toBeVisible();
+    await expect.poll(async () => (await ui(page)).hidden).toEqual([gatilho.id]);
+    // a lista: miniatura e nome; um toque traz de volta
+    await page.getByRole("button", { name: /1 peça escondida/ }).tap();
+    await expect(page.locator(".hiddenlist__item")).toHaveCount(1);
+    await expect(page.locator(".hiddenlist__name")).toHaveText("Gatilho");
+    await page.screenshot({ path: `${DIR}/esconder-lista-844x390.png` });
+    await page.getByRole("button", { name: "Mostrar Gatilho" }).tap();
+    await expect.poll(async () => (await ui(page)).hidden).toEqual([]);
+    // "Mostrar todas"
+    await page.evaluate(
+      (ids) => {
+        const s = (
+          window as unknown as { __IL__: { ui: { getState(): { hide(id: string): void } } } }
+        ).__IL__.ui.getState();
+        for (const id of ids) s.hide(id);
+      },
+      scene.parts.slice(1, 4).map((p) => p.id),
+    );
+    await page.getByRole("button", { name: /3 peças escondidas/ }).tap();
+    await page.getByRole("button", { name: "Mostrar todas" }).tap();
+    await expect.poll(async () => (await ui(page)).hidden).toEqual([]);
+    // abrir um exemplo começa sem nada escondido
+    await page.evaluate(
+      (id) =>
+        (window as unknown as { __IL__: { ui: { getState(): { hide(id: string): void } } } }).__IL__.ui
+          .getState()
+          .hide(id),
+      gatilho.id,
+    );
+    await page.evaluate(() =>
+      (window as unknown as { __IL__: { openExample(id: string): Promise<void> } }).__IL__.openExample(
+        "lancador-bancada",
+      ),
+    );
+    await expect.poll(async () => (await ui(page)).hidden).toEqual([]);
+  });
+});

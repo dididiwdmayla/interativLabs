@@ -11,6 +11,7 @@ import { MainSheet } from "./MainSheet";
 import { PartsDrawer } from "./PartsDrawer";
 import { LayerStack } from "./LayerStack";
 import { LayersBar } from "./LayersBar";
+import { HideBar } from "./HiddenParts";
 import type { Look } from "@/render/look";
 import { SidePanel } from "./Panel";
 import {
@@ -190,7 +191,7 @@ function Workbench() {
       data-edgemenu={edgeOpen}
       data-tool={tool || (lookState.open && !hideMode) || hideMode}
       data-colors={look.colors}
-      data-topstrip={mode === "simulate" && lookState.open}
+      data-topstrip={mode === "simulate" && (lookState.open || hideMode)}
     >
       <div className="workbench" ref={bench}>
         <Stage
@@ -210,6 +211,7 @@ function Workbench() {
           onHide={hideMode ? onHide : undefined}
         >
           {model && lookState.open && !tool && !hideMode && <LayersBar model={model} />}
+          {hideMode && <HideBar />}
         </Stage>
         <Corners model={model} wide={wide} />
         {mode === "simulate" && <TestBar />}
