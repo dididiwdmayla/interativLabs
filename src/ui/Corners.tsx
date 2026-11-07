@@ -2,6 +2,7 @@ import { useId, useRef } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import type { SceneModel } from "@/render/prepare";
 import { Icon } from "./icons";
+import { VariantMenu } from "./VariantMenu";
 import { ModeButton } from "./ModeButton";
 import { HiddenPill } from "./HiddenParts";
 
@@ -55,6 +56,7 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
         <h1 className="corner__title" title={title}>
           {title}
         </h1>
+        <VariantMenu />
         {editing && hint && <p className="corner__hint">{HINT_TEXT}</p>}
       </div>
       {editing && (

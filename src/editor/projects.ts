@@ -1,3 +1,4 @@
+import type { HistoryState } from "./history";
 import type { Scene } from "@/model/types";
 import type { ProjectView } from "./useUiStore";
 
@@ -22,7 +23,16 @@ export interface ProjectMeta {
   updatedAt: string;
 }
 
+export interface Variant {
+  id: string;
+  name: string;
+  scene: Scene;
+  history: HistoryState;
+}
+
 export interface Project extends ProjectMeta {
+  variants?: Variant[];
+  activeVariant?: string;
   scene: Scene;
   /** estado de vista (peças escondidas): fora da cena, do hash e do desfazer */
   view?: ProjectView;

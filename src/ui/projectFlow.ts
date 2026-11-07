@@ -12,6 +12,7 @@ import {
   putProject,
   setLast,
   storageAvailable,
+  type Variant,
   type Project,
   type ProjectMeta,
 } from "@/editor/projects";
@@ -84,10 +85,20 @@ function figureOf(list: ProjectMeta[], id: string): number {
 }
 
 function show(p: Project, list: ProjectMeta[]): void {
-  const scene: Scene = { ...p.scene, meta: { ...p.scene.meta, title: p.name } };
+  const active = p.variants?.find((v) => v.id === p.activeVariant) ?? p.variants?.[0];
+  const base = active?.scene ?? p.scene;
+  const scene: Scene = { ...base, meta: { ...base.meta, title: p.name } };
   useUiStore
     .getState()
-    .openScene(p.id, scene, figureOf(list, p.id), loadHistory(p.id, scene) ?? undefined, p.view);
+    .openScene(
+      p.id,
+      scene,
+      figureOf(list, p.id),
+      active?.history ?? loadHistory(p.id, scene) ?? undefined,
+      p.view,
+      p.variants,
+      active?.id,
+    );
   void setLast(p.id);
 }
 
@@ -198,7 +209,13 @@ function viewNow(): ProjectView {
   return { hidden: useUiStore.getState().hidden, probes: useUiStore.getState().probes };
 }
 
-async function save(id: string, scene: Scene, view: ProjectView): Promise<void> {
+async function save(
+  id: string,
+  scene: Scene,
+  view: ProjectView,
+  variants: Variant[],
+  activeVariant: string,
+): Promise<void> {
   const p = await getProject(id);
   const now = new Date().toISOString();
   await putProject({
@@ -209,14 +226,10 @@ async function save(id: string, scene: Scene, view: ProjectView): Promise<void> 
     createdAt: p?.createdAt ?? now,
     updatedAt: now,
     view,
+    variants,
+    activeVariant,
   });
   await useProjects.getState().refresh();
-}
-
-/** Só o estado de vista mudou: a cena e as datas ficam. */
-async function saveView(id: string, view: ProjectView): Promise<void> {
-  const p = await getProject(id);
-  if (p) await putProject({ ...p, view });
 }
 
 export async function flushAutosave(): Promise<void> {
@@ -240,17 +253,19 @@ export function startAutosave(): () => void {
     if (c.id !== prev.current?.id) return;
     const id = c.id;
     const scene = c.scene;
-    if (c.scene === prev.current?.scene) {
-      if (s.hidden === prev.hidden && s.probes === prev.probes) return;
-      // peças escondidas: estado de vista, salvo à parte da cena
-      if (!pending) {
-        pending = () => saveView(id, viewNow());
-        window.clearTimeout(timer);
-        timer = window.setTimeout(() => void flushAutosave(), AUTOSAVE_MS);
-      }
+    if (
+      c.scene === prev.current?.scene &&
+      s.hidden === prev.hidden &&
+      s.probes === prev.probes &&
+      s.variants === prev.variants &&
+      s.activeVariant === prev.activeVariant &&
+      s.history === prev.history
+    )
       return;
-    }
-    pending = () => save(id, scene, viewNow());
+    const view = viewNow();
+    const variants = s.variantSnapshot();
+    const active = s.activeVariant;
+    pending = () => save(id, scene, view, variants, active);
     window.clearTimeout(timer);
     timer = window.setTimeout(() => void flushAutosave(), AUTOSAVE_MS);
   });
