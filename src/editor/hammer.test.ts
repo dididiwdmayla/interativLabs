@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { prepareScene } from "@/render/prepare";
 import { loadScene } from "@/model/scene";
-import { hammerFix, hammerPoint } from "./hammer";
+import { hammerFix, hammerPoint, hammerPhrase } from "./hammer";
 import { run, undo, redo, push, emptyHistory } from "./history";
 import { profileSlotScene, profilesScene } from "../../scripts/fixtures/multicamada";
 
@@ -81,4 +81,9 @@ describe("stamped fasteners in the engine", () => {
     expect(Math.abs(pose.y)).toBeLessThan(0.01);
     engine.dispose();
   });
+});
+
+it("describes fastening to the background and to another piece", () => {
+  expect(hammerPhrase("screw", "Base", null)).toBe("Parafuso: a Base fica presa ao fundo");
+  expect(hammerPhrase("screw", "Placa 3", "Base")).toBe("Parafuso: a Placa 3 se une à Base");
 });

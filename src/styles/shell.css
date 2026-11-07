@@ -2432,3 +2432,7 @@
   color: var(--color-gold);
   font-size: 13px;
 }
+
+/* Keep layer names readable in the compact landscape corner. */
+.pill__name { white-space: normal; overflow: visible; text-overflow: clip; max-width: 18ch; line-height: 1.2; }
+.pill { flex-shrink: 0; padding-block: var(--space-1); }

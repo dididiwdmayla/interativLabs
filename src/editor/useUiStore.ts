@@ -43,6 +43,11 @@ export interface EdgeMenuState {
 }
 
 interface UiState {
+  penSeen: boolean;
+  fingerDraws: boolean;
+  lastInput: string;
+  noteInput: (kind: string) => void;
+  setFingerDraws: (on: boolean) => void;
   mode: Mode;
   pick: CardPick | null;
   setPick: (pick: CardPick | null) => void;
@@ -132,6 +137,14 @@ const hasWindow = typeof window !== "undefined";
  * por comandos (`commit`), com desfazer e refazer por patches do Immer.
  */
 export const useUiStore = create<UiState>()((set, get) => ({
+  penSeen: false,
+  fingerDraws: hasWindow && readPref("il.fingerDraws") === "1",
+  lastInput: "mouse",
+  noteInput: (kind) => set((s) => ({ lastInput: kind, penSeen: s.penSeen || kind === "pen" })),
+  setFingerDraws: (fingerDraws) => {
+    writePref("il.fingerDraws", fingerDraws ? "1" : "0");
+    set({ fingerDraws });
+  },
   mode: "edit",
   pick: null,
   setPick: (pick) => set({ pick, sheet: null, edgeMenu: null, hammer: null }),

@@ -372,7 +372,7 @@ export function Stage({
   const pencilCursor = useRef<SVGGElement>(null);
   const pencilTether = useRef<SVGPathElement>(null);
   /** uma caneta já desenhou nesta sessão: o dedo só move a vista no Lápis */
-  const penSeen = useRef(false);
+
   const penStroke = useRef<PencilStroke | null>(null);
   /** chamado a cada mudança da vista (o botão da peça acompanha) */
   const onView = useRef<(() => void) | null>(null);
@@ -838,7 +838,7 @@ export function Stage({
     if (!model || !nodes) return;
     onFirstTouch?.();
     const [x, y] = local(e);
-    if (e.pointerType === "pen") penSeen.current = true;
+    useUiStore.getState().noteInput(e.pointerType);
     // caneta no Lápis: desenha à parte, e os dedos continuam movendo a vista ao mesmo tempo
     if (editing && !bare && pencilOn && e.pointerType === "pen" && !penStroke.current) {
       box.current?.setPointerCapture(e.pointerId);
@@ -890,7 +890,7 @@ export function Stage({
       }
     } else if (!bare) {
       // Lápis com o dedo (ou mouse): desenha; com caneta presente, o dedo só move a vista
-      if (pencilOn && !picking && !(e.pointerType === "touch" && penSeen.current)) {
+      if (pencilOn && !picking && !(e.pointerType === "touch" && useUiStore.getState().penSeen && !useUiStore.getState().fingerDraws)) {
         if (pencilPending?.plan.kind === "sides") {
           const side = sideAt(pencilPending.plan, w);
           if (side !== null) {
