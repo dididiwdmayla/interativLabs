@@ -42,7 +42,13 @@ export interface SceneSvgProps {
   size: { width: number; height: number };
   /** camadas em cores, afastadas, isoladas e peças escondidas (estado de vista) */
   look?: Look;
+  /** rastro do movimento (Testar): monta os caminhos fixos que o escritor preenche */
+  trail?: boolean;
 }
+
+/** Caminhos do rastro: 13 peças × 6 trechos (src/ui/sim/trail.ts). */
+const TRAIL_SLOTS = 13;
+const TRAIL_SEGMENTS = 6;
 
 type LayerState = "full" | "active" | "below" | "above" | "xray" | "xray-active";
 
@@ -325,7 +331,9 @@ export function SceneSvg(props: SceneSvgProps) {
 
   // depois de cada montagem, reaplica o quadro atual (as poses não passam pelo React)
   useLayoutEffect(() => {
-    nodes.setContext({ ...writeCtx, walls: !heavy });
+    nodes.setContext({ ...writeCtx, walls: !heavy, spread, active: props.active });
+    nodes.trailFocus = selection?.kind === "part" ? selection.id : null;
+    if (!props.trail || mode !== "simulate") nodes.trailEls.length = 0;
     nodes.write(nodes.frame, true);
   });
 
@@ -513,6 +521,13 @@ export function SceneSvg(props: SceneSvgProps) {
                 ref={nodes.refChamber(lm.link.id, geos.get(lm.link.id)!, "label")}
               />
             ) : null,
+          )}
+          {props.trail && mode === "simulate" && (
+            <g className="trails">
+              {Array.from({ length: TRAIL_SLOTS * TRAIL_SEGMENTS }, (_, i) => (
+                <path key={i} className={`trail trail--${i % TRAIL_SEGMENTS}`} ref={nodes.refTrail(i)} />
+              ))}
+            </g>
           )}
           <g className="callouts">
             {callouts.map((c) =>

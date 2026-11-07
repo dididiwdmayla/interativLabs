@@ -29,6 +29,39 @@ export interface StripItem {
   /** nome completo para leitores de tela e o `title` (o rótulo visível fica curto) */
   hint?: string;
   onClick: () => void;
+  /** toque longo (500 ms): o cartão "o que é" da ferramenta */
+  onLong?: () => void;
+}
+
+const LONG_MS = 500;
+
+/** Toque longo num botão da faixa: chama `onLong` e engole o clique que viria depois. */
+function longPress(it: StripItem) {
+  if (!it.onLong) return {};
+  let timer = 0;
+  let fired = false;
+  const cancel = () => window.clearTimeout(timer);
+  return {
+    onPointerDown: () => {
+      fired = false;
+      cancel();
+      timer = window.setTimeout(() => {
+        fired = true;
+        it.onLong?.();
+      }, LONG_MS);
+    },
+    onPointerUp: cancel,
+    onPointerLeave: cancel,
+    onPointerCancel: cancel,
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+    onClickCapture: (e: React.MouseEvent) => {
+      if (fired) {
+        e.stopPropagation();
+        e.preventDefault();
+        fired = false;
+      }
+    },
+  };
 }
 
 export interface StripGroup {
@@ -208,6 +241,7 @@ export function ToolStrip({
       disabled={it.disabled}
       onClick={it.onClick}
       data-tool={it.id}
+      {...longPress(it)}
     >
       {it.icon ? (
         <Icon name={it.icon} uid={`${uid}${key ?? it.id}`} size={20} />

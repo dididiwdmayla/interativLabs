@@ -41,12 +41,10 @@ export function HiddenPill({ model }: { model: SceneModel }) {
   const hidden = useUiStore((s) => s.hidden);
   const unhide = useUiStore((s) => s.unhide);
   const unhideAll = useUiStore((s) => s.unhideAll);
-  const [open, setOpen] = useState(false);
+  const [want, setOpen] = useState(false);
   const list = hidden.map((id) => model.parts.get(id)).filter((m): m is PartModel => !!m);
-  useEffect(() => {
-    if (!list.length) setOpen(false);
-  }, [list.length]);
   if (!list.length) return null;
+  const open = want;
   return (
     <div className="hiddenpill" data-keeps-sheet>
       {open && (
@@ -58,7 +56,10 @@ export function HiddenPill({ model }: { model: SceneModel }) {
                   type="button"
                   className="hiddenlist__item"
                   aria-label={`Mostrar ${partName(m.part)}`}
-                  onClick={() => unhide(m.part.id)}
+                  onClick={() => {
+                    unhide(m.part.id);
+                    if (list.length === 1) setOpen(false);
+                  }}
                 >
                   <PartThumb m={m} />
                   <span className="hiddenlist__ref">{m.part.ref}</span>
@@ -68,7 +69,14 @@ export function HiddenPill({ model }: { model: SceneModel }) {
               </li>
             ))}
           </ul>
-          <button type="button" className="btn btn--outline btn--small hiddenlist__all" onClick={unhideAll}>
+          <button
+            type="button"
+            className="btn btn--outline btn--small hiddenlist__all"
+            onClick={() => {
+              unhideAll();
+              setOpen(false);
+            }}
+          >
             Mostrar todas
           </button>
         </div>

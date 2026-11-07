@@ -2543,3 +2543,24 @@
   width: 100%;
   margin-top: var(--space-2);
 }
+
+/* ---------- cartão "o que é" (Parte E2d) ---------- */
+
+.explain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+.explain__text {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink);
+}
+
+.explain__text:last-child {
+  color: var(--color-ink-2);
+  font-style: italic;
+}

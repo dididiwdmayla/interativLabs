@@ -320,6 +320,7 @@ export default function PerfPage() {
           activeLayer={3}
           onNodes={setNodes}
           look={look}
+          trail={trail}
           bare
         />
       </div>

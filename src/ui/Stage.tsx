@@ -102,6 +102,8 @@ interface StageProps {
   onHide?: (id: string) => void;
   /** faixas e pílulas que vivem dentro da prancha (camadas em cores, escondidas) */
   children?: React.ReactNode;
+  /** rastro do movimento (só no Testar) */
+  trail?: boolean;
 }
 
 type Pad = [number, number, number, number];
@@ -305,6 +307,7 @@ export function Stage({
   look = NO_LOOK,
   onHide,
   children,
+  trail = false,
 }: StageProps) {
   // o desenho usa a cena inteira; o toque, o modelo sem as peças escondidas (e só a ativa no isolar)
   const model = useMemo(
@@ -1709,6 +1712,7 @@ export function Stage({
             <SceneSvg
               model={drawModel}
               look={look}
+              trail={trail}
               nodes={nodes}
               uid={uid}
               zoom={zoom}

@@ -12,6 +12,7 @@ import { PartsDrawer } from "./PartsDrawer";
 import { LayerStack } from "./LayerStack";
 import { LayersBar } from "./LayersBar";
 import { HideBar } from "./HiddenParts";
+import { ExplainCard } from "./ExplainCard";
 import type { Look } from "@/render/look";
 import { SidePanel } from "./Panel";
 import {
@@ -90,6 +91,7 @@ function Workbench() {
   const lookState = useUiStore((s) => s.look);
   const hiddenIds = useUiStore((s) => s.hidden);
   const hideMode = useUiStore((s) => s.hideMode);
+  const trail = useUiStore((s) => s.trail);
   const wide = useMedia(WIDE_QUERY);
   const sa = useSafeArea();
   const portrait = useMedia("(orientation: portrait) and (max-width: 700px)");
@@ -208,6 +210,7 @@ function Workbench() {
           obstacles={obstacles}
           onFirstTouch={onFirstTouch}
           look={look}
+          trail={trail && mode === "simulate"}
           onHide={hideMode ? onHide : undefined}
         >
           {model && lookState.open && !tool && !hideMode && <LayersBar model={model} />}
@@ -228,6 +231,7 @@ function Workbench() {
           <LayerStack model={model} />
         </Sheet>
       )}
+      <ExplainCard />
       <Toast />
       {error && <p className="shell__error">{error}</p>}
     </div>

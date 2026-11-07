@@ -48,6 +48,7 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Stri
           icon: TOOL_ICONS[tool],
           pressed: hammer === tool,
           onClick: () => setHammer(tool),
+          onLong: () => useUiStore.getState().setExplain(tool),
         })),
       }))}
     />

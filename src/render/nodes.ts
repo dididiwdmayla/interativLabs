@@ -5,9 +5,9 @@ import { calloutPath } from "./callouts";
 import { cablePath, coilScale, gasPolygon, type ChamberGeo } from "./geometry";
 import { worldOf, type SceneModel } from "./prepare";
 
-/** Quem desenha o rastro a cada quadro (src/ui/sim: lê a gravação). */
+/** Quem desenha o rastro a cada quadro (src/ui/sim/trail.ts: lê a gravação). */
 export interface TrailWriter {
-  write(frame: FrameSource): void;
+  write(frame: FrameSource & { step?: number }): void;
 }
 
 /**
@@ -86,6 +86,9 @@ export interface WriteContext {
   px: number;
   /** escreve a parede das peças móveis (falso no Simular de cena pesada) */
   walls?: boolean;
+  /** camadas afastadas: px entre folhas vizinhas, e a camada ativa (a folha de cima é a dela) */
+  spread?: number;
+  active?: number;
 }
 
 /** pressão manométrica (kPa) em que o gás chega à metade da opacidade máxima */
@@ -109,8 +112,10 @@ export class StageNodes {
   chambers = new Map<Id, ChamberNodes>();
   /** hastes do afastamento (pino e sensor entre folhas): seguem o ponto na peça */
   hastes = new Map<Id, { el: SVGGElement; host: Id; at: Vec2 }>();
-  /** rastro do movimento (Testar): caminhos fixos, com o `d` escrito a cada quadro */
+  /** rastro do movimento (Testar): quem escreve, os caminhos fixos e a peça escolhida */
   trail: TrailWriter | null = null;
+  trailEls: (SVGPathElement | null)[] = [];
+  trailFocus: Id | null = null;
   world: HTMLElement | null = null;
   /** fio e anel do arrasto */
   drag: { g?: SVGGElement | null; wire?: SVGLineElement | null; ring?: SVGCircleElement | null } = {};
@@ -203,6 +208,12 @@ export class StageNodes {
     };
   }
 
+  refTrail(i: number) {
+    return (el: SVGPathElement | null) => {
+      this.trailEls[i] = el;
+    };
+  }
+
   refCableGhost(id: Id, end: "a" | "b") {
     return (el: SVGCircleElement | null) => {
       const c = this.cables.get(id);
@@ -245,7 +256,7 @@ export class StageNodes {
   }
 
   /** Escreve um quadro. `all` inclui as peças fixas (montagem e troca de zoom). */
-  write(frame: FrameSource = this.frame, all = true): void {
+  write(frame: FrameSource & { step?: number } = this.frame, all = true): void {
     this.frame = frame;
     const { wallMm, shadowMm } = this.ctx;
     for (const m of this.model.partList) {

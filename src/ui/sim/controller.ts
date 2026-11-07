@@ -7,6 +7,7 @@ import { localOf, worldOf } from "@/render/prepare";
 import { Pacer, blendAt } from "@/sim/pacing";
 import { Recorder, type FrameView, type PendingInput, type SimEvent } from "@/sim/session";
 import type { SimReply, SimRequest } from "./sim.worker";
+import { Trail } from "./trail";
 import { useSimStore, type SimControl, type SimPick, type Speed, type TimelineState } from "./simStore";
 
 /**
@@ -75,6 +76,7 @@ class Controller implements SimControl {
   private flash = new Map<Id, number>();
   private opts: ControllerOptions;
   private onFrame: ((t: TimelineState) => void) | null = null;
+  private trail: Trail;
 
   constructor(
     worker: Worker,
@@ -90,6 +92,8 @@ class Controller implements SimControl {
     this.mix = new Float32Array(this.rec.stride);
     worker.onmessage = (e: MessageEvent<SimReply>) => this.onReply(e.data);
     nodes.resetPeaks();
+    this.trail = new Trail(this.rec, nodes, this.h);
+    nodes.trail = this.trail;
     document.addEventListener("visibilitychange", this.onVisibility);
     this.drawCurrent();
     this.start();
@@ -311,6 +315,7 @@ class Controller implements SimControl {
     this.pacer.reset(0);
     this.due = [];
     this.nodes.resetPeaks();
+    this.trail.reset();
     this.state.set({ scrubbed: false, recalculating: false });
     this.post({ t: "restart", id: this.epoch });
   }
@@ -421,6 +426,7 @@ class Controller implements SimControl {
     document.removeEventListener("visibilitychange", this.onVisibility);
     this.worker.terminate();
     this.nodes.setDrag(null);
+    if (this.nodes.trail === this.trail) this.nodes.trail = null;
   }
 }
 

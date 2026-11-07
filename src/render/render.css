@@ -549,3 +549,31 @@
   stroke-width: var(--stroke-hardware);
   stroke-dasharray: 2 2;
 }
+
+/* rastro do movimento (Testar): linha fina em ouro que some com o tempo */
+.trail {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: var(--stroke-hardware);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trail--0 {
+  opacity: 0.95;
+}
+.trail--1 {
+  opacity: 0.75;
+}
+.trail--2 {
+  opacity: 0.55;
+}
+.trail--3 {
+  opacity: 0.38;
+}
+.trail--4 {
+  opacity: 0.22;
+}
+.trail--5 {
+  opacity: 0.1;
+}

@@ -26,6 +26,7 @@ type UiState = {
   penSeen: boolean;
   hidden: string[];
   selection: unknown;
+  trail: boolean;
 };
 type W = {
   __IL__: {
@@ -494,5 +495,91 @@ test.describe("16.3 — esconder peça", () => {
       ),
     );
     await expect.poll(async () => (await ui(page)).hidden).toEqual([]);
+  });
+});
+
+// ——— 16.4 ———
+
+test.describe("16.4 — cartões 'o que é'", () => {
+  test.use({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+
+  test("pelo cartão da ligação e pelo toque longo na faixa do Martelo", async ({ page }) => {
+    const scene = sceneOf(LANCADOR);
+    await open(page, scene);
+    const pick = (kind: string) => scene.links.find((l) => l.kind === kind)!.id;
+    for (const kind of ["axle", "spring", "chamber"]) {
+      await page.evaluate((id) => {
+        const s = (window as unknown as W).__IL__.ui.getState() as unknown as {
+          select(s: { kind: "link"; id: string }): void;
+          setSheet(s: string): void;
+        };
+        s.select({ kind: "link", id });
+        s.setSheet("card");
+      }, pick(kind));
+      await page.getByRole("button", { name: "O que é?" }).tap();
+      const card = page.locator(`.explain[data-kind="${kind}"]`);
+      await expect(card).toBeVisible();
+      await expect(card.locator(".explainart")).toHaveAttribute("data-kind", kind);
+      await page.waitForTimeout(900);
+      const name = { axle: "eixo", spring: "mola", chamber: "camara" }[kind]!;
+      await page.screenshot({ path: `${DIR}/o-que-e-${name}-844x390.png` });
+      await page.keyboard.press("Escape");
+      await expect(card).toHaveCount(0);
+    }
+    // toque longo na Trava da faixa do Martelo
+    await page.evaluate(() => (window as unknown as W).__IL__.ui.getState().select(null));
+    await page.getByRole("button", { name: "Martelo", exact: true }).tap();
+    const strip = page.locator(".toolstrip");
+    for (let i = 0; i < 6 && !(await strip.locator('[data-tool="lock"]').isVisible()); i++)
+      await strip.locator(".toolstrip__selector").tap();
+    const lock = strip.locator('[data-tool="lock"]');
+    const b = (await lock.boundingBox())!;
+    const cdp = await page.context().newCDPSession(page);
+    const at = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [at] });
+    await page.waitForTimeout(700);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect(page.locator('.explain[data-kind="lock"]')).toBeVisible();
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `${DIR}/o-que-e-trava-844x390.png` });
+  });
+});
+
+test.describe("16.4 — rastro", () => {
+  test.use({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+
+  test("em Lento no Lançador: o caminho do Ferrolho e da esfera", async ({ page }) => {
+    test.setTimeout(120_000);
+    const scene = sceneOf(LANCADOR);
+    const ferrolho = scene.parts.find((p) => p.name === "Ferrolho")!.id;
+    await open(page, scene);
+    await page.evaluate(() => (window as unknown as W).__IL__.ui.getState().setMode("simulate"));
+    // o item Rastro só existe no menu Vista do Testar
+    await page.getByRole("button", { name: "Menu Vista" }).tap();
+    await page.getByRole("menuitem", { name: "Rastro" }).tap();
+    await expect.poll(async () => (await ui(page)).trail).toBe(true);
+    const tf = await fireLancador(page);
+    await page.evaluate(() =>
+      ((window as unknown as W).__IL__.ui.getState() as unknown as { clearNotice(): void }).clearNotice(),
+    );
+    const frames = [6, 14, 26];
+    for (const [k, n] of frames.entries()) {
+      await page.evaluate(
+        (x) =>
+          (window as unknown as { __IL__: { sim: { getState(): Sim } } }).__IL__.sim
+            .getState()
+            .ctl!.preview(x),
+        tf + n / 240,
+      );
+      await page.waitForTimeout(250);
+      await page.screenshot({ path: `${DIR}/rastro-lento-quadro-${k + 1}-844x390.png` });
+    }
+    // os caminhos com traço: o do Ferrolho (peça que recua) e o da esfera; nenhum elemento novo por quadro
+    const drawn = await page
+      .locator(".trail")
+      .evaluateAll((els) => els.filter((e) => (e.getAttribute("d") ?? "").length > 0).length);
+    expect(drawn).toBeGreaterThanOrEqual(2 * 6 - 2);
+    expect(await page.locator(".trail").count()).toBe(13 * 6);
+    void ferrolho;
   });
 });

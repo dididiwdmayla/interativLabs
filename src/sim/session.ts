@@ -158,6 +158,15 @@ export class Recorder {
     return this.viewOf(out, 0, step, (step + alpha) * h);
   }
 
+  /** Posição (x, y) da peça no passo, sem criar a vista do quadro (rastro). */
+  xy(step: number, id: Id): [number, number] | null {
+    if (!this.has(step)) return null;
+    const i = this.partIndex.get(id);
+    if (i === undefined) return null;
+    const o = this.slot(step) + i * 3;
+    return [this.data[o]!, this.data[o + 1]!];
+  }
+
   view(step: number, h: number): FrameView | null {
     if (!this.has(step)) return null;
     return this.viewOf(this.data, this.slot(step), step, step * h);
