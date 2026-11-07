@@ -1,0 +1,32 @@
+{
+  "parametros": {
+    "rdpPx": 0.5,
+    "gaussianaSigmaPx": 5,
+    "cantoGraus": 35,
+    "mmPorPx": 0.2
+  },
+  "lacoR6": {
+    "pontosNoRastro": 240,
+    "verticesFinais": 43,
+    "erroDeArea": 0.002426554597233272,
+    "maiorViradaEntreSegmentosGraus": 11.557726073305739,
+    "maiorViradaNoRastroGraus": 168.79410109018943
+  },
+  "cantosFalsos": {
+    "lacos": 120,
+    "raiosMm": [
+      4,
+      6,
+      10
+    ],
+    "comCantoFalso": 1
+  },
+  "quadrado20": {
+    "cantosDetectados": 4,
+    "reguaVertices": 4,
+    "erroDeAreaComRegua": 0.008490929858500067
+  },
+  "retaTremidaMais1mm": {
+    "regua": "line"
+  }
+}

@@ -40,6 +40,9 @@ async function rebuild(file: string, fixture: string, layer: number) {
   const make = await loadBox2d();
   const f = FIXTURES.find((x) => x.id === fixture)!;
   const r = await runFixture(make(), f.script, rebuilt);
+  const o = await runFixture(make(), f.script, scene);
+  const originalExit =
+    o.runs.flatMap((run) => run.assertions).find((x) => /sai pela boca/.test(x.label))?.value ?? null;
   const assertions = r.runs.flatMap((run) => run.assertions.map((x) => ({ ...x, runName: run.name })));
   const name = (id: string | null) => (id ? copy.parts.find((p) => p.id === id)?.name : "fundo");
   return {
@@ -49,6 +52,7 @@ async function rebuild(file: string, fixture: string, layer: number) {
       body: name(original.body),
       walls: original.walls.map((w) => name(w.part)),
       bore: original.bore,
+      exit: originalExit,
     },
     detected: {
       body: name(link.body),
@@ -60,6 +64,8 @@ async function rebuild(file: string, fixture: string, layer: number) {
       warning: found.warning ?? null,
     },
     cycle: {
+      /** primeira afirmação de saída pela boca (o pico da velocidade) */
+      exit: assertions.find((x) => /sai pela boca/.test(x.label))?.value ?? null,
       passed: assertions.filter((x) => x.pass).length,
       total: assertions.length,
       failed: assertions.filter((x) => !x.pass).map((x) => `${x.runName}: ${x.label} (${x.value})`),

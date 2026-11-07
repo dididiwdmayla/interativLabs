@@ -67,7 +67,7 @@ for (const { width, height } of SIZES) {
 }
 
 /** As folhas e o menu de borda abertos também não fazem rolagem lateral e têm alvos de 44 px. */
-const SHEETS = ["main", "drawer", "layers", "card", "edge", "hammer"] as const;
+const SHEETS = ["main", "drawer", "layers", "card", "edge", "hammer", "pencil"] as const;
 for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSCAPE]) {
   for (const sheet of SHEETS) {
     test(`folha ${sheet} em ${width}×${height}`, async ({ page }) => {
@@ -85,6 +85,7 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
                   select(s: { kind: "part"; id: string }): void;
                   setSheet(s: string): void;
                   setHammer(s: string): void;
+                  setPencil(on: boolean): void;
                   setEdgeMenu(m: { side: "left" | "right"; cy: number; hover: null }): void;
                 };
               };
@@ -95,6 +96,7 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
         if (p) ui.select({ kind: "part", id: p.id });
         if (sh === "edge") ui.setEdgeMenu({ side: "left", cy: 200, hover: null });
         else if (sh === "hammer") ui.setHammer("axle");
+        else if (sh === "pencil") ui.setPencil(true);
         else ui.setSheet(sh);
       }, sheet);
       await page.waitForTimeout(400);
@@ -108,7 +110,7 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
             el.matches("input[type=range]") ? r.height < 24 : r.width < 44 || r.height < 44,
           )
           .map(({ el, r }) => `${el.getAttribute("aria-label") ?? el.textContent} ${r.width}x${r.height}`),
-        escaped: Array.from(document.querySelectorAll(".sheet *, .edgemenu *"))
+        escaped: Array.from(document.querySelectorAll(".sheet *, .edgemenu *, .toolstrip *"))
           .map((el) => ({ el, r: el.getBoundingClientRect() }))
           .filter(({ r }) => r.width > 0 && (r.right > window.innerWidth + 0.5 || r.left < -0.5))
           .filter(({ el }) => !el.closest(".tiles"))

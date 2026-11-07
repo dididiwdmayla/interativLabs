@@ -66,7 +66,7 @@ for (const viewport of [
         ).toBe(true);
       }
       mkdirSync(DIR, { recursive: true });
-      await page.screenshot({ path: `${DIR}/martelo-faixa-${viewport.width}x${viewport.height}.png` });
+      await page.screenshot({ path: `${SCRATCH}/martelo-faixa-${viewport.width}x${viewport.height}.png` });
       const p = await at(page, [3.6, 0]);
       const initial = await current(page);
       if (viewport.width < 1000) {

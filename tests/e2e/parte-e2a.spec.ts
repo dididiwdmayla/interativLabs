@@ -207,19 +207,19 @@ test.describe("editor tátil em 844×390", () => {
 
     // desfaz tudo com dois dedos, conferindo cada passo
     const backs = [afterBar, afterPlate, initial];
-    await f.tapMany(2, { x: 200, y: 320 });
-    await f.tapMany(2, { x: 200, y: 320 });
+    await f.tapMany(2, { x: 300, y: 260 });
+    await f.tapMany(2, { x: 300, y: 260 });
     expect((await st(page)).scene).toBe(afterBar);
     expect((await st(page)).notice).toMatch(/^Desfeito: /);
-    await f.tapMany(2, { x: 200, y: 320 });
+    await f.tapMany(2, { x: 300, y: 260 });
     expect((await st(page)).scene).toBe(backs[1]);
-    await f.tapMany(2, { x: 200, y: 320 });
+    await f.tapMany(2, { x: 300, y: 260 });
     s = await st(page);
     expect(s.scene).toBe(initial);
     expect(s.future).toBe(4);
 
     // refaz tudo com três dedos
-    for (let i = 0; i < 4; i++) await f.tapMany(3, { x: 200, y: 320 });
+    for (let i = 0; i < 4; i++) await f.tapMany(3, { x: 300, y: 260 });
     s = await st(page);
     expect(s.scene).toBe(final);
     expect(s.future).toBe(0);

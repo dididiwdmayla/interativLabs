@@ -26,6 +26,8 @@ export interface StripItem {
   disabled?: boolean;
   /** alerta (brasa): "vai sair" */
   warn?: boolean;
+  /** nome completo para leitores de tela e o `title` (o rótulo visível fica curto) */
+  hint?: string;
   onClick: () => void;
 }
 
@@ -164,8 +166,8 @@ export function ToolStrip({
       key={key ?? it.id}
       className={`toolstrip__tool${it.warn ? " is-warn" : ""}`}
       aria-pressed={it.pressed}
-      aria-label={withLabel ? undefined : it.label}
-      title={it.label}
+      aria-label={withLabel && !it.hint ? undefined : (it.hint ?? it.label)}
+      title={it.hint ?? it.label}
       disabled={it.disabled}
       onClick={it.onClick}
       data-tool={it.id}
@@ -218,7 +220,7 @@ export function ToolStrip({
         ? it
         : {
             ...it,
-            label: `${it.label} · tocar: ${next.label.toLocaleLowerCase("pt-BR")}`,
+            hint: `${it.label} · tocar: ${next.label.toLocaleLowerCase("pt-BR")}`,
             pressed: undefined,
             onClick: next.onClick,
           };

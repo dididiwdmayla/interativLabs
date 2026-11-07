@@ -114,6 +114,39 @@ function corners(p: Vec2[], k: number, closed: boolean, deg = CORNER_DEG): numbe
   return out;
 }
 
+/** Gaussiana simples ao longo da linha (σ em amostras); pontas espelhadas na linha aberta. */
+function blur(p: Vec2[], sigma: number, closed: boolean): Vec2[] {
+  const n = p.length;
+  const reach = Math.ceil(3 * sigma);
+  const w = Array.from({ length: reach + 1 }, (_, k) => Math.exp(-(k * k) / (2 * sigma * sigma)));
+  const get = (j: number): Vec2 => {
+    if (closed) return p[((j % n) + n) % n]!;
+    if (j < 0) {
+      const e = p[0]!;
+      const q = p[Math.min(n - 1, -j)]!;
+      return [2 * e[0] - q[0], 2 * e[1] - q[1]];
+    }
+    if (j >= n) {
+      const e = p[n - 1]!;
+      const q = p[Math.max(0, 2 * (n - 1) - j)]!;
+      return [2 * e[0] - q[0], 2 * e[1] - q[1]];
+    }
+    return p[j]!;
+  };
+  return p.map((_, i) => {
+    let sx = 0;
+    let sy = 0;
+    let sw = 0;
+    for (let k = -reach; k <= reach; k++) {
+      const q = get(i + k);
+      sx += q[0] * w[Math.abs(k)]!;
+      sy += q[1] * w[Math.abs(k)]!;
+      sw += w[Math.abs(k)]!;
+    }
+    return [sx / sw, sy / sw];
+  });
+}
+
 export interface SmoothOptions {
   closed: boolean;
   /** mm por px de tela */
@@ -128,7 +161,8 @@ export interface Smoothed {
 
 /**
  * Simplifica e suaviza preservando os cantos: RDP a 0,5 px; reamostra a 1,5
- * px; cantos (virada acima de 35° na escala de 6 px) ficam presos; cada
+ * px; cantos (virada acima de 35° na escala de 8 px, sobre uma cópia com
+ * σ = 2 px) ficam presos; cada
  * trecho entre cantos passa por uma gaussiana de σ = 5 px ao longo do traço
  * (o tremido do dedo, de 1 a 2 px em ondas de 10 a 15 px, some); o laço volta
  * à área do traço simplificado; por fim, RDP fino a 0,15 px enxuga os
@@ -142,9 +176,11 @@ export function smoothStroke(raw: Vec2[], o: SmoothOptions): Smoothed {
   const p = resample(simple.length >= 2 ? simple : base, h, o.closed);
   const n = p.length;
   if (n < 4) return { points: p, corners: [] };
-  const k = Math.max(2, Math.round((6 * o.px) / h));
+  // cantos: virada medida a 8 px sobre uma cópia com o tremido mais fino tirado (σ = 2 px),
+  // para o ruído do dedo não virar canto
+  const k = Math.max(2, Math.round((8 * o.px) / h));
   const pinned = new Uint8Array(n);
-  const cs = corners(p, k, o.closed);
+  const cs = corners(blur(p, 2 / 1.5, o.closed), k, o.closed);
   for (const c of cs) pinned[c] = 1;
   if (!o.closed) {
     pinned[0] = 1;
