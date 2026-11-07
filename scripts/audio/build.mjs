@@ -203,6 +203,10 @@ function entryFor(cfg, m, cutStart) {
     duration: round3(m.duration),
     loop: loopOf(cfg, cutStart),
     target: { mode: target.mode, value: target.value },
+    measured: {
+      lufs: m.integrated == null ? null : Math.round(m.integrated * 10) / 10,
+      peak: Math.round(m.truePeak * 10) / 10,
+    },
     use: cfg.use,
     on: cfg.on,
     gain: round3(10 ** (cfg.gainDb / 20)),
@@ -239,6 +243,8 @@ export interface AudioEntry {
   loop: AudioLoop | null;
   /** alvo de volume: LUFS integrado ou pico real (dBTP) nos efeitos curtos */
   target: { mode: "lufs" | "peak"; value: number };
+  /** o que o arquivo convertido mede: volume integrado (null nos curtos) e pico real, dBTP */
+  measured: { lufs: number | null; peak: number };
   use: string;
   /** quando ganha gatilho: S = Parte S da Fase 1; M2, M3, M4 = Mecânica 2.0 (sem gatilho ainda) */
   on: "S" | "M2" | "M3" | "M4";

@@ -68,3 +68,8 @@ export function trailAction(): void {
   ui.setTrail(!ui.trail);
   ui.notify(ui.trail ? "Rastro desligado" : "Rastro: o caminho recente das peças que se movem");
 }
+
+export function soundAction(): void {
+  const ui = useUiStore.getState();
+  ui.setSoundBar(!ui.soundBar);
+}

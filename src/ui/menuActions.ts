@@ -6,6 +6,7 @@ import {
   hideModeAction,
   layersAction,
   leftyAction,
+  soundAction,
   tipsAction,
   trailAction,
   xrayAction,
@@ -72,6 +73,7 @@ const ACTIONS: Record<string, () => void> = {
   layers: layersAction,
   hide: hideModeAction,
   trail: trailAction,
+  sound: soundAction,
   tips: tipsAction,
   lefty: leftyAction,
 };

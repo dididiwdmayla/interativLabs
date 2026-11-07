@@ -11,6 +11,8 @@ import { MainSheet } from "./MainSheet";
 import { PartsDrawer } from "./PartsDrawer";
 import { LayerStack } from "./LayerStack";
 import { LayersBar } from "./LayersBar";
+import { SoundBar } from "./SoundBar";
+import { sound } from "@/sound";
 import { HideBar } from "./HiddenParts";
 import { ExplainCard } from "./ExplainCard";
 import type { Look } from "@/render/look";
@@ -92,6 +94,7 @@ function Workbench() {
   const hiddenIds = useUiStore((s) => s.hidden);
   const hideMode = useUiStore((s) => s.hideMode);
   const trail = useUiStore((s) => s.trail);
+  const soundBar = useUiStore((s) => s.soundBar);
   const wide = useMedia(WIDE_QUERY);
   const sa = useSafeArea();
   const portrait = useMedia("(orientation: portrait) and (max-width: 700px)");
@@ -132,6 +135,9 @@ function Workbench() {
     return startAutosave();
   }, []);
 
+  // o som só nasce no primeiro gesto (src/sound): aqui só liga a escuta
+  useEffect(() => sound.install(), []);
+
   useSimulation(mode === "simulate", nodes);
   useShortcuts();
 
@@ -143,6 +149,7 @@ function Workbench() {
       openExample: openExampleAsProject,
       projects: { useProjects, newProject, openProject, importText, exportJson, flushAutosave },
       stage: stageApi,
+      sound,
     };
   }, []);
 
@@ -191,9 +198,9 @@ function Workbench() {
       data-lefty={lefty}
       data-wide={wide}
       data-edgemenu={edgeOpen}
-      data-tool={tool || (lookState.open && !hideMode) || hideMode}
+      data-tool={tool || (lookState.open && !hideMode) || hideMode || soundBar}
       data-colors={look.colors}
-      data-topstrip={mode === "simulate" && (lookState.open || hideMode)}
+      data-topstrip={mode === "simulate" && (lookState.open || hideMode || soundBar)}
     >
       <div className="workbench" ref={bench}>
         <Stage
@@ -215,6 +222,7 @@ function Workbench() {
         >
           {model && lookState.open && !tool && !hideMode && <LayersBar model={model} />}
           {hideMode && <HideBar />}
+          {soundBar && !tool && !lookState.open && !hideMode && <SoundBar />}
         </Stage>
         <Corners model={model} wide={wide} />
         {mode === "simulate" && <TestBar />}
