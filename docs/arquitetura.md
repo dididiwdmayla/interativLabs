@@ -363,7 +363,7 @@ Feito para o dedo e para a caneta, paisagem primeiro no celular. A complexidade 
 
 ### Ferramentas da mão (decidido em 05/11/2026)
 
-Dois botões redondos flutuantes, só no Montar, na fileira de baixo junto do desfazer (o canhoto troca o lado): o **Martelo** (ligar e fixar) e o **Lápis** (forma). Cada um liga um modo que fica até tocar de novo no botão, apertar Esc ou ir para o Testar. Com um modo ligado, uma faixa mostra as ferramentas dele e uma frase diz o que a ferramenta ativa faz e o que o próximo toque vai fazer ("Eixo: a Alavanca 7 gira sobre a Placa de base 1"). Um dedo arrastando no fundo continua movendo a vista; dois dedos, zoom; os toques de desfazer e refazer continuam valendo.
+Dois botões redondos flutuantes, só no Montar, na fileira de baixo junto do desfazer (o canhoto troca o lado): o **Martelo** (ligar e fixar) e o **Lápis** (forma). Cada um liga um modo que fica até tocar de novo no botão, apertar Esc ou ir para o Testar. **Ligar ou desligar um modo nunca mexe na vista** (o teste do Will em 07/11 mostrou que reenquadrar ao abrir o Martelo atrapalha). Com um modo ligado, uma faixa presa à borda de baixo, baixa e no estilo da prancha, mostra as ferramentas dele e uma frase diz o que a ferramenta ativa faz e o que o próximo toque vai fazer ("Eixo: a Alavanca 7 gira sobre a Placa de base 1"). Um dedo arrastando no fundo continua movendo a vista; dois dedos, zoom; os toques de desfazer e refazer continuam valendo.
 
 **Martelo** — quatro grupos:
 
@@ -374,7 +374,7 @@ Dois botões redondos flutuantes, só no Montar, na fileira de baixo junto do de
 | Guiar | Trilho | Arrastar na direção do curso, a partir da peça que corre. |
 | Gás | Câmara, Sensor | Câmara: arrastar ao longo do furo, do fundo à boca. Sensor: tocar no ponto e depois no alvo. |
 
-- **Prévia acima do dedo.** Pressionar mostra a ferragem (ou a mola, a haste, o trilho) deslocada acima do dedo, com uma linha fina até o ponto, as guias de encaixe e as duas peças que vão ser ligadas realçadas em ouro (a de cima cheia, a de baixo tracejada). Arrastar ajusta; soltar crava. Com caneta e mouse, sem deslocamento.
+- **Cursor deslocado** (revisto em 07/11). Toque rápido crava sob o dedo, com encaixe. **Segurar parado 300 ms acende o cursor**: uma mira em ouro com a ferragem 64 px acima do dedo (abaixo, quando falta espaço em cima), ligada ao dedo por uma linha fina. A partir daí, **o ponto é o cursor**: o dedo o move 1:1, o encaixe e as peças realçadas são calculados no cursor, e soltar crava onde ele está. Nas ferramentas de arrastar, segurar antes de arrastar põe o começo no cursor, e o fim acompanha o cursor. As duas peças que vão ser ligadas ficam realçadas em ouro (a de cima cheia, a de baixo tracejada). Com caneta e mouse, sem deslocamento; com mouse, a prévia segue o ponteiro. Na E2b a ferragem aparecia acima, mas cravava sob o dedo: o cursor era só enfeite.
 - **Quais peças.** `b` é a peça mais alta sob o ponto na camada ativa (se não houver, a mais alta abaixo); `a` é a próxima abaixo dela no mesmo ponto (mesma camada, ordem menor, ou camadas de baixo); sem nenhuma, o fundo. O cartão da ligação mostra o par e deixa trocar entre as peças daquele ponto.
 - **Encaixe forte em centros.** Eixo e parafuso puxam para o centro de disco, engrenagem e furo redondo quando o ponto cai perto dele (até 30% do raio ou 24 px de tela). Os outros encaixes são os do §6 (pontos, bordas, retas das ligações, grade).
 - **Pino.** O hospedeiro é `b`. A faixa vai da camada dele até a vizinha onde o ponto está livre (primeiro para baixo, depois para cima). Se o ponto cai num furo ou rasgo de uma peça de outra camada, a faixa chega até ela e o rasgo nasce junto (`joint` se o rasgo for reto, senão `contact`). O pino nunca nasce dentro de material: se nasceria, o cartão avisa.
@@ -399,13 +399,18 @@ Dois botões redondos flutuantes, só no Montar, na fileira de baixo junto do de
 - **Régua** (liga e desliga): traço quase reto vira reta, quase círculo vira círculo, cantos viram vértices. Com a régua, a borracha reta dá um rasgo reto de verdade (vale para rasgo `joint`).
 - Peça paramétrica que passa pelo lápis vira forma livre (aviso curto; desfazer volta). Engrenagem e disco viram polígono.
 - **Caneta:** com caneta (`pointerType: "pen"`), ela desenha e o dedo só move a vista, sem precisar de opção.
+- Com o dedo, segurar 300 ms antes de traçar desenha pelo cursor deslocado (mesma regra do Martelo). O traço é simplificado e suavizado preservando os cantos, para a forma sair com cara de peça usinada, não de rabisco.
 
 ### Entender
 
 - **Modo camadas em cores:** cada camada ganha uma cor ordenada (do fundo para o topo), número na peça e, opcionalmente, as camadas afastadas em 2,5D para ver o que está em cima e embaixo. Isolar camada mostra só ela.
 - **Cartões "o que é"** para cada ligação, com uma animação curta.
-- **Tutorial** sobre o objeto padrão: um roteiro curto que mostra onde tocar (puxar o gatilho, ver a mola, abrir o menu, desmontar uma peça).
+- **Oficina guiada** (decidida em 07/11, substitui o tutorial sobre o objeto padrão): a pessoa escolhe o que montar (trinco de porta, catraca, gatilho com retém, par de engrenagens e outros) e é levada passo a passo. Cada receita é dado (`src/learn/`): a frase do passo, o gabarito fantasma em ouro tracejado de onde vai a peça ou a ligação, a ferramenta a usar realçada, e a conferência automática quando a cena satisfaz o passo (forma parecida, ligação do tipo certo entre as peças certas, com tolerância generosa). Passo cumprido ganha selo e o próximo entra; no fim, Testar com a frase do que observar. Sair a qualquer hora mantém o projeto. Cada receita tem uma cena de teste: os passos feitos por roteiro dão um mecanismo que passa nas afirmações dela.
 - **Rastro do movimento** no Testar: as peças em movimento deixam um rastro curto, para ver a trajetória.
+
+### Som (mínimo, decidido em 07/11)
+
+Pouca coisa, bem feita: uma música ambiente leve em laço (gerada no Suno) e uns oito efeitos curtos. Som marca o que acontece, nunca a tecla ou a navegação: cravar, ligar, soltar a trava, o gás acendendo, os impactos da simulação (o volume e a variação pela velocidade do impacto, com limite de efeitos por instante, de modo que a catraca estala sozinha), trocar entre Montar e Testar, o lápis cortando. Nada toca antes do primeiro gesto; a aba fora de foco cala tudo. Música e efeitos ligam e desligam no menu Vista. O motor é uma versão enxuta do motor de som do interativMind (`src/sound/`), com o pipeline `npm run audio`. O som é só saída: não entra na simulação nem no hash.
 
 ### Comandos
 
@@ -484,3 +489,6 @@ O uso mostrou uma diferença entre a regra geométrica da câmara e a câmara au
 | Velocidades | 04/11 (Parte F) | Fechada: Lento 1/20, Normal ¼ (padrão), Real 1×, com interpolação de desenho |
 | Peça multicamada e trava (formato v3) | 05/11 | Fechada (§3.2); implementação na Fase 1 · Parte E2b |
 | Ferramentas da mão: Martelo e Lápis | 05/11 | Fechada (§6); Martelo na Parte E2b, Lápis na E2c. Substitui o "conectar por toque na sobreposição" |
+| Cursor deslocado, faixa na borda sem mexer na vista | 07/11 | Fechada (§6), depois do teste do Will; entra na E2c |
+| Oficina guiada (receitas) | 07/11 | Fechada (§6, Entender); substitui o tutorial sobre o objeto padrão |
+| Som mínimo | 07/11 | Fechada (§6, Som): uma música em laço e uns oito efeitos; lote som-01 pelo coordenador sonoro |

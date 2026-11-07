@@ -1,6 +1,6 @@
 # Fase 1 — Fundação
 
-Branch: `fase-1` (ou o da sessão do executor). A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt e o seu PR para o `main`: **A** (itens 1–2), **B** (3–4), **C** (item 5: motor definitivo e ligações 2.0), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo), **E1** (item 10: pipeline de assets), **E2a** (itens 7–9: base do editor tátil), **F** (item 14: correções do teste real e exemplo-vitrine), **E2b** (item 13: Martelo, cartões de ligação, peça multicamada e trava; PR #8), todas feitas; **E2c** (item 15: Lápis, caneta e camadas em cores), **E2d** (item 16: entender: cartões "o que é", tutorial e rastro) e **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit.
+Branch: `fase-1` (ou o da sessão do executor). A fase roda em partes, uma por sessão do executor, cada uma com o seu prompt e o seu PR para o `main`: **A** (itens 1–2), **B** (3–4), **C** (item 5: motor definitivo e ligações 2.0), **C2** (item 12: objeto padrão), **D** (item 6: palco vivo), **E1** (item 10: pipeline de assets), **E2a** (itens 7–9: base do editor tátil), **F** (item 14: correções do teste real e exemplo-vitrine), **E2b** (item 13: Martelo, cartões de ligação, peça multicamada e trava; PR #8), todas feitas; **E2c** (item 15: acertos do teste da E2b, Lápis e caneta), **E2d** (item 16: camadas em cores, cartões "o que é" e rastro), **E2e** (item 17: oficina guiada), **S** (item 18: som mínimo) e **E3** (item 11: verificação). O prompt de cada parte manda; este documento é o plano e os critérios de aceite. Um commit por item (`Fase 1 · item M — descrição`), push após cada commit.
 
 Objetivo: o protótipo de `reference/prototype-v0/` reescrito sobre a arquitetura definitiva (`docs/arquitetura.md`), com o motor de física escolhido por medição, testes de cena, desfazer em tudo e projetos salvos. O visual já usa os tokens, a paleta e as fontes da Prancha índigo (`docs/identidade/identidade.md`), mas sem hachuras, texturas nem ferragens: isso é da Fase 2. Alinhamento, espaçamento e toque precisam estar corretos, porque a Fase 2 completa a pele, não refaz a estrutura.
 
@@ -115,10 +115,22 @@ Depois do primeiro teste do Will no celular (04/11):
 
 Subitens e aceites no prompt da Parte F.
 
-## Item 15 — Lápis, caneta e camadas em cores (Parte E2c)
+## Item 15 — Acertos do teste, Lápis e caneta (Parte E2c)
 
-O Lápis de §6 (contorno e traço, somar e tirar, régua, dividir em duas peças, forma livre), a caneta desenhando com o dedo movendo a vista, e o modo camadas em cores (cor ordenada por camada, número na peça, afastamento 2,5D, isolar camada). Prompt depois da revisão da E2b.
+- 15.1 Acertos do teste da E2b: o Martelo não mexe na vista; cursor deslocado de verdade (§6); faixa presa à borda de baixo, baixa, no estilo da prancha; detecção da câmara (corpo, paredes e diâmetro).
+- 15.2 Lápis: contorno (somar e tirar), lados no traço de borda a borda, dividir em duas peças, peça nova, suavização que preserva cantos.
+- 15.3 Lápis: traço com largura (pincel, borracha, rasgo, furo) e régua.
+- 15.4 Caneta, forma livre, perfil da camada ativa e a física das formas novas.
+- 15.5 Verificação.
 
 ## Item 16 — Entender (Parte E2d)
 
-Cartões "o que é" de cada ligação com animação curta, tutorial sobre o objeto padrão e rastro do movimento no Testar. Prompt depois da revisão da E2c.
+Modo camadas em cores (cor ordenada por camada, número na peça, afastamento 2,5D, isolar camada), cartões "o que é" de cada ligação com animação curta e rastro do movimento no Testar. Prompt depois da revisão da E2c.
+
+## Item 17 — Oficina guiada (Parte E2e)
+
+Receitas passo a passo (§6, Entender) com gabarito fantasma, ferramenta realçada e conferência automática; primeira leva de receitas e uma cena de teste por receita.
+
+## Item 18 — Som mínimo (Parte S)
+
+Lote som-01 (uma música em laço e uns oito efeitos, pelo coordenador sonoro), pipeline `npm run audio`, motor enxuto e os gatilhos de §6 (Som), com liga e desliga no menu Vista.
