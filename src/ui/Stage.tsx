@@ -1,3 +1,5 @@
+import { partAt } from "@/render/hit";
+import { addProbe } from "./instruments/actions";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
 import { hammerPoint, hammerFix, type HammerPoint, type HammerTool } from "@/editor/hammer";
@@ -980,6 +982,22 @@ export function Stage({
     }
     if (pointers.current.size > 2) return;
     const w = toWorld(view.current, x, y);
+    const gapUi = useUiStore.getState();
+    if (gapUi.gapTarget && !bare) {
+      const a = model.scene.parts.find((p) => p.id === gapUi.gapTarget);
+      const layer = model.scene.layers.findIndex((l) => l.id === a?.layer);
+      const id = partAt(model, nodes.frame, w, {
+        layer: (i) => i === layer,
+        exclude: new Set([gapUi.gapTarget]),
+      });
+      if (id && a) {
+        const b = model.scene.parts.find((p) => p.id === id);
+        addProbe(a.id, "clearance", `${a.name} / ${b?.name ?? id}`, id);
+        gapUi.setGapTarget(null);
+      } else gapUi.notify("Toque em outra peça da mesma camada");
+      gesture.current = { kind: "none" };
+      return;
+    }
     if (onHide && !bare) {
       // modo "Esconder peças": um toque esconde a peça mais alta sob o dedo; arrastar move a vista
       gesture.current = { kind: "hide", start: { ...view.current }, x0: x, y0: y, moved: false };

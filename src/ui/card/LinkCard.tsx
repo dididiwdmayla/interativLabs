@@ -1,3 +1,4 @@
+import { Measure } from "../instruments/Measure";
 import { Suspense, lazy, useId } from "react";
 import { deleteLink } from "@/editor/commands";
 import { LINK_LABEL } from "@/editor/names";
@@ -40,6 +41,12 @@ export function LinkCard({ model, lm }: { model: SceneModel; lm: LinkModel }) {
         </span>
         <h3 className="card__title">{LINK_LABEL[l.kind]}</h3>
       </div>
+      <Measure
+        target={l.id}
+        name={LINK_LABEL[l.kind]}
+        kind={l.kind}
+        limit={l.kind === "lock" ? l.breakForce : undefined}
+      />
       <LinkQuick scene={model.scene} link={l} />
       <LinkPair model={model} lm={lm} />
       <LinkLists model={model} link={l} />

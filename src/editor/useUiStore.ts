@@ -119,6 +119,8 @@ interface UiState {
   setHideMode: (on: boolean) => void;
   /** peças escondidas do projeto aberto (estado de vista, salvo com o projeto) */
   hidden: Id[];
+  gapTarget: string | null;
+  setGapTarget: (target: string | null) => void;
   probes: Probe[];
   setProbes: (probes: Probe[]) => void;
   hide: (id: Id) => void;
@@ -261,6 +263,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
       pick: null,
       edgeMenu: null,
     })),
+  gapTarget: null,
+  setGapTarget: (gapTarget) => set({ gapTarget }),
   probes: [],
   setProbes: (probes) => set({ probes: probes.slice(0, 4) }),
   hidden: [],
@@ -286,6 +290,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   openScene: (id, scene, figure, history, view) =>
     set((s) => ({
       // estado de vista: o do projeto (peças que ainda existem); um exemplo começa sem nada escondido
+      gapTarget: null,
       probes: view?.probes ?? [],
       hidden: (view?.hidden ?? []).filter((h) => scene.parts.some((p) => p.id === h)),
       hideMode: false,

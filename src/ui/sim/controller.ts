@@ -225,6 +225,7 @@ class Controller implements SimControl {
     );
     this.nodes.write(f, false);
     this.onFrame?.(this.timeline());
+    useInstruments.getState().setTime(f.time, this.step * this.h);
   }
 
   private frame = (now: number) => {

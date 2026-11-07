@@ -1,3 +1,4 @@
+import { InstrumentPanel } from "./instruments/InstrumentPanel";
 import { SimControls } from "./sim/SimControls";
 import { Timeline } from "./sim/Timeline";
 
@@ -5,6 +6,7 @@ import { Timeline } from "./sim/Timeline";
 export function TestBar() {
   return (
     <div className="testbar">
+      <InstrumentPanel />
       <SimControls />
       <Timeline />
     </div>
