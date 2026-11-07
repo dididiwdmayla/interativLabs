@@ -1,3 +1,4 @@
+import { TrailHistory, TRAIL_BANDS } from "./trails";
 import type { PartPose } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
@@ -14,6 +15,7 @@ import { worldOf, type SceneModel } from "./prepare";
 
 /** O que o escritor precisa saber de um quadro. */
 export interface FrameSource {
+  time?: number;
   lock?(id: Id): boolean | undefined;
   pose(id: Id): PartPose | undefined;
   /** câmara: pressão absoluta (kPa) e curso de cada parede (mm) */
@@ -91,6 +93,33 @@ export const poseTransform = (p: PartPose, dx = 0, dy = 0) =>
 
 export class StageNodes {
   model: SceneModel;
+  spread = 0;
+  trailHistory = new TrailHistory();
+  trailPaths = new Map<number, SVGPathElement>();
+  trailOn = false;
+  trailSelected: Id | null = null;
+  trailHidden: readonly string[] = [];
+  trailLayer: number | null = null;
+  refTrail(index: number) {
+    return (el: SVGPathElement | null) => {
+      if (el) this.trailPaths.set(index, el);
+      else this.trailPaths.delete(index);
+    };
+  }
+  hiddenEnds = new Map<string, { el: SVGCircleElement; part: Id; at: Vec2; layer: number }>();
+  refHiddenEnd(key: string, part: Id, at: Vec2, layer: number) {
+    return (el: SVGCircleElement | null) => {
+      if (el) this.hiddenEnds.set(key, { el, part, at, layer });
+      else this.hiddenEnds.delete(key);
+    };
+  }
+  shafts = new Map<Id, SVGPathElement>();
+  refShaft(id: Id) {
+    return (el: SVGPathElement | null) => {
+      if (el) this.shafts.set(id, el);
+      else this.shafts.delete(id);
+    };
+  }
   ctx: WriteContext = { wallMm: 0.4, shadowMm: 0.6, px: 0.2 };
   /** quadro mostrado agora (o laço troca; o React reaplica depois de cada montagem) */
   frame: FrameSource;
@@ -235,11 +264,15 @@ export class StageNodes {
       n.shadow?.setAttribute("transform", poseTransform(p, shadowMm, shadowMm));
       for (const fl of n.followers) fl.setAttribute("transform", t);
     }
-    const at = (e: { part: Id | null; at: Vec2 }) =>
-      worldOf(e.part === null ? null : frame.pose(e.part), e.at);
-    for (const s of this.springs.values()) {
-      const a = at(s.a);
-      const b = at(s.b);
+    const at = (e: { part: Id | null; at: Vec2 }, layer: number) => {
+      const q = worldOf(e.part === null ? null : frame.pose(e.part), e.at);
+      const d = ((e.part ? (this.model.parts.get(e.part)?.layer ?? layer) : layer) - layer) * this.spread;
+      return [q[0] + d, q[1] - d] as Vec2;
+    };
+    for (const [id, s] of this.springs) {
+      const layer = this.model.linkById.get(id)?.layer ?? 0;
+      const a = at(s.a, layer);
+      const b = at(s.b, layer);
       const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
       const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
       s.g?.setAttribute("transform", `translate(${f(a[0])} ${f(a[1])}) rotate(${f(deg(ang))})`);
@@ -249,13 +282,17 @@ export class StageNodes {
       );
       s.endB?.setAttribute("transform", `translate(${f(L)} 0)`);
     }
-    for (const r of this.rods.values()) {
-      const a = at(r.a);
-      const b = at(r.b);
+    for (const [id, r] of this.rods) {
+      const layer = this.model.linkById.get(id)?.layer ?? 0;
+      const a = at(r.a, layer);
+      const b = at(r.b, layer);
       const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
       r.el?.setAttribute("transform", `translate(${f(a[0])} ${f(a[1])}) rotate(${f(deg(ang))})`);
     }
-    for (const c of this.cables.values()) c.el?.setAttribute("d", cablePath(at(c.a), at(c.b), c.max));
+    for (const [id, c] of this.cables) {
+      const layer = this.model.linkById.get(id)?.layer ?? 0;
+      c.el?.setAttribute("d", cablePath(at(c.a, layer), at(c.b, layer), c.max));
+    }
     for (const [id, c] of this.chambers) {
       const st = frame.chamber(id);
       if (!st) continue;
@@ -298,6 +335,42 @@ export class StageNodes {
           { duration: 250, easing: "ease-out" },
         );
       }
+    }
+    for (const n of this.hiddenEnds.values()) {
+      const p = worldOf(frame.pose(n.part), n.at);
+      n.el.setAttribute("cx", f(p[0] + n.layer * this.spread));
+      n.el.setAttribute("cy", f(p[1] - n.layer * this.spread));
+    }
+    for (const [id, el] of this.shafts) {
+      const lm = this.model.linkById.get(id);
+      if (!lm) continue;
+      const q = worldOf(lm.carrier ? frame.pose(lm.carrier) : null, lm.at);
+      const a = lm.span[0] * this.spread,
+        b = lm.span[1] * this.spread;
+      el.setAttribute("d", `M${q[0] + a} ${q[1] - a}L${q[0] + b} ${q[1] - b}`);
+    }
+    if (this.trailOn && frame.time !== undefined) {
+      const points = new Map<Id, Vec2>();
+      for (const [id, m] of this.model.parts) {
+        if (
+          (!m.dynamic && id !== this.trailSelected) ||
+          this.trailHidden.includes(id) ||
+          (this.trailLayer !== null && m.layer !== this.trailLayer)
+        )
+          continue;
+        const p = frame.pose(id);
+        if (p) points.set(id, worldOf(p, m.center));
+      }
+      const ids = this.trailHistory.update(frame.time, points, this.trailSelected);
+      for (const [index, el] of this.trailPaths) {
+        const id = ids[Math.floor(index / TRAIL_BANDS)];
+        const d = (id ? (this.model.parts.get(id)?.layer ?? 0) : 0) * this.spread;
+        el.setAttribute("d", id ? this.trailHistory.path(id, index % TRAIL_BANDS, frame.time, [d, -d]) : "");
+        el.dataset.trailPart = id ?? "";
+      }
+    } else {
+      this.trailHistory.clear();
+      for (const el of this.trailPaths.values()) el.setAttribute("d", "");
     }
     this.writeDrag();
   }

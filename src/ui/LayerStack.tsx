@@ -58,7 +58,10 @@ function Row({
           onClick={() => ui.setActiveLayer(index)}
         >
           <span className="lrow__plate" aria-hidden="true">
-            <span className="lrow__sheet" />
+            <span
+              className="lrow__sheet"
+              style={ui.layerColors ? { background: `var(--layer-${index + 1})` } : undefined}
+            />
           </span>
           <span className="lrow__num">– {index + 1}</span>
           <span className="lrow__meta">

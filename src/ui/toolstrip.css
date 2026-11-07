@@ -187,7 +187,7 @@
 
 /* com uma ferramenta aberta, a pílula da camada encolhe para dar lugar à faixa */
 .shell[data-tool="true"] .pill {
-  max-width: 116px;
+  max-width: 190px;
 }
 
 @media (prefers-reduced-motion: reduce) {
