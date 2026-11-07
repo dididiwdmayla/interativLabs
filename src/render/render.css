@@ -446,3 +446,14 @@
 @media (prefers-reduced-motion: reduce) { .scene--colors .layer { transition: none; } }
 
 .layer-shaft { fill: none; stroke: var(--color-ink-2); stroke-width: var(--stroke-hardware); stroke-dasharray: var(--dash-hidden); }
+
+.part[data-hidden] .part__wallg,
+.part[data-hidden] .part__face,
+.part[data-hidden] .part__hatch,
+.part[data-hidden] .part__light,
+.part[data-hidden] .part__faint,
+.part[data-hidden] .part__innerline,
+.part[data-hidden] .part__outline,
+.part[data-hidden] .part__select,
+.part[data-hidden] .layer-seal { display: none; }
+.hidden-end { fill: var(--color-stage); stroke: var(--color-ink); stroke-width: var(--stroke-hardware); stroke-dasharray: var(--dash-hidden); }

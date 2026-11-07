@@ -1,3 +1,6 @@
+import type { Selection } from "./selection";
+import { linkParts } from "@/editor/names";
+import { hiddenLinkState } from "@/editor/hiddenParts";
 import { useUiStore } from "@/editor/useUiStore";
 import { layerOffset } from "@/editor/layerView";
 import { memo, useLayoutEffect, useMemo, type ReactNode } from "react";
@@ -23,7 +26,7 @@ import "./render.css";
  */
 
 export type LayerMode = "focus" | "all" | "xray";
-export type Selection = { kind: "part" | "link"; id: string } | null;
+export type { Selection } from "./selection";
 
 export interface SceneSvgProps {
   model: SceneModel;
@@ -151,11 +154,13 @@ interface PartArtProps {
 /** Uma peça: parede (cópia deslocada no mundo) e o grupo com face, hachura, chanfro e contorno. */
 function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) {
   const colors = useUiStore((s) => s.layerColors);
+  const hidden = useUiStore((s) => s.hiddenParts.includes(m.part.id));
   const id = m.part.id;
   return (
     <g
       className={`part${m.dynamic ? " part--dynamic" : " part--fixed"}${skin.tiny ? " is-tiny" : ""}`}
       data-part={id}
+      data-hidden={hidden || undefined}
     >
       <g className="part__wallg" ref={nodes.refPart(id, "wall", m.key)}>
         <path className="part__wall" d={m.d} />
@@ -191,6 +196,7 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
 }
 
 export function SceneSvg(props: SceneSvgProps) {
+  const hidden = useUiStore((s) => s.hiddenParts);
   const colors = useUiStore((s) => s.layerColors);
   const spread = useUiStore((s) => s.layerColors ? s.layerSpread : 0);
   const isolate = useUiStore((s) => s.layerColors && s.layerIsolate);
@@ -221,11 +227,13 @@ export function SceneSvg(props: SceneSvgProps) {
     [model],
   );
 
+  const visibleLinks = useMemo(() => model.links.filter((lm) => hiddenLinkState(lm.link, hidden, model.scene) !== "hidden"), [model, hidden]);
+
   // ligações por lugar de desenho
   const carriedBy = new Map<string, LinkModel[]>();
   const worldAt = new Map<number, LinkModel[]>();
   const followersAt = new Map<number, LinkModel[]>();
-  for (const lm of model.links) {
+  for (const lm of visibleLinks) {
     if (isolate && !(lm.span[0] <= props.active && props.active <= lm.span[1])) continue;
     const k = lm.link.kind;
     if (k === "spring" || k === "rod" || k === "cable" || k === "slot") {
@@ -252,7 +260,7 @@ export function SceneSvg(props: SceneSvgProps) {
     if (props.callouts === false || colors) return [];
     const targets: CalloutTarget[] = [];
     if (mode === "edit")
-      for (const lm of model.links) {
+      for (const lm of visibleLinks) {
         if (lm.link.kind === "slot") continue;
         const touches = lm.span[0] <= props.active && props.active <= lm.span[1];
         const ranged = lm.link.kind === "pin" || lm.link.kind === "sensor";
@@ -266,12 +274,12 @@ export function SceneSvg(props: SceneSvgProps) {
       }
     if (selection?.kind === "part") {
       const m = model.parts.get(selection.id);
-      if (m && (mode === "edit" || m.dynamic))
+      if (m && !hidden.includes(m.part.id) && (mode === "edit" || m.dynamic))
         targets.push({ id: m.part.id, ref: m.part.ref, p: [m.part.x, m.part.y], priority: 1000 });
     }
     // espaço livre e cruzamentos: contornos das peças visíveis no mundo
     return layoutCallouts(targets, calloutGeo.bounds, px, calloutGeo.geo);
-  }, [model, mode, selection, px, props.active, props.callouts, calloutGeo, colors]);
+  }, [model, mode, selection, px, props.active, props.callouts, calloutGeo, colors, hidden, visibleLinks]);
 
   // depois de cada montagem, reaplica o quadro atual (as poses não passam pelo React)
   useLayoutEffect(() => {
@@ -291,13 +299,13 @@ export function SceneSvg(props: SceneSvgProps) {
     const items: Record<"static" | "dynamic", ReactNode[]> = { static: [], dynamic: [] };
     const kindOf = (m: PartModel | undefined) => (m?.dynamic ? "dynamic" : "static");
     if (L.index > 0 && visible)
-      for (const m of L.parts)
+      for (const m of L.parts.filter((m) => !hidden.includes(m.part.id)))
         items[kindOf(m)].push(
           <g key={`s-${m.part.id}`} ref={nodes.refPart(m.part.id, "shadow", m.key)}>
             <path className="part__shadow" d={m.d} />
           </g>,
         );
-    for (const lm of model.links) {
+    for (const lm of visibleLinks) {
       if (lm.link.kind !== "chamber" || lm.layer !== L.index) continue;
       const geo = geos.get(lm.link.id)!;
       items.dynamic.push(
@@ -337,7 +345,7 @@ export function SceneSvg(props: SceneSvgProps) {
         items.static.push(<CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />);
       else items.dynamic.push(<TwoEndArt key={lm.link.id} ctx={ctx} lm={lm} />);
     }
-    for (const lm of model.links)
+    for (const lm of visibleLinks)
       if (lm.ground && lm.layer === L.index)
         items.static.push(<Ground key={`g-${lm.link.id}`} p={lm.ground} px={px} />);
     for (const kind of ["static", "dynamic"] as const)
@@ -387,8 +395,13 @@ export function SceneSvg(props: SceneSvgProps) {
         "overlay",
         "stage__sheet--overlay",
         <g className="overlay">
-          {spread > 0 && model.links.filter((lm) => (lm.link.kind === "pin" || lm.link.kind === "sensor") && (!isolate || (lm.span[0] <= props.active && props.active <= lm.span[1]))).map((lm) => <path key={`shaft-${lm.link.id}`} className="layer-shaft" ref={nodes.refShaft(lm.link.id)} />)}
-          {model.links.map((lm) =>
+          {visibleLinks.filter((lm) => hiddenLinkState(lm.link, hidden, model.scene) === "partial").flatMap((lm) => linkParts(lm.link).filter((id): id is string => id !== null && hidden.includes(id)).map((id) => {
+            const l = lm.link;
+            const at = "atA" in l ? (l.a === id ? l.atA : l.atB) : "at" in l ? l.at : [0, 0] as [number, number];
+            return <circle key={`${l.id}-${id}`} className="hidden-end" r={5 * px} ref={nodes.refHiddenEnd(`${l.id}-${id}`, id, at, model.parts.get(id)?.layer ?? 0)} />;
+          }))}
+          {spread > 0 && visibleLinks.filter((lm) => (lm.link.kind === "pin" || lm.link.kind === "sensor") && (!isolate || (lm.span[0] <= props.active && props.active <= lm.span[1]))).map((lm) => <path key={`shaft-${lm.link.id}`} className="layer-shaft" ref={nodes.refShaft(lm.link.id)} />)}
+          {visibleLinks.map((lm) =>
             lm.link.kind === "chamber" ? (
               <text
                 key={`kpa-${lm.link.id}`}

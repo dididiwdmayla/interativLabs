@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { Scene } from "@/model/types";
-import type { Selection } from "@/render/SceneSvg";
+import type { Selection } from "@/render/selection";
 import type { CardPick } from "./cardPick";
 import type { HammerTool } from "./hammer";
 import { DEFAULT_PENCIL, type PencilTool } from "./pencil";
@@ -8,7 +8,7 @@ import type { Command } from "./commands";
 import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
 
 export type Mode = "edit" | "simulate";
-export type { Selection } from "@/render/SceneSvg";
+export type { Selection } from "@/render/selection";
 
 export interface OpenScene {
   /** projeto (IndexedDB) ou exemplo de onde veio */
@@ -43,6 +43,14 @@ export interface EdgeMenuState {
 }
 
 interface UiState {
+  hiddenParts: string[];
+  hideMode: boolean;
+  hiddenList: boolean;
+  setHideMode: (on: boolean) => void;
+  setHiddenList: (on: boolean) => void;
+  hidePart: (id: string) => void;
+  showPart: (id?: string) => void;
+  restoreHidden: (ids: string[]) => void;
   layerColors: boolean;
   layerSpread: number;
   layerIsolate: boolean;
@@ -141,6 +149,14 @@ const hasWindow = typeof window !== "undefined";
  * por comandos (`commit`), com desfazer e refazer por patches do Immer.
  */
 export const useUiStore = create<UiState>()((set, get) => ({
+  hiddenParts: [],
+  hideMode: false,
+  hiddenList: false,
+  setHideMode: (hideMode) => set({ hideMode, hammer: null, pencil: false }),
+  setHiddenList: (hiddenList) => set({ hiddenList }),
+  hidePart: (id) => set((s) => ({ hiddenParts: s.hiddenParts.includes(id) ? s.hiddenParts : [...s.hiddenParts, id], selection: s.selection?.id === id ? null : s.selection })),
+  showPart: (id) => set((s) => ({ hiddenParts: id ? s.hiddenParts.filter((p) => p !== id) : [] })),
+  restoreHidden: (hiddenParts) => set({ hiddenParts }),
   layerColors: false,
   layerSpread: 0,
   layerIsolate: false,
@@ -199,6 +215,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
   openScene: (id, scene, figure, history) =>
     set((s) => ({
+      hiddenParts: [],
+      hideMode: false,
+      hiddenList: false,
       current: { id, scene, figure, serial: (s.current?.serial ?? 0) + 1 },
       history: history ?? emptyHistory(),
       mode: "edit",

@@ -56,6 +56,7 @@ export const MENUS: Record<MenuId, MenuDef> = {
     title: "Vista",
     modes: ["edit", "simulate"],
     items: [
+      { id: "hide-parts", label: "Esconder peças", icon: "eyeOff" },
       { id: "fit", label: "Enquadrar", icon: "fit" },
       { id: "xray", label: "Raio-x", icon: "xray", on: (c) => c.xray },
       { id: "fullscreen", label: "Tela cheia", icon: "fullscreen", on: (c) => c.fullscreen },

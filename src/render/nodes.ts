@@ -92,6 +92,10 @@ export const poseTransform = (p: PartPose, dx = 0, dy = 0) =>
 export class StageNodes {
   model: SceneModel;
   spread = 0;
+  hiddenEnds = new Map<string, { el: SVGCircleElement; part: Id; at: Vec2; layer: number }>();
+  refHiddenEnd(key: string, part: Id, at: Vec2, layer: number) {
+    return (el: SVGCircleElement | null) => { if (el) this.hiddenEnds.set(key, { el, part, at, layer }); else this.hiddenEnds.delete(key); };
+  }
   shafts = new Map<Id, SVGPathElement>();
   refShaft(id: Id) {
     return (el: SVGPathElement | null) => { if (el) this.shafts.set(id, el); else this.shafts.delete(id); };
@@ -311,6 +315,11 @@ export class StageNodes {
           { duration: 250, easing: "ease-out" },
         );
       }
+    }
+    for (const n of this.hiddenEnds.values()) {
+      const p = worldOf(frame.pose(n.part), n.at);
+      n.el.setAttribute("cx", f(p[0] + n.layer * this.spread));
+      n.el.setAttribute("cy", f(p[1] - n.layer * this.spread));
     }
     for (const [id, el] of this.shafts) {
       const lm = this.model.linkById.get(id);

@@ -2436,3 +2436,11 @@
 /* Keep layer names readable in the compact landscape corner. */
 .pill__name { white-space: normal; overflow: visible; text-overflow: clip; max-width: 18ch; line-height: 1.2; }
 .pill { flex-shrink: 0; padding-block: var(--space-1); }
+
+.hidden-parts { position: relative; }
+.hidden-parts__list { position: absolute; bottom: calc(100% + var(--space-2)); right: 0; width: min(280px, 70vw); max-height: 60vh; overflow: auto; padding: var(--space-3); border: var(--stroke-frame-thin) solid var(--color-ink-3); border-top: 3px double var(--color-ink-2); background: var(--color-stage); box-shadow: var(--shadow-panel); color: var(--color-ink); }
+.hidden-parts__list h3 { font-family: var(--font-title); font-size: var(--text-panel-title); letter-spacing: var(--tracking-label); }
+.hidden-parts__list p { color: var(--color-ink-2); font-size: var(--text-label); }
+.hidden-parts__row { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--touch-min); background: none; border: 0; border-bottom: 1px solid var(--color-ink-faint); color: var(--color-ink); text-align: left; cursor: pointer; }
+.hidden-parts__row svg { width: 48px; height: 36px; fill: var(--color-wall); stroke: var(--color-ink); }
+.hidden-parts__row path { vector-effect: non-scaling-stroke; }

@@ -322,6 +322,7 @@ class Controller implements SimControl {
     for (const lm of this.nodes.model.links) {
       if (
         lm.link.kind !== "lock" ||
+        useUiStore.getState().hiddenParts.includes(lm.link.b) ||
         frame.lock?.(lm.link.id) ||
         this.nodes.model.layers[lm.layer]?.layer.visible === false
       )

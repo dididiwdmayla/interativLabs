@@ -1,3 +1,4 @@
+import { HiddenParts } from "./HiddenParts";
 import { useId } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import type { SceneModel } from "@/render/prepare";
@@ -96,9 +97,10 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
           </button>
         </div>
       )}
-      {editing && !wide && layer && (
+      {layer && (
         <div className="corner corner--br">
-          <button
+          <HiddenParts model={model} />
+          {(!wide || !editing) && <button
             type="button"
             className="pill"
             aria-label={`Camada ativa: ${active + 1}, ${layer.name}. Abrir a pilha de camadas`}
@@ -113,7 +115,7 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
             </span>
             <span className="pill__num">{active + 1}</span>
             <span className="pill__name">{layer.name}</span>
-          </button>
+          </button>}
         </div>
       )}
     </>

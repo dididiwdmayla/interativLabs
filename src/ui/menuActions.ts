@@ -51,6 +51,7 @@ export function partsAction(): void {
 }
 
 const ACTIONS: Record<string, () => void> = {
+  "hide-parts": () => { const s = useUiStore.getState(); s.setHideMode(!s.hideMode); },
   "layer-colors": () => { const s = useUiStore.getState(); s.setHammer(null); s.setPencil(false); s.setLayerView({ layerColors: !s.layerColors }); },
   parts: partsAction,
   hammer: () => useUiStore.getState().setHammer("axle"),

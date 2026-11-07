@@ -1,3 +1,4 @@
+import { useUiStore } from "./useUiStore";
 import { containsPoint, locateInRing } from "@/geometry/polygon";
 import { straightSlot } from "@/geometry/slot";
 import { distToSegment } from "@/geometry/vec";
@@ -32,6 +33,7 @@ export function hammerStack(model: SceneModel, point: Vec2, active: number, hole
     .slice()
     .reverse()
     .filter((m) => {
+      if (useUiStore.getState().hiddenParts.includes(m.part.id)) return false;
       if (m.layer > active || model.layers[m.layer]?.layer.visible === false || seen.has(m.part.id))
         return false;
       const p = localOf(m.part, point);

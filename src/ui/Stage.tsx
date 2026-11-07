@@ -1,3 +1,4 @@
+import { ToolStrip } from "./ToolStrip";
 import { LayerViewBar } from "./LayerViewBar";
 import { spreadBounds } from "@/editor/layerView";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -301,6 +302,7 @@ export function Stage({
   const { width, height } = useElementSize(box);
   const uid = useId().replace(/:/g, "");
   const ctl = useSimStore((s) => s.ctl);
+  const hideMode = useUiStore((s) => s.hideMode);
   const spread = useUiStore((s) => s.layerColors ? s.layerSpread : 0);
   const editing = mode === "edit";
   const hammer = useUiStore((s) => s.hammer);
@@ -899,6 +901,15 @@ export function Stage({
     const w = toWorld(view.current, x, y);
     w[0] -= activeLayer * spread;
     w[1] += activeLayer * spread;
+    if (hideMode && model && nodes) {
+      const raw = toWorld(view.current, x, y);
+      for (let i = model.layers.length - 1; i >= 0; i--) {
+        const hit = partHit(model, nodes.frame, [raw[0] - i * spread, raw[1] + i * spread], { layer: (l) => l === i && model.layers[l]?.layer.visible !== false });
+        if (hit) { useUiStore.getState().hidePart(hit.part.id); break; }
+      }
+      gesture.current = { kind: "none" };
+      return;
+    }
     if (!editing) {
       if (ctl?.releaseAt(w)) {
         gesture.current = { kind: "none" };
@@ -1513,7 +1524,8 @@ export function Stage({
           )}
         </>
       )}
-      {!bare && <LayerViewBar />}
+      {!bare && hideMode && <ToolStrip label="Esconder peças" mode="cycle" phrase="Toque para esconder a peça mais alta · ela continua no mecanismo" groups={[{ name: "Esconder", items: [{ id: "done-hide", label: "Concluir", onClick: () => useUiStore.getState().setHideMode(false) }] }]} />}
+      {!bare && !hideMode && <LayerViewBar />}
       {editing && !bare && pencilOn && model && (
         <>
           <PencilBar

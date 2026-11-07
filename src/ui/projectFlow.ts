@@ -86,6 +86,7 @@ function figureOf(list: ProjectMeta[], id: string): number {
 function show(p: Project, list: ProjectMeta[]): void {
   const scene: Scene = { ...p.scene, meta: { ...p.scene.meta, title: p.name } };
   useUiStore.getState().openScene(p.id, scene, figureOf(list, p.id), loadHistory(p.id, scene) ?? undefined);
+  useUiStore.getState().restoreHidden(p.view?.hiddenParts.filter((id) => scene.parts.some((part) => part.id === id)) ?? []);
   void setLast(p.id);
 }
 
@@ -191,11 +192,12 @@ export async function removeProject(id: string): Promise<void> {
 let timer = 0;
 let pending: (() => Promise<void>) | null = null;
 
-async function save(id: string, scene: Scene): Promise<void> {
+async function save(id: string, scene: Scene, hiddenParts: string[]): Promise<void> {
   const p = await getProject(id);
   const now = new Date().toISOString();
   await putProject({
     id,
+    view: { hiddenParts },
     name: scene.meta.title,
     scene: { ...scene, meta: { ...scene.meta, updatedAt: now } },
     thumb: thumbFor(scene),
@@ -223,10 +225,11 @@ export function startAutosave(): () => void {
     const c = s.current;
     if (!c) return;
     if (c.id === prev.current?.id && s.history !== prev.history) saveHistory(c.id, c.scene, s.history);
-    if (c.id !== prev.current?.id || c.scene === prev.current?.scene) return;
+    if (c.id !== prev.current?.id || (c.scene === prev.current?.scene && s.hiddenParts === prev.hiddenParts)) return;
     const id = c.id;
     const scene = c.scene;
-    pending = () => save(id, scene);
+    const hiddenParts = s.hiddenParts;
+    pending = () => save(id, scene, hiddenParts);
     window.clearTimeout(timer);
     timer = window.setTimeout(() => void flushAutosave(), AUTOSAVE_MS);
   });
