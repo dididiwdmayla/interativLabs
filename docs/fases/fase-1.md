@@ -123,9 +123,19 @@ Subitens e aceites no prompt da Parte F.
 - 15.4 Caneta, forma livre, perfil da camada ativa e a física das formas novas.
 - 15.5 Verificação.
 
-## Item 16 — Entender (Parte E2d)
+## Item 16 — Entender (Parte E2d, em duas sessões)
 
-Acertos da revisão da E2c (frases do Martelo, pílula da camada, "Dedo desenha", câmara do Lançador coerente com o desenho). Modo camadas em cores (paleta provisória em tokens, número na peça, afastamento 2,5D, isolar camada), esconder peça com um toque (como o "clique e esconda" dos simuladores de desmontagem, para ver o que está atrás), cartões "o que é" de cada ligação com animação curta e rastro do movimento no Testar. Prompt depois da revisão da E2c.
+Primeira parte rodada no Modo Astra (`docs/coordenacao/papeis.md`): uma sessão de criação e outra de verificação, no mesmo PR.
+
+- **A · criação** (GPT-6 Astra, esforço médio):
+  - 16.1 acertos da revisão da E2c (frases do Martelo, "Esc sai" só com teclado, pílula da camada, "Dedo desenha");
+  - 16.2 modo camadas em cores (paleta provisória em tokens, Afastar 2,5D, Isolar);
+  - 16.3 esconder peça;
+  - 16.4 cartões "o que é" e rastro.
+- **B · verificação** (Claude Sonnet 5.5, esforço alto, no branch da A):
+  - 16.5 bateria completa, testes que faltarem e `/#perf` com os modos novos;
+  - 16.6 câmara do Lançador coerente com o desenho (saída 10,3 ±0,3 m/s);
+  - 16.7 capturas e documentação.
 
 ## Item 17 — (movido)
 
