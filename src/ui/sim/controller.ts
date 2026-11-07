@@ -1,3 +1,4 @@
+import { instrumentPreset } from "@/instruments/presets";
 import { useUiStore } from "@/editor/useUiStore";
 import { useInstruments } from "../instruments/store";
 import { FIXED_STEP } from "@/engine/common";
@@ -92,7 +93,13 @@ class Controller implements SimControl {
     this.unsubscribeProbes = useUiStore.subscribe((s, prev) => {
       if (s.probes !== prev.probes) this.post({ t: "samples", id: this.epoch, probes: s.probes });
     });
-    this.post({ t: "samples", id: this.epoch, probes: useUiStore.getState().probes });
+    this.post({
+      t: "samples",
+      id: this.epoch,
+      probes: useUiStore.getState().probes.length
+        ? useUiStore.getState().probes
+        : instrumentPreset(nodes.model.scene),
+    });
     this.nodes = nodes;
     this.opts = opts;
     this.rec = new Recorder(ready.partIds, ready.chamberIds, CAPACITY, ready.lockIds);

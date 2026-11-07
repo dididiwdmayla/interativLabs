@@ -99,7 +99,7 @@ export function Timeline() {
             <path className="timeline__tick" d={ticks} />
             <path className="timeline__tick timeline__tick--long" d={longs} />
             {events
-              .filter((e) => e.step / 240 >= last.current.w0)
+              .filter((e) => e.step / 240 >= base)
               .map((event, i) => (
                 <g
                   key={`${event.step}:${i}`}

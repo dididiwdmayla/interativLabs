@@ -69,6 +69,9 @@ it("Box2D shape distance reads the drawn block gap within 0.01 mm", () => {
   const e = make();
   e.compile(b.scene, { unitMm: 1 });
   expect(sample(probe(a.id, "clearance", c.id), e.snapshot(), e)).toBeCloseTo(3, 2);
+  c.x = 8;
+  e.compile(b.scene, { unitMm: 1 });
+  expect(sample(probe(a.id, "clearance", c.id), e.snapshot(), e)).toBeCloseTo(-2, 2);
   e.dispose();
 });
 it("reduction keeps extrema, exact cursor and truncates the abandoned future", () => {

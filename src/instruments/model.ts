@@ -27,6 +27,8 @@ export interface Probe {
   other?: string;
   limit?: number;
   threshold?: number;
+  /** Count a pawl dropping after each tooth, from the relative joint angle. */
+  countDrops?: boolean;
 }
 export function available(kind: LinkKind | "part"): Quantity[] {
   if (kind === "part") return ["x", "y", "angle", "speed", "velocity", "angular", "rpm"];

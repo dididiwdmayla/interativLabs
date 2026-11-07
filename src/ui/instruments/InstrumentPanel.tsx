@@ -24,30 +24,22 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
   );
   const ctl = useSimStore((s) => s.ctl);
   const { probe, points, cursor } = series;
-  const valid = points.filter((p) => p.value !== null);
-  const values = valid.map((p) => p.value!);
+  const valid = points.filter((p): p is typeof p & { value: number } => p.value !== null);
+  const values = valid.map((p) => p.value);
   const lo = Math.min(0, ...values, probe.limit ?? 0);
   const hi = Math.max(1e-6, ...values, probe.limit ?? 0);
   const range = hi - lo || 1;
   const end = Math.max(1, latest * 240, points.at(-1)?.step ?? 0);
   const x = (step: number) => 12 + (step / end) * 276;
   const y = (value: number) => 78 - ((value - lo) / range) * 56;
-  let drawing = false;
   const path = points
-    .map((p) => {
-      if (p.value === null) {
-        drawing = false;
-        return "";
-      }
-      const command = drawing ? "L" : "M";
-      drawing = true;
+    .map((p, i) => {
+      if (p.value === null) return "";
+      const command = points[i - 1]?.value != null ? "L" : "M";
       return `${command}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)}`;
     })
     .join(" ");
-  const peak = valid.reduce<(typeof valid)[number] | null>(
-    (a, p) => (!a || p.value! > a.value! ? p : a),
-    null,
-  );
+  const peak = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value > a.value ? p : a), null);
   const scrub = (clientX: number, el: SVGSVGElement) => {
     const r = el.getBoundingClientRect();
     ctl?.scrub((Math.max(0, Math.min(1, (((clientX - r.left) / r.width) * 300 - 12) / 276)) * end) / 240);
@@ -122,7 +114,7 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
             </text>
           </g>
         )}
-        {peak && <circle cx={x(peak.step)} cy={y(peak.value!)} r="2.5" className="instrument-chart__peak" />}
+        {peak && <circle cx={x(peak.step)} cy={y(peak.value)} r="2.5" className="instrument-chart__peak" />}
         <g className="instrument-chart__cursor">
           <path d={`M${x(shown * 240)} 16V82`} />
           <path d={`M${x(shown * 240) - 4} 12h8l-4 5z`} />
@@ -172,7 +164,8 @@ export function InstrumentPanel() {
   const cycles = thresholdSeries
     ? thresholdSeries.crossings
     : ticks.filter((t) => t.kind === "chamber-fired").length;
-  const clicks = ticks.filter((t) => t.kind === "impact").length;
+  const clicks =
+    series.find((s) => s.probe.countDrops)?.clicks ?? ticks.filter((t) => t.kind === "impact").length;
   if (!probes.length) return null;
   return (
     <section className="instruments" aria-label="Instrumentos">

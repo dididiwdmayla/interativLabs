@@ -1,3 +1,4 @@
+import { instrumentPreset } from "@/instruments/presets";
 import type { Probe } from "@/instruments/model";
 import type { Series } from "@/instruments/sampling";
 import { loadBox2d } from "@/engine/box2d/load";
@@ -55,7 +56,7 @@ self.onmessage = async (e: MessageEvent<SimRequest>) => {
     if (m.t === "init") {
       const make = await loadBox2d();
       session?.dispose();
-      session = new SimSession(make, m.scene);
+      session = new SimSession(make, m.scene, { probes: instrumentPreset(m.scene) });
       const frame = new Float32Array(session.rec.stride);
       session.rec.copyFrame(0, frame, 0);
       post(
