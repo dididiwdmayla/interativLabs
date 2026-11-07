@@ -1,4 +1,4 @@
-import { memo, useLayoutEffect, useMemo, type ReactNode } from "react";
+import { memo, useLayoutEffect, useMemo, type CSSProperties, type ReactNode } from "react";
 import { assets, type Asset } from "@/assets/registry";
 import { layoutCallouts, type CalloutTarget } from "./callouts";
 import { calloutGeometry } from "./calloutScene";
@@ -6,6 +6,7 @@ import { chamberGeo } from "./geometry";
 import { HATCHES, WOOD_TILE_PX, hatchCoverage, hatchScale, patternTransform, type HatchId } from "./hatch";
 import { HW_IDS, type ArtContext } from "./hardware";
 import { CarriedArt, Ground, TwoEndArt } from "./LinkArt";
+import { NO_LOOK, badgeSpot, hiddenEnd, linkShow, spreadOffset, type Look, type LinkShow } from "./look";
 import type { StageNodes } from "./nodes";
 import type { LinkModel, PartModel, SceneModel } from "./prepare";
 import { SkinCache, type PartSkin } from "./skin";
@@ -39,13 +40,22 @@ export interface SceneSvgProps {
   callouts?: boolean;
   /** tamanho do palco, px */
   size: { width: number; height: number };
+  /** camadas em cores, afastadas, isoladas e peças escondidas (estado de vista) */
+  look?: Look;
+  /** rastro do movimento (Testar): monta os caminhos fixos que o escritor preenche */
+  trail?: boolean;
 }
+
+/** Caminhos do rastro: 13 peças × 6 trechos (src/ui/sim/trail.ts). */
+const TRAIL_SLOTS = 13;
+const TRAIL_SEGMENTS = 6;
 
 type LayerState = "full" | "active" | "below" | "above" | "xray" | "xray-active";
 
 function layerState(i: number, p: SceneSvgProps): LayerState {
   if (p.layerMode === "xray") return i === p.active ? "xray-active" : "xray";
-  if (p.mode === "simulate" || p.layerMode === "all") return "full";
+  // em cores, todas as camadas plenas: cada uma na cor dela
+  if (p.mode === "simulate" || p.layerMode === "all" || p.look?.colors) return "full";
   return i === p.active ? "active" : i < p.active ? "below" : "above";
 }
 
@@ -144,15 +154,55 @@ interface PartArtProps {
   selected: boolean;
   carried: LinkModel[];
   ctx: ArtContext;
+  /** escondida ou fora do isolar: some do desenho (as ligações dela que ficam continuam) */
+  gone: boolean;
+  /** número da camada (modo em cores) */
+  badge: number | null;
+  show: (lm: LinkModel) => LinkShow;
+}
+
+/** Diâmetro do selo, px de tela. */
+const BADGE_PX = 13;
+
+/**
+ * Selo do número da camada, no espaço local da peça (gira com ela): um
+ * círculo de fio duplo, dentro, no ponto mais longe das bordas; fora, junto
+ * do canto de cima, com uma linha fina, quando a peça não comporta o selo.
+ */
+function LayerBadge({ m, n, px }: { m: PartModel; n: number; px: number }) {
+  const r = (BADGE_PX / 2) * px;
+  const spot = badgeSpot(m);
+  const inside = spot.room >= r;
+  const [, by0, bx1] = spot.box;
+  const at: [number, number] = inside ? spot.at : [bx1 + 1.3 * r, by0 - 1.3 * r];
+  const lead = inside ? null : `M${spot.at[0]} ${spot.at[1]}L${at[0] - 0.7 * r} ${at[1] + 0.7 * r}`;
+  return (
+    <g className={`layerbadge${inside ? "" : " is-out"}`}>
+      {lead && <path className="layerbadge__lead" d={lead} />}
+      <g transform={`translate(${at[0]} ${at[1]})`}>
+        <circle className="layerbadge__plate" r={r} />
+        <circle className="layerbadge__inner" r={r - 1.6 * px} />
+        <text className="layerbadge__num" y={3.4 * px} style={{ fontSize: `${9.5 * px}px` }}>
+          {n}
+        </text>
+      </g>
+    </g>
+  );
+}
+
+/** Envoltório de uma ligação com o estado dela na vista (some, fica, ponta tracejada). */
+function LinkWrap({ show, children }: { show: LinkShow; children: ReactNode }) {
+  return <g className={`linkwrap is-${show}`}>{children}</g>;
 }
 
 /** Uma peça: parede (cópia deslocada no mundo) e o grupo com face, hachura, chanfro e contorno. */
-function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) {
+function PartArt({ m, skin, uid, nodes, selected, carried, ctx, gone, badge, show }: PartArtProps) {
   const id = m.part.id;
   return (
     <g
-      className={`part${m.dynamic ? " part--dynamic" : " part--fixed"}${skin.tiny ? " is-tiny" : ""}`}
+      className={`part${m.dynamic ? " part--dynamic" : " part--fixed"}${skin.tiny ? " is-tiny" : ""}${gone ? " is-gone" : ""}`}
       data-part={id}
+      data-gone={gone || undefined}
     >
       <g className="part__wallg" ref={nodes.refPart(id, "wall", m.key)}>
         <path className="part__wall" d={m.d} />
@@ -178,16 +228,29 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
         )}
         <path className="part__outline" d={m.d} />
         {selected && <path className="part__select" d={m.d} />}
+        {badge !== null && <LayerBadge m={m} n={badge} px={ctx.px} />}
         {carried.map((lm) => (
-          <CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />
+          <LinkWrap key={lm.link.id} show={show(lm)}>
+            <CarriedArt ctx={ctx} lm={lm} />
+            {show(lm) === "half" && <HalfRing lm={lm} px={ctx.px} />}
+          </LinkWrap>
         ))}
       </g>
     </g>
   );
 }
 
+/** Ligação que toca uma peça escondida: anel tracejado em volta da ferragem. */
+function HalfRing({ lm, px }: { lm: LinkModel; px: number }) {
+  return <circle className="link-ghost" cx={lm.at[0]} cy={lm.at[1]} r={Math.max(2.2, 9 * px)} />;
+}
+
 export function SceneSvg(props: SceneSvgProps) {
   const { model, nodes, uid, zoom, fitZoom, mode, selection, size } = props;
+  const look = props.look ?? NO_LOOK;
+  const spread = look.spread;
+  const show = (lm: LinkModel) => linkShow(lm, look, props.active);
+  const gone = (m: PartModel) => look.hidden.has(m.part.id) || (look.isolate && m.layer !== props.active);
   const px = mmPerPx(zoom);
   const step = hatchStep(zoom);
   // um cache por cena (a chave é o id da peça)
@@ -241,7 +304,8 @@ export function SceneSvg(props: SceneSvgProps) {
 
   // chamadas: ligações no Editar; a peça selecionada (no Simular, só se ela se move)
   const callouts = useMemo(() => {
-    if (props.callouts === false) return [];
+    // afastadas, as chamadas não acompanham as folhas: saem
+    if (props.callouts === false || spread > 0) return [];
     const targets: CalloutTarget[] = [];
     if (mode === "edit")
       for (const lm of model.links) {
@@ -263,11 +327,13 @@ export function SceneSvg(props: SceneSvgProps) {
     }
     // espaço livre e cruzamentos: contornos das peças visíveis no mundo
     return layoutCallouts(targets, calloutGeo.bounds, px, calloutGeo.geo);
-  }, [model, mode, selection, px, props.active, props.callouts, calloutGeo]);
+  }, [model, mode, selection, px, props.active, props.callouts, calloutGeo, spread]);
 
   // depois de cada montagem, reaplica o quadro atual (as poses não passam pelo React)
   useLayoutEffect(() => {
-    nodes.setContext({ ...writeCtx, walls: !heavy });
+    nodes.setContext({ ...writeCtx, walls: !heavy, spread, active: props.active });
+    nodes.trailFocus = selection?.kind === "part" ? selection.id : null;
+    if (!props.trail || mode !== "simulate") nodes.trailEls.length = 0;
     nodes.write(nodes.frame, true);
   });
 
@@ -280,10 +346,28 @@ export function SceneSvg(props: SceneSvgProps) {
     const strong = (lm: LinkModel) => lm.span[0] <= props.active && props.active <= lm.span[1];
     const items: Record<"static" | "dynamic", ReactNode[]> = { static: [], dynamic: [] };
     const kindOf = (m: PartModel | undefined) => (m?.dynamic ? "dynamic" : "static");
+    // afastadas: a moldura de cada prancha, na cor da camada, com o número no canto
+    if (spread > 0) {
+      const [bx, by, bw, bh] = model.bounds;
+      const pad = 6 * px;
+      const kind = L.parts.some((m) => !m.dynamic) || !L.parts.length ? "static" : "dynamic";
+      items[kind].push(
+        <g key="plate" className="sheetframe">
+          <rect x={bx - pad} y={by - pad} width={bw + 2 * pad} height={bh + 2 * pad} />
+          <text x={bx + bw + pad - 4 * px} y={by - pad - 4 * px} style={{ fontSize: `${12 * px}px` }}>
+            {L.index + 1}
+          </text>
+        </g>,
+      );
+    }
     if (L.index > 0)
       for (const m of L.parts)
         items[kindOf(m)].push(
-          <g key={`s-${m.part.id}`} ref={nodes.refPart(m.part.id, "shadow", m.key)}>
+          <g
+            key={`s-${m.part.id}`}
+            ref={nodes.refPart(m.part.id, "shadow", m.key)}
+            className={gone(m) ? "is-gone" : undefined}
+          >
             <path className="part__shadow" d={m.d} />
           </g>,
         );
@@ -291,7 +375,9 @@ export function SceneSvg(props: SceneSvgProps) {
       if (lm.link.kind !== "chamber" || lm.layer !== L.index) continue;
       const geo = geos.get(lm.link.id)!;
       items.dynamic.push(
-        <polygon key={`gas-${lm.link.id}`} className="gas" ref={nodes.refChamber(lm.link.id, geo, "gas")} />,
+        <LinkWrap key={`gas-${lm.link.id}`} show={show(lm)}>
+          <polygon className="gas" ref={nodes.refChamber(lm.link.id, geo, "gas")} />
+        </LinkWrap>,
       );
     }
     for (const m of L.parts)
@@ -305,27 +391,74 @@ export function SceneSvg(props: SceneSvgProps) {
           selected={selection?.kind === "part" && selection.id === m.part.id}
           carried={carriedBy.get(m.key) ?? []}
           ctx={ctx}
+          gone={gone(m)}
+          badge={look.colors ? L.index + 1 : null}
+          show={show}
         />,
       );
     for (const lm of followersAt.get(L.index) ?? [])
       items[kindOf(model.parts.get(lm.carrier ?? ""))].push(
-        <g
-          key={`f-${lm.link.id}`}
-          className={`follower${strong(lm) ? " link--strong" : ""}`}
-          ref={nodes.refFollower(lm.carrier ?? "")}
-        >
-          <CarriedArt ctx={ctx} lm={lm} follower />
-        </g>,
+        <LinkWrap key={`f-${lm.link.id}`} show={show(lm)}>
+          <g
+            className={`follower${strong(lm) ? " link--strong" : ""}`}
+            ref={nodes.refFollower(lm.carrier ?? "")}
+          >
+            <CarriedArt ctx={ctx} lm={lm} follower />
+          </g>
+        </LinkWrap>,
       );
+    // afastadas: pino e sensor que atravessam camadas viram uma haste entre as folhas
+    if (spread > 0)
+      for (const lm of model.links) {
+        const k = lm.link.kind;
+        if ((k !== "pin" && k !== "sensor") || lm.span[0] !== L.index || lm.span[1] <= lm.span[0]) continue;
+        const host = lm.link.host;
+        const off = spreadOffset(lm.span[1] - lm.span[0], spread);
+        items[kindOf(model.parts.get(host))].push(
+          <LinkWrap key={`h-${lm.link.id}`} show={show(lm)}>
+            <g className="haste" ref={nodes.refHaste(lm.link.id, host, lm.at)}>
+              <line className="haste__rod" x2={off[0] * px} y2={off[1] * px} />
+              <circle className="haste__end" r={1.6 * px} />
+              <circle className="haste__end" cx={off[0] * px} cy={off[1] * px} r={1.6 * px} />
+            </g>
+          </LinkWrap>,
+        );
+      }
     for (const lm of worldAt.get(L.index) ?? []) {
       const k = lm.link.kind;
       if (lm.carrier === null && k !== "spring" && k !== "rod" && k !== "cable")
-        items.static.push(<CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />);
-      else items.dynamic.push(<TwoEndArt key={lm.link.id} ctx={ctx} lm={lm} />);
+        items.static.push(
+          <LinkWrap key={lm.link.id} show={show(lm)}>
+            <CarriedArt ctx={ctx} lm={lm} />
+          </LinkWrap>,
+        );
+      else
+        items.dynamic.push(
+          <LinkWrap key={lm.link.id} show={show(lm)}>
+            <TwoEndArt ctx={ctx} lm={lm} ghost={show(lm) === "half" ? hiddenEnd(lm, look) : null} />
+          </LinkWrap>,
+        );
     }
     for (const lm of model.links)
       if (lm.ground && lm.layer === L.index)
-        items.static.push(<Ground key={`g-${lm.link.id}`} p={lm.ground} px={px} />);
+        items.static.push(
+          <LinkWrap key={`g-${lm.link.id}`} show={show(lm)}>
+            <Ground p={lm.ground} px={px} />
+          </LinkWrap>,
+        );
+    // afastadas, o manômetro vai na folha da câmara (a de cima fica deslocada)
+    if (spread > 0)
+      for (const lm of model.links)
+        if (lm.link.kind === "chamber" && lm.layer === L.index)
+          items.dynamic.push(
+            <LinkWrap key={`kpa-${lm.link.id}`} show={show(lm)}>
+              <text
+                className="gauge"
+                style={{ fontSize: `${12 * px}px` }}
+                ref={nodes.refChamber(lm.link.id, geos.get(lm.link.id)!, "label")}
+              />
+            </LinkWrap>,
+          );
     for (const kind of ["static", "dynamic"] as const)
       if (items[kind].length)
         sheets.push({
@@ -337,6 +470,7 @@ export function SceneSvg(props: SceneSvgProps) {
               key="layer"
               className={`layer layer--${st}${L.layer.visible === false ? " is-hidden" : ""}`}
               data-layer={L.index}
+              style={{ "--layer-color": `var(--layer-${(L.index % 16) + 1})` } as CSSProperties}
             >
               {items[kind]}
             </g>,
@@ -347,10 +481,17 @@ export function SceneSvg(props: SceneSvgProps) {
   // orçamento de pintura (docs/decisoes/desempenho.md): com muitas peças
   // móveis, a parede delas sai no Simular (fica no Editar e nas fixas)
   const heavy = mode === "simulate" && model.partList.filter((m) => m.dynamic).length > WALL_BUDGET;
-  const svg = (key: string, cls: string, children: ReactNode) => (
+  const sheetStyle = (layer: number | null): CSSProperties | undefined => {
+    if (spread <= 0 || layer === null) return undefined;
+    const o = spreadOffset(layer, spread);
+    return { transform: `translate(${o[0]}px, ${o[1]}px)` };
+  };
+  const svg = (key: string, cls: string, children: ReactNode, layer: number | null = null) => (
     <svg
       key={key}
-      className={`stage__sheet scene${zoom >= 3 ? " is-close" : ""}${heavy ? " is-heavy" : ""} ${cls}`}
+      style={sheetStyle(layer)}
+      data-sheet-layer={layer ?? undefined}
+      className={`stage__sheet scene${zoom >= 3 ? " is-close" : ""}${heavy ? " is-heavy" : ""}${look.colors ? " is-colors" : ""}${look.isolate ? " is-isolated" : ""}${spread > 0 ? " is-spread" : ""} ${cls}`}
       width={size.width}
       height={size.height}
       viewBox={`0 0 ${size.width} ${size.height}`}
@@ -366,13 +507,13 @@ export function SceneSvg(props: SceneSvgProps) {
   return (
     <>
       {svg("defs", "stage__sheet--defs", <Defs uid={uid} step={step} woods={woods} />)}
-      {sheets.map((sh) => svg(sh.key, `stage__sheet--${sh.kind}`, sh.items))}
+      {sheets.map((sh) => svg(sh.key, `stage__sheet--${sh.kind}`, sh.items, sh.layer))}
       {svg(
         "overlay",
         "stage__sheet--overlay",
         <g className="overlay">
           {model.links.map((lm) =>
-            lm.link.kind === "chamber" ? (
+            lm.link.kind === "chamber" && spread <= 0 && show(lm) !== "gone" ? (
               <text
                 key={`kpa-${lm.link.id}`}
                 className="gauge"
@@ -380,6 +521,13 @@ export function SceneSvg(props: SceneSvgProps) {
                 ref={nodes.refChamber(lm.link.id, geos.get(lm.link.id)!, "label")}
               />
             ) : null,
+          )}
+          {props.trail && mode === "simulate" && (
+            <g className="trails">
+              {Array.from({ length: TRAIL_SLOTS * TRAIL_SEGMENTS }, (_, i) => (
+                <path key={i} className={`trail trail--${i % TRAIL_SEGMENTS}`} ref={nodes.refTrail(i)} />
+              ))}
+            </g>
           )}
           <g className="callouts">
             {callouts.map((c) =>
@@ -424,6 +572,7 @@ export function SceneSvg(props: SceneSvgProps) {
             <circle className="drag__ring" r={6 * px} ref={nodes.refDrag("ring")} />
           </g>
         </g>,
+        props.active,
       )}
     </>
   );

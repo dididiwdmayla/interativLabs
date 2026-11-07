@@ -1,4 +1,5 @@
 import type { Scene } from "@/model/types";
+import type { ProjectView } from "./useUiStore";
 
 /**
  * Projetos salvos no aparelho (docs/arquitetura.md §7), em IndexedDB:
@@ -23,6 +24,8 @@ export interface ProjectMeta {
 
 export interface Project extends ProjectMeta {
   scene: Scene;
+  /** estado de vista (peças escondidas): fora da cena, do hash e do desfazer */
+  view?: ProjectView;
 }
 
 const DB = "interativlabs";

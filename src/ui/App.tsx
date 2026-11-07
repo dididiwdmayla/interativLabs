@@ -10,6 +10,10 @@ import { InstallSheet } from "./InstallSheet";
 import { MainSheet } from "./MainSheet";
 import { PartsDrawer } from "./PartsDrawer";
 import { LayerStack } from "./LayerStack";
+import { LayersBar } from "./LayersBar";
+import { HideBar } from "./HiddenParts";
+import { ExplainCard } from "./ExplainCard";
+import type { Look } from "@/render/look";
 import { SidePanel } from "./Panel";
 import {
   boot,
@@ -62,6 +66,7 @@ const FLOATING = [
   ".corner__title",
   ".corner__hint",
   ".toolstrip__row",
+  ".toolstrip__popover",
   ".edgetab__mark",
   ".testbar > *",
 ].join(",");
@@ -83,6 +88,10 @@ function Workbench() {
   const hint = useUiStore((s) => s.hint);
   const edgeOpen = useUiStore((s) => s.edgeMenu !== null);
   const tool = useUiStore((s) => s.hammer !== null || s.pencil);
+  const lookState = useUiStore((s) => s.look);
+  const hiddenIds = useUiStore((s) => s.hidden);
+  const hideMode = useUiStore((s) => s.hideMode);
+  const trail = useUiStore((s) => s.trail);
   const wide = useMedia(WIDE_QUERY);
   const sa = useSafeArea();
   const portrait = useMedia("(orientation: portrait) and (max-width: 700px)");
@@ -93,6 +102,29 @@ function Workbench() {
   const menuInsets = useMemo(() => (wide ? { ...sa, right: 0 } : sa), [sa, wide]);
   const [error, setError] = useState<string | null>(null);
   const model = useMemo(() => (current ? prepareScene(current.scene) : null), [current]);
+  // estado de vista: camadas em cores, afastadas, isoladas e peças escondidas (só as que existem)
+  const hiddenSet = useMemo(
+    () => new Set(hiddenIds.filter((id) => model?.parts.has(id))),
+    [hiddenIds, model],
+  );
+  const look = useMemo<Look>(
+    () => ({
+      colors: lookState.open && lookState.colors,
+      // a distância é a do celular deitado (390 px de altura); telas maiores afastam na proporção
+      spread:
+        lookState.open && lookState.spread
+          ? Math.round(lookState.distance * Math.min(2.4, Math.max(1, size.height / 390)))
+          : 0,
+      isolate: lookState.open && lookState.isolate,
+      hidden: hiddenSet,
+    }),
+    [lookState, hiddenSet, size.height],
+  );
+  const onHide = useCallback((id: string) => {
+    const ui = useUiStore.getState();
+    ui.hide(id);
+    if (ui.selection?.id === id) ui.select(null);
+  }, []);
 
   // abre o último projeto (na primeira vez, "Meu primeiro mecanismo", cópia do objeto padrão)
   useEffect(() => {
@@ -159,7 +191,9 @@ function Workbench() {
       data-lefty={lefty}
       data-wide={wide}
       data-edgemenu={edgeOpen}
-      data-tool={tool}
+      data-tool={tool || (lookState.open && !hideMode) || hideMode}
+      data-colors={look.colors}
+      data-topstrip={mode === "simulate" && (lookState.open || hideMode)}
     >
       <div className="workbench" ref={bench}>
         <Stage
@@ -175,7 +209,13 @@ function Workbench() {
           fitPad={fitPad}
           obstacles={obstacles}
           onFirstTouch={onFirstTouch}
-        />
+          look={look}
+          trail={trail && mode === "simulate"}
+          onHide={hideMode ? onHide : undefined}
+        >
+          {model && lookState.open && !tool && !hideMode && <LayersBar model={model} />}
+          {hideMode && <HideBar />}
+        </Stage>
         <Corners model={model} wide={wide} />
         {mode === "simulate" && <TestBar />}
         <EdgeTabs height={size.height} />
@@ -191,6 +231,7 @@ function Workbench() {
           <LayerStack model={model} />
         </Sheet>
       )}
+      <ExplainCard />
       <Toast />
       {error && <p className="shell__error">{error}</p>}
     </div>

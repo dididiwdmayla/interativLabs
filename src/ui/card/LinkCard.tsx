@@ -44,6 +44,12 @@ export function LinkCard({ model, lm }: { model: SceneModel; lm: LinkModel }) {
       <LinkPair model={model} lm={lm} />
       <LinkLists model={model} link={l} />
       <section className="card__acts" aria-label="Ações">
+        <button type="button" className="cardact" data-keeps-sheet onClick={() => ui.setExplain(l.kind)}>
+          <span className="cardact__icon">
+            <Icon name="explain" uid={`${uid}x`} />
+          </span>
+          <span className="cardact__label">O que é?</span>
+        </button>
         <button
           type="button"
           className="cardact cardact--danger"

@@ -436,3 +436,144 @@
 .layer.is-hidden {
   display: none;
 }
+
+/* ---------- entender (Parte E2d): cores, afastar, isolar, esconder ---------- */
+
+/*
+ * Camadas em cores: a face de cada peça na cor da camada (--layer-color, do
+ * grupo da camada), a hachura do material por cima, mais discreta. A cor é
+ * a exceção declarada a "cor é estado": só vale com o modo ligado.
+ */
+.scene.is-colors .part__face {
+  fill: var(--layer-color);
+}
+
+.scene.is-colors .part__hatch {
+  opacity: var(--opacity-hatch-colors);
+}
+
+.scene.is-colors .part__tone {
+  fill: var(--layer-color);
+  fill-opacity: 1 !important;
+}
+
+.scene.is-colors .part__wall {
+  fill: color-mix(in oklch, var(--layer-color) 55%, var(--color-shadow));
+}
+
+.sheetframe rect {
+  fill: none;
+  stroke: color-mix(in oklch, var(--layer-color) 60%, var(--color-ink));
+  stroke-width: var(--stroke-bevel);
+  stroke-dasharray: var(--dash-hidden);
+}
+
+.scene:not(.is-colors) .sheetframe rect {
+  stroke: var(--color-ink-3);
+}
+
+.sheetframe text {
+  fill: var(--color-ink-2);
+  font-family: var(--font-callout);
+  font-style: italic;
+  text-anchor: end;
+}
+
+.layerbadge__plate {
+  fill: color-mix(in oklch, var(--layer-color) 70%, var(--color-shadow));
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-hardware);
+}
+
+.layerbadge__inner {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-construction);
+}
+
+.layerbadge__num {
+  fill: var(--color-ink);
+  font-family: var(--font-callout);
+  font-style: italic;
+  text-anchor: middle;
+}
+
+.layerbadge__lead {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: var(--stroke-callout);
+}
+
+/* folhas afastadas: só transform, com transição curta ao ligar e desligar */
+.stage__sheet {
+  transition: transform var(--dur-base) var(--ease-settle);
+}
+
+.haste__rod {
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-hardware);
+  stroke-dasharray: var(--dash-hidden);
+}
+
+.haste__end {
+  fill: var(--color-stage);
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-hardware);
+}
+
+/*
+ * Peça escondida ou fora do isolar: some do desenho, mas os nós ficam (o
+ * escritor de quadros continua). As ligações dela que ficam à vista voltam
+ * por visibility (o filho visível vence o pai escondido).
+ */
+.scene .is-gone {
+  visibility: hidden;
+}
+
+.scene .linkwrap.is-gone {
+  display: none;
+}
+
+.scene .linkwrap.is-shown,
+.scene .linkwrap.is-half {
+  visibility: visible;
+}
+
+.scene .linkwrap.is-half {
+  opacity: 0.8;
+}
+
+.link-ghost {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: var(--stroke-hardware);
+  stroke-dasharray: 2 2;
+}
+
+/* rastro do movimento (Testar): linha fina em ouro que some com o tempo */
+.trail {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: var(--stroke-hardware);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trail--0 {
+  opacity: 0.95;
+}
+.trail--1 {
+  opacity: 0.75;
+}
+.trail--2 {
+  opacity: 0.55;
+}
+.trail--3 {
+  opacity: 0.38;
+}
+.trail--4 {
+  opacity: 0.22;
+}
+.trail--5 {
+  opacity: 0.1;
+}

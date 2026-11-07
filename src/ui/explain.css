@@ -1,0 +1,470 @@
+/*
+ * Animações dos cartões "o que é" (Parte E2d): traço da prancha, laço curto,
+ * só transform e opacity. Em prefers-reduced-motion, imagem parada.
+ */
+
+.explainart {
+  display: block;
+  max-width: 320px;
+  margin: 0 auto;
+  border: var(--stroke-frame-thin) solid var(--color-ink-faint);
+  background: var(--color-stage);
+}
+
+.explainart * {
+  transform-box: view-box;
+}
+
+.xa-face {
+  fill: var(--color-stage);
+}
+
+.xa-line {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.xa-face.xa-line {
+  fill: var(--color-stage);
+}
+
+.xa-hatch {
+  stroke: none;
+}
+
+.xa-hatchline {
+  stroke: var(--color-ink-2);
+  stroke-width: 0.6;
+}
+
+.xa-fixed .xa-face {
+  fill: var(--color-wall);
+}
+
+.xa-fixed .xa-line {
+  stroke: var(--color-ink-2);
+}
+
+.xa-center {
+  fill: none;
+  stroke: var(--color-ink-3);
+  stroke-width: 0.6;
+  stroke-dasharray: 8 2 1 2;
+}
+
+.xa-dash {
+  fill: none;
+  stroke: var(--color-ink-2);
+  stroke-width: 0.8;
+  stroke-dasharray: 2 2;
+}
+
+.xa-stop,
+.xa-mount {
+  fill: var(--color-wall);
+  stroke: var(--color-ink-2);
+  stroke-width: 0.8;
+}
+
+.xa-spring,
+.xa-cable {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.xa-ember {
+  fill: var(--color-ember);
+}
+
+.xa-zone {
+  fill: none;
+  stroke: var(--color-ember);
+  stroke-width: 1.4;
+}
+
+.xa-zone--idle {
+  stroke: var(--color-ink-2);
+  stroke-width: 0.8;
+  stroke-dasharray: 3 2;
+}
+
+/* ——— laços ——— */
+
+.xa-move--pair {
+  animation: xa-pair 2.8s var(--ease-plate) infinite;
+}
+
+@keyframes xa-pair {
+  0%,
+  15% {
+    transform: translateX(0);
+  }
+  50%,
+  65% {
+    transform: translateX(26px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.xa-spin {
+  animation: xa-spin 3.2s linear infinite;
+}
+
+@keyframes xa-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.xa-rod {
+  animation: xa-rod 3.2s linear infinite;
+}
+
+.xa-run--rod {
+  animation: xa-rodblock 3.2s linear infinite;
+}
+
+.xa-pusher {
+  animation: xa-pusher 3s var(--ease-plate) infinite;
+}
+
+@keyframes xa-pusher {
+  0%,
+  10% {
+    transform: translateX(0);
+  }
+  50%,
+  70% {
+    transform: translateX(30px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.xa-pushed {
+  animation: xa-pushed 3s linear infinite;
+}
+
+/* o pino encosta na chapa de baixo quando a de cima andou 11 px */
+@keyframes xa-pushed {
+  0%,
+  24% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50%,
+  86% {
+    transform: translateX(19px);
+    opacity: 1;
+  }
+  93% {
+    transform: translateX(19px);
+    opacity: 0;
+  }
+  94% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.xa-run--slot {
+  animation: xa-slot 2.6s var(--ease-plate) infinite alternate;
+}
+
+@keyframes xa-slot {
+  to {
+    transform: translateX(108px);
+  }
+}
+
+.xa-run--slider {
+  animation: xa-slider 1.8s cubic-bezier(0.55, 0, 0.75, 1) infinite alternate;
+}
+
+@keyframes xa-slider {
+  to {
+    transform: translateX(105px);
+  }
+}
+
+.xa-stretch {
+  animation: xa-stretch 2.4s var(--ease-plate) infinite alternate;
+}
+
+@keyframes xa-stretch {
+  to {
+    transform: scaleY(1.27);
+  }
+}
+
+.xa-hang {
+  animation: xa-hang 2.4s var(--ease-plate) infinite alternate;
+}
+
+@keyframes xa-hang {
+  to {
+    transform: translateY(12px);
+  }
+}
+
+.xa-wobble {
+  animation: xa-wobble 2.6s linear infinite;
+}
+
+@keyframes xa-wobble {
+  0%,
+  5% {
+    transform: rotate(0);
+  }
+  12% {
+    transform: rotate(-6deg);
+  }
+  24% {
+    transform: rotate(4.5deg);
+  }
+  36% {
+    transform: rotate(-3deg);
+  }
+  48% {
+    transform: rotate(1.8deg);
+  }
+  60% {
+    transform: rotate(-0.8deg);
+  }
+  72%,
+  100% {
+    transform: rotate(0);
+  }
+}
+
+/* mola apoiada: comprimida pela mão, solta, empurra e fica no comprimento livre; o bloco sai do assento */
+.xa-coil {
+  animation: xa-coil 3.2s var(--ease-plate) infinite;
+}
+
+@keyframes xa-coil {
+  0%,
+  8% {
+    transform: scaleX(1);
+  }
+  32%,
+  44% {
+    transform: scaleX(0.56);
+  }
+  54%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.xa-run--spring {
+  animation: xa-springblock 3.2s var(--ease-plate) infinite;
+}
+
+@keyframes xa-springblock {
+  0%,
+  8% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  32%,
+  44% {
+    transform: translateX(-31px);
+    opacity: 1;
+  }
+  54% {
+    transform: translateX(0);
+    animation-timing-function: cubic-bezier(0.1, 0.6, 0.3, 1);
+  }
+  80% {
+    transform: translateX(44px);
+    opacity: 1;
+  }
+  90% {
+    transform: translateX(44px);
+    opacity: 0;
+  }
+  91% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* trava: segura, salta para fora e a peça cai girando no eixo */
+.xa-latch {
+  animation: xa-latch 3.2s ease-out infinite;
+}
+
+@keyframes xa-latch {
+  0%,
+  30% {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(12px, -26px) rotate(35deg);
+    opacity: 0;
+  }
+  92% {
+    transform: translate(0, 0) rotate(0);
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.xa-fall {
+  animation: xa-fall 3.2s infinite;
+}
+
+@keyframes xa-fall {
+  0%,
+  33% {
+    transform: rotate(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.6);
+  }
+  52% {
+    transform: rotate(52deg);
+    animation-timing-function: ease-out;
+  }
+  58% {
+    transform: rotate(46deg);
+  }
+  64%,
+  86% {
+    transform: rotate(50deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+/* câmara: a carga acende e o gás empurra as duas paredes para longe uma da outra */
+.xa-gas {
+  animation: xa-gas 2.8s var(--ease-settle) infinite;
+}
+
+@keyframes xa-gas {
+  0%,
+  12% {
+    transform: scaleX(1);
+    opacity: 0.15;
+  }
+  20% {
+    transform: scaleX(1.15);
+    opacity: 0.85;
+  }
+  60% {
+    transform: scaleX(3.1);
+    opacity: 0.3;
+  }
+  84% {
+    transform: scaleX(3.1);
+    opacity: 0.12;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0.15;
+  }
+}
+
+.xa-wall--a,
+.xa-wall--b {
+  animation: 2.8s var(--ease-settle) infinite;
+}
+
+.xa-wall--a {
+  animation-name: xa-wall-a;
+}
+
+.xa-wall--b {
+  animation-name: xa-wall-b;
+}
+
+@keyframes xa-wall-a {
+  0%,
+  14% {
+    transform: translateX(0);
+  }
+  60%,
+  84% {
+    transform: translateX(-34px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes xa-wall-b {
+  0%,
+  14% {
+    transform: translateX(0);
+  }
+  60%,
+  84% {
+    transform: translateX(34px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* sensor: a esfera bate na zona acima da velocidade mínima e o sensor acende em brasa */
+.xa-run--ball {
+  animation: xa-ball 2.6s infinite;
+}
+
+@keyframes xa-ball {
+  0% {
+    transform: translateX(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 1);
+  }
+  42% {
+    transform: translateX(80px);
+    animation-timing-function: ease-out;
+  }
+  70%,
+  100% {
+    transform: translateX(28px);
+  }
+}
+
+.xa-flash {
+  animation: xa-flash 2.6s infinite;
+}
+
+@keyframes xa-flash {
+  0%,
+  41% {
+    opacity: 0;
+  }
+  43% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explainart * {
+    animation: none !important;
+  }
+}

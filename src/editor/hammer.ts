@@ -5,7 +5,8 @@ import { nextRef } from "@/model/ids";
 import type { Link, Vec2 } from "@/model/types";
 import { localOf, worldOf, type PartModel, type SceneModel } from "@/render/prepare";
 import { idsFor, type Command } from "./commands";
-import { LINK_LABEL, partName } from "./names";
+import { LINK_LABEL } from "./names";
+import { hammerPhrase } from "./phrases";
 import { snapMove, type SnapGuide } from "./snap";
 import { snapTargets } from "./snapScene";
 
@@ -96,15 +97,12 @@ export function hammerPoint(
   const stack = hammerStack(model, at, active, solid);
   const b = stack[0] ?? null,
     a = stack[1] ?? null;
-  const name = LINK_LABEL[tool];
   return {
     point: at,
     a,
     b,
     guides,
-    phrase: b
-      ? `${name}: ${partName(b.part)} ${tool === "axle" ? "gira sobre" : "liga a"} ${a ? partName(a.part) : "o fundo"}`
-      : "Toque sobre uma peça",
+    phrase: hammerPhrase(tool, b?.part ?? null, a?.part ?? null),
   };
 }
 

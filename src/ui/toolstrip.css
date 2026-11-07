@@ -185,9 +185,35 @@
   outline-offset: -3px;
 }
 
-/* com uma ferramenta aberta, a pílula da camada encolhe para dar lugar à faixa */
+/* com uma ferramenta aberta, a pílula da camada encolhe para dar lugar à faixa:
+   espaçamento menor, pilha em miniatura menor e o nome em até duas linhas pequenas */
 .shell[data-tool="true"] .pill {
   max-width: 116px;
+  gap: var(--space-1);
+  padding: 0 6px 0 4px;
+}
+
+.shell[data-tool="true"] .pill__plates {
+  width: 18px;
+  transform: scale(0.8);
+  transform-origin: left center;
+}
+
+.shell[data-tool="true"] .pill__num {
+  font-size: 15px;
+}
+
+.shell[data-tool="true"] .pill__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: 10px;
+  line-height: 12px;
+  letter-spacing: 0.05em;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: left;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -237,4 +263,38 @@
   font-variant: normal;
   font-size: 14px;
   color: var(--color-ink);
+}
+
+/* o deslizante da distância (camadas afastadas): compacto, para não cobrir o mecanismo */
+.toolstrip[aria-label="Camadas em cores"] .toolstrip__popover {
+  bottom: calc(100% + 16px);
+  padding: 0 var(--space-2);
+}
+
+.toolstrip[aria-label="Camadas em cores"] .pencildetails input {
+  width: 104px;
+}
+
+/* presa à borda de cima (camadas em cores no Testar): a frase e o deslizante descem */
+.toolstrip[data-edge="top"] {
+  bottom: auto;
+  top: calc(var(--sa-top, 0px) + var(--strip-bottom, var(--frame-inset)));
+}
+
+.toolstrip[data-edge="top"] .toolstrip__phrase {
+  bottom: auto;
+  top: calc(100% + 2px);
+  left: 0;
+  width: 100%;
+  background: var(--color-chrome-float);
+}
+
+.toolstrip[data-edge="top"] .toolstrip__popover {
+  bottom: auto;
+  top: calc(100% + 18px);
+}
+
+/* a faixa de cima toma o lugar do nome do projeto */
+.shell[data-topstrip="true"] .corner--top {
+  visibility: hidden;
 }

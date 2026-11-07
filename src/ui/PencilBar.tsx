@@ -30,6 +30,8 @@ export function PencilBar({
   const mode = useUiStore((s) => s.mode);
   const tool = useUiStore((s) => s.pencilTool);
   const set = useUiStore((s) => s.setPencilTool);
+  const penSeen = useUiStore((s) => s.penSeen);
+  const fingerDraws = useUiStore((s) => s.fingerDraws);
   const [details, setDetails] = useState(false);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -152,6 +154,26 @@ export function PencilBar({
             },
           ],
         },
+        // só depois de ver uma caneta: o dedo volta a desenhar (salvo no aparelho)
+        ...(penSeen
+          ? [
+              {
+                name: "Dedo",
+                items: [
+                  {
+                    id: "finger",
+                    label: "Dedo desenha",
+                    icon: "finger" as const,
+                    pressed: fingerDraws,
+                    hint: fingerDraws
+                      ? "Dedo desenha (ligado) · tocar: o dedo só move a vista"
+                      : "Dedo desenha (desligado: o dedo só move a vista)",
+                    onClick: () => useUiStore.getState().setFingerDraws(!fingerDraws),
+                  },
+                ],
+              },
+            ]
+          : []),
       ]}
     />
   );

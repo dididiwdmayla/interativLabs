@@ -67,7 +67,22 @@ for (const { width, height } of SIZES) {
 }
 
 /** As folhas e o menu de borda abertos também não fazem rolagem lateral e têm alvos de 44 px. */
-const SHEETS = ["main", "drawer", "layers", "card", "edge", "hammer", "pencil"] as const;
+const SHEETS = [
+  "main",
+  "drawer",
+  "layers",
+  "card",
+  "edge",
+  "hammer",
+  "pencil",
+  // Parte E2d: a faixa das camadas (com o deslizante), no Montar e no Testar; o modo
+  // Esconder; a lista de escondidas aberta; o cartão "o que é"
+  "colors",
+  "colors-sim",
+  "hide",
+  "hidden",
+  "explain",
+] as const;
 for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSCAPE]) {
   for (const sheet of SHEETS) {
     test(`folha ${sheet} em ${width}×${height}`, async ({ page }) => {
@@ -87,6 +102,11 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
                   setHammer(s: string): void;
                   setPencil(on: boolean): void;
                   setEdgeMenu(m: { side: "left" | "right"; cy: number; hover: null }): void;
+                  setLook(p: Record<string, unknown>): void;
+                  setMode(m: string): void;
+                  setHideMode(on: boolean): void;
+                  hide(id: string): void;
+                  setExplain(k: string): void;
                 };
               };
             };
@@ -97,8 +117,16 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
         if (sh === "edge") ui.setEdgeMenu({ side: "left", cy: 200, hover: null });
         else if (sh === "hammer") ui.setHammer("axle");
         else if (sh === "pencil") ui.setPencil(true);
+        else if (sh === "colors") ui.setLook({ open: true, spread: true });
+        else if (sh === "colors-sim") {
+          ui.setMode("simulate");
+          ui.setLook({ open: true, spread: true, isolate: true });
+        } else if (sh === "hide") ui.setHideMode(true);
+        else if (sh === "hidden") for (const q of ui.current?.scene.parts.slice(0, 5) ?? []) ui.hide(q.id);
+        else if (sh === "explain") ui.setExplain("spring");
         else ui.setSheet(sh);
       }, sheet);
+      if (sheet === "hidden") await page.locator(".hiddenpill__btn").click();
       await page.waitForTimeout(400);
       const m = await page.evaluate(() => ({
         doc: document.documentElement.scrollWidth,
@@ -110,7 +138,9 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
             el.matches("input[type=range]") ? r.height < 24 : r.width < 44 || r.height < 44,
           )
           .map(({ el, r }) => `${el.getAttribute("aria-label") ?? el.textContent} ${r.width}x${r.height}`),
-        escaped: Array.from(document.querySelectorAll(".sheet *, .edgemenu *, .toolstrip *"))
+        escaped: Array.from(
+          document.querySelectorAll(".sheet *, .edgemenu *, .toolstrip *, .hiddenlist *, .corner *"),
+        )
           .map((el) => ({ el, r: el.getBoundingClientRect() }))
           .filter(({ r }) => r.width > 0 && (r.right > window.innerWidth + 0.5 || r.left < -0.5))
           .filter(({ el }) => !el.closest(".tiles"))

@@ -5,6 +5,11 @@ import { calloutPath } from "./callouts";
 import { cablePath, coilScale, gasPolygon, type ChamberGeo } from "./geometry";
 import { worldOf, type SceneModel } from "./prepare";
 
+/** Quem desenha o rastro a cada quadro (src/ui/sim/trail.ts: lê a gravação). */
+export interface TrailWriter {
+  write(frame: FrameSource & { step?: number }): void;
+}
+
 /**
  * Nós guardados do palco e o escritor de quadros. Os componentes React
  * montam a estrutura uma vez e registram aqui os nós que mexem; o laço da
@@ -61,6 +66,8 @@ export interface TwoNodes {
   a: { part: Id | null; at: Vec2 };
   b: { part: Id | null; at: Vec2 };
   max: number;
+  /** ponta escondida do cabo: anel tracejado que acompanha a ponta */
+  ghost?: { el: SVGCircleElement | null; end: "a" | "b" };
 }
 
 interface ChamberNodes {
@@ -79,6 +86,9 @@ export interface WriteContext {
   px: number;
   /** escreve a parede das peças móveis (falso no Simular de cena pesada) */
   walls?: boolean;
+  /** camadas afastadas: px entre folhas vizinhas, e a camada ativa (a folha de cima é a dela) */
+  spread?: number;
+  active?: number;
 }
 
 /** pressão manométrica (kPa) em que o gás chega à metade da opacidade máxima */
@@ -100,6 +110,12 @@ export class StageNodes {
   rods = new Map<Id, TwoNodes>();
   cables = new Map<Id, TwoNodes>();
   chambers = new Map<Id, ChamberNodes>();
+  /** hastes do afastamento (pino e sensor entre folhas): seguem o ponto na peça */
+  hastes = new Map<Id, { el: SVGGElement; host: Id; at: Vec2 }>();
+  /** rastro do movimento (Testar): quem escreve, os caminhos fixos e a peça escolhida */
+  trail: TrailWriter | null = null;
+  trailEls: (SVGPathElement | null)[] = [];
+  trailFocus: Id | null = null;
   world: HTMLElement | null = null;
   /** fio e anel do arrasto */
   drag: { g?: SVGGElement | null; wire?: SVGLineElement | null; ring?: SVGCircleElement | null } = {};
@@ -185,6 +201,26 @@ export class StageNodes {
     };
   }
 
+  refHaste(id: Id, host: Id, at: Vec2) {
+    return (el: SVGGElement | null) => {
+      if (el) this.hastes.set(id, { el, host, at });
+      else this.hastes.delete(id);
+    };
+  }
+
+  refTrail(i: number) {
+    return (el: SVGPathElement | null) => {
+      this.trailEls[i] = el;
+    };
+  }
+
+  refCableGhost(id: Id, end: "a" | "b") {
+    return (el: SVGCircleElement | null) => {
+      const c = this.cables.get(id);
+      if (c) c.ghost = { el, end };
+    };
+  }
+
   refDrag(field: "g" | "wire" | "ring") {
     return (el: SVGGElement | SVGLineElement | SVGCircleElement | null) => {
       if (field === "g") this.drag.g = el as SVGGElement | null;
@@ -220,7 +256,7 @@ export class StageNodes {
   }
 
   /** Escreve um quadro. `all` inclui as peças fixas (montagem e troca de zoom). */
-  write(frame: FrameSource = this.frame, all = true): void {
+  write(frame: FrameSource & { step?: number } = this.frame, all = true): void {
     this.frame = frame;
     const { wallMm, shadowMm } = this.ctx;
     for (const m of this.model.partList) {
@@ -255,7 +291,20 @@ export class StageNodes {
       const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
       r.el?.setAttribute("transform", `translate(${f(a[0])} ${f(a[1])}) rotate(${f(deg(ang))})`);
     }
-    for (const c of this.cables.values()) c.el?.setAttribute("d", cablePath(at(c.a), at(c.b), c.max));
+    for (const c of this.cables.values()) {
+      const a = at(c.a);
+      const b = at(c.b);
+      c.el?.setAttribute("d", cablePath(a, b, c.max));
+      if (c.ghost?.el) {
+        const p = c.ghost.end === "a" ? a : b;
+        c.ghost.el.setAttribute("cx", f(p[0]));
+        c.ghost.el.setAttribute("cy", f(p[1]));
+      }
+    }
+    for (const h of this.hastes.values()) {
+      const p = worldOf(frame.pose(h.host), h.at);
+      h.el.setAttribute("transform", `translate(${f(p[0])} ${f(p[1])})`);
+    }
     for (const [id, c] of this.chambers) {
       const st = frame.chamber(id);
       if (!st) continue;
@@ -300,6 +349,7 @@ export class StageNodes {
       }
     }
     this.writeDrag();
+    this.trail?.write(frame);
   }
 
   writeDrag(): void {

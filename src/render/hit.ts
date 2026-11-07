@@ -17,6 +17,8 @@ export interface HitOptions {
   layer?: (index: number) => boolean;
   /** tolerância de borda, mm */
   tol?: number;
+  /** peças fora do toque (escondidas) */
+  exclude?: ReadonlySet<Id>;
 }
 
 export function partHit(
@@ -26,7 +28,9 @@ export function partHit(
   opts: HitOptions = {},
 ): PartModel | null {
   const layerOk = opts.layer ?? ((i: number) => model.layers[i]?.layer.visible !== false);
-  const list = model.partList.filter((m) => (!opts.dynamicOnly || m.dynamic) && layerOk(m.layer));
+  const list = model.partList.filter(
+    (m) => (!opts.dynamicOnly || m.dynamic) && layerOk(m.layer) && !opts.exclude?.has(m.part.id),
+  );
   const locals = list.map((m) => localOf(frame.pose(m.part.id), p));
   for (let i = list.length - 1; i >= 0; i--) {
     const m = list[i]!;

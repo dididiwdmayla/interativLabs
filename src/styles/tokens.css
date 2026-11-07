@@ -25,6 +25,32 @@
   --color-gold: #d4aa5f; /* a mão da pessoa */
   --color-ember: #ee7b4f; /* energia e alerta */
 
+  /*
+   * Camadas em cores (Parte E2d) — PROVISÓRIO, até a paleta do coordenador
+   * visual. A exceção declarada a "cor é estado": vale só com o modo ligado.
+   * Uma cor por camada, do fundo (1) para o topo (16), em OKLCH com a mesma
+   * luminosidade (46%) e croma moderado (0,055), como lápis de cor sobre a
+   * prancha. Matizes espaçados pela razão áurea entre 112° e 358°, longe do
+   * ouro (81°) e da brasa (41°): no mínimo 48° de distância. Contraste do
+   * ink sobre a face: 5,25 a 5,67 (AA). Teste: src/render/layerColors.test.ts
+   */
+  --layer-1: oklch(46% 0.055 237);
+  --layer-2: oklch(46% 0.055 143);
+  --layer-3: oklch(46% 0.055 295);
+  --layer-4: oklch(46% 0.055 201);
+  --layer-5: oklch(46% 0.055 353);
+  --layer-6: oklch(46% 0.055 259);
+  --layer-7: oklch(46% 0.055 165);
+  --layer-8: oklch(46% 0.055 317);
+  --layer-9: oklch(46% 0.055 223);
+  --layer-10: oklch(46% 0.055 129);
+  --layer-11: oklch(46% 0.055 281);
+  --layer-12: oklch(46% 0.055 187);
+  --layer-13: oklch(46% 0.055 339);
+  --layer-14: oklch(46% 0.055 245);
+  --layer-15: oklch(46% 0.055 151);
+  --layer-16: oklch(46% 0.055 304);
+
   /* Textura do palco (limites medidos) e vinheta estática */
   --color-stage-low: #181c3d;
   --color-stage-high: #262c4d;
@@ -62,6 +88,7 @@
   --opacity-bevel-light: 0.7;
   --opacity-bevel-faint: 0.35;
   --opacity-hatch-veiled: 0.42; /* ink-2 sobre wall ≈ ink-faint */
+  --opacity-hatch-colors: 0.45; /* hachura discreta sobre a cor da camada */
   --stroke-shadow-line: 3px;
   --stroke-bevel: 0.75px;
   --stroke-callout: 0.75px;

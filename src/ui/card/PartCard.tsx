@@ -241,6 +241,16 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
           }}
         />
         <Action
+          icon="hide"
+          label="Esconder"
+          onClick={() => {
+            // estado de vista: some do desenho e do toque, continua na cena e na simulação
+            ui.hide(p.id);
+            ui.select(null);
+            ui.notify(`${p.name || "Peça"} escondida · a lista fica no canto`);
+          }}
+        />
+        <Action
           icon="trash"
           label="Excluir"
           danger

@@ -73,7 +73,14 @@ export type IconName =
   | "cut"
   | "ruler"
   | "swap"
-  | "check";
+  | "check"
+  | "finger"
+  | "layerColors"
+  | "spread"
+  | "isolate"
+  | "hide"
+  | "trail"
+  | "explain";
 
 /** Linhas a 45° cobrindo a grade inteira; recortadas pela forma de cada ícone. */
 function hatchLines(spacing: number, offset = 0): string {
@@ -554,6 +561,64 @@ const ICONS: Record<IconName, (c: DrawCtx) => ReactNode> = {
     </>
   ),
   check: () => <path d="M4.5 12.5L9.5 17.5L19.5 6.5" />,
+  // dedo: a ponta tocando a chapa, com a marca do toque
+  finger: () => (
+    <>
+      <path d="M9 20.5V10.5C9 9.4 9.9 8.5 11 8.5C12.1 8.5 13 9.4 13 10.5V13.5L17.2 14.6C18.3 14.9 19 16 18.7 17.1L17.8 20.5" />
+      <path d="M7 5.5C8 4.2 9.4 3.5 11 3.5C12.6 3.5 14 4.2 15 5.5" className="thin" />
+    </>
+  ),
+  // camadas em cores: três pranchas oblíquas, a de cima hachurada
+  layerColors: (c) => (
+    <>
+      <path d="M6 17.5H16L19 14.5H9Z" className="thin" />
+      <path d="M5.5 13.5H15.5L18.5 10.5H8.5Z" className="thin" />
+      {c.hatch(<path d="M5 9.5H15L18 6.5H8Z" />, "lc", true)}
+      <path d="M5 9.5H15L18 6.5H8Z" />
+    </>
+  ),
+  // afastar: as pranchas separadas em diagonal, com a seta
+  spread: () => (
+    <>
+      <path d="M3.5 20.5H11L13 18.5H5.5Z" className="thin" />
+      <path d="M7.5 15H15L17 13H9.5Z" />
+      <path d="M11.5 9.5H19L21 7.5H13.5Z" />
+      <path d="M4 15.5L8.5 11M8.5 11V14M8.5 11H5.5" className="thin" />
+    </>
+  ),
+  // isolar: uma prancha cheia e as outras só no tracejado
+  isolate: (c) => (
+    <>
+      <path d="M5 19H15L18 16H8Z" className="thin" strokeDasharray="1.5 1.5" />
+      {c.hatch(<path d="M4.5 13.5H14.5L17.5 10.5H7.5Z" />, "is", true)}
+      <path d="M4.5 13.5H14.5L17.5 10.5H7.5Z" />
+      <path d="M5 8H15L18 5H8Z" className="thin" strokeDasharray="1.5 1.5" />
+    </>
+  ),
+  // esconder peça: a peça em tracejado com o dedo tocando
+  hide: () => (
+    <>
+      <rect x="3.75" y="4.75" width="12" height="9" strokeDasharray="2 1.6" />
+      <path d="M12 21V14.5C12 13.7 12.7 13 13.5 13C14.3 13 15 13.7 15 14.5V16.5L18.5 17.4C19.4 17.6 19.9 18.5 19.7 19.4L19.3 21" />
+    </>
+  ),
+  // rastro: o caminho que some, com a peça na ponta
+  trail: () => (
+    <>
+      <path d="M3.5 18C6 18 7 15 9 13" className="thin" strokeDasharray="1.2 1.6" />
+      <path d="M9 13C11 11 12.5 12.5 14.5 10.5" className="thin" />
+      <circle cx="17.5" cy="7.5" r="3.25" />
+      <path d="M14.5 10.5L15.2 9.8" />
+    </>
+  ),
+  // "o que é?": o ponto de interrogação em versalete, dentro do círculo da chamada
+  explain: () => (
+    <>
+      <circle cx="12" cy="12" r="8.25" className="thin" />
+      <path d="M9.5 9.6C9.5 8.2 10.6 7.2 12 7.2C13.4 7.2 14.5 8.2 14.5 9.5C14.5 11.4 12 11.6 12 13.8" />
+      <path d="M12 16.4V16.9" />
+    </>
+  ),
   up: () => (
     <>
       <path d="M12 20V5" />

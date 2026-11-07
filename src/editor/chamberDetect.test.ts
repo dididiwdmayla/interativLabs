@@ -71,9 +71,21 @@ describe("câmara pela regra de 07/11", () => {
     expect(sameBody(scene, link.walls[1]!.part, original.walls[1]!.part)).toBe(true);
     // a face do Êmbolo dentro do tubo da Luva (vão 4,1 mm)
     expect(link.bore).toBeCloseTo(4.05, 2);
+    // desenho e dado concordam (E2d): a câmara declarada é o tubo da Luva
+    expect(Math.abs(link.bore - original.bore)).toBeLessThanOrEqual(0.1);
     expect(warning).toBeUndefined();
     const failed = (await cycle("exemplos/lancador-bancada", rebuilt)).filter((a) => !a.pass);
     expect(failed.map((a) => `${a.runName}: ${a.label} (${a.value})`)).toEqual([]);
+  });
+
+  it("Lançador de bancada: a esfera sai a 10,3 ±0,3 m/s e a cena de teste passa inteira", async () => {
+    const scene = JSON.parse(readFileSync("scenes/examples/lancador-bancada.json", "utf8")) as Scene;
+    const all = await cycle("exemplos/lancador-bancada", scene);
+    expect(all.filter((a) => !a.pass).map((a) => `${a.runName}: ${a.label} (${a.value})`)).toEqual([]);
+    const exit = all.find((a) => /sai pela boca/.test(a.label))!;
+    const peak = Number(/pico ([\d,]+)/.exec(String(exit.value))![1]!.replace(",", ".")) / 1000;
+    expect(peak).toBeGreaterThanOrEqual(10.0);
+    expect(peak).toBeLessThanOrEqual(10.6);
   });
 
   it("Cilindro de dois pistões: as duas paredes do exemplo, ciclo do exemplo", async () => {

@@ -16,6 +16,12 @@ export interface MenuContext {
   hint: boolean;
   lefty: boolean;
   fullscreen: boolean;
+  /** camadas em cores (o modo, com a faixa) */
+  layers: boolean;
+  /** modo "Esconder peças" */
+  hideMode: boolean;
+  /** rastro do movimento (Testar) */
+  trail: boolean;
 }
 
 export interface MenuItem {
@@ -56,15 +62,27 @@ export const MENUS: Record<MenuId, MenuDef> = {
     title: "Vista",
     modes: ["edit", "simulate"],
     items: [
+      // no máximo 8 itens (Exemplos ficou no menu do canto)
       { id: "fit", label: "Enquadrar", icon: "fit" },
+      { id: "layers", label: "Camadas em cores", icon: "layerColors", on: (c) => c.layers },
       { id: "xray", label: "Raio-x", icon: "xray", on: (c) => c.xray },
+      { id: "hide", label: "Esconder peças", icon: "hide", on: (c) => c.hideMode },
+      {
+        id: "trail",
+        label: "Rastro",
+        icon: "trail",
+        when: (c) => c.mode === "simulate",
+        on: (c) => c.trail,
+      },
       { id: "fullscreen", label: "Tela cheia", icon: "fullscreen", on: (c) => c.fullscreen },
-      { id: "examples", label: "Exemplos", icon: "examples" },
       { id: "tips", label: "Dicas", icon: "tips", on: (c) => c.hint },
       { id: "lefty", label: "Canhoto", icon: "lefty", on: (c) => c.lefty },
     ],
   },
 };
+
+/** Itens do menu Vista no máximo (o menu circular não comporta mais). */
+export const VIEW_MENU_MAX = 8;
 
 /** Itens visíveis agora. */
 export function menuItems(id: MenuId, c: MenuContext): MenuItem[] {

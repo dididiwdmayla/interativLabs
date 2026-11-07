@@ -107,7 +107,7 @@ for (const width of [844, 1440])
         else await page.mouse.click(...q);
       };
       await tap([15, 0]);
-      await expect(page.getByText(/Sensor: toque numa câmara/)).toBeVisible();
+      await expect(page.getByText(/Sensor: toque na câmara ou na trava/)).toBeVisible();
       await tap([-15, 0]);
       await page.getByRole("button", { name: "Soltar trava", exact: true }).click();
       const made = (await current(page)).links.find((l) => l.kind === "sensor");
