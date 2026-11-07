@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import type { Scene } from "../../src/model/types";
+import { pickTool } from "./tools";
 
 type W = {
   __IL__: {
@@ -15,7 +16,8 @@ type W = {
     sim: { getState(): { ctl: unknown } };
   };
 };
-const DIR = "docs/capturas/fase-1/parte-e2b";
+// capturas da E2b ficam como estão: reexecuções gravam fora de docs/
+const DIR = "test-results/capturas-e2b";
 function scene(): Scene {
   const s = JSON.parse(readFileSync("scenes/fixtures/multicamada/perfis.scene.json", "utf8")) as Scene;
   const p = s.parts[0]!;
@@ -48,16 +50,15 @@ const at = (page: Page, p: [number, number]) =>
 for (const width of [844, 1440])
   test.describe(`${width}`, () => {
     test.use({ viewport: { width, height: width === 844 ? 390 : 900 }, hasTouch: width === 844 });
-    for (const [tool, label, group] of [
-      ["spring", "Mola", "Ligar"],
-      ["rod", "Haste", "Ligar"],
-      ["cable", "Cabo", "Ligar"],
-      ["slider", "Trilho", "Guiar"],
+    for (const [tool, label] of [
+      ["spring", "Mola"],
+      ["rod", "Haste"],
+      ["cable", "Cabo"],
+      ["slider", "Trilho"],
     ] as const)
       test(`${label}: desenhar e desfazer`, async ({ page }) => {
         await open(page);
-        await page.getByRole("button", { name: group, exact: true }).click();
-        await page.getByRole("button", { name: label, exact: true }).click();
+        await pickTool(page, label);
         const initial = await current(page),
           from = await at(page, [-15, 0]),
           to = await at(page, tool === "slider" ? [5, 0] : [15, 0]);
@@ -99,8 +100,7 @@ for (const width of [844, 1440])
       const s = JSON.parse(readFileSync("scenes/fixtures/fixacoes/trava.scene.json", "utf8")) as Scene;
       s.links = s.links.filter((l) => l.kind !== "sensor");
       await open(page, s);
-      await page.getByRole("button", { name: "Gás", exact: true }).click();
-      await page.getByRole("button", { name: "Sensor", exact: true }).click();
+      await pickTool(page, "Sensor");
       const tap = async (p: [number, number]) => {
         const q = await at(page, p);
         if (width === 844) await page.touchscreen.tap(...q);
@@ -120,7 +120,9 @@ for (const width of [844, 1440])
     });
   });
 
-test("câmara detecta duas paredes e a largura livre de 6 mm", async ({ page }) => {
+test("câmara: corpo fixo, a primeira parede móvel à frente, pistão de 5,6 mm no vão de 6 mm", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const s = scene();
   const wall = s.parts[0]!;
@@ -154,8 +156,7 @@ test("câmara detecta duas paredes e a largura livre de 6 mm", async ({ page }) 
   });
   s.settings.snap.on = false;
   await open(page, s);
-  await page.getByRole("button", { name: "Gás", exact: true }).click();
-  await page.getByRole("button", { name: "Câmara", exact: true }).click();
+  await pickTool(page, "Câmara");
   const a = await at(page, [-19, 0]),
     b = await at(page, [19, 0]);
   await page.mouse.move(...a);
@@ -166,10 +167,9 @@ test("câmara detecta duas paredes e a largura livre de 6 mm", async ({ page }) 
   await expect.poll(async () => (await current(page)).links.length).toBe(1);
   await page.screenshot({ path: `${DIR}/martelo-camara-cravada-1440.png` });
   const c = (await current(page)).links[0]!;
-  expect(c).toMatchObject({
-    kind: "chamber",
-    body: "cylinder",
-    bore: 6,
-    walls: [{ part: "second" }, { part: wall.id }],
-  });
+  // regra de 07/11: começo numa peça fixa = corpo; a parede da frente é a primeira
+  // peça móvel que cruza a linha; o diâmetro é a largura dela dentro do vão
+  expect(c).toMatchObject({ kind: "chamber", body: "cylinder", walls: [{ part: wall.id }] });
+  // o contorno do disco é discretizado (corda de 0,02 mm): 5,6 mm ± 0,05
+  if (c.kind === "chamber") expect(c.bore).toBeCloseTo(5.6, 1);
 });

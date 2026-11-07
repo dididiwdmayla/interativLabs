@@ -1,8 +1,9 @@
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect } from "react";
 import { HAMMER_GROUPS, type HammerTool } from "@/editor/hammer";
 import { LINK_LABEL } from "@/editor/names";
 import { useUiStore } from "@/editor/useUiStore";
-import { Icon, type IconName } from "./icons";
+import type { IconName } from "./icons";
+import { ToolStrip, type StripItem } from "./ToolStrip";
 import "./hammer.css";
 
 const TOOL_ICONS: Record<HammerTool, IconName> = {
@@ -18,10 +19,11 @@ const TOOL_ICONS: Record<HammerTool, IconName> = {
   sensor: "sensor",
 };
 
-export function HammerBar({ phrase, actions }: { phrase?: string; actions?: ReactNode }) {
-  const ui = useUiStore();
-  const uid = useId();
-  const [group, setGroup] = useState(0);
+/** Faixa do Martelo: os quatro grupos na faixa compartilhada com o Lápis. */
+export function HammerBar({ phrase, actions }: { phrase?: string; actions?: StripItem[] }) {
+  const hammer = useUiStore((s) => s.hammer);
+  const mode = useUiStore((s) => s.mode);
+  const setHammer = useUiStore((s) => s.setHammer);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") useUiStore.getState().setHammer(null);
@@ -29,41 +31,23 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Reac
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
   }, []);
-  if (!ui.hammer || ui.mode !== "edit") return null;
+  if (!hammer || mode !== "edit") return null;
   return (
-    <aside className="hammerbar stage__ui" aria-label="Ferramentas do Martelo" data-keeps-sheet>
-      <div className="hammerbar__groups" role="group" aria-label="Grupos">
-        {HAMMER_GROUPS.map((g, i) => (
-          <button type="button" key={g.name} aria-pressed={group === i} onClick={() => setGroup(i)}>
-            {g.name}
-          </button>
-        ))}
-        <button
-          type="button"
-          aria-label="Sair do Martelo"
-          title="Sair (Esc)"
-          onClick={() => ui.setHammer(null)}
-        >
-          <Icon name="close" uid={`${uid}close`} size={18} />
-        </button>
-      </div>
-      <div className="hammerbar__tools" role="group" aria-label={HAMMER_GROUPS[group]?.name}>
-        {HAMMER_GROUPS[group]?.tools.map((tool) => (
-          <button
-            type="button"
-            key={tool}
-            aria-pressed={ui.hammer === tool}
-            onClick={() => ui.setHammer(tool)}
-          >
-            <Icon name={TOOL_ICONS[tool]} uid={`${uid}${tool}`} size={22} />
-            <span>{LINK_LABEL[tool]}</span>
-          </button>
-        ))}
-      </div>
-      {actions && <div className="hammerbar__tools">{actions}</div>}
-      <p className="hammerbar__phrase" aria-live="polite">
-        {phrase ?? `${LINK_LABEL[ui.hammer]}: toque sobre uma peça · Esc sai`}
-      </p>
-    </aside>
+    <ToolStrip
+      label="Ferramentas do Martelo"
+      mode="select"
+      phrase={phrase ?? `${LINK_LABEL[hammer]}: toque sobre uma peça · Esc sai`}
+      actions={actions}
+      groups={HAMMER_GROUPS.map((g) => ({
+        name: g.name,
+        items: g.tools.map((tool) => ({
+          id: tool,
+          label: LINK_LABEL[tool],
+          icon: TOOL_ICONS[tool],
+          pressed: hammer === tool,
+          onClick: () => setHammer(tool),
+        })),
+      }))}
+    />
   );
 }

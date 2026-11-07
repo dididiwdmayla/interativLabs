@@ -1,6 +1,7 @@
 import { readFileSync, mkdirSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import type { Scene } from "../../src/model/types";
+import { pickTool } from "./tools";
 
 type Hooks = {
   __IL__: {
@@ -13,7 +14,9 @@ type Hooks = {
     stage: { get(): { worldToClient(p: [number, number]): [number, number] } };
   };
 };
-const DIR = "docs/capturas/fase-1/parte-e2b";
+const DIR = "docs/capturas/fase-1/parte-e2c";
+/** capturas por ferramenta (as da E2b ficam como estão) */
+const SCRATCH = "test-results/capturas-e2b";
 function fixture(): Scene {
   const s = JSON.parse(readFileSync("scenes/fixtures/fixacoes/trava.scene.json", "utf8")) as Scene;
   s.links = [];
@@ -72,8 +75,14 @@ for (const viewport of [
           type: "touchStart",
           touchPoints: [{ x: p[0], y: p[1] }],
         });
+        // segurar 300 ms acende o cursor 64 px acima do dedo
         await expect(page.locator("[data-hammer-preview]")).toHaveAttribute("data-touch-offset", "-64");
         await page.screenshot({ path: `${DIR}/martelo-previa-${viewport.width}x${viewport.height}.png` });
+        // o ponto é o cursor: o dedo desce 64 px para cravar no centro
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x: p[0], y: p[1] + 64 }],
+        });
         await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
       } else {
         await page.mouse.move(...p);
@@ -83,7 +92,7 @@ for (const viewport of [
       await expect.poll(async () => (await current(page)).links.length).toBe(1);
       const stamped = await current(page);
       expect(stamped.links[0]).toMatchObject({ kind: "axle", at: [0, 0] });
-      await page.screenshot({ path: `${DIR}/martelo-axle-${viewport.width}.png` });
+      await page.screenshot({ path: `${SCRATCH}/martelo-axle-${viewport.width}.png` });
       await page.getByRole("button", { name: "Desfazer", exact: true }).click();
       expect(await current(page)).toEqual(initial);
       await page.getByRole("button", { name: "Refazer", exact: true }).click();
@@ -112,7 +121,7 @@ for (const width of [844, 1440]) {
           scene.links = [];
         }
         await open(page, scene);
-        await page.getByRole("button", { name: label, exact: true }).click();
+        await pickTool(page, label);
         const p = await at(page, [0, 0]);
         const initial = await current(page);
         if (width === 844) await page.touchscreen.tap(...p);
@@ -123,7 +132,7 @@ for (const width of [844, 1440]) {
         if (tool === "pin")
           expect(stamped.links[1]).toMatchObject({ kind: "slot", mode: "joint", profile: "guide-profile" });
         if (tool === "screw") expect(stamped.links[0]).toMatchObject({ a: null });
-        await page.screenshot({ path: `${DIR}/martelo-${tool}-${width}.png` });
+        await page.screenshot({ path: `${SCRATCH}/martelo-${tool}-${width}.png` });
         await page.getByRole("button", { name: "Desfazer", exact: true }).click();
         expect(await current(page)).toEqual(initial);
         await page.getByRole("button", { name: "Refazer", exact: true }).click();
@@ -153,7 +162,7 @@ for (const width of [844, 1440]) {
     }
     test("pino sobre material avisa e não crava", async ({ page }) => {
       await open(page);
-      await page.getByRole("button", { name: "Pino", exact: true }).click();
+      await pickTool(page, "Pino");
       const p = await at(page, [0, 0]);
       if (width === 844) await page.touchscreen.tap(...p);
       else await page.mouse.click(...p);

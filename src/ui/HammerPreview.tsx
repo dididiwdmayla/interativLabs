@@ -2,25 +2,36 @@ import { assets } from "@/assets/registry";
 import { coilCount, coilMetrics } from "@/render/geometry";
 import type { HammerPoint, HammerTool } from "@/editor/hammer";
 import { toScreen, viewMatrix, mmPerPx, type View } from "@/render/view";
+import type { Vec2 } from "@/geometry/vec";
 import { Icon } from "./icons";
 
+/**
+ * Prévia do Martelo: as duas peças realçadas em ouro (a de cima cheia, a de
+ * baixo tracejada), a ferragem fantasma no ponto e, com o cursor deslocado
+ * aceso, a mira (anel em ouro com cruz fina) e a linha fina até o dedo.
+ * Só `transform` e `opacity` se animam.
+ */
 export function HammerPreview({
   hit,
   start,
   tool,
   view,
-  touch,
+  finger,
+  raw,
   stamped,
 }: {
   hit: HammerPoint;
   start?: HammerPoint;
   tool: HammerTool;
   view: View;
-  touch: boolean;
+  /** dedo, px do palco, quando o cursor deslocado está aceso */
+  finger?: Vec2 | null;
+  /** ponto do cursor antes do encaixe, px do palco */
+  raw?: Vec2 | null;
   stamped: boolean;
 }) {
   const p = toScreen(view, hit.point);
-  const dy = touch && !stamped ? -64 : 0;
+  const dy = finger ? finger[1] - (raw?.[1] ?? p[1]) : 0;
   const from = start ? toScreen(view, start.point) : p;
   const length = Math.hypot(p[0] - from[0], p[1] - from[1]);
   const angle = (Math.atan2(p[1] - from[1], p[0] - from[0]) * 180) / Math.PI;
@@ -40,7 +51,10 @@ export function HammerPreview({
       height="100%"
       aria-hidden="true"
       data-hammer-preview
-      data-touch-offset={dy}
+      data-cursor={finger ? "lit" : "off"}
+      data-touch-offset={finger ? -dy : 0}
+      data-point={raw ? `${raw[0].toFixed(2)} ${raw[1].toFixed(2)}` : undefined}
+      data-finger={finger ? `${finger[0].toFixed(2)} ${finger[1].toFixed(2)}` : undefined}
     >
       <g transform={viewMatrix(view)}>
         {[start?.b ?? hit.a, hit.b].map(
@@ -57,8 +71,7 @@ export function HammerPreview({
       </g>
       {start && (
         <>
-          <path className="hammerpreview__line" d={`M${from[0]} ${from[1]}v${dy}M${p[0]} ${p[1]}v${dy}`} />
-          <g transform={`translate(${from[0]} ${from[1] + dy}) rotate(${angle})`}>
+          <g transform={`translate(${from[0]} ${from[1]}) rotate(${angle})`}>
             {tool === "spring" ? (
               <g>
                 <path className="hammerpreview__line" d={`M0 0H${end}M${length - end} 0H${length}`} />
@@ -95,18 +108,34 @@ export function HammerPreview({
           </g>
         </>
       )}
+      {finger && raw && (
+        <path
+          className="hammerpreview__line hammerpreview__tether"
+          d={`M${raw[0]} ${raw[1] + 13}L${finger[0]} ${finger[1] - 6}`}
+        />
+      )}
       <g transform={`translate(${p[0]} ${p[1]})`}>
-        <path className="hammerpreview__line" d={`M-9 0H9M0-9V9M0 0V${dy}`} />
+        {finger && (
+          <g className="hammercursor">
+            <circle r="13" className="hammercursor__ring" />
+            <path className="hammercursor__cross" d="M-21 0H-15M15 0H21M0-21V-15M0 15V21M-3 0H3M0-3V3" />
+          </g>
+        )}
+        {!finger && <path className="hammerpreview__line" d="M-9 0H9M0-9V9" />}
         {hit.guides.length > 0 && <circle r="7" className="hammerpreview__line" />}
         {stamped && <circle className="hammerpreview__line hammerink" r="13" />}
-        <g transform={`translate(0 ${dy})`}>
-          <g className={stamped ? `hammerstamp hammerstamp--${tool}` : undefined}>
-            <circle r="19" className="hammerpreview__head" />
+        {start ? null : stamped ? (
+          <g className={`hammerstamp hammerstamp--${tool}`}>
+            <circle r="15" className="hammerpreview__head" />
             <g transform="translate(-12 -12)">
               <Icon name={tool === "lock" ? "latch" : tool} uid="hammer-preview" />
             </g>
           </g>
-        </g>
+        ) : (
+          <g className="hammerghost" transform="translate(-9.6 -9.6) scale(0.8)">
+            <Icon name={tool === "lock" ? "latch" : tool} uid="hammer-preview" />
+          </g>
+        )}
       </g>
     </svg>
   );

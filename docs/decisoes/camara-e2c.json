@@ -1,0 +1,66 @@
+[
+  {
+    "example": "scenes/examples/lancador-bancada.json",
+    "underStart": "Luva",
+    "original": {
+      "body": "fundo",
+      "walls": [
+        "Êmbolo",
+        "Ferrolho"
+      ],
+      "bore": 6
+    },
+    "detected": {
+      "body": "fundo",
+      "walls": [
+        "Êmbolo",
+        "Ferrolho"
+      ],
+      "bore": 4.05,
+      "at": [
+        -45.4,
+        0
+      ],
+      "dir": 0,
+      "length": 100,
+      "warning": null
+    },
+    "cycle": {
+      "passed": 72,
+      "total": 72,
+      "failed": []
+    }
+  },
+  {
+    "example": "scenes/examples/cilindro-dois-pistoes.json",
+    "underStart": "Fundo móvel",
+    "original": {
+      "body": "fundo",
+      "walls": [
+        "Pistão",
+        "Fundo móvel"
+      ],
+      "bore": 10
+    },
+    "detected": {
+      "body": "fundo",
+      "walls": [
+        "Pistão",
+        "Fundo móvel"
+      ],
+      "bore": 9.8,
+      "at": [
+        0,
+        0
+      ],
+      "dir": 0,
+      "length": 100,
+      "warning": null
+    },
+    "cycle": {
+      "passed": 4,
+      "total": 4,
+      "failed": []
+    }
+  }
+]

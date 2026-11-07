@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
-import { hammerPoint, hammerFix, type HammerPoint } from "@/editor/hammer";
+import { hammerPoint, hammerFix, type HammerPoint, type HammerTool } from "@/editor/hammer";
+import {
+  CURSOR_HOLD_MS,
+  cursorLit,
+  cursorPoint,
+  holdCursor,
+  moveCursor,
+  startCursor,
+  type OffsetCursor,
+} from "@/editor/offsetCursor";
 import { dragLink, insertLink, sensorLink } from "@/editor/hammerDrag";
 import { pickLinkEdit, PICK_PHRASE } from "@/editor/cardPick";
 import { linkHandles, adjustLinkHandle, type LinkHandle } from "@/editor/linkHandles";
@@ -89,6 +98,8 @@ type Pad = [number, number, number, number];
 const FIT_PAD_EDIT: Pad = [64, 44, 64, 44];
 const FIT_PAD_SIM: Pad = [56, 32, 92, 32];
 const TAP_PX = 8;
+/** ferramentas do Martelo que se arrastam de um ponto a outro */
+const DRAG_TOOLS: string[] = ["spring", "rod", "cable", "slider", "chamber"];
 /** faixa lateral do gesto do menu, fração da largura da prancha */
 const EDGE_ZONE = 0.15;
 const HOLD_MS = 1000;
@@ -104,8 +115,25 @@ const SNAP_PX = 10;
 
 type Gesture =
   | { kind: "linkhandle"; link: Link; handle: LinkHandle; last: Link | null }
-  | { kind: "hammer"; start: HammerPoint; last: HammerPoint; touch: boolean }
-  | { kind: "linkmove"; id: string; last: HammerPoint | null; start: Vec2 }
+  | {
+      kind: "hammer";
+      start: HammerPoint;
+      last: HammerPoint;
+      cursor: OffsetCursor;
+      timer: number;
+      /** vista no começo: um arrasto no fundo antes de acender o cursor move a vista */
+      view0: View;
+    }
+  | {
+      kind: "linkmove";
+      id: string;
+      last: HammerPoint | null;
+      start: Vec2;
+      cursor: OffsetCursor;
+      timer: number;
+      /** dedo quando o cursor acendeu: a ferragem só sai do lugar depois que ele anda */
+      litAt?: Vec2;
+    }
   | { kind: "none" }
   | { kind: "menu" }
   | { kind: "drag" }
@@ -137,6 +165,22 @@ type Gesture =
       handle: Handle;
       last: StretchResult | null;
     };
+
+/** Ações que o sensor pode disparar no alvo escolhido (faixa do Martelo). */
+function sensorActions(target: Link): { label: string; action: SensorAction }[] {
+  if (target.kind === "lock")
+    return [{ label: "Soltar trava", action: { do: "release", target: target.id } }];
+  if (target.kind !== "chamber") return [];
+  return [
+    { label: "Acender carga", action: { do: "ignite", target: target.id } },
+    ...target.vents.flatMap((_, i) =>
+      (["open", "close"] as const).map((act) => ({
+        label: `${act === "open" ? "Abrir" : "Fechar"} respiro ${i + 1}`,
+        action: { do: act, target: target.id, vent: i } as SensorAction,
+      })),
+    ),
+  ];
+}
 
 function vibrate(ms: number) {
   try {
@@ -251,7 +295,9 @@ export function Stage({
     hit: HammerPoint;
     start?: HammerPoint;
     view: View;
-    touch: boolean;
+    /** dedo e ponto do cursor antes do encaixe, px, com o cursor deslocado aceso */
+    finger?: Vec2 | null;
+    raw?: Vec2 | null;
     stamped: boolean;
   } | null>(null);
 
@@ -310,25 +356,24 @@ export function Stage({
     const pad = editing ? (fitPad?.edit ?? FIT_PAD_EDIT) : (fitPad?.sim ?? FIT_PAD_SIM);
     const rect = box.current?.getBoundingClientRect();
     const obs = rect && obstacles ? obstacles(rect) : null;
-    const bar = box.current?.querySelector(".hammerbar")?.getBoundingClientRect();
-    const freeHeight = hammer && bar && rect ? Math.max(100, bar.top - rect.top - 8) : height;
+    // ligar ou desligar o Martelo ou o Lápis nunca mexe na vista: a faixa não entra aqui
     const v = obs
-      ? fitAround(model.focus, width, freeHeight, obs.rects, obs.edge)
-      : fitView(model.focus, width, freeHeight, pad);
+      ? fitAround(model.focus, width, height, obs.rects, obs.edge)
+      : fitView(model.focus, width, height, pad);
     view.current = v;
     setFitZoom(v.zoom);
     writeView();
     settle();
-  }, [model, width, height, editing, writeView, settle, fitPad, obstacles, hammer]);
+  }, [model, width, height, editing, writeView, settle, fitPad, obstacles]);
 
   // enquadra ao abrir a cena e na primeira medida do palco
   const fitted = useRef<string>("");
   useLayoutEffect(() => {
-    const key = `${serial}:${width > 0 && height > 0}:${model !== null}:${!!hammer}`;
+    const key = `${serial}:${width > 0 && height > 0}:${model !== null}`;
     if (fitted.current === key || width <= 0) return;
     fitted.current = key;
     fit();
-  }, [serial, width, height, model, fit, hammer]);
+  }, [serial, width, height, model, fit]);
 
   useLayoutEffect(() => {
     nodes?.setRoot(sheets.current);
@@ -581,6 +626,50 @@ export function Stage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bare, fit, width, height, model]);
 
+  // ——— Martelo: cursor deslocado (docs/arquitetura.md §6, revisto em 07/11) ———
+  const hammerAt = (tool: HammerTool, sp: Vec2, m: SceneModel): HammerPoint =>
+    hammerPoint(m, tool, toWorld(view.current, sp[0], sp[1]), activeLayer, mmPerPx(view.current.zoom));
+  const showHammer = (
+    hit: HammerPoint,
+    start: HammerPoint | undefined,
+    c: OffsetCursor,
+    x: number,
+    y: number,
+  ) =>
+    setHammerPreview({
+      view: { ...view.current },
+      hit,
+      start,
+      finger: cursorLit(c) ? [x, y] : null,
+      raw: cursorLit(c) ? cursorPoint(c, x, y) : null,
+      stamped: false,
+    });
+  /** segurar parado 300 ms acende o cursor: daí em diante o ponto é ele */
+  const armCursor = (c: OffsetCursor): number => {
+    if (!c.touch) return 0;
+    return window.setTimeout(() => {
+      const g = gesture.current;
+      if ((g.kind !== "hammer" && g.kind !== "linkmove") || g.cursor !== c || pointers.current.size !== 1)
+        return;
+      if (!holdCursor(c)) return;
+      vibrate(8);
+      const f = [...pointers.current.values()][0];
+      const tool = g.kind === "hammer" ? useUiStore.getState().hammer : "axle";
+      if (!model || !tool || !f) return;
+      const hit = hammerAt(tool, cursorPoint(c, f.x, f.y), model);
+      if (g.kind === "hammer") {
+        // nas ferramentas de arrastar, segurar antes põe o começo no cursor
+        g.start = hit;
+        g.last = hit;
+      } else g.litAt = [f.x, f.y];
+      showHammer(hit, undefined, c, f.x, f.y);
+    }, CURSOR_HOLD_MS);
+  };
+  const beginLinkMove = (id: string, w: Vec2, x: number, y: number, pointerType: string) => {
+    const cursor = startCursor(x, y, performance.now(), pointerType);
+    gesture.current = { kind: "linkmove", id, last: null, start: w, cursor, timer: armCursor(cursor) };
+  };
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as Element).closest(".stage__ui")) return;
     if (!model || !nodes) return;
@@ -599,6 +688,7 @@ export function Stage({
       if (g.kind === "drag") ctl?.dragEnd();
       if (g.kind === "linkhandle") setLinkPreview(null);
       if (g.kind === "hammer" || g.kind === "linkmove") {
+        window.clearTimeout(g.timer);
         setHammerPreview(null);
         overlay.current?.guides([]);
       }
@@ -656,7 +746,11 @@ export function Stage({
           } else {
             const hit = hammerPoint(model, "pin", w, activeLayer, mmPerPx(view.current.zoom));
             if (hit.b?.dynamic && hit.b.part.id !== waiting.link.body) {
-              const link = { ...waiting.link, walls: [{ part: hit.b.part.id, seal: waiting.link.length }] };
+              // a parede tocada é a da frente; a de trás (se a regra achou) continua
+              const link = {
+                ...waiting.link,
+                walls: [{ part: hit.b.part.id, seal: waiting.link.length }, ...waiting.link.walls],
+              };
               const ui = useUiStore.getState();
               ui.commit(insertLink(link), { selection: { kind: "link", id: link.id } });
               ui.setSheet("card");
@@ -669,7 +763,7 @@ export function Stage({
         }
         const link = pickLink(w);
         if (link && selection?.kind === "link" && selection.id === link) {
-          gesture.current = { kind: "linkmove", id: link, last: null, start: w };
+          beginLinkMove(link, w, x, y, e.pointerType);
           return;
         }
         if (link) {
@@ -680,15 +774,19 @@ export function Stage({
           gesture.current = { kind: "none" };
           return;
         }
-        const hit = hammerPoint(model, hammer, w, activeLayer, mmPerPx(view.current.zoom));
-        setHammerPreview({
-          view: { ...view.current },
-          hit,
-          touch: e.pointerType === "touch",
-          stamped: false,
-        });
-        if (hit.b || ["spring", "rod", "cable", "chamber"].includes(hammer)) {
-          gesture.current = { kind: "hammer", start: hit, last: hit, touch: e.pointerType === "touch" };
+        const cursor = startCursor(x, y, performance.now(), e.pointerType);
+        const hit = hammerAt(hammer, [x, y], model);
+        // dedo: nada aparece antes de acender o cursor (ou de arrastar); mouse e caneta: prévia no ponto
+        if (!cursor.touch) showHammer(hit, undefined, cursor, x, y);
+        if (cursor.touch || hit.b || DRAG_TOOLS.includes(hammer)) {
+          gesture.current = {
+            kind: "hammer",
+            start: hit,
+            last: hit,
+            cursor,
+            timer: armCursor(cursor),
+            view0: { ...view.current },
+          };
           return;
         }
         gesture.current = { kind: "pan", start: { ...view.current }, tap: true };
@@ -718,7 +816,7 @@ export function Stage({
       }
       const link = pickLink(w);
       if (link && selection?.kind === "link" && selection.id === link) {
-        gesture.current = { kind: "linkmove", id: link, last: null, start: w };
+        beginLinkMove(link, w, x, y, e.pointerType);
         return;
       }
       const part = link ? null : pickPart(w);
@@ -762,7 +860,6 @@ export function Stage({
             activeLayer,
             mmPerPx(view.current.zoom),
           ),
-          touch: false,
           stamped: false,
         });
       return;
@@ -776,24 +873,35 @@ export function Stage({
       g.last = adjustLinkHandle(model, g.link, g.handle, w);
       setLinkPreview(g.last);
     } else if (g.kind === "linkmove" && model) {
-      if (Math.hypot(w[0] - g.start[0], w[1] - g.start[1]) < 3 * mmPerPx(view.current.zoom)) return;
-      g.last = hammerPoint(model, "axle", w, activeLayer, mmPerPx(view.current.zoom));
+      const moved = moveCursor(g.cursor, x, y);
+      if (moved) window.clearTimeout(g.timer);
+      if (cursorLit(g.cursor)) {
+        const lit = g.litAt ?? [x, y];
+        if (!g.last && Math.hypot(x - lit[0], y - lit[1]) < 3) return;
+      } else if (
+        g.cursor.touch
+          ? !g.cursor.moved
+          : Math.hypot(w[0] - g.start[0], w[1] - g.start[1]) < 3 * mmPerPx(view.current.zoom)
+      )
+        return;
+      g.last = hammerAt("axle", cursorPoint(g.cursor, x, y), model);
       overlay.current?.guides(g.last.guides);
-      setHammerPreview({
-        view: { ...view.current },
-        hit: g.last,
-        touch: e.pointerType === "touch",
-        stamped: false,
-      });
+      showHammer(g.last, undefined, g.cursor, x, y);
     } else if (g.kind === "hammer" && model && hammer) {
-      g.last = hammerPoint(model, hammer, w, activeLayer, mmPerPx(view.current.zoom));
-      setHammerPreview({
-        view: { ...view.current },
-        hit: g.last,
-        start: ["spring", "rod", "cable", "slider", "chamber"].includes(hammer) ? g.start : undefined,
-        touch: g.touch,
-        stamped: false,
-      });
+      const moved = moveCursor(g.cursor, x, y);
+      if (moved) window.clearTimeout(g.timer);
+      if (!cursorLit(g.cursor)) {
+        // antes de acender: parado, espera; arrastando no fundo com ferramenta de tocar, move a vista
+        if (g.cursor.touch && !g.cursor.moved) return;
+        if (moved && !DRAG_TOOLS.includes(hammer) && !g.start.b) {
+          setHammerPreview(null);
+          gesture.current = { kind: "pan", start: g.view0, tap: false };
+          onPointerMove(e);
+          return;
+        }
+      }
+      g.last = hammerAt(hammer, cursorPoint(g.cursor, x, y), model);
+      showHammer(g.last, DRAG_TOOLS.includes(hammer) ? g.start : undefined, g.cursor, x, y);
     } else if (g.kind === "menu") {
       const ui = useUiStore.getState();
       const hover = hitEdgeMenu(x, y);
@@ -901,12 +1009,14 @@ export function Stage({
         gesture.current = { kind: "none" };
         setHammerPreview(null);
         overlay.current?.guides([]);
+        window.clearTimeout(g.timer);
         if (up && model && g.last) ui.commit(moveLink(model, g.id, g.last.point));
-        else if (up) ui.setSheet("card");
+        else if (up && !cursorLit(g.cursor)) ui.setSheet("card");
         return;
       }
       case "hammer": {
         gesture.current = { kind: "none" };
+        window.clearTimeout(g.timer);
         if (!up || !model || !ui.hammer) {
           setHammerPreview(null);
           return;
@@ -920,7 +1030,7 @@ export function Stage({
           setPending({ kind: "sensor", hit: g.last });
           return;
         }
-        if (["spring", "rod", "cable", "slider", "chamber"].includes(ui.hammer)) {
+        if (DRAG_TOOLS.includes(ui.hammer)) {
           const created = dragLink(model, ui.hammer, g.start, g.last, activeLayer);
           if (!created) {
             ui.notify("Arraste entre duas pontas distintas", { warn: true });
@@ -947,7 +1057,7 @@ export function Stage({
           return;
         }
         if (stamp && ui.commit(stamp.command, { selection: { kind: "link", id: stamp.id } })) {
-          setHammerPreview({ view: { ...view.current }, hit: g.last, touch: false, stamped: true });
+          setHammerPreview({ view: { ...view.current }, hit: g.last, stamped: true });
           vibrate(12);
           window.setTimeout(() => setHammerPreview(null), 350);
         }
@@ -1090,7 +1200,8 @@ export function Stage({
           hit={hammerPreview.hit}
           tool="axle"
           view={hammerPreview.view}
-          touch={hammerPreview.touch}
+          finger={hammerPreview.finger}
+          raw={hammerPreview.raw}
           stamped={false}
         />
       )}
@@ -1109,43 +1220,13 @@ export function Stage({
                     : hammerPreview?.hit.phrase
             }
             actions={
-              waiting?.kind === "sensor" && waiting.target ? (
-                <>
-                  {waiting.target.kind === "lock" && (
-                    <button
-                      type="button"
-                      onClick={() => finishSensor([{ do: "release", target: waiting.target?.id ?? "" }])}
-                    >
-                      Soltar trava
-                    </button>
-                  )}
-                  {waiting.target.kind === "chamber" && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => finishSensor([{ do: "ignite", target: waiting.target?.id ?? "" }])}
-                      >
-                        Acender carga
-                      </button>
-                      {waiting.target.vents.flatMap((_, i) =>
-                        ["open", "close"].map((action) => (
-                          <button
-                            type="button"
-                            key={`${i}-${action}`}
-                            onClick={() =>
-                              finishSensor([
-                                { do: action as "open" | "close", target: waiting.target?.id ?? "", vent: i },
-                              ])
-                            }
-                          >
-                            {action === "open" ? "Abrir" : "Fechar"} respiro {i + 1}
-                          </button>
-                        )),
-                      )}
-                    </>
-                  )}
-                </>
-              ) : undefined
+              waiting?.kind === "sensor" && waiting.target
+                ? sensorActions(waiting.target).map((a, i) => ({
+                    id: `${i}`,
+                    label: a.label,
+                    onClick: () => finishSensor([a.action]),
+                  }))
+                : undefined
             }
           />
           {waiting?.kind === "sensor" && model && hammerPreview && (
@@ -1166,7 +1247,8 @@ export function Stage({
               start={hammerPreview.start}
               tool={hammer}
               view={hammerPreview.view}
-              touch={hammerPreview.touch}
+              finger={hammerPreview.finger}
+              raw={hammerPreview.raw}
               stamped={hammerPreview.stamped}
             />
           )}
@@ -1236,7 +1318,7 @@ export function Stage({
             width={width - 2 * (inset + gap)}
             height={height - 2 * (inset + gap)}
           />
-          {editing && !bare && (
+          {editing && !bare && !hammer && (
             <text className="stage__fig" x={width / 2} y={height - inset - gap - 14} textAnchor="middle">
               <tspan className="stage__fig-script">Fig. {figure}</tspan>
             </text>

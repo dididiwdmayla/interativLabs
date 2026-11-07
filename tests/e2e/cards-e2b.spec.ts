@@ -17,7 +17,8 @@ type W = {
     };
   };
 };
-const DIR = "docs/capturas/fase-1/parte-e2b";
+// capturas da E2b ficam como estão: reexecuções gravam fora de docs/
+const DIR = "test-results/capturas-e2b";
 function fixture(kind: LinkKind): { scene: Scene; id: string } {
   for (const group of readdirSync("scenes/fixtures")) {
     if (group.includes(".")) continue;

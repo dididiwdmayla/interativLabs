@@ -25,7 +25,8 @@ type W = {
     stage: { get(): { worldToClient(p: [number, number]): [number, number] } };
   };
 };
-const DIR = "docs/capturas/fase-1/parte-e2b";
+// capturas da E2b ficam como estão: reexecuções gravam fora de docs/
+const DIR = "test-results/capturas-e2b";
 for (const vp of [
   { width: 844, height: 390 },
   { width: 1440, height: 900 },

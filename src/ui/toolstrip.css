@@ -1,0 +1,199 @@
+/*
+ * Faixa das ferramentas da mão: um carimbo preso à borda de baixo da
+ * prancha, com o filete duplo da moldura (docs/identidade/identidade.md).
+ * Posição medida (ToolStrip.tsx): entre os cantos de baixo, ou acima deles.
+ * Altura: botões de 44 px + filete duplo (≈ 49,5 px) e a frase de 14 px.
+ */
+
+.toolstrip {
+  --strip-edge: var(--frame-inset);
+  position: absolute;
+  z-index: 8;
+  left: var(--strip-left, 50%);
+  bottom: calc(var(--sa-bottom, 0px) + var(--strip-bottom, var(--frame-inset)));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+}
+
+.toolstrip[data-placed="false"] {
+  visibility: hidden;
+}
+
+.toolstrip__phrase {
+  position: absolute;
+  bottom: 100%;
+  left: var(--strip-room-left, 0px);
+  width: var(--strip-room, 100%);
+  margin: 0;
+  height: 14px;
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.01em;
+  color: var(--color-ink-2);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.toolstrip__phrase:empty {
+  visibility: hidden;
+}
+
+/* filete duplo: o grosso por fora (borda) e o fino por dentro (linha da fileira) */
+.toolstrip__row {
+  display: flex;
+  align-items: stretch;
+  padding: 1px;
+  background: var(--color-chrome-float);
+  border: var(--stroke-frame-thick) solid var(--color-ink-3);
+  box-shadow: inset 0 0 0 var(--stroke-frame-thin) var(--color-ink-faint);
+}
+
+.toolstrip__group {
+  display: flex;
+  align-items: stretch;
+  padding: 0.75px;
+}
+
+/* entre grupos: filete fino vertical, como as divisões de um carimbo */
+.toolstrip__group + .toolstrip__group {
+  margin-left: 4px;
+  padding-left: 4.75px;
+  border-left: var(--stroke-frame-thin) solid var(--color-ink-faint);
+}
+
+.toolstrip__tool,
+.toolstrip__selector,
+.toolstrip__action {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: var(--touch-min);
+  height: var(--touch-min);
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--color-ink-2);
+  cursor: pointer;
+  transition:
+    transform var(--dur-tick) var(--ease-press),
+    opacity var(--dur-quick) var(--ease-settle);
+}
+
+.toolstrip[data-tier="full"] .toolstrip__tool,
+.toolstrip[data-tier="label"] .toolstrip__tool {
+  width: 55px;
+}
+
+.toolstrip__tool .icon {
+  stroke: currentColor;
+}
+
+.toolstrip__tool:active:not(:disabled),
+.toolstrip__selector:active,
+.toolstrip__action:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.toolstrip__tool:disabled,
+.toolstrip__action:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ouro só na ferramenta ativa: o traço do ícone, o rótulo e um filete por cima */
+.toolstrip__tool[aria-pressed="true"],
+.toolstrip__action[aria-pressed="true"] {
+  color: var(--color-gold);
+  box-shadow: inset 0 0 0 var(--stroke-frame-thin) var(--color-gold);
+}
+
+.toolstrip__tool.is-warn,
+.toolstrip__action.is-warn {
+  color: var(--color-ember);
+}
+
+/* rótulo em versalete da Old Standard */
+.toolstrip__label {
+  font-family: var(--font-title);
+  font-variant: small-caps;
+  font-size: 11px;
+  line-height: 11px;
+  letter-spacing: var(--tracking-label);
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.toolstrip__glyph {
+  font-family: var(--font-callout);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.toolstrip__selector {
+  width: 52px;
+  color: var(--color-ink);
+}
+
+.toolstrip__dots {
+  display: flex;
+  gap: 3px;
+}
+
+.toolstrip__dots i {
+  width: 4px;
+  height: 4px;
+  border: var(--stroke-frame-thin) solid var(--color-ink-3);
+  transform: rotate(45deg);
+}
+
+.toolstrip__dots i[data-on="true"] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+}
+
+.toolstrip__action {
+  flex-direction: row;
+  min-width: 88px;
+  padding: 0 var(--space-2);
+  font-family: var(--font-title);
+  font-variant: small-caps;
+  font-size: 13px;
+  letter-spacing: var(--tracking-label);
+  text-transform: lowercase;
+  color: var(--color-ink);
+}
+
+.toolstrip__group--actions {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.toolstrip__tool:focus-visible,
+.toolstrip__selector:focus-visible,
+.toolstrip__action:focus-visible {
+  outline: var(--focus-ring) solid var(--color-gold);
+  outline-offset: -3px;
+}
+
+/* com uma ferramenta aberta, a pílula da camada encolhe para dar lugar à faixa */
+.shell[data-tool="true"] .pill {
+  max-width: 132px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolstrip__tool,
+  .toolstrip__selector,
+  .toolstrip__action {
+    transition: none;
+  }
+}
