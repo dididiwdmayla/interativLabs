@@ -627,7 +627,7 @@
       "body": null,
       "at": [-45.4, 0],
       "dir": 0,
-      "bore": 6,
+      "bore": 4.1,
       "length": 100,
       "walls": [
         {
@@ -657,7 +657,7 @@
         "gamma": 1.4,
         "p0": 101.325,
         "charge": {
-          "amount": 0.5,
+          "amount": 0.69,
           "burnMs": 1,
           "shots": 12
         }

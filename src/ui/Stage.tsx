@@ -15,7 +15,7 @@ import { dragLink, insertLink, sensorLink } from "@/editor/hammerDrag";
 import { pickLinkEdit, PICK_PHRASE } from "@/editor/cardPick";
 import { linkHandles, adjustLinkHandle, type LinkHandle } from "@/editor/linkHandles";
 import { applyLink } from "./card/applyLink";
-import { LINK_LABEL } from "@/editor/names";
+import { dragPhrase, pencilPhrase as pencilToolPhrase } from "@/editor/phrases";
 import { moveLink } from "@/editor/moveLink";
 import { HammerBar } from "./HammerBar";
 import { PencilBar } from "./PencilBar";
@@ -371,8 +371,6 @@ export function Stage({
   const [liveClip, setLiveClip] = useState<{ d: string; transform: string } | null>(null);
   const pencilCursor = useRef<SVGGElement>(null);
   const pencilTether = useRef<SVGPathElement>(null);
-  /** uma caneta já desenhou nesta sessão: o dedo só move a vista no Lápis */
-  const penSeen = useRef(false);
   const penStroke = useRef<PencilStroke | null>(null);
   /** chamado a cada mudança da vista (o botão da peça acompanha) */
   const onView = useRef<(() => void) | null>(null);
@@ -838,7 +836,7 @@ export function Stage({
     if (!model || !nodes) return;
     onFirstTouch?.();
     const [x, y] = local(e);
-    if (e.pointerType === "pen") penSeen.current = true;
+    if (e.pointerType === "pen") useUiStore.getState().setPenSeen(true);
     // caneta no Lápis: desenha à parte, e os dedos continuam movendo a vista ao mesmo tempo
     if (editing && !bare && pencilOn && e.pointerType === "pen" && !penStroke.current) {
       box.current?.setPointerCapture(e.pointerId);
@@ -890,7 +888,10 @@ export function Stage({
       }
     } else if (!bare) {
       // Lápis com o dedo (ou mouse): desenha; com caneta presente, o dedo só move a vista
-      if (pencilOn && !picking && !(e.pointerType === "touch" && penSeen.current)) {
+      // (a não ser com "Dedo desenha" ligado)
+      const ui0 = useUiStore.getState();
+      const fingerPans = e.pointerType === "touch" && ui0.penSeen && !ui0.fingerDraws;
+      if (pencilOn && !picking && !fingerPans) {
         if (pencilPending?.plan.kind === "sides") {
           const side = sideAt(pencilPending.plan, w);
           if (side !== null) {
@@ -1380,7 +1381,6 @@ export function Stage({
   }, [step]);
 
   const pencilPhrase = (): string => {
-    const t = pencilTool;
     const mm = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
     if (pencilPending?.offer) return `${pencilPending.offer}: separar em peça?`;
     if (pencilPending) {
@@ -1389,18 +1389,8 @@ export function Stage({
         ? `Vai sair ${mm(a.removed)} mm² (em brasa) · toque num lado para escolher`
         : `Vai entrar ${mm(a.added)} mm² · toque num lado para escolher`;
     }
-    const target =
-      selection?.kind === "part" && model?.parts.get(selection.id)
-        ? (model.parts.get(selection.id)?.part.name ?? "")
-        : "";
-    const on = target ? ` em ${target}` : "";
-    if (t.form === "contour")
-      return t.op === "cut"
-        ? `Tirar${on}: feche um laço, ou corte de borda a borda${t.ruler ? " · régua" : ""}`
-        : `Somar${on}: feche um laço; no vazio, vira peça nova${t.ruler ? " · régua" : ""}`;
-    return t.op === "cut"
-      ? `Borracha de ${mm(t.width)} mm${on} · um toque faz furo${t.ruler ? " · reta vira rasgo" : ""}`
-      : `Pincel de ${mm(t.width)} mm${on}: barra ou alavanca à mão${t.ruler ? " · régua" : ""}`;
+    const target = selection?.kind === "part" ? (model?.parts.get(selection.id)?.part ?? null) : null;
+    return pencilToolPhrase(pencilTool, target);
   };
   const ready = width > 0 && height > 0;
   const inset = 8;
@@ -1449,11 +1439,17 @@ export function Stage({
               waiting?.kind === "sensor"
                 ? waiting.target
                   ? "Escolha a ação do sensor"
-                  : "Sensor: toque numa câmara, respiro ou trava; no fundo, fica sem ação"
+                  : "Sensor: toque na câmara ou na trava que ele aciona; no fundo, fica sem ação"
                 : waiting?.kind === "chamber"
-                  ? "Toque na parede"
+                  ? "Câmara: toque na parede móvel da frente"
                   : hammerPreview?.start
-                    ? `${LINK_LABEL[hammer]}: ${Math.hypot(hammerPreview.hit.point[0] - hammerPreview.start.point[0], hammerPreview.hit.point[1] - hammerPreview.start.point[1]).toFixed(1)} mm · solte para cravar`
+                    ? dragPhrase(
+                        hammer,
+                        Math.hypot(
+                          hammerPreview.hit.point[0] - hammerPreview.start.point[0],
+                          hammerPreview.hit.point[1] - hammerPreview.start.point[1],
+                        ),
+                      )
                     : hammerPreview?.hit.phrase
             }
             actions={

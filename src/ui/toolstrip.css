@@ -185,9 +185,35 @@
   outline-offset: -3px;
 }
 
-/* com uma ferramenta aberta, a pílula da camada encolhe para dar lugar à faixa */
+/* com uma ferramenta aberta, a pílula da camada encolhe para dar lugar à faixa:
+   espaçamento menor, pilha em miniatura menor e o nome em até duas linhas pequenas */
 .shell[data-tool="true"] .pill {
   max-width: 116px;
+  gap: var(--space-1);
+  padding: 0 6px 0 4px;
+}
+
+.shell[data-tool="true"] .pill__plates {
+  width: 18px;
+  transform: scale(0.8);
+  transform-origin: left center;
+}
+
+.shell[data-tool="true"] .pill__num {
+  font-size: 15px;
+}
+
+.shell[data-tool="true"] .pill__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: 10px;
+  line-height: 12px;
+  letter-spacing: 0.05em;
+  white-space: normal;
+  overflow-wrap: break-word;
+  text-align: left;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { HAMMER_GROUPS, type HammerTool } from "@/editor/hammer";
 import { LINK_LABEL } from "@/editor/names";
+import { idlePhrase, withEsc } from "@/editor/phrases";
 import { useUiStore } from "@/editor/useUiStore";
 import type { IconName } from "./icons";
 import { ToolStrip, type StripItem } from "./ToolStrip";
@@ -24,6 +25,7 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Stri
   const hammer = useUiStore((s) => s.hammer);
   const mode = useUiStore((s) => s.mode);
   const setHammer = useUiStore((s) => s.setHammer);
+  const keys = useUiStore((s) => s.keys);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") useUiStore.getState().setHammer(null);
@@ -36,7 +38,7 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Stri
     <ToolStrip
       label="Ferramentas do Martelo"
       mode="select"
-      phrase={phrase ?? `${LINK_LABEL[hammer]}: toque sobre uma peça · Esc sai`}
+      phrase={phrase ?? withEsc(idlePhrase(hammer), keys)}
       actions={actions}
       groups={HAMMER_GROUPS.map((g) => ({
         name: g.name,

@@ -71,6 +71,15 @@ interface UiState {
   lefty: boolean;
   /** dica curta no topo da prancha */
   hint: boolean;
+  /** a pessoa usa teclado ou mouse (último ponteiro foi mouse, ou uma tecla foi apertada): "Esc sai" aparece */
+  keys: boolean;
+  setKeys: (on: boolean) => void;
+  /** uma caneta já tocou a prancha nesta sessão: no Lápis, o dedo só move a vista (salvo "Dedo desenha") */
+  penSeen: boolean;
+  setPenSeen: (on: boolean) => void;
+  /** "Dedo desenha" no Lápis, mesmo depois de ver a caneta (salvo no aparelho) */
+  fingerDraws: boolean;
+  setFingerDraws: (on: boolean) => void;
   /** a gaveta sai da frente enquanto uma peça é arrastada dela */
   drawerAway: boolean;
   setDrawerAway: (on: boolean) => void;
@@ -163,6 +172,19 @@ export const useUiStore = create<UiState>()((set, get) => ({
   edgeMenu: null,
   lefty: hasWindow && readPref("il.lefty") === "1",
   hint: !hasWindow || readPref("il.hint") !== "0",
+  keys: hasWindow && typeof window.matchMedia === "function" && window.matchMedia("(pointer: fine)").matches,
+  setKeys: (keys) => {
+    if (get().keys !== keys) set({ keys });
+  },
+  penSeen: false,
+  setPenSeen: (penSeen) => {
+    if (get().penSeen !== penSeen) set({ penSeen });
+  },
+  fingerDraws: hasWindow && readPref("il.fingerDraws") === "1",
+  setFingerDraws: (fingerDraws) => {
+    writePref("il.fingerDraws", fingerDraws ? "1" : "0");
+    set({ fingerDraws });
+  },
 
   drawerAway: false,
   setDrawerAway: (drawerAway) => set({ drawerAway }),

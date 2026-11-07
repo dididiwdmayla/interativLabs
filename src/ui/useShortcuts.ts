@@ -35,7 +35,19 @@ export function useShortcuts(extra?: (e: KeyboardEvent) => boolean): void {
       }
       if (extra?.(e)) e.preventDefault();
     };
+    // "Esc sai" só aparece para quem usa teclado ou mouse
+    const input = (e: Event) => {
+      const s = useUiStore.getState();
+      if (e instanceof PointerEvent) s.setKeys(e.pointerType === "mouse");
+      else if (e instanceof KeyboardEvent && !typing(e.target)) s.setKeys(true);
+    };
     window.addEventListener("keydown", on);
-    return () => window.removeEventListener("keydown", on);
+    window.addEventListener("keydown", input, true);
+    window.addEventListener("pointerdown", input, true);
+    return () => {
+      window.removeEventListener("keydown", on);
+      window.removeEventListener("keydown", input, true);
+      window.removeEventListener("pointerdown", input, true);
+    };
   }, [extra]);
 }

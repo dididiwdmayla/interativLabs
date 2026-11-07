@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useRef } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import type { SceneModel } from "@/render/prepare";
 import { Icon } from "./icons";
@@ -29,6 +29,7 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
   const pencil = useUiStore((s) => s.pencil);
   const setPencil = useUiStore((s) => s.setPencil);
   const editing = mode === "edit";
+  const pillName = useRef<HTMLSpanElement>(null);
   const layer = model?.layers[active]?.layer;
   const title = model?.scene.meta.title ?? "";
   return (
@@ -104,7 +105,17 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
             aria-label={`Camada ativa: ${active + 1}, ${layer.name}. Abrir a pilha de camadas`}
             aria-expanded={sheet === "layers"}
             data-keeps-sheet
-            onClick={() => setSheet(sheet === "layers" ? null : "layers")}
+            onClick={() => {
+              // nome cortado (tela pequena com a faixa aberta): o toque mostra o nome inteiro
+              const el = pillName.current;
+              if (
+                el &&
+                sheet !== "layers" &&
+                (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)
+              )
+                useUiStore.getState().notify(`Camada ${active + 1} · ${layer.name}`);
+              setSheet(sheet === "layers" ? null : "layers");
+            }}
           >
             <span className="pill__plates" aria-hidden="true">
               <span />
@@ -112,7 +123,9 @@ export function Corners({ model, wide }: { model: SceneModel | null; wide: boole
               <span />
             </span>
             <span className="pill__num">{active + 1}</span>
-            <span className="pill__name">{layer.name}</span>
+            <span className="pill__name" ref={pillName} title={layer.name}>
+              {layer.name}
+            </span>
           </button>
         </div>
       )}

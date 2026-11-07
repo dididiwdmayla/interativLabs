@@ -11,7 +11,8 @@ import { prepareScene } from "@/render/prepare";
  * Recria a câmara dos exemplos com o Martelo (mesmo arraste, do fundo à boca)
  * e roda o ciclo de cada um com a geometria detectada; carga, respiros,
  * vedação e sensores vêm do exemplo (são ajustes do cartão).
- * Grava docs/decisoes/camara-e2c.json.
+ * Grava docs/decisoes/camara-e2d.json (o da E2c, com a câmara antiga do
+ * Lançador, fica como registro). Uso: npm run … -- [arquivo de saída].
  */
 async function rebuild(file: string, fixture: string, layer: number) {
   const scene = JSON.parse(readFileSync(file, "utf8")) as Scene;
@@ -73,11 +74,11 @@ async function rebuild(file: string, fixture: string, layer: number) {
   };
 }
 
-export async function main() {
+export async function main(args: string[] = []) {
   const out = [
     await rebuild("scenes/examples/lancador-bancada.json", "exemplos/lancador-bancada", 1),
     await rebuild("scenes/examples/cilindro-dois-pistoes.json", "exemplos/cilindro-dois-pistoes", 0),
   ];
-  writeFileSync("docs/decisoes/camara-e2c.json", JSON.stringify(out, null, 2) + "\n");
+  writeFileSync(args[0] ?? "docs/decisoes/camara-e2d.json", JSON.stringify(out, null, 2) + "\n");
   console.log(JSON.stringify(out, null, 2));
 }

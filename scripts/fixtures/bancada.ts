@@ -67,8 +67,12 @@ export const BANCADA = {
   boltTravel: 15,
   /** recuo do ferrolho em que o gás desveda: o gás leva o ferrolho até perto do batente */
   boltSeal: 14.5,
-  /** dose de gás por tiro, mmol */
-  charge: 0.5,
+  /**
+   * dose de gás por tiro, mmol. A câmara é o tubo da Luva (Ø 4,1 mm, o mesmo
+   * que o Martelo detecta), não o cano da esfera; com 0,69 mmol a esfera sai a
+   * 10,3 m/s, como saía com a câmara antiga de 6 mm e 0,5 mmol (E2d)
+   */
+  charge: 0.69,
   /** força do carregador com a coluna cheia, N, e o amortecimento, N·s/mm */
   feedForce: 0.6,
   feedDamping: 0.0015,
@@ -473,7 +477,8 @@ export function buildBancada(): BancadaIds {
     body: null,
     at: [boltFace, 0],
     dir: 0,
-    bore: 6,
+    // o tubo da Luva, onde o Êmbolo corre (a esfera de 6 mm corre no cano, à frente)
+    bore: r4(2 * (eH + 0.05)),
     length: 100,
     walls: [
       { part: embolo.id, seal: 100 },
