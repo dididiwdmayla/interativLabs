@@ -278,3 +278,79 @@ test.describe("régua e pincel (1440×900)", () => {
     await page.screenshot({ path: `${DIR}/lapis-peca-a-mao-1440.png` });
   });
 });
+
+test.describe("caneta e dedo (844×390)", () => {
+  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true });
+
+  test("ao mesmo tempo: a caneta desenha e o dedo move a vista", async ({ page }) => {
+    await open(page);
+    await page.getByRole("button", { name: "Lápis", exact: true }).click();
+    await setTool(page, { form: "contour", op: "cut", ruler: false });
+    const cdp = await page.context().newCDPSession(page);
+    const view = () => page.evaluate(() => (window as unknown as W).__IL__.stage.get().view());
+    const pen = (type: "mousePressed" | "mouseMoved" | "mouseReleased", p: [number, number]) =>
+      cdp.send("Input.dispatchMouseEvent", {
+        type,
+        x: p[0],
+        y: p[1],
+        button: "left",
+        buttons: type === "mouseReleased" ? 0 : 1,
+        clickCount: 1,
+        pointerType: "pen",
+      });
+    const v0 = await view();
+    // a caneta pousa no começo do laço
+    const start = await toClient(page, [-1, 0]);
+    await pen("mousePressed", start);
+    // um dedo pousa no fundo e arrasta: a vista anda 60 px
+    const f: [number, number] = [120, 300];
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: f[0], y: f[1] }] });
+    for (let i = 1; i <= 6; i++)
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: f[0] + i * 10, y: f[1] }],
+      });
+    await expect.poll(async () => (await view()).tx - v0.tx).toBeCloseTo(60, 0);
+    const v1 = await view();
+    // a caneta segue o laço na vista nova, com o dedo ainda pousado
+    for (let i = 0; i <= 40; i++) {
+      const a = Math.PI + (2 * Math.PI * i) / 40;
+      await pen("mouseMoved", await toClient(page, [4 + 5 * Math.cos(a), 5 * Math.sin(a)]));
+    }
+    await page.screenshot({ path: `${DIR}/lapis-caneta-e-dedo-844x390.png` });
+    await pen("mouseReleased", await toClient(page, [-1, 0]));
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect.poll(async () => polyOf(await current(page), "plate").holes.length).toBe(1);
+    // depois da caneta, um dedo sozinho no Lápis só move a vista
+    const before = await current(page);
+    await touchPath(page, [
+      [300, 200],
+      [340, 210],
+      [380, 220],
+    ]);
+    expect(await current(page)).toEqual(before);
+    expect((await view()).tx).not.toBe(v1.tx);
+  });
+
+  test("no Martelo, a caneta crava sem deslocamento", async ({ page }) => {
+    await open(page, plateScene(), 1);
+    await page.getByRole("button", { name: "Martelo", exact: true }).click();
+    await pickTool(page, "Parafuso");
+    const p = await toClient(page, [-12, 4]);
+    const cdp = await page.context().newCDPSession(page);
+    for (const type of ["mousePressed", "mouseReleased"] as const)
+      await cdp.send("Input.dispatchMouseEvent", {
+        type,
+        x: p[0],
+        y: p[1],
+        button: "left",
+        buttons: type === "mousePressed" ? 1 : 0,
+        clickCount: 1,
+        pointerType: "pen",
+      });
+    await expect.poll(async () => (await current(page)).links.length).toBe(1);
+    const link = (await current(page)).links[0] as { at: [number, number] };
+    const at = await toClient(page, link.at);
+    expect(Math.hypot(at[0] - p[0], at[1] - p[1])).toBeLessThan(1);
+  });
+});

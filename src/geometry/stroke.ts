@@ -1,7 +1,7 @@
 import { ClipperOffset, EndType, JoinType, PolyTree64, type Paths64 } from "clipper2-ts";
 import { CLIP_SCALE, MIN_AREA, difference, resolveRing } from "./clip";
 import { area, containsPoint, signedArea, type PolyWithHoles, type Ring } from "./polygon";
-import { circleRing, slotRing } from "./primitives";
+import { CHORD_TOL, circleRing, slotRing } from "./primitives";
 import { distToSegment, type Vec2 } from "./vec";
 
 /**
@@ -411,7 +411,8 @@ export function loopRegion(ring: Ring): PolyWithHoles[] {
 }
 
 function offsetPaths(paths: Vec2[][], delta: number, end: EndType): PolyWithHoles[] {
-  const co = new ClipperOffset(2, 0.002 * CLIP_SCALE);
+  // juntas e pontas redondas com a mesma tolerância de corda dos arcos das peças
+  const co = new ClipperOffset(2, CHORD_TOL * CLIP_SCALE);
   const p: Paths64 = paths.map((ring) =>
     ring.map(([x, y]) => ({ x: Math.round(x * CLIP_SCALE), y: Math.round(y * CLIP_SCALE) })),
   );

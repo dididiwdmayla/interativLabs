@@ -1,0 +1,282 @@
+[
+  {
+    "id": "lapis/rasgo-e-laco",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.007593189111037872,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Placa 21 · Real · sacudida 8 Hz · t = 0.446 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 1118.8007833665547,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Placa 21 · Real · sacudida 8 Hz · t = 0.446 s"
+      },
+      "energy": {
+        "worst": 0.28967924806783185,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Placa 21 · Normal · soltura no meio · t = 2.117 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    },
+    "links": "pin, slot, axle"
+  },
+  {
+    "id": "lapis/alavanca-a-mao",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0,
+      "where": ""
+    },
+    "results": {
+      "joint": {
+        "worst": 0.0035601172188724946,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Peça à mão 1 · Real · sacudida 8 Hz · t = 0.408 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 0,
+        "limit": 0.3,
+        "pass": true,
+        "na": false,
+        "where": ""
+      },
+      "speed": {
+        "worst": 1471.5001220703125,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Peça à mão 1 · Lento · fora e volta · t = 0.150 s"
+      },
+      "energy": {
+        "worst": 0.0011798802367278332,
+        "limit": 2,
+        "pass": true,
+        "na": false,
+        "where": "Peça à mão 2 · Lento · sacudida 8 Hz · t = 0.687 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    },
+    "links": "axle"
+  },
+  {
+    "id": "lapis/corte-em-duas",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.598392903804779,
+      "where": "Placa 30 (parte 2) · Real · sacudida 8 Hz · t = 0.854 s · entre Placa 30 e Placa 30 (parte 2)"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.028290520851059486,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "Placa 30 (parte 2) · Real · sacudida 8 Hz · t = 0.458 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 1.4589171409606934,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "Placa 30 (parte 2) · Real · soltura no meio · t = 1.350 s · entre Placa 30 e Placa 30 (parte 2)"
+      },
+      "speed": {
+        "worst": 363.8311818910706,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "Placa 30 (parte 2) · Real · fora e volta · t = 0.275 s"
+      },
+      "energy": {
+        "worst": 8.526195508265387,
+        "limit": 2,
+        "pass": false,
+        "na": false,
+        "where": "Placa 30 · Lento · sacudida 8 Hz · t = 0.346 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    },
+    "links": "axle, axle"
+  },
+  {
+    "id": "controle/duas-placas-sem-lapis",
+    "runs": 18,
+    "steps": 10846,
+    "parts": 2,
+    "sampled": false,
+    "lasting": {
+      "worst": 0.873748779296875,
+      "where": "right · Normal · fora e volta · t = 0.571 s · entre left e right"
+    },
+    "results": {
+      "joint": {
+        "worst": 0.031227312365776968,
+        "limit": 0.5,
+        "pass": true,
+        "na": false,
+        "where": "right · Normal · fora e volta · t = 0.646 s"
+      },
+      "cable": {
+        "worst": 0,
+        "limit": 0.5,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "mount": {
+        "worst": 0,
+        "limit": 1,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "pinHole": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": true,
+        "where": ""
+      },
+      "penetration": {
+        "worst": 2.932157039642334,
+        "limit": 0.3,
+        "pass": false,
+        "na": false,
+        "where": "right · Real · sacudida 8 Hz · t = 1.637 s · entre left e right"
+      },
+      "speed": {
+        "worst": 512.011270535324,
+        "limit": 2000,
+        "pass": true,
+        "na": false,
+        "where": "right · Normal · fora e volta · t = 0.263 s"
+      },
+      "energy": {
+        "worst": 32.26470673138091,
+        "limit": 2,
+        "pass": false,
+        "na": false,
+        "where": "right · Normal · fora e volta · t = 0.729 s"
+      },
+      "nan": {
+        "worst": 0,
+        "limit": 0,
+        "pass": true,
+        "na": false,
+        "where": ""
+      }
+    },
+    "links": "axle, axle"
+  }
+]

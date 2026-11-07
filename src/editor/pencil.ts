@@ -1,5 +1,6 @@
 import type { Draft } from "immer";
 import { MIN_AREA, difference, intersection, union } from "@/geometry/clip";
+import { CHORD_TOL } from "@/geometry/primitives";
 import {
   area,
   cleanShape,
@@ -274,7 +275,8 @@ const round = (v: number) => Math.round(v * 1e4) / 1e4;
 /** Forma do mundo para o espaço local da peça, limpa e arredondada. */
 function toLocal(s: PolyWithHoles, pose: { x: number; y: number; angle: number } | null): Shape {
   const ring = (r: Ring) => r.map((p) => localOf(pose, p)).map((p): Vec2 => [round(p[0]), round(p[1])]);
-  const c = cleanShape({ outer: ring(s.outer), holes: s.holes.map(ring) });
+  // limpa na tolerância de corda dos arcos (0,02 mm): sem vértices quase colineares, que viram lascas
+  const c = cleanShape({ outer: ring(s.outer), holes: s.holes.map(ring) }, 0.01, CHORD_TOL);
   return { kind: "poly", outer: c.outer, holes: c.holes };
 }
 
@@ -360,7 +362,9 @@ export function pencilCommit(
   const pieces = resultWorld.filter((s) => area(s) >= MIN_AREA).sort((a, b) => area(b) - area(a));
   if (!target) return { kind: "none", reason: "Sem peça da camada ativa" };
   if (!pieces.length) return { kind: "none", reason: "O corte tiraria a peça inteira" };
-  const part = target.part;
+  // a peça de verdade (o alvo traz a projeção do perfil da camada ativa)
+  const part = scene.parts.find((p) => p.id === target.part.id);
+  if (!part) return { kind: "none", reason: "A peça não existe mais" };
   const multi = !!part.profiles?.length;
   if (pieces.length > 1 && multi && !opts.separate)
     return {
