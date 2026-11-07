@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { prepareScene } from "@/render/prepare";
 import { loadScene } from "@/model/scene";
@@ -93,18 +92,5 @@ describe("dragged links", () => {
     for (let i = 0; i < 100; i++) engine.step(1 / 240);
     expect(engine.snapshot().links[lock.id]!.released).toBe(true);
     engine.dispose();
-  });
-  it.fails("recreates the exact bench chamber (documented geometry mismatch)", () => {
-    const scene = JSON.parse(readFileSync("scenes/examples/lancador-bancada.json", "utf8")) as Scene;
-    const original = scene.links.find((l) => l.kind === "chamber")!;
-    if (original.kind !== "chamber") throw new Error("Câmara ausente");
-    scene.links = scene.links.filter((l) => l.id !== original.id && !(l.kind === "sensor"));
-    scene.settings.snap.on = false;
-    const model = prepareScene(scene);
-    const start = hammerPoint(model, "chamber", original.at, 1, 0.001);
-    const end = hammerPoint(model, "chamber", [original.at[0] + original.length, original.at[1]], 1, 0.001);
-    const result = dragLink(model, "chamber", start, end, 1)!;
-    expect(result.link.kind).toBe("chamber");
-    expect(result.link).toMatchObject({ body: original.body, bore: original.bore, walls: original.walls });
   });
 });

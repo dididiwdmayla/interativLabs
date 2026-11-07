@@ -62,3 +62,7 @@ O perfil é o que uma cremalheira de corte reta geraria (ângulo de pressão α,
 Malha medida (módulo 1, 360 posições de uma volta do pinhão): pares 12 × 24, 14 × 32 e 20 × 20 e pinhão de 12 contra cremalheira com **interseção zero** e distância máxima entre perfis de 0,040 a 0,042 mm (limite: 0,1 mm). A distância mínima, 0,0377 mm, é a folga normal esperada (0,04 · cos 20°).
 
 Catraca: dente de serra com rampa reta até a ponta (78% do passo) e face de trava inclinada (4° por padrão), arco de pé até o próximo dente. A forma `gear` com perfil `ratchet` do v1 usa as proporções do protótipo: profundidade π·m/2, ponta em r + 0,4·profundidade.
+
+## Lascas finas (Parte E2c, 07/11)
+
+A decomposição convexa passou a tratar como lasca também a peça mais fina que 0,055 mm na menor largura (`MIN_THICKNESS` em `src/geometry/decompose.ts`), além das com menos de 0,05 mm². Motivo: o Box2D calibrado (`lengthUnits` 5, folga linear de 0,025 mm) descarta como degenerada uma peça com pontos a menos de duas folgas da reta, e a triangulação de furos densos (traço à mão do Lápis) fazia leques finos de um canto distante até dois vértices vizinhos do furo; a peça saía com aviso de compilação. A lasca é fundida à vizinha; quando a fusão passa de 8 vértices, as duas são juntadas (até 14) e divididas de novo pela diagonal que deixa as metades mais grossas; pelo fecho convexo, a lasca fina pode encher um entalhe do tamanho dela mais 0,05 mm². Peças que o motor já aceitava não mudam: os 33 hashes das cenas de teste continuaram iguais.

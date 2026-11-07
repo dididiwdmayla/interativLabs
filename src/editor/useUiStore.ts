@@ -3,6 +3,7 @@ import type { Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
 import type { CardPick } from "./cardPick";
 import type { HammerTool } from "./hammer";
+import { DEFAULT_PENCIL, type PencilTool } from "./pencil";
 import type { Command } from "./commands";
 import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
 
@@ -47,6 +48,12 @@ interface UiState {
   setPick: (pick: CardPick | null) => void;
   hammer: HammerTool | null;
   setHammer: (tool: HammerTool | null) => void;
+  /** Lápis ligado (ligar um desliga o outro) */
+  pencil: boolean;
+  /** escolhas do Lápis: ficam entre uma vez e outra */
+  pencilTool: PencilTool;
+  setPencil: (on: boolean) => void;
+  setPencilTool: (patch: Partial<PencilTool>) => void;
   current: OpenScene | null;
   history: HistoryState;
   selection: Selection;
@@ -129,7 +136,21 @@ export const useUiStore = create<UiState>()((set, get) => ({
   pick: null,
   setPick: (pick) => set({ pick, sheet: null, edgeMenu: null, hammer: null }),
   hammer: null,
-  setHammer: (hammer) => set({ hammer, pick: null, sheet: null, edgeMenu: null, selection: null }),
+  setHammer: (hammer) =>
+    set((s) => ({
+      hammer,
+      pencil: hammer ? false : s.pencil,
+      pick: null,
+      sheet: null,
+      edgeMenu: null,
+      selection: null,
+    })),
+  pencil: false,
+  pencilTool: DEFAULT_PENCIL,
+  // o Lápis age na peça escolhida: a seleção fica
+  setPencil: (pencil) =>
+    set((s) => ({ pencil, hammer: pencil ? null : s.hammer, pick: null, edgeMenu: null })),
+  setPencilTool: (patch) => set((s) => ({ pencilTool: { ...s.pencilTool, ...patch } })),
   current: null,
   history: emptyHistory(),
   selection: null,
@@ -150,6 +171,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
       mode,
       pick: null,
       hammer: mode === "simulate" ? null : get().hammer,
+      pencil: mode === "simulate" ? false : get().pencil,
       edgeMenu: null,
       sheet: mode === "simulate" ? null : get().sheet,
     }),
@@ -160,6 +182,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
       history: history ?? emptyHistory(),
       mode: "edit",
       hammer: null,
+      pencil: false,
       pick: null,
       selection: null,
       sheet: null,

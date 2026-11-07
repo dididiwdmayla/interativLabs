@@ -1,54 +1,3 @@
-.hammerbar {
-  position: absolute;
-  z-index: 8;
-  bottom: calc(var(--sa-bottom) + 76px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(430px, calc(100% - 96px));
-  background: var(--color-chrome-float);
-  border: 1px solid var(--color-ink-3);
-  padding: 4px 8px;
-  color: var(--color-ink);
-  font-family: var(--font-ui);
-}
-.hammerbar__groups,
-.hammerbar__tools {
-  display: flex;
-  justify-content: center;
-  gap: 2px;
-}
-.hammerbar button {
-  flex: 1;
-  min-height: 44px;
-  border: 0;
-  background: none;
-  color: var(--color-ink-2);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-.hammerbar button[aria-pressed="true"] {
-  color: var(--color-gold);
-  box-shadow: inset 0 -1px currentColor;
-}
-.hammerbar button:disabled {
-  opacity: 0.35;
-}
-.hammerbar__tools {
-  flex-wrap: wrap;
-}
-.hammerbar__tools button {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  justify-content: center;
-}
-.hammerbar__phrase {
-  font-size: 11px;
-  line-height: 1.4;
-  margin: 5px 2px;
-  min-height: 16px;
-}
 .hammerbutton {
   width: 52px;
   height: 52px;
@@ -137,20 +86,41 @@
     opacity: 0;
   }
 }
-@media (max-width: 700px) {
-  .hammerbar {
-    width: min(360px, calc(100% - 96px));
+
+/* cursor deslocado: mira em ouro (anel e cruz fina), a ferragem fantasma no
+   ponto e a linha até o dedo; acende com transform e opacity */
+.hammercursor {
+  animation: hammer-cursor var(--dur-quick) var(--ease-settle) both;
+}
+.hammercursor__ring {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 1.25;
+}
+.hammercursor__cross {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 0.75;
+}
+.hammerpreview__tether {
+  stroke-dasharray: 2 3;
+  opacity: 0.8;
+}
+.hammerghost {
+  opacity: 0.6;
+}
+@keyframes hammer-cursor {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
-
-@media (max-width: 480px) {
-  .hammerbar__tools button {
-    flex-direction: column;
-    gap: 2px;
-    padding: 4px 0;
-  }
-  .hammerbar button {
-    min-width: 44px;
-    font-size: 11px;
+@media (prefers-reduced-motion: reduce) {
+  .hammercursor {
+    animation: none;
   }
 }

@@ -61,7 +61,7 @@ const FLOATING = [
   ".corner--br > *",
   ".corner__title",
   ".corner__hint",
-  ".hammerbar",
+  ".toolstrip__row",
   ".edgetab__mark",
   ".testbar > *",
 ].join(",");
@@ -82,6 +82,7 @@ function Workbench() {
   const sheet = useUiStore((s) => s.sheet);
   const hint = useUiStore((s) => s.hint);
   const edgeOpen = useUiStore((s) => s.edgeMenu !== null);
+  const tool = useUiStore((s) => s.hammer !== null || s.pencil);
   const wide = useMedia(WIDE_QUERY);
   const sa = useSafeArea();
   const portrait = useMedia("(orientation: portrait) and (max-width: 700px)");
@@ -152,7 +153,14 @@ function Workbench() {
   }, []);
 
   return (
-    <div className="shell" data-mode={mode} data-lefty={lefty} data-wide={wide} data-edgemenu={edgeOpen}>
+    <div
+      className="shell"
+      data-mode={mode}
+      data-lefty={lefty}
+      data-wide={wide}
+      data-edgemenu={edgeOpen}
+      data-tool={tool}
+    >
       <div className="workbench" ref={bench}>
         <Stage
           model={model}

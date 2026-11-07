@@ -19,7 +19,8 @@ type W = {
     stage: { get(): { worldToClient(p: [number, number]): [number, number] } };
   };
 };
-const DIR = "docs/capturas/fase-1/parte-e2b";
+// capturas da E2b ficam como estão: reexecuções gravam fora de docs/
+const DIR = "test-results/capturas-e2b";
 async function open(page: Page) {
   const { scene, piece } = profilesScene();
   scene.parts = [piece];

@@ -36,9 +36,19 @@ export interface Decomposition {
   discardedArea: number;
 }
 
+/**
+ * Peça convexa mais fina que isso (mm, na menor largura) é lasca: o Box2D
+ * calibrado (lengthUnits 5, folga linear de 0,025 mm) junta pontos a menos de
+ * duas folgas da reta e a descarta como degenerada. Aparece na triangulação
+ * de furos densos (traço à mão do Lápis): um leque de um canto distante até
+ * dois vértices vizinhos do furo.
+ */
+export const MIN_THICKNESS = 0.055;
+
 export interface DecomposeOptions {
   maxVertices?: number;
   minArea?: number;
+  minThickness?: number;
 }
 
 interface Part {
@@ -52,6 +62,7 @@ const COLLINEAR_EPS = 1e-9;
 export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {}): GeoResult<Decomposition> {
   const maxV = opts.maxVertices ?? MAX_POLY_VERTICES;
   const minArea = opts.minArea ?? MIN_AREA;
+  const minThickness = opts.minThickness ?? MIN_THICKNESS;
   const clean = cleanShape(normalize(shape));
   if (clean.outer.length < 3) return fail("invalid", "A forma não tem área");
   const total = shapeArea(clean);
@@ -134,7 +145,7 @@ export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {
     addEdges(parts.length - 1);
   }
 
-  const tryMerge = (ia: number, ib: number, p: number, q: number): number[] | null => {
+  const tryMerge = (ia: number, ib: number, p: number, q: number, limit = maxV): number[] | null => {
     const A = parts[ia]!.v;
     const B = parts[ib]!.v;
     let u = p;
@@ -155,8 +166,50 @@ export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {
     const merged = [...a.slice(0, -1), ...b.slice(0, -1)];
     const ring = ringOf(merged);
     if (!convexCCW(ring)) return null;
-    if (effectiveCount(ring) > maxV) return null;
+    if (effectiveCount(ring) > limit) return null;
     return merged;
+  };
+
+  const widthOf = (v: number[]) => {
+    const ring = ringOf(v);
+    let w = Infinity;
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i]!;
+      const b = ring[(i + 1) % ring.length]!;
+      const L = dhypot(b[0] - a[0], b[1] - a[1]);
+      if (L < 1e-12) continue;
+      let m = 0;
+      for (const q of ring)
+        m = Math.max(m, Math.abs((b[0] - a[0]) * (q[1] - a[1]) - (b[1] - a[1]) * (q[0] - a[0])) / L);
+      w = Math.min(w, m);
+    }
+    return w;
+  };
+
+  /**
+   * Lasca fina sem fusão de até 8 vértices: junta com a vizinha (convexo, até
+   * 14 vértices) e divide de novo pela diagonal que deixa as duas metades
+   * mais grossas, cada uma com até 8 vértices.
+   */
+  const splitMerge = (ia: number, ib: number, p: number, q: number): [number[], number[]] | null => {
+    const m = tryMerge(ia, ib, p, q, 2 * maxV - 2);
+    if (!m) return null;
+    const n = m.length;
+    let best: [number[], number[]] | null = null;
+    let bestW = minThickness;
+    for (let i = 0; i < n; i++)
+      for (let j = i + 2; j < n; j++) {
+        if (i === 0 && j === n - 1) continue;
+        const a = m.slice(i, j + 1);
+        const b = [...m.slice(j), ...m.slice(0, i + 1)];
+        if (effectiveCount(ringOf(a)) > maxV || effectiveCount(ringOf(b)) > maxV) continue;
+        const w = Math.min(widthOf(a), widthOf(b));
+        if (w > bestW) {
+          bestW = w;
+          best = [a, b];
+        }
+      }
+    return best;
   };
 
   const replace = (ia: number, ib: number, merged: number[]) => {
@@ -177,13 +230,14 @@ export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {
     addEdges(parts.length - 1);
   };
 
-  const hullMerge = (ia: number, ib: number): { v: number[]; area: number } | null => {
+  /** `slack`: acréscimo de área aceito além de 25% da menor (lasca fina: a resolução de área do motor). */
+  const hullMerge = (ia: number, ib: number, slack = 0): { v: number[]; area: number } | null => {
     const ids = [...new Set([...parts[ia]!.v, ...parts[ib]!.v])];
     const hull = hullIndices(ids, verts);
     if (hull.length < 3 || hull.length > maxV) return null;
     const a = signedArea(ringOf(hull));
     const base = parts[ia]!.area + parts[ib]!.area;
-    if (a - base > Math.max(1e-4, 0.25 * Math.min(parts[ia]!.area, parts[ib]!.area))) return null;
+    if (a - base > Math.max(1e-4, slack, 0.25 * Math.min(parts[ia]!.area, parts[ib]!.area))) return null;
     return { v: hull, area: a };
   };
 
@@ -213,10 +267,11 @@ export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {
     if (!merged) break;
   }
 
-  // Lascas: funde com uma vizinha, senão descarta.
+  // Lascas (pequenas ou finas): funde com uma vizinha, senão descarta.
+  const thin = (p: Part) => widthOf(p.v) < minThickness;
   let discarded = 0;
-  for (let guard = 0; guard < parts.length; guard++) {
-    const small = parts.findIndex((p) => p.alive && p.area < minArea);
+  for (let guard = 0; guard < 4 * parts.length; guard++) {
+    const small = parts.findIndex((p) => p.alive && (p.area < minArea || thin(p)));
     if (small < 0) break;
     const v = parts[small]!.v;
     const neigh: { id: number; p: number; q: number }[] = [];
@@ -237,13 +292,29 @@ export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {
     }
     // Sem fusão convexa (lasca encostada num trecho côncavo e denso): funde
     // pelo fecho convexo se o acréscimo for desprezível.
+    // lasca fina: aceita encher um entalhe do tamanho dela mais a resolução de área do motor
+    const slack = parts[small]!.area >= minArea ? parts[small]!.area + minArea : 0;
     for (const n of done ? [] : neigh) {
-      const m = hullMerge(small, n.id);
+      const m = hullMerge(small, n.id, slack);
       if (m) {
         replaceWith(small, n.id, m.v, m.area);
         done = true;
         break;
       }
+    }
+    for (const n of done || parts[small]!.area < minArea ? [] : neigh) {
+      const halves = splitMerge(n.id, small, n.p, n.q);
+      if (!halves) continue;
+      dropEdges(n.id);
+      dropEdges(small);
+      parts[n.id]!.alive = false;
+      parts[small]!.alive = false;
+      for (const v of halves) {
+        parts.push({ v, alive: true, area: signedArea(ringOf(v)) });
+        addEdges(parts.length - 1);
+      }
+      done = true;
+      break;
     }
     if (!done) {
       dropEdges(small);

@@ -159,6 +159,26 @@ export function hammerFix(model: SceneModel, tool: HammerTool, hit: HammerPoint)
       };
       break;
     }
+    if (slot?.kind === "slot" && slot.mode === "joint") {
+      // rasgo reto: o pino nasce na linha de centro (sem "foi encostado nela" na compilação)
+      const guide = model.partList.find(
+        (m) => m.part.id === slot.guide && (slot.profile ? m.profile === slot.profile : !m.profile),
+      );
+      const ring = guide && guide.part.shape.kind !== "gear" ? guide.part.shape.holes[slot.hole] : undefined;
+      const line = ring ? straightSlot(ring) : null;
+      if (guide && line) {
+        const q = localOf(guide.part, hit.point);
+        const dx = line.p2[0] - line.p1[0],
+          dy = line.p2[1] - line.p1[1];
+        const t = Math.max(
+          0,
+          Math.min(1, ((q[0] - line.p1[0]) * dx + (q[1] - line.p1[1]) * dy) / (dx * dx + dy * dy)),
+        );
+        const on = worldOf(guide.part, [line.p1[0] + dx * t, line.p1[1] + dy * t]);
+        at[0] = localOf(host.part, on)[0];
+        at[1] = localOf(host.part, on)[1];
+      }
+    }
     if (!slot) {
       const choices = [host.layer - 1, host.layer + 1].filter((i) => i >= 0 && i < model.layers.length);
       end =
