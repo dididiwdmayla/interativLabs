@@ -2449,8 +2449,9 @@
 
 /* ---------- peças escondidas (Parte E2d) ---------- */
 
+/* a lista se apoia no canto (borda da tela), não na pílula: cabe em 360 px */
 .hiddenpill {
-  position: relative;
+  position: static;
   display: flex;
 }
 
