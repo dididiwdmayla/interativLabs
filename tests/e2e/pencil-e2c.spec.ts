@@ -1,7 +1,7 @@
 import { readFileSync, mkdirSync } from "node:fs";
 import { test, expect, type Page } from "@playwright/test";
 import type { Scene } from "../../src/model/types";
-import { touchPath } from "./tools";
+import { pickTool, touchPath } from "./tools";
 
 /**
  * Parte E2c, itens 15.2–15.4: o Lápis no palco, com mouse, dedo e caneta.
@@ -214,5 +214,67 @@ test.describe("Lápis com o dedo (844×390)", () => {
     await setTool(page, { form: "contour", op: "cut", ruler: false });
     await touchPath(page, await loopPx(page, [-6, 0], 5), { stepMs: 8 });
     await expect.poll(async () => polyOf(await current(page), "plate").holes.length).toBe(1);
+  });
+});
+
+test.describe("régua e pincel (1440×900)", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("rasgo pela régua, pino do Martelo e o pino correndo no Testar", async ({ page }) => {
+    const s = plateScene();
+    // a barra que vai correr, sobre a placa de base, longe da Placa 3
+    s.parts.push({
+      ...s.parts[2]!,
+      id: "slider",
+      ref: 20,
+      name: "Corrediça",
+      x: -25,
+      y: -8,
+      shape: s.parts[2]!.shape,
+    });
+    s.settings.gravity.on = true;
+    await open(page, s, 0);
+    await page.getByRole("button", { name: "Lápis", exact: true }).click();
+    await setTool(page, { form: "stroke", op: "cut", width: 3, ruler: true });
+    const pts: [number, number][] = [];
+    for (let i = 0; i <= 30; i++)
+      pts.push(await toClient(page, [-25 + 0.8 * Math.sin(i * 1.7), -12 + i * (22 / 30)]));
+    await mouseDraw(page, pts);
+    await expect.poll(async () => polyOf(await current(page), "p1").holes.length).toBe(1);
+    // Martelo, camada 2, pino na corrediça: rasgo reto (joint)
+    await page.evaluate(() => (window as unknown as W).__IL__.ui.getState().setActiveLayer(1));
+    await page.getByRole("button", { name: "Martelo", exact: true }).click();
+    await pickTool(page, "Pino");
+    await page.mouse.click(...(await toClient(page, [-25, -8])));
+    await expect.poll(async () => (await current(page)).links.length).toBe(2);
+    expect((await current(page)).links[1]).toMatchObject({ kind: "slot", mode: "joint", guide: "p1" });
+    await page.keyboard.press("Escape");
+    const bar = page.locator('.stage__sheets [data-part="slider"]').first();
+    const y0 = (await bar.boundingBox())!.y;
+    await page.getByRole("button", { name: "Testar: ligar a física" }).click();
+    await expect.poll(async () => (await bar.boundingBox())!.y - y0, { timeout: 8000 }).toBeGreaterThan(20);
+    await page.screenshot({ path: `${DIR}/lapis-rasgo-regua-pino-1440.png` });
+  });
+
+  test("alavanca desenhada à mão com o pincel", async ({ page }) => {
+    await open(page);
+    await page.getByRole("button", { name: "Lápis", exact: true }).click();
+    await setTool(page, { form: "stroke", op: "add", width: 5, ruler: false });
+    // um braço com um cotovelo, traçado tremido como o dedo
+    const pts: [number, number][] = [];
+    for (let i = 0; i <= 40; i++) {
+      const t = i / 40;
+      const p: [number, number] =
+        t < 0.6 ? [-38 + t * 25, 26 - t * 14] : [-23 + (t - 0.6) * 20, 17.6 + (t - 0.6) * 20];
+      const c = await toClient(page, p);
+      pts.push([c[0] + Math.sin(i * 2.3) * 1.2, c[1] + Math.cos(i * 1.9) * 1.2]);
+    }
+    await mouseDraw(page, pts, async () => {
+      await page.screenshot({ path: `${DIR}/lapis-pincel-desenhando-1440.png` });
+    });
+    await expect.poll(async () => (await current(page)).parts.length).toBe(5);
+    await page.mouse.click(1300, 120);
+    await page.getByRole("button", { name: "Lápis", exact: true }).click();
+    await page.screenshot({ path: `${DIR}/lapis-peca-a-mao-1440.png` });
   });
 });

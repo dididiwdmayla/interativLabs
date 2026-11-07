@@ -17,6 +17,8 @@ import { distToSegment, type Vec2 } from "./vec";
 export const RDP_PX = 0.5;
 /** Ângulo a partir do qual um ponto do traço é canto, graus. */
 export const CORNER_DEG = 35;
+/** Escala da suavização (σ da gaussiana ao longo do traço), px de tela. */
+export const SMOOTH_PX = 5;
 /** Fim a menos disso do começo fecha o contorno, px de tela. */
 export const CLOSE_PX = 12;
 
@@ -126,9 +128,11 @@ export interface Smoothed {
 
 /**
  * Simplifica e suaviza preservando os cantos: RDP a 0,5 px; reamostra a 1,5
- * px; cantos (virada acima de 35° na escala de 6 px) ficam presos; o resto
- * passa por Taubin (λ/μ, sem encolher); por fim, RDP fino a 0,15 px para
- * enxugar os vértices sem tirar a curva.
+ * px; cantos (virada acima de 35° na escala de 6 px) ficam presos; cada
+ * trecho entre cantos passa por uma gaussiana de σ = 5 px ao longo do traço
+ * (o tremido do dedo, de 1 a 2 px em ondas de 10 a 15 px, some); o laço volta
+ * à área do traço simplificado; por fim, RDP fino a 0,15 px enxuga os
+ * vértices sem tirar a curva.
  */
 export function smoothStroke(raw: Vec2[], o: SmoothOptions): Smoothed {
   const base = dedupe(raw, o.px * 0.25);
@@ -147,22 +151,54 @@ export function smoothStroke(raw: Vec2[], o: SmoothOptions): Smoothed {
     pinned[n - 1] = 1;
   }
   const at = (i: number) => (o.closed ? p[(i + n) % n]! : p[Math.max(0, Math.min(n - 1, i))]!);
-  const pass = (f: number) => {
-    const next = p.map((q) => [q[0], q[1]] as Vec2);
-    for (let i = 0; i < n; i++) {
-      if (pinned[i]) continue;
-      const a = at(i - 1);
-      const b = at(i + 1);
-      next[i] = [
-        p[i]![0] + f * ((a[0] + b[0]) / 2 - p[i]![0]),
-        p[i]![1] + f * ((a[1] + b[1]) / 2 - p[i]![1]),
-      ];
+  // gaussiana ao longo do traço (σ = SMOOTH_PX), trecho a trecho entre cantos; nas pontas presas, o
+  // trecho é espelhado em volta da ponta (uma reta continua reta e a ponta não sai do lugar)
+  const sigma = SMOOTH_PX / 1.5;
+  const reach = Math.ceil(3 * sigma);
+  const weights = Array.from({ length: reach + 1 }, (_, k) => Math.exp(-(k * k) / (2 * sigma * sigma)));
+  const smoothRun = (idx: number[], fixedEnds: boolean) => {
+    const m = idx.length;
+    const src = idx.map((k) => at(k));
+    const get = (j: number): Vec2 => {
+      if (!fixedEnds) return src[((j % m) + m) % m]!;
+      if (j < 0) {
+        const e = src[0]!;
+        const q = src[Math.min(m - 1, -j)]!;
+        return [2 * e[0] - q[0], 2 * e[1] - q[1]];
+      }
+      if (j >= m) {
+        const e = src[m - 1]!;
+        const q = src[Math.max(0, 2 * (m - 1) - j)]!;
+        return [2 * e[0] - q[0], 2 * e[1] - q[1]];
+      }
+      return src[j]!;
+    };
+    for (let j = fixedEnds ? 1 : 0; j < (fixedEnds ? m - 1 : m); j++) {
+      let sx = 0;
+      let sy = 0;
+      let sw = 0;
+      for (let k = -reach; k <= reach; k++) {
+        const w = weights[Math.abs(k)]!;
+        const q = get(j + k);
+        sx += q[0] * w;
+        sy += q[1] * w;
+        sw += w;
+      }
+      p[idx[j]! % n] = [sx / sw, sy / sw];
     }
-    for (let i = 0; i < n; i++) p[i] = next[i]!;
   };
-  for (let it = 0; it < 12; it++) {
-    pass(0.6);
-    pass(-0.62);
+  if (o.closed && !cs.length)
+    smoothRun(
+      Array.from({ length: n }, (_, k) => k),
+      false,
+    );
+  else {
+    const stops = o.closed ? [...cs, cs[0]! + n] : [0, ...cs, n - 1];
+    for (let r = 0; r + 1 < stops.length; r++) {
+      const idx: number[] = [];
+      for (let k = stops[r]!; k <= stops[r + 1]!; k++) idx.push(k);
+      if (idx.length > 2) smoothRun(idx, true);
+    }
   }
   // enxuga: RDP fino por trecho entre cantos, e os cantos ficam
   const isCorner = new Uint8Array(n);

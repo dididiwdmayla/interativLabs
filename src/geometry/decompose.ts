@@ -36,9 +36,19 @@ export interface Decomposition {
   discardedArea: number;
 }
 
+/**
+ * Peça convexa mais fina que isso (mm, na menor largura) é lasca: o Box2D
+ * calibrado (lengthUnits 5, folga linear de 0,025 mm) junta pontos a menos de
+ * duas folgas da reta e a descarta como degenerada. Aparece na triangulação
+ * de furos densos (traço à mão do Lápis): um leque de um canto distante até
+ * dois vértices vizinhos do furo.
+ */
+export const MIN_THICKNESS = 0.055;
+
 export interface DecomposeOptions {
   maxVertices?: number;
   minArea?: number;
+  minThickness?: number;
 }
 
 interface Part {
@@ -52,6 +62,7 @@ const COLLINEAR_EPS = 1e-9;
 export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {}): GeoResult<Decomposition> {
   const maxV = opts.maxVertices ?? MAX_POLY_VERTICES;
   const minArea = opts.minArea ?? MIN_AREA;
+  const minThickness = opts.minThickness ?? MIN_THICKNESS;
   const clean = cleanShape(normalize(shape));
   if (clean.outer.length < 3) return fail("invalid", "A forma não tem área");
   const total = shapeArea(clean);
@@ -213,10 +224,25 @@ export function decomposeConvex(shape: PolyWithHoles, opts: DecomposeOptions = {
     if (!merged) break;
   }
 
-  // Lascas: funde com uma vizinha, senão descarta.
+  // Lascas (pequenas ou finas): funde com uma vizinha, senão descarta.
+  const thin = (p: Part) => {
+    const ring = ringOf(p.v);
+    let w = Infinity;
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i]!;
+      const b = ring[(i + 1) % ring.length]!;
+      const L = dhypot(b[0] - a[0], b[1] - a[1]);
+      if (L < 1e-12) continue;
+      let m = 0;
+      for (const q of ring)
+        m = Math.max(m, Math.abs((b[0] - a[0]) * (q[1] - a[1]) - (b[1] - a[1]) * (q[0] - a[0])) / L);
+      w = Math.min(w, m);
+    }
+    return w < minThickness;
+  };
   let discarded = 0;
-  for (let guard = 0; guard < parts.length; guard++) {
-    const small = parts.findIndex((p) => p.alive && p.area < minArea);
+  for (let guard = 0; guard < 4 * parts.length; guard++) {
+    const small = parts.findIndex((p) => p.alive && (p.area < minArea || thin(p)));
     if (small < 0) break;
     const v = parts[small]!.v;
     const neigh: { id: number; p: number; q: number }[] = [];
