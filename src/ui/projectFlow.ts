@@ -195,7 +195,7 @@ let pending: (() => Promise<void>) | null = null;
 
 /** Estado de vista do projeto aberto (peças escondidas). */
 function viewNow(): ProjectView {
-  return { hidden: useUiStore.getState().hidden };
+  return { hidden: useUiStore.getState().hidden, probes: useUiStore.getState().probes };
 }
 
 async function save(id: string, scene: Scene, view: ProjectView): Promise<void> {

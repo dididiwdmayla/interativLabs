@@ -1,3 +1,5 @@
+import { useUiStore } from "@/editor/useUiStore";
+import { useInstruments } from "../instruments/store";
 import { FIXED_STEP } from "@/engine/common";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
@@ -47,6 +49,7 @@ export interface ControllerOptions {
 
 class Controller implements SimControl {
   private worker: Worker;
+  private unsubscribeProbes: () => void;
   private rec: Recorder;
   private nodes: StageNodes;
   private h = FIXED_STEP;
@@ -85,6 +88,11 @@ class Controller implements SimControl {
     opts: ControllerOptions,
   ) {
     this.worker = worker;
+    useInstruments.getState().setSeries([]);
+    this.unsubscribeProbes = useUiStore.subscribe((s, prev) => {
+      if (s.probes !== prev.probes) this.post({ t: "samples", id: this.epoch, probes: s.probes });
+    });
+    this.post({ t: "samples", id: this.epoch, probes: useUiStore.getState().probes });
     this.nodes = nodes;
     this.opts = opts;
     this.rec = new Recorder(ready.partIds, ready.chamberIds, CAPACITY, ready.lockIds);
@@ -114,6 +122,10 @@ class Controller implements SimControl {
     }
     if (m.t === "ready") return;
     if (m.id !== this.epoch) return;
+    if (m.t === "samples") {
+      useInstruments.getState().setSeries(m.series);
+      return;
+    }
     if (m.t === "frames") {
       const stride = this.rec.stride;
       for (let i = 0; i < m.count; i++) this.rec.recordRaw(m.from + i, m.data, i * stride);
@@ -389,6 +401,7 @@ class Controller implements SimControl {
     const step = Math.max(this.rec.oldest, Math.min(this.rec.latest, Math.round(t / this.h)));
     if (this.dragging) this.dragEnd();
     this.shownStep = step === this.step ? null : step;
+    this.post({ t: "samples", id: this.epoch, cursor: step });
     this.state.set({ paused: true, scrubbed: this.shownStep !== null });
     const f = this.view(step);
     if (f) this.draw(f);
@@ -399,6 +412,7 @@ class Controller implements SimControl {
     if (this.dragging) this.dragEnd();
     const d = Math.max(this.rec.oldest, Math.min(this.rec.latest, t / this.h));
     this.shownStep = Math.floor(d);
+    this.post({ t: "samples", id: this.epoch, cursor: this.shownStep });
     this.state.set({ paused: true, scrubbed: true });
     const { step, alpha } = blendAt(d, this.rec.oldest, this.rec.latest);
     const f = this.rec.blend(step, alpha, this.h, this.mix);
@@ -424,6 +438,7 @@ class Controller implements SimControl {
     cancelAnimationFrame(this.raf);
     if (this.rewinding) window.clearTimeout(this.rewinding.timer);
     document.removeEventListener("visibilitychange", this.onVisibility);
+    this.unsubscribeProbes();
     this.worker.terminate();
     this.nodes.setDrag(null);
     if (this.nodes.trail === this.trail) this.nodes.trail = null;

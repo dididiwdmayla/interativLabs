@@ -1,3 +1,5 @@
+import { Samples } from "@/instruments/sampling";
+import type { Probe } from "@/instruments/model";
 import { FIXED_STEP } from "@/engine/common";
 import type { EngineAdapter, PartPose, Snapshot } from "@/engine/types";
 import type { Vec2 } from "@/geometry/vec";
@@ -207,9 +209,11 @@ export interface Rewind {
 export interface SessionOptions {
   /** passos gravados (padrão: 10 s) */
   capacity?: number;
+  probes?: Probe[];
 }
 
 export class SimSession {
+  readonly samples = new Samples();
   readonly scene: Scene;
   readonly h = FIXED_STEP;
   private make: () => EngineAdapter;
@@ -237,9 +241,11 @@ export class SimSession {
       opts.capacity ?? Math.round(10 / FIXED_STEP),
       scene.links.filter((l) => l.kind === "lock").map((l) => l.id),
     );
+    this.samples.configure(opts.probes ?? []);
     this.adapter = this.compile();
     this.last = this.adapter.snapshot();
     this.rec.record(0, this.last);
+    this.samples.record(0, this.last, this.adapter);
   }
 
   private compile(): EngineAdapter {
@@ -300,6 +306,7 @@ export class SimSession {
     const s = this.adapter.snapshot();
     this.last = s;
     this.rec.record(this.step, s);
+    this.samples.record(this.step, s, this.adapter);
     for (const e of s.events) {
       if (e.kind === "lock-released")
         this.events.push({ step: this.step, kind: "lock-released", id: e.lock });
@@ -359,6 +366,7 @@ export class SimSession {
       this.queue.length = 0;
       this.step = target;
       this.rec.truncate(target);
+      this.samples.truncate(target);
       this.events = this.events.filter((e) => e.step <= target);
       this.last = a.snapshot();
       // um arrasto que estava acontecendo no passo não continua: o dedo já saiu
@@ -394,10 +402,12 @@ export class SimSession {
     this.target = null;
     this.step = 0;
     this.events = [];
+    this.samples.clear();
     this.rec.truncate(0);
     this.rec.oldest = 0;
     this.last = this.adapter.snapshot();
     this.rec.record(0, this.last);
+    this.samples.record(0, this.last, this.adapter);
   }
 
   /** Poses atuais direto do motor (precisão total; testes de determinismo). */

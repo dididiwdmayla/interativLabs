@@ -168,6 +168,9 @@ export interface EngineAdapter {
   setVent(linkId: Id, vent: number, open: boolean): void;
   /** Diagnóstico do estado atual (energia, folgas, velocidade); só o motor do app. */
   probe?(region?: [number, number, number, number]): EngineProbe;
+  velocity?(part: Id): { x: number; y: number; omega: number } | null;
+  reaction?(link: Id): { force: number; torque: number } | null;
+  clearance?(a: Id, b: Id): number | null;
   dispose(): void;
 }
 

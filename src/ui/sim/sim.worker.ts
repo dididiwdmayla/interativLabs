@@ -1,3 +1,5 @@
+import type { Probe } from "@/instruments/model";
+import type { Series } from "@/instruments/sampling";
 import { loadBox2d } from "@/engine/box2d/load";
 import type { Scene } from "@/model/types";
 import { SimSession, type PendingInput, type SimEvent } from "@/sim/session";
@@ -10,12 +12,14 @@ import { SimSession, type PendingInput, type SimEvent } from "@/sim/session";
  */
 
 export type SimRequest =
+  | { t: "samples"; id: number; probes?: Probe[]; cursor?: number }
   | { t: "init"; scene: Scene }
   | { t: "run"; id: number; steps: number; inputs: PendingInput[] }
   | { t: "rewind"; id: number; step: number }
   | { t: "restart"; id: number };
 
 export type SimReply =
+  | { t: "samples"; id: number; series: Series[] }
   | { t: "ready"; partIds: string[]; chamberIds: string[]; lockIds: string[]; frame: Float32Array }
   | {
       t: "frames";
@@ -42,6 +46,7 @@ function frames(id: number, from: number, count: number, events: SimEvent[], phy
   const data = new Float32Array(stride * count);
   for (let i = 0; i < count; i++) session.rec.copyFrame(from + i, data, i * stride);
   post({ t: "frames", id, from, count, data, events, physics }, [data.buffer]);
+  post({ t: "samples", id, series: session.samples.series(session.step) });
 }
 
 self.onmessage = async (e: MessageEvent<SimRequest>) => {
@@ -66,7 +71,10 @@ self.onmessage = async (e: MessageEvent<SimRequest>) => {
       return;
     }
     if (!session) return;
-    if (m.t === "run") {
+    if (m.t === "samples") {
+      if (m.probes) session.samples.configure(m.probes);
+      post({ t: "samples", id: m.id, series: session.samples.series(m.cursor ?? session.step) });
+    } else if (m.t === "run") {
       session.enqueue(m.inputs);
       const steps = Math.max(0, Math.floor(m.steps));
       const t0 = performance.now();
