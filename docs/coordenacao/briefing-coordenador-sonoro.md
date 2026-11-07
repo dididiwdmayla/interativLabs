@@ -66,6 +66,24 @@ A identidade é um desenho de patente em traço branco sobre papel índigo: ofic
 | `sfx-cut` | Lápis recortando ou somando | grafite ou riscador, curto |
 | `sfx-ui` | abrir faixa de ferramenta ou cartão | tique de papel bem baixo |
 
+### Efeitos extras (acrescentados em 07/11, no mesmo lote)
+
+Gerados agora, na mesma sessão, para manter a estética e ter um manifesto só. Os que a física de hoje já dispara entram ligados na integração (Parte S). Os outros ficam registrados e ligam quando a peça existir (Mecânica 2.0).
+
+| ID | Momento | Caráter | Liga em |
+| --- | --- | --- | --- |
+| `sfx-impact-heavy-1`, `-2` | impacto de peça de metal pesada | metal com metal, mais grave e com corpo, sem eco longo | S |
+| `sfx-impact-wood-1`, `-2` | impacto de madeira e polímero | batida surda e seca | S |
+| `sfx-impact-rubber` | impacto de borracha | abafado, quase só corpo | S |
+| `sfx-ratchet-1`, `-2` | lingueta caindo num dente de catraca | estalo metálico preciso, de relojoaria | S |
+| `sfx-vent-loop` | gás saindo por um respiro ou porta; o volume acompanha a vazão | chiado de ar fino, emendável em laço de ~1 s | S |
+| `sfx-pop-strong` | câmara com carga forte (o `sfx-gas` fica para a fraca e a média) | estouro seco e curto, com ataque forte e cauda curta; nada de explosão grande | S |
+| `sfx-case-drop-1`, `-2` | cápsula vazia caindo depois da ejeção | latão pequeno tilintando numa bancada | M2 |
+| `sfx-valve` | válvula de retenção assentando | clique metálico pequeno, com um respiro curto | M3 |
+| `sfx-clock-tic`, `sfx-clock-tac` | escape de relógio, alternados | tique de relojoaria, um levemente diferente do outro | M4 |
+
+Explosão grande fica de fora: as peças têm milímetros, e um estrondo cansa quando se testa o mesmo ciclo vinte vezes seguidas. O `sfx-pop-strong` é o teto.
+
 ## Formatos
 
 - Efeitos em WAV 48 kHz (24 ou 16 bits), mono, até 0,8 s.
