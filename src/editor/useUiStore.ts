@@ -6,6 +6,8 @@ import type { HammerTool } from "./hammer";
 import { DEFAULT_PENCIL, type PencilTool } from "./pencil";
 import type { Command } from "./commands";
 import { emptyHistory, lowerFirst, push, pushMerged, redo, run, undo, type HistoryState } from "./history";
+import { sound } from "@/sound";
+import { commitSound } from "@/sound/tools";
 
 export type Mode = "edit" | "simulate";
 export type { Selection } from "@/render/SceneSvg";
@@ -195,6 +197,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   setPick: (pick) => set({ pick, sheet: null, edgeMenu: null, hammer: null }),
   hammer: null,
   setHammer: (hammer) => {
+    // abrir a faixa do Martelo (não trocar de ferramenta dentro dela)
+    if (hammer && !get().hammer) sound.play("sfx-ui");
     set((s) => ({
       hammer,
       pencil: hammer ? false : s.pencil,
@@ -210,6 +214,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   pencilTool: DEFAULT_PENCIL,
   // o Lápis age na peça escolhida: a seleção fica
   setPencil: (pencil) => {
+    if (pencil && !get().pencil) sound.play("sfx-ui");
     set((s) => ({
       pencil,
       hammer: pencil ? null : s.hammer,
@@ -248,6 +253,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
 
   look: LOOK_OFF,
   setLook: (patch) => {
+    if (patch.open === true && !get().look.open) sound.play("sfx-ui");
     set((s) => {
       const look = { ...s.look, ...patch };
       // abrir o modo liga as cores; fechar volta tudo ao normal
@@ -258,6 +264,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   },
   hideMode: false,
   setHideMode: (hideMode) => {
+    if (hideMode && !get().hideMode) sound.play("sfx-ui");
     set((s) => ({
       hideMode,
       hammer: hideMode ? null : s.hammer,
@@ -275,6 +282,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   setTrail: (trail) => set({ trail }),
   soundBar: false,
   setSoundBar: (soundBar) => {
+    if (soundBar && !get().soundBar) sound.play("sfx-ui");
     set((s) =>
       soundBar
         ? {
@@ -291,11 +299,13 @@ export const useUiStore = create<UiState>()((set, get) => ({
   },
   explain: null,
   setExplain: (explain) => {
+    if (explain && !get().explain) sound.play("sfx-ui");
     set({ explain });
   },
   drawerAway: false,
   setDrawerAway: (drawerAway) => set({ drawerAway }),
   setMode: (mode) => {
+    if (mode !== get().mode) sound.play("sfx-mode");
     set({
       mode,
       pick: null,
@@ -352,6 +362,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
       selection,
       activeLayer: clampLayer(r.scene, after?.activeLayer ?? s.activeLayer),
     });
+    // o som segue o comando registrado (ligação carimbada), não o clique
+    const tone = commitSound(s.current.scene, r.scene);
+    if (tone) sound.play(tone);
     if (cmd.warning) s.notify(cmd.warning, { warn: true, undo: true });
     else if (cmd.notice) s.notify(cmd.notice, { undo: true });
     return true;
@@ -385,6 +398,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   notify: (text, opts) => set({ notice: { id: ++noticeSeq, text, ...opts } }),
   clearNotice: () => set({ notice: null }),
   setSheet: (sheet) => {
+    // abrir o cartão (não trocar de folha para o mesmo cartão)
+    if (sheet === "card" && get().sheet !== "card") sound.play("sfx-ui");
     set({ sheet, edgeMenu: null });
   },
   setMainTab: (mainTab) => set({ mainTab }),
