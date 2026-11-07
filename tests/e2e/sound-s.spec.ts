@@ -18,7 +18,9 @@ type Debug = {
 type W = {
   __IL__: {
     sound: { ready: boolean; debug(): Debug | null };
-    ui: { getState(): { setSoundBar(on: boolean): void; setHint(on: boolean): void; setMode(m: string): void } };
+    ui: {
+      getState(): { setSoundBar(on: boolean): void; setHint(on: boolean): void; setMode(m: string): void };
+    };
   };
 };
 
@@ -103,10 +105,12 @@ test("música e efeitos ligam e desligam separados, e as preferências voltam de
   await expect(effects).toHaveAttribute("aria-pressed", "true");
   // com a música desligada, o primeiro toque acorda o motor mas a música não entra
   await page.mouse.click(720, 450);
-  await expect.poll(async () => (await debug(page))?.prefs, { timeout: 15_000 }).toEqual({
-    music: false,
-    effects: true,
-  });
+  await expect
+    .poll(async () => (await debug(page))?.prefs, { timeout: 15_000 })
+    .toEqual({
+      music: false,
+      effects: true,
+    });
   await page.waitForTimeout(1200);
   expect((await debug(page))!.music.playing).toBe(false);
   // ligando de novo, ela entra na hora

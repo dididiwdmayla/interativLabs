@@ -135,9 +135,6 @@ function Workbench() {
     return startAutosave();
   }, []);
 
-  // o som só nasce no primeiro gesto (src/sound): aqui só liga a escuta
-  useEffect(() => sound.install(), []);
-
   useSimulation(mode === "simulate", nodes);
   useShortcuts();
 
@@ -248,6 +245,11 @@ function Workbench() {
 
 export function App() {
   const route = useHashRoute();
+  // o som só nasce no primeiro gesto (src/sound): aqui só liga a escuta, em qualquer rota
+  useEffect(() => {
+    (window as unknown as { __IL_SOUND__?: unknown }).__IL_SOUND__ = sound;
+    sound.install();
+  }, []);
   if (route === "#bench") {
     return (
       <Suspense fallback={<p className="route-missing">Carregando a bancada…</p>}>

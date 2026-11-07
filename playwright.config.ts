@@ -38,6 +38,8 @@ export default defineConfig({
     { name: "motor-e2b", testMatch: /motor-e2b\.spec\.ts/, timeout: 240_000 },
     { name: "sound-s", testMatch: /sound-s\.spec\.ts/, timeout: 90_000 },
     { name: "sound-fisica-s", testMatch: /sound-fisica-s\.spec\.ts/, timeout: 120_000 },
+    { name: "perf-som-s", testMatch: /perf-som-s\.spec\.ts/, timeout: 900_000 },
+    { name: "capture-final", testMatch: /final-fase-1\.spec\.ts/, timeout: 120_000 },
     { name: "capture", testMatch: /capture\.spec\.ts/ },
     { name: "capture-d", testMatch: /parte-d\.spec\.ts/, timeout: 120_000 },
     { name: "e2a", testMatch: /parte-e2a\.spec\.ts/, timeout: 60_000 },
