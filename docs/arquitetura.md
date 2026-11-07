@@ -404,13 +404,14 @@ Dois botões redondos flutuantes, só no Montar, na fileira de baixo junto do de
 ### Entender
 
 - **Modo camadas em cores:** cada camada ganha uma cor ordenada (do fundo para o topo), número na peça e, opcionalmente, as camadas afastadas em 2,5D para ver o que está em cima e embaixo. Isolar camada mostra só ela.
+- **Esconder peça** com um toque (como o "clique e esconda" dos simuladores de desmontagem): a peça some da vista para mostrar o que está atrás, sem sair da cena nem da simulação; um toque na lista de escondidas traz de volta.
 - **Cartões "o que é"** para cada ligação, com uma animação curta.
 - **Oficina guiada** (decidida em 07/11, substitui o tutorial sobre o objeto padrão): a pessoa escolhe o que montar (trinco de porta, catraca, gatilho com retém, par de engrenagens e outros) e é levada passo a passo. Cada receita é dado (`src/learn/`): a frase do passo, o gabarito fantasma em ouro tracejado de onde vai a peça ou a ligação, a ferramenta a usar realçada, e a conferência automática quando a cena satisfaz o passo (forma parecida, ligação do tipo certo entre as peças certas, com tolerância generosa). Passo cumprido ganha selo e o próximo entra; no fim, Testar com a frase do que observar. Sair a qualquer hora mantém o projeto. Cada receita tem uma cena de teste: os passos feitos por roteiro dão um mecanismo que passa nas afirmações dela.
 - **Rastro do movimento** no Testar: as peças em movimento deixam um rastro curto, para ver a trajetória.
 
 ### Som (mínimo, decidido em 07/11)
 
-Pouca coisa, bem feita: uma música ambiente leve em laço (gerada no Suno) e uns oito efeitos curtos. Som marca o que acontece, nunca a tecla ou a navegação: cravar, ligar, soltar a trava, o gás acendendo, os impactos da simulação (o volume e a variação pela velocidade do impacto, com limite de efeitos por instante, de modo que a catraca estala sozinha), trocar entre Montar e Testar, o lápis cortando. Nada toca antes do primeiro gesto; a aba fora de foco cala tudo. Música e efeitos ligam e desligam no menu Vista. O motor é uma versão enxuta do motor de som do interativMind (`src/sound/`), com o pipeline `npm run audio`. O som é só saída: não entra na simulação nem no hash.
+Pouca coisa, bem feita: uma música ambiente leve em laço (gerada no Suno) e uns 25 efeitos curtos, gerados num lote só (som-01); os que dependem de peças da Mecânica 2.0 (estojo caindo, válvula, tique de escape) ficam registrados e ligam quando a peça existir. Som marca o que acontece, nunca a tecla ou a navegação: cravar, ligar, soltar a trava, o gás acendendo, os impactos da simulação (o som escolhido pelo material e pela massa, o volume e a variação pela velocidade do impacto, com limite de efeitos por instante), a lingueta caindo num dente de catraca (contato com peça de perfil `ratchet`), a vazão de gás por um respiro (chiado em laço com volume pela vazão), o estouro seco da carga forte, trocar entre Montar e Testar, o lápis cortando. Nada toca antes do primeiro gesto; a aba fora de foco cala tudo. Música e efeitos ligam e desligam no menu Vista. O motor é uma versão enxuta do motor de som do interativMind (`src/sound/`), com o pipeline `npm run audio`. O som é só saída: não entra na simulação nem no hash.
 
 ### Comandos
 
@@ -513,5 +514,6 @@ O uso mostrou uma diferença entre a regra geométrica da câmara e a câmara au
 | Peça multicamada e trava (formato v3) | 05/11 | Fechada (§3.2); implementação na Fase 1 · Parte E2b |
 | Ferramentas da mão: Martelo e Lápis | 05/11 | Fechada (§6); Martelo na Parte E2b, Lápis e caneta na E2c. Substitui o "conectar por toque na sobreposição" |
 | Cursor deslocado, faixa na borda sem mexer na vista | 07/11 | Fechada (§6), depois do teste do Will; implementada na E2c |
-| Oficina guiada (receitas) | 07/11 | Fechada (§6, Entender); substitui o tutorial sobre o objeto padrão |
-| Som mínimo | 07/11 | Fechada (§6, Som): uma música em laço e uns oito efeitos; lote som-01 pelo coordenador sonoro |
+| Oficina guiada (receitas) | 07/11 | Fechada (§6, Entender); substitui o tutorial sobre o objeto padrão; entra na Fase 3, depois da Mecânica 2.0 |
+| Ordem das fases | 07/11 | Fecha a Fase 1 (E2c, E2d, S, E3) → Mecânica 2.0 → oficina guiada → acabamento visual (`docs/roadmap.md`) |
+| Som mínimo | 07/11 | Fechada (§6, Som): uma música em laço e uns 25 efeitos; lote som-01 pelo coordenador sonoro |
