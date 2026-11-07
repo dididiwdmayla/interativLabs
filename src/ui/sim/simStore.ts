@@ -1,3 +1,4 @@
+import type { EventTick } from "@/instruments/events";
 import { create } from "zustand";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id } from "@/model/types";
@@ -18,6 +19,7 @@ export interface TimelineState {
   shown: number;
   /** marcas em brasa: instantes (s) */
   events: number[];
+  ticks?: EventTick[];
 }
 
 /** Que peças o toque alcança no Testar (camadas afastadas, peças escondidas). */

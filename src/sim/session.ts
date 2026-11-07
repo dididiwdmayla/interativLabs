@@ -1,3 +1,5 @@
+import { eventTick, type EventTick, type TickKind } from "@/instruments/events";
+export { STRONG_IMPACT } from "@/instruments/events";
 import { Samples } from "@/instruments/sampling";
 import type { Probe } from "@/instruments/model";
 import { FIXED_STEP } from "@/engine/common";
@@ -31,17 +33,8 @@ export type SimInput =
 
 type Pending = PendingInput;
 
-export type SimEventKind = "sensor" | "chamber-fired" | "impact" | "lock-released";
-
-export interface SimEvent {
-  step: number;
-  kind: SimEventKind;
-  /** sensor, câmara ou a primeira peça do impacto */
-  id: Id;
-}
-
-/** Choque acima disto (mm/s) vira marca de "impacto forte" na linha do tempo. */
-export const STRONG_IMPACT = 600;
+export type SimEventKind = TickKind;
+export type SimEvent = EventTick;
 
 /** Uma câmara no quadro gravado. */
 export interface ChamberFrame {
@@ -308,19 +301,9 @@ export class SimSession {
     this.rec.record(this.step, s);
     this.samples.record(this.step, s, this.adapter);
     for (const e of s.events) {
-      if (e.kind === "lock-released")
-        this.events.push({ step: this.step, kind: "lock-released", id: e.lock });
-      else if (e.kind === "sensor") this.events.push({ step: this.step, kind: "sensor", id: e.sensor });
-      else if (e.kind === "chamber-fired")
-        this.events.push({ step: this.step, kind: "chamber-fired", id: e.chamber });
-      else if (e.kind === "impact" && e.speed >= STRONG_IMPACT) {
-        const prev = this.events[this.events.length - 1];
-        if (!prev || prev.kind !== "impact" || this.step - prev.step > 12)
-          this.events.push({ step: this.step, kind: "impact", id: e.a });
-      }
+      const tick = eventTick(e, this.step);
+      if (tick) this.events.push(tick);
     }
-    if (this.events.length && this.events[0]!.step < this.rec.oldest)
-      this.events = this.events.filter((e) => e.step >= this.rec.oldest);
     return s;
   }
 

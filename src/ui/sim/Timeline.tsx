@@ -1,3 +1,4 @@
+import { eventIcons, eventNames, type EventTick } from "@/instruments/events";
 import { useEffect, useRef, useState } from "react";
 import { useElementSize } from "../useElementSize";
 import { useSimStore, type TimelineState } from "./simStore";
@@ -25,8 +26,9 @@ export function Timeline() {
   const head = useRef<SVGGElement>(null);
   const timeEl = useRef<HTMLOutputElement>(null);
   const span = useRef<SVGLineElement>(null);
+  const [eventName, setEventName] = useState("");
   const [base, setBase] = useState(0);
-  const [events, setEvents] = useState<number[]>([]);
+  const [events, setEvents] = useState<EventTick[]>([]);
   const last = useRef<{ base: number; n: number; w0: number }>({ base: -1, n: -1, w0: 0 });
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function Timeline() {
       }
       if (t.events.length !== last.current.n) {
         last.current.n = t.events.length;
-        setEvents(t.events.slice());
+        setEvents((t.ticks ?? []).slice());
       }
       strip.current?.setAttribute("transform", `translate(${pad - w0 * k} 0)`);
       head.current?.setAttribute("transform", `translate(${pad + (t.shown - w0) * k} 0)`);
@@ -90,13 +92,41 @@ export function Timeline() {
       aria-valuemax={WINDOW}
     >
       {width > 0 && (
-        <svg className="timeline__svg" width={width} height={40} aria-hidden="true">
+        <svg className="timeline__svg" width={width} height={44}>
           <line className="timeline__base" x1={pad} x2={width - pad} y1={26} y2={26} />
           <line className="timeline__span" ref={span} y1={26} y2={26} />
           <g ref={strip}>
             <path className="timeline__tick" d={ticks} />
             <path className="timeline__tick timeline__tick--long" d={longs} />
-            <path className="timeline__event" d={events.map((t) => `M${(t * k).toFixed(2)} 6V26`).join("")} />
+            {events
+              .filter((e) => e.step / 240 >= last.current.w0)
+              .map((event, i) => (
+                <g
+                  key={`${event.step}:${i}`}
+                  transform={`translate(${(event.step / 240) * k} 0)`}
+                  className="timeline__event"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${eventNames[event.kind]}, ${fmt(event.step / 240)}`}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    ctl?.scrub(event.step / 240);
+                    setEventName(eventNames[event.kind]);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      ctl?.scrub(event.step / 240);
+                      setEventName(eventNames[event.kind]);
+                    }
+                  }}
+                >
+                  <title>{eventNames[event.kind]}</title>
+                  <rect x="-22" y="-2" width="44" height="44" fill="transparent" stroke="none" />
+                  <path d="M0 16V26" />
+                  <path d={eventIcons[event.kind]} transform="translate(0 8)" fill="none" />
+                </g>
+              ))}
           </g>
           <g ref={head} className="timeline__head">
             <path d="M0 8V34" />
@@ -107,6 +137,7 @@ export function Timeline() {
       <output className="timeline__time" ref={timeEl}>
         t = {fmt(0)}
       </output>
+      {eventName && <output className="timeline__event-name">{eventName}</output>}
       {recalculating && <p className="timeline__recalc">Recalculando…</p>}
     </div>
   );

@@ -134,8 +134,7 @@ class Controller implements SimControl {
         this.events.push(...m.events);
         this.due.push(...m.events);
       }
-      if ((this.events[0]?.step ?? Infinity) < this.rec.oldest)
-        this.events = this.events.filter((e) => e.step >= this.rec.oldest);
+
       this.recvPhysics += m.physics;
       this.recvSteps += m.count;
       this.inflight = false;
@@ -225,7 +224,7 @@ class Controller implements SimControl {
     );
     this.nodes.write(f, false);
     this.onFrame?.(this.timeline());
-    useInstruments.getState().setTime(f.time, this.step * this.h);
+    useInstruments.getState().setTime(f.time, this.step * this.h, this.events);
   }
 
   private frame = (now: number) => {
@@ -428,6 +427,7 @@ class Controller implements SimControl {
       latest: this.rec.latest * h,
       shown: (this.shownStep ?? this.step) * h,
       events: this.events.map((e) => e.step * h),
+      ticks: this.events,
     };
   }
 

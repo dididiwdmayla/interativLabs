@@ -1,4 +1,4 @@
-import { useState, useId } from "react";
+import { useState, useId, useRef, useEffect } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import { quantities } from "@/instruments/model";
 import type { Series } from "@/instruments/sampling";
@@ -9,6 +9,19 @@ const fmt = (v: number | null | undefined) =>
   v == null ? "—" : v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
 function Chart({ series, shown, latest }: { series: Series; shown: number; latest: number }) {
   const uid = useId();
+  const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const start = useRef({ x: 0, y: 0 });
+  const [threshold, setThreshold] = useState<number | null>(null);
+  const cancelHold = () => {
+    if (hold.current) clearTimeout(hold.current);
+    hold.current = null;
+  };
+  useEffect(
+    () => () => {
+      if (hold.current) clearTimeout(hold.current);
+    },
+    [],
+  );
   const ctl = useSimStore((s) => s.ctl);
   const { probe, points, cursor } = series;
   const valid = points.filter((p) => p.value !== null);
@@ -76,12 +89,22 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
         }}
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
+          start.current = { x: e.clientX, y: e.clientY };
+          const rect = e.currentTarget.getBoundingClientRect();
+          const value = lo + ((78 - ((e.clientY - rect.top) / rect.height) * 96) / 56) * range;
+          cancelHold();
+          hold.current = setTimeout(() => setThreshold(value), 550);
           scrub(e.clientX, e.currentTarget);
         }}
         onPointerMove={(e) => {
+          if (Math.hypot(e.clientX - start.current.x, e.clientY - start.current.y) > 8) cancelHold();
           if (e.currentTarget.hasPointerCapture(e.pointerId)) scrub(e.clientX, e.currentTarget);
         }}
-        onPointerUp={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}
+        onPointerUp={(e) => {
+          cancelHold();
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }}
+        onPointerCancel={cancelHold}
       >
         <defs>
           <pattern id={uid} width="23" height="14" patternUnits="userSpaceOnUse">
@@ -111,13 +134,45 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
           {fmt(end / 240)} s
         </text>
       </svg>
+      {threshold !== null && (
+        <button
+          className="instrument-chart__threshold"
+          onClick={() => {
+            const ui = useUiStore.getState();
+            ui.setProbes(
+              ui.probes.map((p) =>
+                p.id === probe.id ? { ...p, threshold } : { ...p, threshold: undefined },
+              ),
+            );
+            setThreshold(null);
+          }}
+        >
+          Contar quando passar daqui · {fmt(threshold)} {quantities[probe.quantity][1]}
+        </button>
+      )}
+      {probe.threshold !== undefined && (
+        <button
+          className="instrument-chart__threshold"
+          onClick={() => {
+            const ui = useUiStore.getState();
+            ui.setProbes(ui.probes.map((p) => (p.id === probe.id ? { ...p, threshold: undefined } : p)));
+          }}
+        >
+          Limiar {fmt(probe.threshold)} · remover
+        </button>
+      )}
     </article>
   );
 }
 export function InstrumentPanel() {
   const [collapsed, setCollapsed] = useState(false);
   const probes = useUiStore((s) => s.probes);
-  const { series, shown, latest } = useInstruments();
+  const { series, shown, latest, ticks } = useInstruments();
+  const thresholdSeries = series.find((s) => s.probe.threshold !== undefined);
+  const cycles = thresholdSeries
+    ? thresholdSeries.crossings
+    : ticks.filter((t) => t.kind === "chamber-fired").length;
+  const clicks = ticks.filter((t) => t.kind === "impact").length;
   if (!probes.length) return null;
   return (
     <section className="instruments" aria-label="Instrumentos">
@@ -126,7 +181,7 @@ export function InstrumentPanel() {
           Instrumentos <span>{collapsed ? "＋" : "−"}</span>
         </button>
         <small>
-          {probes.length} / 4 · t = {fmt(shown)} s
+          {cycles} ciclos · {clicks} estalos · t = {fmt(shown)} s
         </small>
       </header>
       {!collapsed && (
