@@ -21,13 +21,11 @@ const TOOL_ICONS: Record<HammerTool, IconName> = {
 
 /** Faixa do Martelo: os quatro grupos na faixa compartilhada com o Lápis. */
 export function HammerBar({ phrase, actions }: { phrase?: string; actions?: StripItem[] }) {
-  const lastInput = useUiStore((s) => s.lastInput);
   const hammer = useUiStore((s) => s.hammer);
   const mode = useUiStore((s) => s.mode);
   const setHammer = useUiStore((s) => s.setHammer);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      useUiStore.getState().noteInput("keyboard");
       if (e.key === "Escape") useUiStore.getState().setHammer(null);
     };
     window.addEventListener("keydown", key);
@@ -38,10 +36,7 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Stri
     <ToolStrip
       label="Ferramentas do Martelo"
       mode="select"
-      phrase={
-        phrase ??
-        `${LINK_LABEL[hammer]}: toque sobre uma peça${lastInput === "mouse" || lastInput === "keyboard" ? " · Esc sai" : ""}`
-      }
+      phrase={phrase ?? `${LINK_LABEL[hammer]}: toque sobre uma peça · Esc sai`}
       actions={actions}
       groups={HAMMER_GROUPS.map((g) => ({
         name: g.name,
@@ -51,7 +46,6 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Stri
           icon: TOOL_ICONS[tool],
           pressed: hammer === tool,
           onClick: () => setHammer(tool),
-          onLongPress: () => useUiStore.getState().setExplain(tool),
         })),
       }))}
     />

@@ -18,9 +18,6 @@ export function hitEdgeMenu(x: number, y: number): string | null {
 }
 
 export function useMenuContext(): MenuContext {
-  const layerColors = useUiStore((s) => s.layerColors);
-  const hideMode = useUiStore((s) => s.hideMode);
-  const trails = useUiStore((s) => s.trails);
   const mode = useUiStore((s) => s.mode);
   const hasSelection = useUiStore((s) => s.selection !== null);
   const xray = useUiStore((s) => s.xray);
@@ -28,9 +25,6 @@ export function useMenuContext(): MenuContext {
   const lefty = useUiStore((s) => s.lefty);
   return {
     mode,
-    layerColors,
-    hideMode,
-    trails,
     hasSelection,
     xray,
     hint,

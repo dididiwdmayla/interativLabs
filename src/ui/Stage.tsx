@@ -1,7 +1,3 @@
-import { ExplainCard } from "./ExplainCard";
-import { ToolStrip } from "./ToolStrip";
-import { LayerViewBar } from "./LayerViewBar";
-import { spreadBounds } from "@/editor/layerView";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assets } from "@/assets/registry";
 import { hammerPoint, hammerFix, type HammerPoint, type HammerTool } from "@/editor/hammer";
@@ -303,9 +299,6 @@ export function Stage({
   const { width, height } = useElementSize(box);
   const uid = useId().replace(/:/g, "");
   const ctl = useSimStore((s) => s.ctl);
-  const isolate = useUiStore((s) => s.layerColors && s.layerIsolate);
-  const hideMode = useUiStore((s) => s.hideMode);
-  const spread = useUiStore((s) => (s.layerColors ? s.layerSpread : 0));
   const editing = mode === "edit";
   const hammer = useUiStore((s) => s.hammer);
   const pencilOn = useUiStore((s) => s.pencil);
@@ -317,13 +310,8 @@ export function Stage({
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") useUiStore.getState().setPick(null);
     };
-    const pointer = (e: PointerEvent) => useUiStore.getState().noteInput(e.pointerType);
-    window.addEventListener("pointerdown", pointer, true);
     window.addEventListener("keydown", key);
-    return () => {
-      window.removeEventListener("keydown", key);
-      window.removeEventListener("pointerdown", pointer, true);
-    };
+    return () => window.removeEventListener("keydown", key);
   }, []);
   const [hammerPreview, setHammerPreview] = useState<{
     hit: HammerPoint;
@@ -384,7 +372,7 @@ export function Stage({
   const pencilCursor = useRef<SVGGElement>(null);
   const pencilTether = useRef<SVGPathElement>(null);
   /** uma caneta já desenhou nesta sessão: o dedo só move a vista no Lápis */
-
+  const penSeen = useRef(false);
   const penStroke = useRef<PencilStroke | null>(null);
   /** chamado a cada mudança da vista (o botão da peça acompanha) */
   const onView = useRef<(() => void) | null>(null);
@@ -508,26 +496,6 @@ export function Stage({
     };
     anim.current = requestAnimationFrame(step);
   };
-  const beforeSpread = useRef<View | null>(null);
-  useEffect(() => {
-    if (!model || !width || !height) return;
-    if (spread) {
-      beforeSpread.current ??= { ...view.current };
-      animateView(
-        fitView(
-          spreadBounds(model.bounds, model.layers.length, spread),
-          width,
-          height,
-          editing ? FIT_PAD_EDIT : FIT_PAD_SIM,
-        ),
-      );
-    } else if (beforeSpread.current) {
-      animateView(beforeSpread.current);
-      beforeSpread.current = null;
-    }
-    // Only a change in separation changes this framing.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spread]);
   useEffect(() => () => clearHold(), []);
 
   const local = (e: { clientX: number; clientY: number }): Vec2 => {
@@ -549,7 +517,7 @@ export function Stage({
   // ——— edição: peça mais alta sob o dedo, alças, pose durante o gesto ———
   const layerOk = (i: number) => {
     const L = model?.layers[i]?.layer;
-    return !!L && L.visible && !L.locked && (!(spread || isolate) || i === activeLayer);
+    return !!L && L.visible && !L.locked;
   };
   const pickedSurface = useRef<{ id: string; layer: number } | null>(null);
   const pickPart = (w: Vec2): string | null => {
@@ -870,7 +838,7 @@ export function Stage({
     if (!model || !nodes) return;
     onFirstTouch?.();
     const [x, y] = local(e);
-    useUiStore.getState().noteInput(e.pointerType);
+    if (e.pointerType === "pen") penSeen.current = true;
     // caneta no Lápis: desenha à parte, e os dedos continuam movendo a vista ao mesmo tempo
     if (editing && !bare && pencilOn && e.pointerType === "pen" && !penStroke.current) {
       box.current?.setPointerCapture(e.pointerId);
@@ -911,22 +879,6 @@ export function Stage({
     }
     if (pointers.current.size > 2) return;
     const w = toWorld(view.current, x, y);
-    w[0] -= activeLayer * spread;
-    w[1] += activeLayer * spread;
-    if (hideMode && model && nodes) {
-      const raw = toWorld(view.current, x, y);
-      for (let i = model.layers.length - 1; i >= 0; i--) {
-        const hit = partHit(model, nodes.frame, [raw[0] - i * spread, raw[1] + i * spread], {
-          layer: (l) => l === i && model.layers[l]?.layer.visible !== false,
-        });
-        if (hit) {
-          useUiStore.getState().hidePart(hit.part.id);
-          break;
-        }
-      }
-      gesture.current = { kind: "none" };
-      return;
-    }
     if (!editing) {
       if (ctl?.releaseAt(w)) {
         gesture.current = { kind: "none" };
@@ -938,11 +890,7 @@ export function Stage({
       }
     } else if (!bare) {
       // Lápis com o dedo (ou mouse): desenha; com caneta presente, o dedo só move a vista
-      if (
-        pencilOn &&
-        !picking &&
-        !(e.pointerType === "touch" && useUiStore.getState().penSeen && !useUiStore.getState().fingerDraws)
-      ) {
+      if (pencilOn && !picking && !(e.pointerType === "touch" && penSeen.current)) {
         if (pencilPending?.plan.kind === "sides") {
           const side = sideAt(pencilPending.plan, w);
           if (side !== null) {
@@ -1123,8 +1071,6 @@ export function Stage({
     if (e.pointerType === "touch") multi.current.move(e.pointerId, x, y);
     const g = gesture.current;
     const w = toWorld(view.current, x, y);
-    w[0] -= activeLayer * spread;
-    w[1] += activeLayer * spread;
     if (g.kind === "linkhandle" && model) {
       g.last = adjustLinkHandle(model, g.link, g.handle, w);
       setLinkPreview(g.last);
@@ -1545,28 +1491,6 @@ export function Stage({
           )}
         </>
       )}
-      {!bare && <ExplainCard />}
-      {!bare && hideMode && (
-        <ToolStrip
-          label="Esconder peças"
-          mode="cycle"
-          phrase="Toque para esconder a peça mais alta · ela continua no mecanismo"
-          groups={[
-            {
-              name: "Esconder",
-              items: [
-                {
-                  id: "done-hide",
-                  label: "Concluir",
-                  glyph: "OK",
-                  onClick: () => useUiStore.getState().setHideMode(false),
-                },
-              ],
-            },
-          ]}
-        />
-      )}
-      {!bare && !hideMode && <LayerViewBar />}
       {editing && !bare && pencilOn && model && (
         <>
           <PencilBar

@@ -99,9 +99,6 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
 
   return (
     <div className="card">
-      <button className="btn btn--outline" onClick={() => ui.hidePart(p.id)}>
-        Esconder
-      </button>
       <div className="card__head">
         <span className="card__ref" aria-label={`Número de chamada ${p.ref}`}>
           {p.ref}
