@@ -22,6 +22,7 @@ export interface ProjectMeta {
 }
 
 export interface Project extends ProjectMeta {
+  view?: { hiddenParts: string[] };
   scene: Scene;
 }
 

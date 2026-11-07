@@ -15,6 +15,7 @@ import type { Box } from "./view";
  */
 
 export interface PartModel {
+  center: Vec2;
   part: Part;
   key: Id;
   profile?: Id;
@@ -183,6 +184,7 @@ export function prepareScene(scene: Scene): SceneModel {
       const hatch: HatchId = part.material;
       const angled = hatch !== "rubber" && hatch !== "wood";
       const m: PartModel = {
+        center: g.value.mass.centroid,
         part,
         key: surface.id,
         ...(surface.id === owner.id ? {} : { profile: surface.id }),

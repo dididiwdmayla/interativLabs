@@ -1,3 +1,4 @@
+import { useUiStore } from "./useUiStore";
 import { containsPoint, locateInRing } from "@/geometry/polygon";
 import { straightSlot } from "@/geometry/slot";
 import { distToSegment } from "@/geometry/vec";
@@ -32,6 +33,7 @@ export function hammerStack(model: SceneModel, point: Vec2, active: number, hole
     .slice()
     .reverse()
     .filter((m) => {
+      if (useUiStore.getState().hiddenParts.includes(m.part.id)) return false;
       if (m.layer > active || model.layers[m.layer]?.layer.visible === false || seen.has(m.part.id))
         return false;
       const p = localOf(m.part, point);
@@ -96,16 +98,30 @@ export function hammerPoint(
   const stack = hammerStack(model, at, active, solid);
   const b = stack[0] ?? null,
     a = stack[1] ?? null;
-  const name = LINK_LABEL[tool];
   return {
     point: at,
     a,
     b,
     guides,
-    phrase: b
-      ? `${name}: ${partName(b.part)} ${tool === "axle" ? "gira sobre" : "liga a"} ${a ? partName(a.part) : "o fundo"}`
-      : "Toque sobre uma peça",
+    phrase: b ? hammerPhrase(tool, partName(b.part), a ? partName(a.part) : null) : "Toque sobre uma peça",
   };
+}
+
+export function hammerPhrase(tool: HammerTool, piece: string, other: string | null): string {
+  const target = other ? `à ${other}` : "ao fundo";
+  const verbs: Record<HammerTool, string> = {
+    screw: other ? `se une ${target}` : "fica presa ao fundo",
+    axle: `gira sobre ${other ? `a ${other}` : "o fundo"}`,
+    pin: "recebe um pino que atravessa camadas",
+    lock: `fica travada ${target}`,
+    spring: `recebe uma mola ligada ${target}`,
+    rod: `recebe uma haste ligada ${target}`,
+    cable: `recebe um cabo ligado ${target}`,
+    slider: `desliza em relação ${target}`,
+    chamber: "recebe a força do gás",
+    sensor: "recebe uma zona de detecção",
+  };
+  return `${LINK_LABEL[tool]}: a ${piece} ${verbs[tool]}`;
 }
 
 export interface HammerStamp {

@@ -26,6 +26,7 @@ export default defineConfig({
     timeout: 120_000,
   },
   projects: [
+    { name: "capture-e2d", testMatch: /capture-e2d\.spec\.ts/, timeout: 120_000 },
     { name: "roda-e2b", testMatch: /roda-e2b\.spec\.ts/, timeout: 60000 },
     { name: "profiles-e2b", testMatch: /profiles-e2b\.spec\.ts/, timeout: 60_000 },
     { name: "cards-e2b", testMatch: /cards-e2b\.spec\.ts/, timeout: 60_000 },

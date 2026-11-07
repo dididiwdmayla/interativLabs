@@ -40,6 +40,9 @@ export function LinkCard({ model, lm }: { model: SceneModel; lm: LinkModel }) {
         </span>
         <h3 className="card__title">{LINK_LABEL[l.kind]}</h3>
       </div>
+      <button className="btn btn--outline" onClick={() => ui.setExplain(l.kind)}>
+        O que é?
+      </button>
       <LinkQuick scene={model.scene} link={l} />
       <LinkPair model={model} lm={lm} />
       <LinkLists model={model} link={l} />
