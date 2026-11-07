@@ -36,6 +36,26 @@ type Pending = PendingInput;
 export type SimEventKind = TickKind;
 export type SimEvent = EventTick;
 
+/**
+ * O que o som precisa da física (só saída: não entra na gravação nem no hash).
+ * Sai do worker junto com os quadros e toca quando o desenho chega ao passo.
+ */
+export type SoundEvent =
+  | { step: number; kind: "impact"; a: Id; b: Id; speed: number }
+  | { step: number; kind: "fired"; chamber: Id; charge: number }
+  | { step: number; kind: "unlocked"; lock: Id }
+  /** vazão total de gás por respiros e portas (mmol/s); 0 = parou */
+  | { step: number; kind: "flow"; flow: number };
+
+/** No máximo tantos impactos por passo seguem para o som (o resto some). */
+const SOUND_IMPACTS_PER_STEP = 8;
+/** A vazão é amostrada a cada tantos passos (e na hora em que começa ou para). */
+const FLOW_EVERY = 6;
+/** Vazão abaixo disto (mmol/s) é silêncio: o chiado não existe e nada é enviado. */
+export const SOUND_FLOW_MIN = 0.02;
+/** A vazão segurada cai a esta fração por passo. */
+const FLOW_DECAY = 0.9;
+
 /** Uma câmara no quadro gravado. */
 export interface ChamberFrame {
   pressure: number;
@@ -220,6 +240,10 @@ export class SimSession {
   private target: Vec2 | null = null;
   readonly rec: Recorder;
   events: SimEvent[] = [];
+  /** eventos para o som, ainda não enviados (o worker esvazia com `drainSound`) */
+  private sound: SoundEvent[] = [];
+  private flowSent = 0;
+  private flowHold = 0;
   private partIds: Id[];
   last: Snapshot;
 
@@ -304,7 +328,42 @@ export class SimSession {
       const tick = eventTick(e, this.step);
       if (tick) this.events.push(tick);
     }
+    this.collectSound(s);
     return s;
+  }
+
+  /** Eventos do som no passo: impactos, carga acendendo, trava soltando e a vazão de gás. */
+  private collectSound(s: Snapshot): void {
+    let impacts = 0;
+    for (const e of s.events) {
+      if (e.kind === "impact") {
+        if (impacts++ < SOUND_IMPACTS_PER_STEP)
+          this.sound.push({ step: this.step, kind: "impact", a: e.a, b: e.b, speed: e.speed });
+      } else if (e.kind === "chamber-fired")
+        this.sound.push({ step: this.step, kind: "fired", chamber: e.chamber, charge: e.charge });
+      else if (e.kind === "lock-released")
+        this.sound.push({ step: this.step, kind: "unlocked", lock: e.lock });
+    }
+    let flow = 0;
+    for (const id in s.links) flow += s.links[id]!.flow ?? 0;
+    // sobe na hora, desce devagar (a vazão do passo oscila) e liga/desliga com folga
+    this.flowHold = Math.max(flow, this.flowHold * FLOW_DECAY);
+    const level =
+      this.flowHold >= (this.flowSent > 0 ? SOUND_FLOW_MIN / 2 : SOUND_FLOW_MIN) ? this.flowHold : 0;
+    if (
+      (this.step % FLOW_EVERY === 0 && (level > 0 || this.flowSent > 0)) ||
+      level > 0 !== this.flowSent > 0
+    ) {
+      this.sound.push({ step: this.step, kind: "flow", flow: level });
+      this.flowSent = level;
+    }
+  }
+
+  /** Entrega (e esquece) os eventos do som acumulados desde o último pedido. */
+  drainSound(): SoundEvent[] {
+    const out = this.sound;
+    this.sound = [];
+    return out;
   }
 
   /** Entradas vindas de fora (worker), na ordem, para o próximo passo. */
@@ -351,6 +410,9 @@ export class SimSession {
       this.rec.truncate(target);
       this.samples.truncate(target);
       this.events = this.events.filter((e) => e.step <= target);
+      this.sound = [];
+      this.flowSent = 0;
+      this.flowHold = 0;
       this.last = a.snapshot();
       // um arrasto que estava acontecendo no passo não continua: o dedo já saiu
       if (this.dragging) this.queue.push({ kind: "end" });
@@ -386,6 +448,9 @@ export class SimSession {
     this.step = 0;
     this.events = [];
     this.samples.clear();
+    this.sound = [];
+    this.flowSent = 0;
+    this.flowHold = 0;
     this.rec.truncate(0);
     this.rec.oldest = 0;
     this.last = this.adapter.snapshot();

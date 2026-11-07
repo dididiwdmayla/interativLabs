@@ -26,7 +26,9 @@ export function useMenuContext(): MenuContext {
   const layers = useUiStore((s) => s.look.open);
   const hideMode = useUiStore((s) => s.hideMode);
   const trail = useUiStore((s) => s.trail);
+  const sound = useUiStore((s) => s.soundBar);
   return {
+    sound,
     layers,
     hideMode,
     trail,

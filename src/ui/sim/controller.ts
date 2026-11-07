@@ -8,7 +8,9 @@ import { partAt } from "@/render/hit";
 import type { StageNodes } from "@/render/nodes";
 import { localOf, worldOf } from "@/render/prepare";
 import { Pacer, blendAt } from "@/sim/pacing";
-import { Recorder, type FrameView, type PendingInput, type SimEvent } from "@/sim/session";
+import { Recorder, type FrameView, type PendingInput, type SimEvent, type SoundEvent } from "@/sim/session";
+import { sound } from "@/sound";
+import { PhysicsSound } from "@/sound/physics";
 import type { SimReply, SimRequest } from "./sim.worker";
 import { Trail } from "./trail";
 import { useSimStore, type SimControl, type SimPick, type Speed, type TimelineState } from "./simStore";
@@ -65,6 +67,9 @@ class Controller implements SimControl {
   private drawnAt = -1;
   /** eventos que já chegaram mas o desenho ainda não alcançou */
   private due: SimEvent[] = [];
+  /** o mesmo para o som: tocam quando o desenho chega ao passo deles, só para a frente */
+  private dueSound: SoundEvent[] = [];
+  private physicsSound: PhysicsSound;
   /** muda a cada reinício ou volta: respostas antigas são ignoradas */
   private epoch = 0;
   private inflight = false;
@@ -102,6 +107,7 @@ class Controller implements SimControl {
     });
     this.nodes = nodes;
     this.opts = opts;
+    this.physicsSound = new PhysicsSound(nodes.model.scene, sound);
     this.rec = new Recorder(ready.partIds, ready.chamberIds, CAPACITY, ready.lockIds);
     this.rec.recordRaw(0, ready.frame, 0);
     this.mix = new Float32Array(this.rec.stride);
@@ -141,7 +147,7 @@ class Controller implements SimControl {
         this.events.push(...m.events);
         this.due.push(...m.events);
       }
-
+      if (m.sound?.length) this.dueSound.push(...m.sound);
       this.recvPhysics += m.physics;
       this.recvSteps += m.count;
       this.inflight = false;
@@ -156,6 +162,8 @@ class Controller implements SimControl {
       this.shownStep = null;
       this.pacer.reset(m.step);
       this.due = [];
+      this.dueSound = [];
+      this.physicsSound.reset();
       this.dirty = true;
       useSimStore.getState().set({ recalculating: false, scrubbed: false, paused: false });
     }
@@ -220,6 +228,14 @@ class Controller implements SimControl {
         this.sensorFlash(reached);
       }
     }
+    if (this.dueSound.length) {
+      const reached = this.dueSound.filter((e) => e.step <= d + 1e-6);
+      if (reached.length) {
+        this.dueSound = this.dueSound.filter((e) => e.step > d + 1e-6);
+        // só na execução para a frente: voltar ou arrastar a régua não toca nada
+        if (this.shownStep === null && !this.rewinding) this.physicsSound.play(reached, performance.now());
+      }
+    }
     return true;
   }
 
@@ -242,6 +258,8 @@ class Controller implements SimControl {
       this.pacer.advance(dt, this.state.speed);
       this.send();
     }
+    // pausada, na régua ou voltando: o chiado da vazão para (volta sozinho quando o fluxo segue)
+    if (this.state.paused || this.shownStep !== null || this.rewinding) this.physicsSound.silence();
     const t1 = performance.now();
     this.mixMs = 0;
     if (this.dirty) this.drawnAt = -1;
@@ -333,6 +351,8 @@ class Controller implements SimControl {
     this.shownStep = null;
     this.pacer.reset(0);
     this.due = [];
+    this.dueSound = [];
+    this.physicsSound.reset();
     this.nodes.resetPeaks();
     this.trail.reset();
     this.state.set({ scrubbed: false, recalculating: false });
@@ -447,6 +467,7 @@ class Controller implements SimControl {
     if (this.rewinding) window.clearTimeout(this.rewinding.timer);
     document.removeEventListener("visibilitychange", this.onVisibility);
     this.unsubscribeProbes();
+    this.physicsSound.silence();
     this.worker.terminate();
     this.nodes.setDrag(null);
     if (this.nodes.trail === this.trail) this.nodes.trail = null;

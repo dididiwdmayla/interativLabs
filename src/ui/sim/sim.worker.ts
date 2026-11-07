@@ -3,7 +3,7 @@ import type { Probe } from "@/instruments/model";
 import type { Series } from "@/instruments/sampling";
 import { loadBox2d } from "@/engine/box2d/load";
 import type { Scene } from "@/model/types";
-import { SimSession, type PendingInput, type SimEvent } from "@/sim/session";
+import { SimSession, type PendingInput, type SimEvent, type SoundEvent } from "@/sim/session";
 
 /**
  * A física do modo Simular num Web Worker: a sessão (Box2D, passo fixo,
@@ -30,6 +30,8 @@ export type SimReply =
       count: number;
       data: Float32Array;
       events: SimEvent[];
+      /** eventos do som (só saída: impactos, carga, trava, vazão) */
+      sound: SoundEvent[];
       /** ms de física (passos + snapshots) */
       physics: number;
     }
@@ -41,12 +43,19 @@ const post = (m: SimReply, transfer: Transferable[] = []) =>
 
 let session: SimSession | null = null;
 
-function frames(id: number, from: number, count: number, events: SimEvent[], physics: number) {
+function frames(
+  id: number,
+  from: number,
+  count: number,
+  events: SimEvent[],
+  physics: number,
+  sound: SoundEvent[] = [],
+) {
   if (!session) return;
   const stride = session.rec.stride;
   const data = new Float32Array(stride * count);
   for (let i = 0; i < count; i++) session.rec.copyFrame(from + i, data, i * stride);
-  post({ t: "frames", id, from, count, data, events, physics }, [data.buffer]);
+  post({ t: "frames", id, from, count, data, events, sound, physics }, [data.buffer]);
   post({ t: "samples", id, series: session.samples.series(session.step) });
 }
 
@@ -88,6 +97,7 @@ self.onmessage = async (e: MessageEvent<SimRequest>) => {
         steps,
         session.events.filter((x) => x.step >= from),
         physics,
+        session.drainSound(),
       );
     } else if (m.t === "rewind") {
       const t0 = performance.now();

@@ -19,6 +19,7 @@ import { linkHandles, adjustLinkHandle, type LinkHandle } from "@/editor/linkHan
 import { applyLink } from "./card/applyLink";
 import { dragPhrase, pencilPhrase as pencilToolPhrase } from "@/editor/phrases";
 import { moveLink } from "@/editor/moveLink";
+import { sound } from "@/sound";
 import { HammerBar } from "./HammerBar";
 import { PencilBar } from "./PencilBar";
 import "./pencil.css";
@@ -901,8 +902,11 @@ export function Stage({
       ui.notify(c.reason, { warn: true });
       return;
     }
-    if (ui.commit(c.command, c.selection ? { selection: { kind: "part", id: c.selection } } : undefined))
+    if (ui.commit(c.command, c.selection ? { selection: { kind: "part", id: c.selection } } : undefined)) {
       vibrate(12);
+      // o corte ou a soma concluídos, uma vez por comando
+      sound.play("sfx-cut");
+    }
   };
 
   /**

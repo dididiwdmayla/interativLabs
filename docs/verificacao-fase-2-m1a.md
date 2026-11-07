@@ -17,8 +17,9 @@
 
 ## Verificações e limites
 
-- `typecheck`, `lint` e `build`: limpos. `git fetch origin main` e `git merge origin/main`: já atualizado, sem conflitos nem mudanças em som.
+- `typecheck`, `lint` e `build`: limpos. `git fetch origin main` e `git merge origin/main`: integração da revisão `6665f5f` (som). Conflitos em `useUiStore`, sessão, controlador e worker resolvidos preservando coleta, transporte e reprodução de som, junto com `samples`. Nenhuma edição em `src/sound/` ou `scripts/audio/`.
 - Vitest executado somente nos três arquivos novos em `src/instruments/`. Eventos: 2/2. Sondas: 3/4 no estado final (falha conhecida de penetração; antes dessa checagem adicional, 4/4). Presets: 1/2 (falha conhecida do pico do Lançador). As afirmações dos aceites permanecem nos testes, sem alargar tolerâncias ou marcar como ignoradas.
+- Capturas anteriores ao merge do som; não repetidas, conforme o limite de uma rodada visual.
 - Captura: somente `capture-m1a`, 4/4 com `PW_CHROMIUM=/usr/bin/chromium`. A primeira tentativa não abriu navegador porque faltava o executável baixado pelo Playwright. Quatro imagens em `docs/capturas/fase-2/m1a/`, todas inspecionadas; nenhum ajuste visual posterior.
 - Verificação seguinte: esclarecer torque da lingueta zerado pela API de reação; fechar forças sem junta nativa e penetração; investigar diferença entre pico instantâneo e medida de saída da esfera. Conferir também persistência, retorno/reinício com sondas, seleção de folga em peças multicamada e camadas afastadas, toque longo, sobreposição de tiques próximos e execução longa (amostras completas ficam na memória do worker; poses continuam com janela de 10 s). A régua limita o cursor à janela gravada, mesmo quando o gráfico mostra a execução inteira.
 - Não foram rodadas bateria completa, regressão Playwright, bancada, abuso, overflow ou determinismo. Sem subagentes, sem mudanças em assets, sons ou formato de cena.

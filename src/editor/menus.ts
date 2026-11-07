@@ -22,6 +22,8 @@ export interface MenuContext {
   hideMode: boolean;
   /** rastro do movimento (Testar) */
   trail: boolean;
+  /** faixa do Som aberta */
+  sound: boolean;
 }
 
 export interface MenuItem {
@@ -75,7 +77,9 @@ export const MENUS: Record<MenuId, MenuDef> = {
         on: (c) => c.trail,
       },
       { id: "fullscreen", label: "Tela cheia", icon: "fullscreen", on: (c) => c.fullscreen },
-      { id: "tips", label: "Dicas", icon: "tips", on: (c) => c.hint },
+      // as dicas só aparecem no Montar: no Testar o lugar é do Som, para o menu não passar de 8
+      { id: "sound", label: "Som", icon: "sound", on: (c) => c.sound },
+      { id: "tips", label: "Dicas", icon: "tips", when: (c) => c.mode === "edit", on: (c) => c.hint },
       { id: "lefty", label: "Canhoto", icon: "lefty", on: (c) => c.lefty },
     ],
   },
