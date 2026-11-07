@@ -38,7 +38,10 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Stri
     <ToolStrip
       label="Ferramentas do Martelo"
       mode="select"
-      phrase={phrase ?? `${LINK_LABEL[hammer]}: toque sobre uma peça${lastInput === "mouse" || lastInput === "keyboard" ? " · Esc sai" : ""}`}
+      phrase={
+        phrase ??
+        `${LINK_LABEL[hammer]}: toque sobre uma peça${lastInput === "mouse" || lastInput === "keyboard" ? " · Esc sai" : ""}`
+      }
       actions={actions}
       groups={HAMMER_GROUPS.map((g) => ({
         name: g.name,
@@ -48,6 +51,7 @@ export function HammerBar({ phrase, actions }: { phrase?: string; actions?: Stri
           icon: TOOL_ICONS[tool],
           pressed: hammer === tool,
           onClick: () => setHammer(tool),
+          onLongPress: () => useUiStore.getState().setExplain(tool),
         })),
       }))}
     />

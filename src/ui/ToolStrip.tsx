@@ -29,6 +29,7 @@ export interface StripItem {
   /** nome completo para leitores de tela e o `title` (o rótulo visível fica curto) */
   hint?: string;
   onClick: () => void;
+  onLongPress?: () => void;
 }
 
 export interface StripGroup {
@@ -76,7 +77,7 @@ function measure(el: HTMLElement): { avail: Slot; full: Slot } | null {
   let left = s.left + 2 * frame;
   let right = s.right - 2 * frame;
   let cornerTop = s.bottom;
-  for (const c of bench.querySelectorAll<HTMLElement>(".corner--bl > *, .corner--br > *")) {
+  for (const c of bench.querySelectorAll<HTMLElement>(".corner--bl > *, .corner--br > *, .testbar > *")) {
     const r = c.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) continue;
     cornerTop = Math.min(cornerTop, r.top);
@@ -150,7 +151,7 @@ export function ToolStrip({
     const bench = el.closest(".workbench");
     if (bench) {
       ro.observe(bench);
-      for (const c of bench.querySelectorAll(".corner--bl, .corner--br")) ro.observe(c);
+      for (const c of bench.querySelectorAll(".corner--bl, .corner--br, .testbar")) ro.observe(c);
     }
     window.addEventListener("resize", place);
     return () => {
@@ -159,6 +160,14 @@ export function ToolStrip({
     };
   });
 
+  const longTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const held = useRef(false);
+  useLayoutEffect(
+    () => () => {
+      if (longTimer.current) clearTimeout(longTimer.current);
+    },
+    [],
+  );
   const tier = slot?.tier ?? "icon";
   const button = (it: StripItem, withLabel: boolean, key?: string) => (
     <button
@@ -169,7 +178,33 @@ export function ToolStrip({
       aria-label={withLabel && !it.hint ? undefined : (it.hint ?? it.label)}
       title={it.hint ?? it.label}
       disabled={it.disabled}
-      onClick={it.onClick}
+      onPointerDown={() => {
+        held.current = false;
+        if (it.onLongPress)
+          longTimer.current = setTimeout(() => {
+            held.current = true;
+            it.onLongPress?.();
+          }, 550);
+      }}
+      onPointerUp={() => {
+        if (longTimer.current) clearTimeout(longTimer.current);
+      }}
+      onPointerCancel={() => {
+        if (longTimer.current) clearTimeout(longTimer.current);
+      }}
+      onPointerLeave={() => {
+        if (longTimer.current) clearTimeout(longTimer.current);
+      }}
+      onContextMenu={(e) => {
+        if (it.onLongPress) {
+          e.preventDefault();
+          it.onLongPress();
+        }
+      }}
+      onClick={() => {
+        if (!held.current) it.onClick();
+        held.current = false;
+      }}
       data-tool={it.id}
     >
       {it.icon ? (

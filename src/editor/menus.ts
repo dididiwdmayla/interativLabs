@@ -13,6 +13,9 @@ export interface MenuContext {
   mode: "edit" | "simulate";
   hasSelection: boolean;
   xray: boolean;
+  layerColors?: boolean;
+  hideMode?: boolean;
+  trails?: boolean;
   hint: boolean;
   lefty: boolean;
   fullscreen: boolean;
@@ -56,11 +59,18 @@ export const MENUS: Record<MenuId, MenuDef> = {
     title: "Vista",
     modes: ["edit", "simulate"],
     items: [
-      { id: "hide-parts", label: "Esconder peças", icon: "eyeOff" },
+      {
+        id: "trails",
+        label: "Rastro",
+        icon: "stroke",
+        when: (c) => c.mode === "simulate",
+        on: (c) => !!c.trails,
+      },
+      { id: "hide-parts", label: "Esconder peças", icon: "eyeOff", on: (c) => !!c.hideMode },
       { id: "fit", label: "Enquadrar", icon: "fit" },
       { id: "xray", label: "Raio-x", icon: "xray", on: (c) => c.xray },
       { id: "fullscreen", label: "Tela cheia", icon: "fullscreen", on: (c) => c.fullscreen },
-      { id: "layer-colors", label: "Camadas em cores", icon: "layers" },
+      { id: "layer-colors", label: "Camadas em cores", icon: "layers", on: (c) => !!c.layerColors },
       { id: "tips", label: "Dicas", icon: "tips", on: (c) => c.hint },
       { id: "lefty", label: "Canhoto", icon: "lefty", on: (c) => c.lefty },
     ],

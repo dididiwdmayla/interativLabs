@@ -1,3 +1,4 @@
+import { TRAIL_SLOTS, TRAIL_BANDS } from "./trails";
 import type { Selection } from "./selection";
 import { linkParts } from "@/editor/names";
 import { hiddenLinkState } from "@/editor/hiddenParts";
@@ -167,7 +168,16 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
       </g>
       <g ref={nodes.refPart(id, "g", m.key)}>
         <path className="part__face" d={m.d} />
-        {colors && <text className="layer-seal" x={m.outline[0]?.outer[0]?.[0] ?? 0} y={(m.outline[0]?.outer[0]?.[1] ?? 0) + 12 * ctx.px} fontSize={11 * ctx.px}>{m.layer + 1}</text>}
+        {colors && (
+          <text
+            className="layer-seal"
+            x={m.outline[0]?.outer[0]?.[0] ?? 0}
+            y={(m.outline[0]?.outer[0]?.[1] ?? 0) + 12 * ctx.px}
+            fontSize={11 * ctx.px}
+          >
+            {m.layer + 1}
+          </text>
+        )}
         {skin.tiny ? (
           <path className="part__hatch part__tone" d={m.d} style={{ fillOpacity: hatchCoverage(m.hatch) }} />
         ) : m.body ? (
@@ -196,9 +206,10 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx }: PartArtProps) 
 }
 
 export function SceneSvg(props: SceneSvgProps) {
+  const trails = useUiStore((s) => s.trails);
   const hidden = useUiStore((s) => s.hiddenParts);
   const colors = useUiStore((s) => s.layerColors);
-  const spread = useUiStore((s) => s.layerColors ? s.layerSpread : 0);
+  const spread = useUiStore((s) => (s.layerColors ? s.layerSpread : 0));
   const isolate = useUiStore((s) => s.layerColors && s.layerIsolate);
   const { model, nodes, uid, zoom, fitZoom, mode, selection, size } = props;
   const px = mmPerPx(zoom);
@@ -227,7 +238,20 @@ export function SceneSvg(props: SceneSvgProps) {
     [model],
   );
 
-  const visibleLinks = useMemo(() => model.links.filter((lm) => hiddenLinkState(lm.link, hidden, model.scene) !== "hidden"), [model, hidden]);
+  const visibleLinks = useMemo(
+    () =>
+      model.links.filter(
+        (lm) =>
+          hiddenLinkState(lm.link, hidden, model.scene) !== "hidden" &&
+          (!isolate ||
+            (lm.link.kind === "pin" || lm.link.kind === "sensor"
+              ? lm.span[0] <= props.active && props.active <= lm.span[1]
+              : linkParts(lm.link).some((id) =>
+                  model.partList.some((m) => m.part.id === id && m.layer === props.active),
+                ))),
+      ),
+    [model, hidden, isolate, props.active],
+  );
 
   // ligações por lugar de desenho
   const carriedBy = new Map<string, LinkModel[]>();
@@ -284,6 +308,10 @@ export function SceneSvg(props: SceneSvgProps) {
   // depois de cada montagem, reaplica o quadro atual (as poses não passam pelo React)
   useLayoutEffect(() => {
     nodes.spread = spread;
+    nodes.trailOn = trails && mode === "simulate";
+    nodes.trailSelected = selection?.kind === "part" ? selection.id : null;
+    nodes.trailHidden = hidden;
+    nodes.trailLayer = isolate ? props.active : null;
     nodes.setContext({ ...writeCtx, walls: !heavy });
     nodes.write(nodes.frame, true);
   });
@@ -325,10 +353,18 @@ export function SceneSvg(props: SceneSvgProps) {
           ctx={ctx}
         />,
       );
-    if (!visible) for (const m of L.parts) {
-      const carried = carriedBy.get(m.key) ?? [];
-      if (carried.length) items[kindOf(m)].push(<g key={`isolated-${m.key}`} ref={nodes.refPart(m.part.id, "g", m.key)}>{carried.map((lm) => <CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />)}</g>);
-    }
+    if (!visible)
+      for (const m of L.parts) {
+        const carried = carriedBy.get(m.key) ?? [];
+        if (carried.length)
+          items[kindOf(m)].push(
+            <g key={`isolated-${m.key}`} ref={nodes.refPart(m.part.id, "g", m.key)}>
+              {carried.map((lm) => (
+                <CarriedArt key={lm.link.id} ctx={ctx} lm={lm} />
+              ))}
+            </g>,
+          );
+      }
     for (const lm of followersAt.get(L.index) ?? [])
       items[kindOf(model.parts.get(lm.carrier ?? ""))].push(
         <g
@@ -360,7 +396,11 @@ export function SceneSvg(props: SceneSvgProps) {
               className={`layer layer--${st}${L.layer.visible === false ? " is-hidden" : ""}`}
               data-layer={L.index}
               transform={`translate(${layerOffset(L.index, spread).join(" ")})`}
-              style={colors ? { "--layer-color": `var(--layer-${L.index + 1})` } as React.CSSProperties : undefined}
+              style={
+                colors
+                  ? ({ "--layer-color": `var(--layer-${L.index + 1})` } as React.CSSProperties)
+                  : undefined
+              }
             >
               {items[kind]}
             </g>,
@@ -395,12 +435,50 @@ export function SceneSvg(props: SceneSvgProps) {
         "overlay",
         "stage__sheet--overlay",
         <g className="overlay">
-          {visibleLinks.filter((lm) => hiddenLinkState(lm.link, hidden, model.scene) === "partial").flatMap((lm) => linkParts(lm.link).filter((id): id is string => id !== null && hidden.includes(id)).map((id) => {
-            const l = lm.link;
-            const at = "atA" in l ? (l.a === id ? l.atA : l.atB) : "at" in l ? l.at : [0, 0] as [number, number];
-            return <circle key={`${l.id}-${id}`} className="hidden-end" r={5 * px} ref={nodes.refHiddenEnd(`${l.id}-${id}`, id, at, model.parts.get(id)?.layer ?? 0)} />;
-          }))}
-          {spread > 0 && visibleLinks.filter((lm) => (lm.link.kind === "pin" || lm.link.kind === "sensor") && (!isolate || (lm.span[0] <= props.active && props.active <= lm.span[1]))).map((lm) => <path key={`shaft-${lm.link.id}`} className="layer-shaft" ref={nodes.refShaft(lm.link.id)} />)}
+          <g className="trails" aria-hidden="true">
+            {Array.from({ length: TRAIL_SLOTS * TRAIL_BANDS }, (_, i) => (
+              <path
+                key={`trail-${i}`}
+                ref={nodes.refTrail(i)}
+                opacity={(1 - (i % TRAIL_BANDS) / TRAIL_BANDS) * 0.85}
+              />
+            ))}
+          </g>
+          {visibleLinks
+            .filter((lm) => hiddenLinkState(lm.link, hidden, model.scene) === "partial")
+            .flatMap((lm) =>
+              linkParts(lm.link)
+                .filter((id): id is string => id !== null && hidden.includes(id))
+                .map((id) => {
+                  const l = lm.link;
+                  const at =
+                    "atA" in l
+                      ? l.a === id
+                        ? l.atA
+                        : l.atB
+                      : "at" in l
+                        ? l.at
+                        : ([0, 0] as [number, number]);
+                  return (
+                    <circle
+                      key={`${l.id}-${id}`}
+                      className="hidden-end"
+                      r={5 * px}
+                      ref={nodes.refHiddenEnd(`${l.id}-${id}`, id, at, model.parts.get(id)?.layer ?? 0)}
+                    />
+                  );
+                }),
+            )}
+          {spread > 0 &&
+            visibleLinks
+              .filter(
+                (lm) =>
+                  (lm.link.kind === "pin" || lm.link.kind === "sensor") &&
+                  (!isolate || (lm.span[0] <= props.active && props.active <= lm.span[1])),
+              )
+              .map((lm) => (
+                <path key={`shaft-${lm.link.id}`} className="layer-shaft" ref={nodes.refShaft(lm.link.id)} />
+              ))}
           {visibleLinks.map((lm) =>
             lm.link.kind === "chamber" ? (
               <text

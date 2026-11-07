@@ -103,9 +103,7 @@ export function hammerPoint(
     a,
     b,
     guides,
-    phrase: b
-      ? hammerPhrase(tool, partName(b.part), a ? partName(a.part) : null)
-      : "Toque sobre uma peça",
+    phrase: b ? hammerPhrase(tool, partName(b.part), a ? partName(a.part) : null) : "Toque sobre uma peça",
   };
 }
 

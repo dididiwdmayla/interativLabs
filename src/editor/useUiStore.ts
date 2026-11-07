@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Scene } from "@/model/types";
+import type { LinkKind, Scene } from "@/model/types";
 import type { Selection } from "@/render/selection";
 import type { CardPick } from "./cardPick";
 import type { HammerTool } from "./hammer";
@@ -43,6 +43,10 @@ export interface EdgeMenuState {
 }
 
 interface UiState {
+  trails: boolean;
+  setTrails: (on: boolean) => void;
+  explain: LinkKind | null;
+  setExplain: (kind: LinkKind | null) => void;
   hiddenParts: string[];
   hideMode: boolean;
   hiddenList: boolean;
@@ -149,12 +153,20 @@ const hasWindow = typeof window !== "undefined";
  * por comandos (`commit`), com desfazer e refazer por patches do Immer.
  */
 export const useUiStore = create<UiState>()((set, get) => ({
+  trails: false,
+  setTrails: (trails) => set({ trails }),
+  explain: null,
+  setExplain: (explain) => set({ explain }),
   hiddenParts: [],
   hideMode: false,
   hiddenList: false,
   setHideMode: (hideMode) => set({ hideMode, hammer: null, pencil: false }),
   setHiddenList: (hiddenList) => set({ hiddenList }),
-  hidePart: (id) => set((s) => ({ hiddenParts: s.hiddenParts.includes(id) ? s.hiddenParts : [...s.hiddenParts, id], selection: s.selection?.id === id ? null : s.selection })),
+  hidePart: (id) =>
+    set((s) => ({
+      hiddenParts: s.hiddenParts.includes(id) ? s.hiddenParts : [...s.hiddenParts, id],
+      selection: s.selection?.id === id ? null : s.selection,
+    })),
   showPart: (id) => set((s) => ({ hiddenParts: id ? s.hiddenParts.filter((p) => p !== id) : [] })),
   restoreHidden: (hiddenParts) => set({ hiddenParts }),
   layerColors: false,

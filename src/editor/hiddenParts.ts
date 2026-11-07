@@ -1,7 +1,11 @@
 import type { Link, Scene } from "@/model/types";
 import { linkParts } from "./names";
 
-export function hiddenLinkState(link: Link, hidden: readonly string[], scene: Scene): "visible" | "partial" | "hidden" {
+export function hiddenLinkState(
+  link: Link,
+  hidden: readonly string[],
+  scene: Scene,
+): "visible" | "partial" | "hidden" {
   const ids = linkParts(link).filter((id): id is string => id !== null);
   if (link.kind === "slot") {
     const pin = scene.links.find((l) => l.id === link.pin);

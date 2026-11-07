@@ -1,3 +1,4 @@
+import { ExplainCard } from "./ExplainCard";
 import { ToolStrip } from "./ToolStrip";
 import { LayerViewBar } from "./LayerViewBar";
 import { spreadBounds } from "@/editor/layerView";
@@ -302,8 +303,9 @@ export function Stage({
   const { width, height } = useElementSize(box);
   const uid = useId().replace(/:/g, "");
   const ctl = useSimStore((s) => s.ctl);
+  const isolate = useUiStore((s) => s.layerColors && s.layerIsolate);
   const hideMode = useUiStore((s) => s.hideMode);
-  const spread = useUiStore((s) => s.layerColors ? s.layerSpread : 0);
+  const spread = useUiStore((s) => (s.layerColors ? s.layerSpread : 0));
   const editing = mode === "edit";
   const hammer = useUiStore((s) => s.hammer);
   const pencilOn = useUiStore((s) => s.pencil);
@@ -318,7 +320,10 @@ export function Stage({
     const pointer = (e: PointerEvent) => useUiStore.getState().noteInput(e.pointerType);
     window.addEventListener("pointerdown", pointer, true);
     window.addEventListener("keydown", key);
-    return () => { window.removeEventListener("keydown", key); window.removeEventListener("pointerdown", pointer, true); };
+    return () => {
+      window.removeEventListener("keydown", key);
+      window.removeEventListener("pointerdown", pointer, true);
+    };
   }, []);
   const [hammerPreview, setHammerPreview] = useState<{
     hit: HammerPoint;
@@ -508,7 +513,14 @@ export function Stage({
     if (!model || !width || !height) return;
     if (spread) {
       beforeSpread.current ??= { ...view.current };
-      animateView(fitView(spreadBounds(model.bounds, model.layers.length, spread), width, height, editing ? FIT_PAD_EDIT : FIT_PAD_SIM));
+      animateView(
+        fitView(
+          spreadBounds(model.bounds, model.layers.length, spread),
+          width,
+          height,
+          editing ? FIT_PAD_EDIT : FIT_PAD_SIM,
+        ),
+      );
     } else if (beforeSpread.current) {
       animateView(beforeSpread.current);
       beforeSpread.current = null;
@@ -537,7 +549,7 @@ export function Stage({
   // ——— edição: peça mais alta sob o dedo, alças, pose durante o gesto ———
   const layerOk = (i: number) => {
     const L = model?.layers[i]?.layer;
-    return !!L && L.visible && !L.locked && (!spread || i === activeLayer);
+    return !!L && L.visible && !L.locked && (!(spread || isolate) || i === activeLayer);
   };
   const pickedSurface = useRef<{ id: string; layer: number } | null>(null);
   const pickPart = (w: Vec2): string | null => {
@@ -904,8 +916,13 @@ export function Stage({
     if (hideMode && model && nodes) {
       const raw = toWorld(view.current, x, y);
       for (let i = model.layers.length - 1; i >= 0; i--) {
-        const hit = partHit(model, nodes.frame, [raw[0] - i * spread, raw[1] + i * spread], { layer: (l) => l === i && model.layers[l]?.layer.visible !== false });
-        if (hit) { useUiStore.getState().hidePart(hit.part.id); break; }
+        const hit = partHit(model, nodes.frame, [raw[0] - i * spread, raw[1] + i * spread], {
+          layer: (l) => l === i && model.layers[l]?.layer.visible !== false,
+        });
+        if (hit) {
+          useUiStore.getState().hidePart(hit.part.id);
+          break;
+        }
       }
       gesture.current = { kind: "none" };
       return;
@@ -921,7 +938,11 @@ export function Stage({
       }
     } else if (!bare) {
       // Lápis com o dedo (ou mouse): desenha; com caneta presente, o dedo só move a vista
-      if (pencilOn && !picking && !(e.pointerType === "touch" && useUiStore.getState().penSeen && !useUiStore.getState().fingerDraws)) {
+      if (
+        pencilOn &&
+        !picking &&
+        !(e.pointerType === "touch" && useUiStore.getState().penSeen && !useUiStore.getState().fingerDraws)
+      ) {
         if (pencilPending?.plan.kind === "sides") {
           const side = sideAt(pencilPending.plan, w);
           if (side !== null) {
@@ -1524,7 +1545,27 @@ export function Stage({
           )}
         </>
       )}
-      {!bare && hideMode && <ToolStrip label="Esconder peças" mode="cycle" phrase="Toque para esconder a peça mais alta · ela continua no mecanismo" groups={[{ name: "Esconder", items: [{ id: "done-hide", label: "Concluir", onClick: () => useUiStore.getState().setHideMode(false) }] }]} />}
+      {!bare && <ExplainCard />}
+      {!bare && hideMode && (
+        <ToolStrip
+          label="Esconder peças"
+          mode="cycle"
+          phrase="Toque para esconder a peça mais alta · ela continua no mecanismo"
+          groups={[
+            {
+              name: "Esconder",
+              items: [
+                {
+                  id: "done-hide",
+                  label: "Concluir",
+                  glyph: "OK",
+                  onClick: () => useUiStore.getState().setHideMode(false),
+                },
+              ],
+            },
+          ]}
+        />
+      )}
       {!bare && !hideMode && <LayerViewBar />}
       {editing && !bare && pencilOn && model && (
         <>

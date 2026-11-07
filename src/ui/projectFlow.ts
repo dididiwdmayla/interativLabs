@@ -86,7 +86,9 @@ function figureOf(list: ProjectMeta[], id: string): number {
 function show(p: Project, list: ProjectMeta[]): void {
   const scene: Scene = { ...p.scene, meta: { ...p.scene.meta, title: p.name } };
   useUiStore.getState().openScene(p.id, scene, figureOf(list, p.id), loadHistory(p.id, scene) ?? undefined);
-  useUiStore.getState().restoreHidden(p.view?.hiddenParts.filter((id) => scene.parts.some((part) => part.id === id)) ?? []);
+  useUiStore
+    .getState()
+    .restoreHidden(p.view?.hiddenParts.filter((id) => scene.parts.some((part) => part.id === id)) ?? []);
   void setLast(p.id);
 }
 
@@ -225,7 +227,8 @@ export function startAutosave(): () => void {
     const c = s.current;
     if (!c) return;
     if (c.id === prev.current?.id && s.history !== prev.history) saveHistory(c.id, c.scene, s.history);
-    if (c.id !== prev.current?.id || (c.scene === prev.current?.scene && s.hiddenParts === prev.hiddenParts)) return;
+    if (c.id !== prev.current?.id || (c.scene === prev.current?.scene && s.hiddenParts === prev.hiddenParts))
+      return;
     const id = c.id;
     const scene = c.scene;
     const hiddenParts = s.hiddenParts;
