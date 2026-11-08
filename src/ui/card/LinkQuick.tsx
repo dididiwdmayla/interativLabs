@@ -361,6 +361,54 @@ export function LinkQuick({ scene, link: l }: { scene: Scene; link: Link }) {
         />
       )}
       {l.kind === "chamber" && (
+        <Options
+          label="A câmara"
+          value={l.mode === "capsule" ? "capsule" : "charge"}
+          items={[
+            ["charge", "Carga própria"],
+            ["capsule", "Recebe cápsula"],
+          ]}
+          onChange={(key) => {
+            if (key === "capsule") {
+              // sem carga nem paredes: a cápsula assentada traz as dela (a esfera e o fundo do estojo)
+              const { charge: _charge, ...gas } = l.gas;
+              void _charge;
+              save(
+                { ...l, mode: "capsule", seat: l.seat ?? 1, walls: [], vents: [], ports: [], gas },
+                "mode",
+              );
+            } else if (l.walls.length) {
+              const { mode: _m, seat: _s, ...rest } = l;
+              void _m;
+              void _s;
+              save(rest, "mode");
+            } else
+              useUiStore
+                .getState()
+                .notify(
+                  "Para voltar à carga própria, refaça a câmara com o Martelo (ela precisa de paredes)",
+                  {
+                    warn: true,
+                  },
+                );
+          }}
+        />
+      )}
+      {l.kind === "chamber" && l.mode === "capsule" && (
+        <>
+          <NumberField
+            label="Assento"
+            unit="mm"
+            value={l.seat ?? 1}
+            onCommit={(v) => applyLink({ ...l, seat: Math.max(0, v) }, "seat")}
+          />
+          <p className="card__empty">
+            O fundo da cápsula a até esta distância do fundo da câmara conta como assentado: o furo continua
+            pelo cano. Arraste a alça no palco.
+          </p>
+        </>
+      )}
+      {l.kind === "chamber" && l.mode !== "capsule" && (
         <>
           <Options
             label="Carga"

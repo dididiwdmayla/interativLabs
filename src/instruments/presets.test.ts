@@ -98,7 +98,7 @@ it("disparo-extracao: pressure of the capsule, exit speed at the muzzle, bolt re
   expect(probes.map((p) => p.id)).toEqual([
     "capsule-pressure",
     "ball-speed",
-    "bolt-position",
+    "bolt-recoil",
     "extractor-force",
   ]);
   const s = new SimSession(await loadBox2d(), sc, { probes });

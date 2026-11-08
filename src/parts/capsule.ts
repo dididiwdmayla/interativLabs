@@ -30,8 +30,12 @@ export const CAPSULE_DEFAULTS: CapsuleParams = { length: 22, diameter: 8, rim: 8
 export const CAPSULE_CHARGES = [0.05, 0.12, 0.25] as const;
 export const CHARGE_LABELS = ["fraca", "média", "forte"] as const;
 
-/** Golpe mínimo na espoleta, mm/s: o ferrolho empurrando a 600 mm/s não acende. */
-export const CAPSULE_MIN_STRIKE = 1000;
+/**
+ * Golpe mínimo na espoleta, mm/s: abaixo da mão do app (que arrasta a até
+ * 600 mm/s), para dar para golpear com o dedo. O ferrolho que empurra a
+ * cápsula não toca a espoleta: a face dele tem um rebaixo em volta dela.
+ */
+export const CAPSULE_MIN_STRIKE = 500;
 
 /** Medidas derivadas: parede, aro, canaleta, fundo, folga e saliência da esfera. */
 export const CAPSULE_PROPORTIONS = {

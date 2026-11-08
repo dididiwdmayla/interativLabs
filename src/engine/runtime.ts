@@ -431,7 +431,7 @@ export class Runtime {
     const balls = new Set(plan.capsules.map((c) => c.ball));
     const watch = new Set<number>();
     for (const c of plan.capsules)
-      for (const i of reach(plan, c.body, 1)) if (this.dyn(i) && !balls.has(i)) watch.add(i);
+      for (const i of reach(plan, c.body, 2)) if (this.dyn(i) && !balls.has(i)) watch.add(i);
     this.caseWatch = [...watch].sort((a, b) => a - b);
     this.releaseProjectile = options.releaseProjectile;
     for (const s of plan.sensors) this.sensors.set(s.id, { p: s, count: 0 });
@@ -645,6 +645,8 @@ export class Runtime {
    */
   shooting(): boolean {
     if (!this.capsules.length) return false;
+    // entre os passos, o roteiro ou a mão podem ter mudado velocidades: lê do motor
+    this.fresh.fill(false);
     // uma trava que solta agora (o gatilho soltando o percussor): o golpe vem dentro deste passo
     if (this.releaseQueue.size) return true;
     for (const c of this.capsules) if (c.ch.fired && !c.ch.spent && c.p.ball >= 0) return true;

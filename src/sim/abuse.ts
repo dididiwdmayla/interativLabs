@@ -196,9 +196,10 @@ function prepare(scene: Scene, initial: Snapshot, staticOffsets: Map<Id, number>
   let mass = 0;
   for (const b of plan.bodies) if (!b.static && b.index > 0) mass += b.mass;
   const g = dhypot(plan.gravity[0], plan.gravity[1]);
-  const hasSource = scene.links.some(
-    (l) => l.kind === "chamber" || (l.kind === "axle" && l.motor !== undefined),
-  );
+  const hasSource =
+    scene.links.some((l) => l.kind === "chamber" || (l.kind === "axle" && l.motor !== undefined)) ||
+    // a cápsula com carga também é fonte: a mão pode golpear a espoleta
+    scene.parts.some((p) => (p.capsule?.charge ?? 0) > 0);
   // piso de ruído: 0,05 mm de movimento contra o peso de tudo e contra as molas
   const springs = springStroke(plan, null).reduce((x, y) => x + y, 0);
   return { scene, rodLength, cables, mounts, pins, hasSource, floor: (mass * g + springs) * 0.05 * 1e-6 };

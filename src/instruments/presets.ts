@@ -45,7 +45,7 @@ export function instrumentPreset(scene: Scene): Probe[] {
         at: { kind: "crossing", target: "p5", quantity: "absoluteX", threshold: muzzle },
         atLabel: "na saída",
       },
-      { id: "bolt-position", target: "p6", quantity: "x", name: "Ferrolho · recuo" },
+      { id: "bolt-recoil", target: "p6", quantity: "x", name: "Ferrolho · recuo" },
       { id: "extractor-force", target: "k9", quantity: "force", name: "Extrator · força na garra" },
     ];
   }

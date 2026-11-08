@@ -28,6 +28,8 @@ export const CICLO = {
   seat: 1,
   /** meia altura do canal do percussor */
   pinChannel: 0.7,
+  /** rebaixo da face do ferrolho em volta da espoleta: meia altura e profundidade (mm) */
+  faceRecess: [3.3, 0.6] as [number, number],
 };
 
 export interface CapsuleParts {
@@ -231,6 +233,8 @@ export function boltShape(
     half?: number;
     ejector?: [number, number, number];
     pocket?: [number, number, number];
+    /** rebaixo da face em volta da espoleta (o ferrolho que alimenta a cápsula) */
+    recess?: boolean;
   } = {},
 ) {
   const len = opts.len ?? 30;
@@ -241,11 +245,17 @@ export function boltShape(
     const [x0, x1, y] = opts.pocket;
     pts.push([x0, -h], [x0, y], [x1, y], [x1, -h]);
   }
-  pts.push([0, -h], [0, -ch], [-12, -ch], [-12, ch], [0, ch]);
+  // rebaixo da face em volta da espoleta: a face só encosta no fundo do estojo fora dela
+  const [rh, rd] = opts.recess ? CICLO.faceRecess : [CICLO.pinChannel, 0];
+  if (opts.recess) pts.push([0, -h], [0, -rh], [-rd, -rh], [-rd, -ch], [-12, -ch], [-12, ch], [-rd, ch]);
+  else pts.push([0, -h], [0, -ch], [-12, -ch], [-12, ch]);
   if (opts.ejector) {
+    // o rasgo do ejetor (mais embaixo) se junta ao rebaixo
     const [y0, y1, depth] = opts.ejector;
-    pts.push([0, y0], [-depth, y0], [-depth, y1], [0, y1]);
-  }
+    if (opts.recess) pts.push([-rd, y0], [-depth, y0], [-depth, y1], [0, y1]);
+    else pts.push([0, ch], [0, y0], [-depth, y0], [-depth, y1], [0, y1]);
+  } else if (opts.recess) pts.push([-rd, rh], [0, rh]);
+  else pts.push([0, ch]);
   pts.push([0, h], [-len, h]);
   return pts.map(([x, y]) => [r4(x), r4(y)] as Vec2);
 }
@@ -275,12 +285,22 @@ export function buildEmpurrada() {
   const gap = 2;
   const face = r4(rear - gap);
   const half = r4(geo.rimHalf - 0.15);
-  const bolt = b.poly("Ferrolho", L, face, 0, boltShape({ half }), "steel");
+  const bolt = b.poly("Ferrolho", L, face, 0, boltShape({ half, recess: true }), "steel");
   // colisão contínua contra o estojo: a 600 mm/s o ferrolho anda 2,5 mm num passo
   bolt.fast = true;
   const striker = strikerPin(b, L, r4(face - 1.5));
-  // solto no canal do ferrolho (com um trilho no ferrolho o Box2D não registra o
-  // golpe na espoleta: ver docs/verificacao-fase-2-m2a.md)
+  // guiado por um trilho do ferrolho, com mola de retorno: quando o ferrolho
+  // para no assento, ele não chega na espoleta por inércia (0,6 m/s contra a mola)
+  striker.fast = false;
+  b.link({
+    kind: "slider",
+    a: bolt.id,
+    b: striker.id,
+    at: [0, 0],
+    dir: 0,
+    travel: [-1, 3],
+    spring: { k: 0.08, rest: 0, damping: 0.00001 },
+  });
   const slider = b.link({
     kind: "slider",
     a: null,

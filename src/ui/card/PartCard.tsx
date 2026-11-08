@@ -21,6 +21,7 @@ import type { PartModel, SceneModel } from "@/render/prepare";
 import { Icon, type IconName } from "../icons";
 import { NumberField, Stepper } from "./fields";
 import { fmt } from "./format";
+import { CapsuleSection } from "./CapsuleSection";
 import { PartLayers } from "./PartLayers";
 import { Swatches } from "./Swatches";
 
@@ -138,6 +139,7 @@ export function PartCard({ model, m }: { model: SceneModel; m: PartModel }) {
         ) : null}
       </section>
 
+      {owner.capsule && <CapsuleSection scene={scene} part={{ ...owner, capsule: owner.capsule }} />}
       <Measure target={p.id} name={p.name} kind={p.capsule ? "capsule" : "part"} />
       <PartLayers scene={scene} part={owner} layer={p.layer} />
       <section className="card__sec" aria-label="Tamanho">

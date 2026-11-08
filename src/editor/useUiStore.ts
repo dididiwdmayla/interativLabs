@@ -1,9 +1,10 @@
 import type { Variant } from "./projects";
 import type { Probe } from "@/instruments/model";
 import { create } from "zustand";
-import type { Id, LinkKind, Scene } from "@/model/types";
+import type { Id, Scene } from "@/model/types";
 import type { Selection } from "@/render/SceneSvg";
 import type { CardPick } from "./cardPick";
+import type { ExplainKind } from "./explain";
 import type { HammerTool } from "./hammer";
 import { DEFAULT_PENCIL, type PencilTool } from "./pencil";
 import type { Command } from "./commands";
@@ -143,8 +144,8 @@ interface UiState {
   soundBar: boolean;
   setSoundBar: (on: boolean) => void;
   /** cartão "o que é" aberto */
-  explain: LinkKind | null;
-  setExplain: (k: LinkKind | null) => void;
+  explain: ExplainKind | null;
+  setExplain: (k: ExplainKind | null) => void;
   /** a gaveta sai da frente enquanto uma peça é arrastada dela */
   drawerAway: boolean;
   setDrawerAway: (on: boolean) => void;

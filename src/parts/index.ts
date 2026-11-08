@@ -7,6 +7,7 @@ import { arcPoints, circleRing, slotRing } from "@/geometry/primitives";
 import { nextRef, type Random } from "@/model/ids";
 import type { MaterialId } from "@/model/materials";
 import type { Part, Scene, Shape, Vec2 } from "@/model/types";
+import { CAPSULE_DEFAULTS, capsuleGeometry } from "./capsule";
 
 /**
  * Peças prontas da gaveta (docs/arquitetura.md §6, "Inserir e conectar"):
@@ -52,6 +53,10 @@ export interface Generator {
   /** detecção contínua (esfera) */
   fast?: boolean;
   compound?: "ratchet" | "crank";
+  /** grupo da gaveta (sem: "Peças") */
+  category?: "ciclo";
+  /** nasce fixa em qualquer camada (o ejetor é um batente) */
+  fixed?: boolean;
   build: (p: Params) => Shape;
 }
 
@@ -406,7 +411,117 @@ export const GENERATORS: Generator[] = [
       bore: 0,
     }),
   },
+  // ——— Ciclo (Fase 2 · M2a) ———
+  {
+    id: "capsule",
+    name: "Cápsula",
+    blurb: "Estojo com carga e a esfera presa na boca; dispara com um golpe na espoleta",
+    material: "brass",
+    category: "ciclo",
+    params: [
+      {
+        key: "length",
+        label: "Comprimento",
+        unit: "mm",
+        min: 12,
+        max: 60,
+        step: 0.5,
+        default: CAPSULE_DEFAULTS.length,
+      },
+      {
+        key: "diameter",
+        label: "Diâmetro",
+        unit: "mm",
+        min: 4,
+        max: 20,
+        step: 0.1,
+        default: CAPSULE_DEFAULTS.diameter,
+      },
+      { key: "rim", label: "Aro", unit: "mm", min: 4, max: 24, step: 0.1, default: CAPSULE_DEFAULTS.rim },
+      {
+        key: "charge",
+        label: "Carga (0 fraca, 1 média, 2 forte)",
+        unit: "",
+        min: 0,
+        max: 2,
+        step: 1,
+        default: CAPSULE_DEFAULTS.charge,
+        integer: true,
+      },
+    ],
+    main: ["length", "diameter", "charge"],
+    handles: [
+      { param: "length", axis: "x", ...half("length") },
+      { param: "diameter", axis: "y", ...half("diameter") },
+    ],
+    build: (p) => poly(capsuleGeometry(capsuleParams(p)).outer),
+  },
+  {
+    id: "extractor",
+    name: "Extrator",
+    blurb: "Gancho num eixo com mola de torção: crave no ferrolho, a garra puxa o aro",
+    material: "steel",
+    category: "ciclo",
+    params: [
+      { key: "l", label: "Comprimento", unit: "mm", min: 6, max: 80, step: 0.5, default: 16 },
+      { key: "claw", label: "Garra", unit: "mm", min: 0.4, max: 4, step: 0.1, default: 1.4 },
+    ],
+    main: ["l", "claw"],
+    handles: [{ param: "l", axis: "x", dist: (p) => p.l!, value: (d) => d }],
+    build: (p) => {
+      const l = p.l!;
+      const claw = p.claw!;
+      // o eixo na origem (furo), a alavanca para a frente e a garra descendo na ponta
+      return poly(
+        [
+          [-2, -2.4],
+          [l, -2.4],
+          [l, -0.4 + claw],
+          [l - 1.2, -0.4 + claw],
+          [l - 1.2, -0.4],
+          [2, -0.4],
+          [2, 1.2],
+          [-2, 1.2],
+        ],
+        [circleRing([0, 0], 0.6)],
+      );
+    },
+  },
+  {
+    id: "ejector",
+    name: "Ejetor",
+    blurb: "Batente fixo onde o fundo do estojo puxado bate e gira para fora",
+    material: "steel",
+    category: "ciclo",
+    fixed: true,
+    params: [
+      { key: "l", label: "Comprimento", unit: "mm", min: 2, max: 60, step: 0.5, default: 10 },
+      { key: "w", label: "Largura", unit: "mm", min: 0.6, max: 10, step: 0.1, default: 1.2 },
+    ],
+    main: ["l", "w"],
+    handles: [
+      { param: "l", axis: "x", ...half("l") },
+      { param: "w", axis: "y", ...half("w") },
+    ],
+    build: (p) => poly(roundedRect(p.l!, p.w!, Math.min(0.3, p.w! / 3))),
+  },
 ];
+
+/** Parâmetros da cápsula a partir dos do gerador. */
+export function capsuleParams(p: Params) {
+  return {
+    length: p.length ?? CAPSULE_DEFAULTS.length,
+    diameter: p.diameter ?? CAPSULE_DEFAULTS.diameter,
+    rim: p.rim ?? CAPSULE_DEFAULTS.rim,
+    charge: p.charge ?? CAPSULE_DEFAULTS.charge,
+  };
+}
+
+/** Mola de torção do extrator da gaveta: N·mm/rad, repouso (aperta a garra) e batentes. */
+export const EXTRACTOR_AXLE = {
+  torsion: { k: 5, rest: 0.05, damping: 0.002 },
+  limit: { lower: -0.2, upper: 0.01 },
+};
 
 const BY_ID = new Map(GENERATORS.map((g) => [g.id, g] as const));
 
@@ -457,7 +572,7 @@ export function buildPart(scene: Scene, generatorId: string, o: BuildOptions): P
   const g = generator(generatorId);
   if (!g) throw new Error(`Gerador desconhecido: ${generatorId}`);
   const params = clampParams(g, { ...defaults(g), ...o.params });
-  const fixed = scene.layers.findIndex((l) => l.id === o.layer) === 0;
+  const fixed = g.fixed === true || scene.layers.findIndex((l) => l.id === o.layer) === 0;
   const ids = idsFor(scene, o.random);
   const part: Part = {
     id: ids.next("part"),
@@ -473,6 +588,8 @@ export function buildPart(scene: Scene, generatorId: string, o: BuildOptions): P
     fast: g.fast ?? false,
     source: { generator: g.id, params },
   };
+  // a cápsula: carga, furo e espoleta; a esfera entra junto na inserção (src/parts/insert.ts)
+  if (g.id === "capsule") part.capsule = { ...capsuleGeometry(capsuleParams(params)).capsule };
   const nextLayer = scene.layers[scene.layers.findIndex((l) => l.id === o.layer) + 1];
   if (g.compound && nextLayer) {
     const r = (params.module! * params.teeth!) / 2;
@@ -532,6 +649,8 @@ export function regenerate(
   if (cur.g.params.every((d) => next[d.key] === cur.params[d.key])) return null;
   const withMirror = mirror === undefined ? next : { ...next, mirror: Number(mirror) };
   const shape = cur.g.build(withMirror);
+  if (cur.g.id === "capsule" && owner.capsule)
+    return regenerateCapsule(scene, owner, shape, withMirror, verb);
   const [x0, y0] = halfSize(part.shape);
   const [x1, y1] = halfSize(shape);
   return setShape(scene, partId, shape, {
@@ -548,4 +667,43 @@ export function mirroredShape(part: Part): Shape | undefined {
   if (!cur) return undefined;
   const m = part.source?.params.mirror === 1 ? 0 : 1;
   return cur.g.build({ ...cur.params, mirror: m });
+}
+
+/** Cápsula com outros parâmetros: forma, carga, furo e espoleta novos, e a esfera volta para a boca. */
+function regenerateCapsule(
+  scene: Scene,
+  owner: Part,
+  shape: Shape,
+  params: Params,
+  verb?: string,
+): Command | null {
+  const base = setShape(scene, owner.id, shape, { params, verb: verb ?? "Esticar" });
+  if (!base) return null;
+  const geo = capsuleGeometry(capsuleParams(params));
+  const mirrored = params.mirror === 1 ? -1 : 1;
+  const flip = (q: Vec2): Vec2 => [q[0] * mirrored, q[1]];
+  const ballId = owner.capsule?.projectile;
+  return {
+    label: base.label,
+    recipe: (d) => {
+      base.recipe(d);
+      const q = d.parts.find((x) => x.id === owner.id);
+      if (!q?.capsule) return;
+      Object.assign(q.capsule, {
+        charge: geo.capsule.charge,
+        base: flip(geo.capsule.base),
+        mouth: flip(geo.capsule.mouth),
+        bore: geo.capsule.bore,
+        primer: flip(geo.capsule.primer),
+      });
+      const ball = ballId === undefined ? undefined : d.parts.find((x) => x.id === ballId);
+      if (!ball || ball.shape.kind !== "circle") return;
+      const at = flip(geo.ball.at);
+      const c = Math.cos(q.angle);
+      const n = Math.sin(q.angle);
+      ball.x = q.x + at[0] * c - at[1] * n;
+      ball.y = q.y + at[0] * n + at[1] * c;
+      ball.shape.r = geo.ball.r;
+    },
+  };
 }

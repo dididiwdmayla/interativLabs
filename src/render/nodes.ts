@@ -37,8 +37,24 @@ export function drawnFrame(model: SceneModel): FrameSource {
 }
 
 /** Quadro com uma peça numa pose diferente (o dedo arrastando no Montar). */
-export function overrideFrame(base: FrameSource, id: Id, pose: PartPose): FrameSource {
-  return { pose: (pid) => (pid === id ? pose : base.pose(pid)), chamber: (cid) => base.chamber(cid) };
+export function overrideFrame(base: FrameSource, id: Id, pose: PartPose, model?: SceneModel): FrameSource {
+  // a esfera presa na boca da cápsula acompanha o estojo no arrasto
+  const ballId = model?.parts.get(id)?.part.capsule?.projectile;
+  const from = base.pose(id);
+  const ball = ballId === undefined ? undefined : base.pose(ballId);
+  let carried: PartPose | undefined;
+  if (ball && from) {
+    const da = pose.angle - from.angle;
+    const c = Math.cos(da);
+    const n = Math.sin(da);
+    const dx = ball.x - from.x;
+    const dy = ball.y - from.y;
+    carried = { x: pose.x + dx * c - dy * n, y: pose.y + dx * n + dy * c, angle: ball.angle + da };
+  }
+  return {
+    pose: (pid) => (pid === id ? pose : carried && pid === ballId ? carried : base.pose(pid)),
+    chamber: (cid) => base.chamber(cid),
+  };
 }
 
 interface PartNodes {

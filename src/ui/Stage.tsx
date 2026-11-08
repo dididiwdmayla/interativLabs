@@ -649,7 +649,7 @@ export function Stage({
   const showPose = (id: string, pose: PartPose | null, fingerY?: number) => {
     if (!model || !nodes) return;
     const base = drawnFrame(model);
-    nodes.write(pose ? overrideFrame(base, id, pose) : base, true);
+    nodes.write(pose ? overrideFrame(base, id, pose, model) : base, true);
     overlay.current?.pose(pose);
     placePartButton(pose ?? model.drawn.get(id) ?? null, fingerY);
   };

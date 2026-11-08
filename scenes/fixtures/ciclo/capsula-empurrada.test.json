@@ -2,7 +2,7 @@
   "id": "ciclo/capsula-empurrada",
   "group": "ciclo",
   "title": "Cápsula empurrada",
-  "notes": "O ferrolho, puxado pela mão a 600 mm/s, empurra a cápsula do carregador 25 mm até assentar no cano. A esfera continua presa na boca: a solda só solta no golpe na espoleta (o ferrolho bate a 0,6 m/s, abaixo dos 1000 mm/s do golpe mínimo). Em 0.45 s o percussor golpeia e a esfera sai.",
+  "notes": "O ferrolho, puxado pela mão a 600 mm/s, empurra a cápsula do carregador 25 mm até assentar no cano. A esfera continua presa na boca: a solda só solta no golpe na espoleta (o ferrolho bate a 0,6 m/s, abaixo dos 500 mm/s do golpe mínimo). Em 0.45 s o percussor golpeia e a esfera sai.",
   "view": [-50, -20, 110, 40],
   "runs": [
     {

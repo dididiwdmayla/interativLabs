@@ -74,7 +74,7 @@
         "mouth": [11, 0],
         "bore": 6.2,
         "primer": [-11, 0],
-        "minStrike": 1000
+        "minStrike": 500
       }
     },
     {

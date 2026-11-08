@@ -1,7 +1,7 @@
 import { useId, type ReactNode } from "react";
 import { assets } from "@/assets/registry";
 import { EXPLAIN } from "@/editor/explain";
-import type { LinkKind } from "@/model/types";
+import type { ExplainKind } from "@/editor/explain";
 import "./explain.css";
 
 /**
@@ -58,7 +58,7 @@ function zigzag(len: number, h: number, n = 8): string {
   return `${d}L${len} 0`;
 }
 
-function Scene({ kind, uid }: { kind: LinkKind; uid: string }): ReactNode {
+function Scene({ kind, uid }: { kind: ExplainKind; uid: string }): ReactNode {
   switch (kind) {
     case "screw":
       return (
@@ -204,6 +204,29 @@ function Scene({ kind, uid }: { kind: LinkKind; uid: string }): ReactNode {
           </g>
         </>
       );
+    case "capsule":
+      // estojo em corte (aro, corpo e furo), a carga em pontilhado de brasa, a
+      // esfera na boca; o percussor bate na espoleta, a esfera sai e o estojo recua
+      return (
+        <>
+          <path d="M14 92H186" className="xa-center" />
+          <g className="xa-run xa-run--pin">
+            <rect x={14} y={54} width={22} height={4} className="xa-face xa-line" />
+          </g>
+          <g className="xa-run xa-run--case">
+            <Plate d="M42 40H48V44H132V50H62V62H132V68H48V72H42Z" uid={uid} />
+            <g className="xa-charge">
+              <path d="M66 52.5H112M68 56H112M66 59.5H112" className="xa-dots" />
+            </g>
+            <g className="xa-puff">
+              <rect x={62} y={50} width={52} height={12} className="xa-ember" />
+            </g>
+          </g>
+          <g className="xa-run xa-run--shot">
+            <circle cx={122} cy={56} r={6} className="xa-face xa-line" />
+          </g>
+        </>
+      );
     case "sensor":
       return (
         <>
@@ -246,7 +269,7 @@ function rodKeyframes(): string {
 const ROD_KEYFRAMES = rodKeyframes();
 
 /** A animação do cartão de `kind`. */
-export function ExplainArt({ kind }: { kind: LinkKind }) {
+export function ExplainArt({ kind }: { kind: ExplainKind }) {
   const uid = useId().replace(/:/g, "");
   return (
     <svg
