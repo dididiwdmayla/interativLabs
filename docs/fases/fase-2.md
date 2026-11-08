@@ -15,11 +15,15 @@ Duas sessões de criação no Modo Astra (`docs/coordenacao/papeis.md`) e uma de
 Estado em 07/11:
 - **M1a feita (PR #14).** Ficaram abertas algumas leituras: a folga não dá sinal de penetração; não há força em pino, em rasgo por contato nem em parafuso (que funde num corpo só); o torque no eixo da lingueta sai zero, porque a junta de eixo não segura rotação e a mola de torção é aplicada à parte; e o pico de velocidade da esfera (10,96 m/s) não é a velocidade na saída que a cena de teste mede (10,3). Dois testes ficam vermelhos no `main` por causa disso, de propósito, até a M1v.
 - A revisão do coordenador viu ainda que, no celular deitado, o painel cobre o mecanismo e a curva fica ilegível numa janela de 1,8 s. Isso vai para a M1b.
-- **M1b:** prompt entregue (Modo Astra), com painel compacto, janela em volta do cursor, posição como deslocamento, variantes, comparar com fantasma e "Experimente comparar".
-- **M1v:**
+- **M1b feita (PR #15, Astra).** Entregou o painel compacto (117 px em 844×390), a janela de 0,5 s, a pinça, o deslocamento, as variantes A–D, o comparar com fantasma e o "Experimente comparar". A revisão achou três coisas:
+  - os números ainda saem com ponto decimal nas capturas ("pico 10.96");
+  - o resumo da comparação aparece cortado em 844×390;
+  - com a mola "dura", o Ferrolho da B quase não recua (0,05 mm) e não há ciclo para comparar.
+- **M1v (Opus, prompt entregue em 07/11):**
   - fecha as leituras: penetração pela separação do contato; força em pino e em rasgo por contato pelos impulsos de contato; torque de eixo com mola de torção, motor e batente; velocidade num evento ("valor no evento", para bater com a saída);
   - parafuso mostra o motivo de não ter força ("une num corpo só");
-  - roda a bateria completa e documenta.
+  - acerta a formatação pt-BR, o resumo e o "Experimente comparar" (uma mola mais rígida que ainda faz o ciclo);
+  - roda a bateria completa (execução longa, tiques próximos, sondas persistidas, folga multicamada, `/#perf` com comparação) e documenta (§10 da arquitetura).
 
 ### Decisões fechadas da M1
 
