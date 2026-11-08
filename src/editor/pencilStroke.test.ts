@@ -36,7 +36,7 @@ const rect = (w: number, h: number): Part["shape"] => ({
 
 function scene(): Scene {
   return {
-    version: 3,
+    version: 4,
     meta: { title: "Traço", createdAt: "2026-11-07T00:00:00.000Z", updatedAt: "2026-11-07T00:00:00.000Z" },
     settings: { gravity: { on: false, g: 9810 }, snap: { grid: 1, on: false } },
     layers: [

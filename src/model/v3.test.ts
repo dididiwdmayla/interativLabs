@@ -9,7 +9,7 @@ import type { Scene } from "./types";
 
 function base(): Scene {
   return {
-    version: 3,
+    version: 4,
     meta: { title: "Perfis e trava", createdAt: "", updatedAt: "" },
     settings: { gravity: { on: true, g: 9810 }, snap: { on: true, grid: 1 } },
     layers: ["L1", "L2", "L3"].map((id) => ({ id, name: id, visible: true, locked: false, thickness: 3 })),
@@ -172,7 +172,7 @@ describe("v2 examples retain their physics hashes", () => {
       const r = parseScene(JSON.stringify(old));
       expect(r).toMatchObject({ ok: true, migratedFrom: 2 });
       if (!r.ok) throw new Error(JSON.stringify(r.issues));
-      expect(r.scene).toEqual({ ...old, version: 3 });
+      expect(r.scene).toEqual({ ...old, version: 4 });
       const name = file.replace(".json", "");
       const script = JSON.parse(
         readFileSync(`scenes/fixtures/exemplos/${name}.test.json`, "utf8"),

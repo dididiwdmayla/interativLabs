@@ -16,7 +16,7 @@ const PX = 0.2;
 /** Placa de 40×20 mm (paramétrica) na camada 2 e o fundo na 1, sem gravidade. */
 function plateScene(): { scene: Scene; plate: Part } {
   const base: Scene = {
-    version: 3,
+    version: 4,
     meta: { title: "Lápis", createdAt: "2026-11-07T00:00:00.000Z", updatedAt: "2026-11-07T00:00:00.000Z" },
     settings: { gravity: { on: false, g: 9810 }, snap: { grid: 1, on: false } },
     layers: [

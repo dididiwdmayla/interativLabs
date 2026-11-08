@@ -193,6 +193,9 @@ const SKIP = new Set([
   "actions",
 ]);
 
+/** Por tipo: o modo e o assento da câmara de cápsula ficam no cartão rápido ("recebe cápsula"). */
+const SKIP_KIND: Partial<Record<Link["kind"], Set<string>>> = { chamber: new Set(["mode", "seat"]) };
+
 function walk(kind: Link["kind"], schema: AnyZod, path: (string | number)[], out: FieldDesc[]): void {
   const def = schema._zod.def;
   switch (def.type) {
@@ -279,7 +282,7 @@ export function linkForm(link: Link): LinkForm {
   if (!schema) return { fields, groups };
   const shape = schema._zod.def.shape as Record<string, AnyZod>;
   const visit = (k: string, v: AnyZod, base: (string | number)[]) => {
-    if (base.length === 0 && SKIP.has(k)) return;
+    if (base.length === 0 && (SKIP.has(k) || SKIP_KIND[link.kind]?.has(k))) return;
     const def = v._zod.def;
     if (def.type === "optional") {
       const inner = def.innerType as AnyZod;

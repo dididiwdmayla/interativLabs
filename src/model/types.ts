@@ -3,6 +3,7 @@ import type {
   AngleLimitSchema,
   AxleSchema,
   CableSchema,
+  CapsuleSchema,
   ChamberSchema,
   CoilSchema,
   GasSchema,
@@ -31,7 +32,7 @@ import type {
 } from "./schema";
 import type { LinkV1Schema, SceneV1Schema } from "./schema-v1";
 
-/** Tipos da cena v3, derivados do schema (fonte única). */
+/** Tipos da cena v4, derivados do schema (fonte única). */
 export type Vec2 = [number, number];
 export type Id = string;
 export type Scene = z.infer<typeof SceneSchema>;
@@ -69,3 +70,6 @@ export type LinkV1 = z.infer<typeof LinkV1Schema>;
 export type Profile = z.infer<typeof ProfileSchema>;
 export type LockLink = z.infer<typeof LockSchema>;
 export type SceneV2 = z.infer<typeof import("./schema-v2").SceneV2Schema>;
+/** Cena v3 (só leitura, para a migração). */
+export type SceneV3 = z.infer<typeof import("./schema").SceneV3Schema>;
+export type Capsule = z.infer<typeof CapsuleSchema>;

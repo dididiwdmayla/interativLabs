@@ -47,7 +47,7 @@ const plate = (id: string, ref: number, holes: Vec2[][], extra: Partial<Part> = 
 
 function base(): Scene {
   return {
-    version: 3,
+    version: 4,
     meta: { title: "t", createdAt: NOW, updatedAt: NOW },
     settings: { gravity: { on: true, g: 9810 }, snap: { grid: 1, on: true } },
     layers: [

@@ -58,7 +58,7 @@ function apply(
 
 function gearScene(): Scene {
   const s: Scene = {
-    version: 3,
+    version: 4,
     meta: { title: "G", createdAt: "2026-11-07T00:00:00.000Z", updatedAt: "2026-11-07T00:00:00.000Z" },
     settings: { gravity: { on: false, g: 9810 }, snap: { grid: 1, on: false } },
     layers: [{ id: "L1", name: "Peças", visible: true, locked: false, thickness: 3 }],
