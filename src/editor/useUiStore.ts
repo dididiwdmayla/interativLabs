@@ -1,3 +1,4 @@
+import type { Variant } from "./projects";
 import type { Probe } from "@/instruments/model";
 import { create } from "zustand";
 import type { Id, LinkKind, Scene } from "@/model/types";
@@ -76,6 +77,13 @@ export interface ProjectView {
 }
 
 interface UiState {
+  variants: Variant[];
+  activeVariant: string;
+  variantSnapshot: () => Variant[];
+  switchVariant: (id: string) => void;
+  createVariant: () => string | null;
+  renameVariant: (id: string, name: string) => void;
+  deleteVariant: (id: string) => void;
   mode: Mode;
   pick: CardPick | null;
   setPick: (pick: CardPick | null) => void;
@@ -142,7 +150,15 @@ interface UiState {
   setDrawerAway: (on: boolean) => void;
   setMode: (mode: Mode) => void;
   toggleMode: () => void;
-  openScene: (id: string, scene: Scene, figure: number, history?: HistoryState, view?: ProjectView) => void;
+  openScene: (
+    id: string,
+    scene: Scene,
+    figure: number,
+    history?: HistoryState,
+    view?: ProjectView,
+    variants?: Variant[],
+    activeVariant?: string,
+  ) => void;
   select: (s: Selection) => void;
   setActiveLayer: (i: number) => void;
   setXray: (on: boolean) => void;
@@ -232,6 +248,55 @@ export const useUiStore = create<UiState>()((set, get) => ({
   },
   setPencilTool: (patch) => set((s) => ({ pencilTool: { ...s.pencilTool, ...patch } })),
   current: null,
+  variants: [],
+  activeVariant: "A",
+  variantSnapshot: () => {
+    const s = get();
+    return s.variants.map((v) =>
+      v.id === s.activeVariant && s.current ? { ...v, scene: s.current.scene, history: s.history } : v,
+    );
+  },
+  switchVariant: (id) => {
+    const s = get();
+    const variants = s.variantSnapshot();
+    const next = variants.find((v) => v.id === id);
+    if (!next || !s.current) return;
+    set({
+      variants,
+      activeVariant: id,
+      current: { ...s.current, scene: next.scene },
+      history: next.history,
+      mode: "edit",
+      selection: null,
+      sheet: null,
+      pick: null,
+      activeLayer: Math.max(0, next.scene.layers.length - 1),
+    });
+  },
+  createVariant: () => {
+    const s = get();
+    if (!s.current) return null;
+    const variants = s.variantSnapshot();
+    const id = ["B", "C", "D"].find((id) => !variants.some((v) => v.id === id));
+    if (!id) return null;
+    set({
+      variants: [
+        ...variants,
+        { id, name: id, scene: structuredClone(s.current.scene), history: emptyHistory() },
+      ],
+    });
+    get().switchVariant(id);
+    return id;
+  },
+  renameVariant: (id, name) => {
+    if (name.trim())
+      set((s) => ({ variants: s.variants.map((v) => (v.id === id ? { ...v, name: name.trim() } : v)) }));
+  },
+  deleteVariant: (id) => {
+    if (id === "A") return;
+    if (get().activeVariant === id) get().switchVariant("A");
+    set((s) => ({ variants: s.variants.filter((v) => v.id !== id) }));
+  },
   history: emptyHistory(),
   selection: null,
   activeLayer: 0,
@@ -326,12 +391,14 @@ export const useUiStore = create<UiState>()((set, get) => ({
     });
   },
   toggleMode: () => get().setMode(get().mode === "edit" ? "simulate" : "edit"),
-  openScene: (id, scene, figure, history, view) =>
+  openScene: (id, scene, figure, history, view, variants, activeVariant) =>
     set((s) => ({
       // estado de vista: o do projeto (peças que ainda existem); um exemplo começa sem nada escondido
+      variants: variants ?? [{ id: "A", name: "A", scene, history: history ?? emptyHistory() }],
+      activeVariant: activeVariant ?? "A",
       gapTarget: null,
       probes: view?.probes ?? [],
-      hidden: (view?.hidden ?? []).filter((h) => scene.parts.some((p) => p.id === h)),
+      hidden: view?.hidden ?? [],
       hideMode: false,
       look: { ...LOOK_OFF, distance: s.look.distance },
       explain: null,

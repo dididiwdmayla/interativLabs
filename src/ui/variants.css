@@ -1,0 +1,31 @@
+.variants {
+  display: inline-block;
+  position: relative;
+  pointer-events: auto;
+}
+.variants__menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 260px;
+  padding: var(--space-2);
+  background: var(--color-chrome);
+  border: 1px solid var(--color-ink-faint);
+  display: grid;
+  gap: var(--space-1);
+  z-index: 30;
+  text-align: left;
+}
+.variants__menu form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.variants__menu input {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  color: var(--color-ink);
+  background: var(--color-stage);
+  border: 1px solid var(--color-ink-faint);
+}
