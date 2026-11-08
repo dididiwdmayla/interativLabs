@@ -51,6 +51,10 @@ const EXPECTED: Record<string, Partial<Record<InvariantId, string>>> = {
   "exemplos/lancador-bancada": { penetration: IMPACT },
   "exemplos/lancador": { penetration: IMPACT },
   "exemplos/trava": { penetration: IMPACT },
+  // garra contra o estojo com o ferrolho sacudido a 8 Hz: 0,311 mm num passo (o que dura dois passos fica em 0,16 mm)
+  "ciclo/extrator": { penetration: IMPACT },
+  "ciclo/ejetor": { penetration: IMPACT },
+  "ciclo/disparo-extracao": { penetration: IMPACT },
 };
 
 function scenes(): { id: string; scene: Scene }[] {

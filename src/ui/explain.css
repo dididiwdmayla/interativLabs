@@ -463,6 +463,120 @@
   }
 }
 
+/* cápsula: o percussor golpeia, a carga some, a esfera sai e o estojo recua */
+.xa-dots {
+  fill: none;
+  stroke: var(--color-ember);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 0 3.6;
+}
+
+.xa-run--pin {
+  animation: xa-capsule-pin 3s infinite;
+}
+
+.xa-run--case {
+  animation: xa-capsule-case 3s infinite;
+}
+
+.xa-run--shot {
+  animation: xa-capsule-shot 3s infinite;
+}
+
+.xa-charge {
+  animation: xa-capsule-charge 3s infinite;
+}
+
+.xa-puff {
+  opacity: 0;
+  animation: xa-capsule-puff 3s infinite;
+}
+
+@keyframes xa-capsule-pin {
+  0%,
+  10% {
+    transform: translateX(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 1);
+  }
+  24% {
+    transform: translateX(6px);
+  }
+  40%,
+  100% {
+    transform: translateX(-4px);
+  }
+}
+
+@keyframes xa-capsule-case {
+  0%,
+  24% {
+    transform: translateX(0);
+  }
+  34% {
+    transform: translateX(-10px);
+  }
+  86% {
+    transform: translateX(-10px);
+    opacity: 1;
+  }
+  94% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes xa-capsule-shot {
+  0%,
+  24% {
+    transform: translateX(0);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  }
+  46% {
+    transform: translateX(70px);
+    opacity: 0;
+  }
+  92% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes xa-capsule-charge {
+  0%,
+  23% {
+    opacity: 1;
+  }
+  25%,
+  94% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes xa-capsule-puff {
+  0%,
+  23% {
+    opacity: 0;
+  }
+  26% {
+    opacity: 0.9;
+  }
+  44%,
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .explainart * {
     animation: none !important;

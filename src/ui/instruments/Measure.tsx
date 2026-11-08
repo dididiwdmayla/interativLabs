@@ -12,13 +12,13 @@ export function Measure({
 }: {
   target: string;
   name: string;
-  kind: LinkKind | "part";
+  kind: LinkKind | "part" | "capsule";
   limit?: number;
 }) {
   const [open, setOpen] = useState(false);
   const ui = useUiStore();
   const options = available(kind);
-  const reason = kind === "part" ? undefined : noReadingReason[kind];
+  const reason = kind === "part" || kind === "capsule" ? undefined : noReadingReason[kind];
   if (!options.length && !reason) return null;
   if (!options.length)
     return (
@@ -45,7 +45,7 @@ export function Measure({
           ))}
         </div>
       )}
-      {kind === "part" && (
+      {(kind === "part" || kind === "capsule") && (
         <button
           className="btn btn--outline btn--small"
           onClick={() => {

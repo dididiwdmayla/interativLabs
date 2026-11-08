@@ -26,6 +26,7 @@ export default defineConfig({
     timeout: 120_000,
   },
   projects: [
+    { name: "capture-m2a", testMatch: /capture-m2a\.spec\.ts/, timeout: 120_000 },
     { name: "perf-m1v", testMatch: /perf-m1v\.spec\.ts/, timeout: 1_200_000 },
     { name: "capture-m1v", testMatch: /capture-m1v\.spec\.ts/, timeout: 120_000 },
     { name: "capture-m1b", testMatch: /capture-m1b\.spec\.ts/, timeout: 90_000 },

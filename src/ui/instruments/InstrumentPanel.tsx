@@ -345,7 +345,7 @@ export function InstrumentPanel() {
   const thresholdSeries = series.find((s) => s.probe.threshold !== undefined);
   const cycles = thresholdSeries
     ? thresholdSeries.crossings
-    : ticks.filter((t) => t.kind === "chamber-fired").length;
+    : ticks.filter((t) => t.kind === "chamber-fired" || t.kind === "capsule-fired").length;
   const clicks =
     series.find((s) => s.probe.countDrops)?.clicks ?? ticks.filter((t) => t.kind === "impact").length;
   if (!probes.length && !comparison.request) return null;

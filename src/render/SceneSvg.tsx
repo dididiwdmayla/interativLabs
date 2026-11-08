@@ -5,6 +5,7 @@ import { calloutGeometry } from "./calloutScene";
 import { chamberGeo } from "./geometry";
 import { HATCHES, WOOD_TILE_PX, hatchCoverage, hatchScale, patternTransform, type HatchId } from "./hatch";
 import { HW_IDS, type ArtContext } from "./hardware";
+import { CapsuleArt } from "./CapsuleArt";
 import { CarriedArt, Ground, TwoEndArt } from "./LinkArt";
 import { NO_LOOK, badgeSpot, hiddenEnd, linkShow, spreadOffset, type Look, type LinkShow } from "./look";
 import type { StageNodes } from "./nodes";
@@ -203,6 +204,7 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx, gone, badge, sho
       className={`part${m.dynamic ? " part--dynamic" : " part--fixed"}${skin.tiny ? " is-tiny" : ""}${gone ? " is-gone" : ""}`}
       data-part={id}
       data-gone={gone || undefined}
+      ref={m.part.capsule ? nodes.refCapsule(id) : undefined}
     >
       <g className="part__wallg" ref={nodes.refPart(id, "wall", m.key)}>
         <path className="part__wall" d={m.d} />
@@ -226,6 +228,7 @@ function PartArt({ m, skin, uid, nodes, selected, carried, ctx, gone, badge, sho
             <path className="part__innerline" d={skin.inner} />
           </>
         )}
+        {m.part.capsule && <CapsuleArt part={m.part} drawn={ctx.model.drawn} px={ctx.px} />}
         <path className="part__outline" d={m.d} />
         {selected && <path className="part__select" d={m.d} />}
         {badge !== null && <LayerBadge m={m} n={badge} px={ctx.px} />}
@@ -373,6 +376,8 @@ export function SceneSvg(props: SceneSvgProps) {
         );
     for (const lm of model.links) {
       if (lm.link.kind !== "chamber" || lm.layer !== L.index) continue;
+      // a câmara que recebe cápsula não tem gás próprio (o da cápsula está no estojo)
+      if (lm.link.mode === "capsule") continue;
       const geo = geos.get(lm.link.id)!;
       items.dynamic.push(
         <LinkWrap key={`gas-${lm.link.id}`} show={show(lm)}>

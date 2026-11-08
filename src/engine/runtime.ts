@@ -1,7 +1,7 @@
 import type { Id } from "@/model/types";
 import type { Vec2 } from "@/geometry/vec";
 import { ChamberSim, exchange, type ChamberGeometry, type PlanChamber } from "./chamber";
-import type { Plan, PlanBody, PlanSensor, PlanSpring } from "./plan";
+import type { Plan, PlanBody, PlanCapsule, PlanSensor, PlanSpring } from "./plan";
 import { N } from "@/model/units";
 import type { EngineEvent, EngineProbe, LinkState, PartPose, Snapshot } from "./types";
 import { PI, dcos, dhypot, dsin } from "@/geometry/dmath";
@@ -33,6 +33,8 @@ export interface RuntimeOptions {
   jointForce?: (linkId: Id) => Vec2 | null;
   /** torque do motor (ou do atrito) de um eixo, g·mm²/s² */
   jointTorque?: (linkId: Id) => number | null;
+  /** solta a esfera presa na boca da cápsula de índice `capsule` (no instante do disparo) */
+  releaseProjectile?: (capsule: number) => void;
   /**
    * Força do gás resolvida pelo motor: a cada passo, rigidez (g/s²) e força
    * atual (g·mm/s², para fora) da câmara de índice `chamber`, com a geometria.
@@ -66,6 +68,25 @@ const DRAG_FORCE_BASE = 4000;
 interface SensorState {
   p: PlanSensor;
   count: number;
+}
+
+/**
+ * Tolerâncias do assento (docs/arquitetura.md §4, "Cápsula"): o fundo do
+ * estojo a até `seat` mm do fundo da câmara ao longo do eixo, o eixo do estojo
+ * a até `SEAT_LATERAL` mm do eixo do cano e no máximo `SEAT_SIN` de giro
+ * (seno: 3°).
+ */
+export const SEAT_LATERAL = 0.5;
+/** Estojo acima destas velocidades (mm/s, rad/s): o passo do motor é dividido (ver `shooting`). */
+export const CASE_FAST_SPEED = 150;
+export const CASE_FAST_SPIN = 15;
+export const SEAT_SIN = 0.0523;
+
+interface CapsuleState {
+  p: PlanCapsule;
+  ch: ChamberSim;
+  /** índice em plan.seats onde está assentada (−1: solta) */
+  seat: number;
 }
 
 /** Distância com sinal de p ao contorno (positiva dentro). Só operações exatas. */
@@ -337,6 +358,7 @@ export function handLimits(plan: Plan, body: number, jointHertz = 960): HandLimi
   };
   for (const a of plan.axles) joint(a.a, a.b, a.anchor);
   for (const l of plan.locks) joint(l.a, l.b, l.anchor);
+  for (const c of plan.capsules) if (c.ball >= 0) joint(c.body, c.ball, c.anchor);
   for (const s of plan.sliders) joint(s.a, s.b, s.anchor);
   for (const s of plan.slots) joint(s.a, s.b, s.anchor);
   for (const d of plan.distances) if (d.kind === "rod") joint(d.a, d.b, d.anchorB);
@@ -369,6 +391,10 @@ export class Runtime {
   private fresh: boolean[];
   private pre: BodyState[];
   private chambers: ChamberSim[];
+  private capsules: CapsuleState[];
+  /** corpos que dividem o passo quando andam rápido (ver `shooting`) */
+  private caseWatch: number[] = [];
+  private releaseProjectile: RuntimeOptions["releaseProjectile"];
   private chamberById = new Map<Id, ChamberSim>();
   private chamberGeo: ChamberGeometry[] = [];
   private gasSpring: RuntimeOptions["gasSpring"];
@@ -400,6 +426,14 @@ export class Runtime {
     this.gasSpring = options.gasSpring;
     this.chambers = plan.chambers.map((p) => new ChamberSim(p));
     for (const c of this.chambers) this.chamberById.set(c.p.id, c);
+    this.capsules = plan.capsules.map((p) => ({ p, ch: this.chambers[p.chamber]!, seat: -1 }));
+    // o estojo e as peças móveis que encostam nele na pose desenhada (sem as esferas)
+    const balls = new Set(plan.capsules.map((c) => c.ball));
+    const watch = new Set<number>();
+    for (const c of plan.capsules)
+      for (const i of reach(plan, c.body, 2)) if (this.dyn(i) && !balls.has(i)) watch.add(i);
+    this.caseWatch = [...watch].sort((a, b) => a - b);
+    this.releaseProjectile = options.releaseProjectile;
     for (const s of plan.sensors) this.sensors.set(s.id, { p: s, count: 0 });
   }
 
@@ -412,6 +446,11 @@ export class Runtime {
       this.fresh[i] = true;
     }
     return s;
+  }
+
+  /** O adaptador mexeu no corpo por fora do passo: a próxima leitura vem do motor. */
+  invalidate(i: number): void {
+    this.fresh[i] = false;
   }
 
   /** Ponto do espaço do corpo → mundo. */
@@ -432,12 +471,18 @@ export class Runtime {
     return i > 0 && !this.plan.bodies[i]!.static;
   }
 
-  /** Forças customizadas, aplicadas antes de cada passo do motor. */
-  beforeStep(h: number): void {
+  /**
+   * Forças customizadas, aplicadas antes de cada passo do motor. Num passo
+   * dividido em subpassos (o tiro de uma cápsula), `sub` > 0 nos seguintes:
+   * os eventos do passo continuam se juntando.
+   */
+  beforeStep(h: number, sub = 0): void {
     this.fresh.fill(false);
-    this.events = [];
-    for (const id of this.releaseQueue) this.releaseLock(id, "touch");
-    this.releaseQueue.clear();
+    if (sub === 0) {
+      this.events = [];
+      for (const id of this.releaseQueue) this.releaseLock(id, "touch");
+      this.releaseQueue.clear();
+    }
     const io = this.io;
     // estado antes do passo (velocidade de aproximação dos sensores)
     if (this.plan.sensors.length)
@@ -548,9 +593,118 @@ export class Runtime {
     return { base, axis, s, faces, lat };
   }
 
+  /**
+   * Onde a cápsula está assentada: a primeira câmara de cápsula com o fundo do
+   * estojo a até `seat` mm do fundo dela, o eixo a até SEAT_LATERAL mm e
+   * alinhado (SEAT_SIN). Assentada, o furo continua até a boca do cano; solta,
+   * termina na boca do estojo. Vale a cada passo: se o estojo sai do assento
+   * durante a queima, o furo volta a terminar na boca dele, e o gás escapa
+   * assim que a esfera já passou dela.
+   */
+  private seatCapsules(): void {
+    for (const c of this.capsules) {
+      const B = this.body(c.p.body);
+      const cc = dcos(B.angle);
+      const cn = dsin(B.angle);
+      const ax = c.ch.p.axis;
+      const u: Vec2 = [ax[0] * cc - ax[1] * cn, ax[0] * cn + ax[1] * cc];
+      const rear = this.world(c.p.body, c.p.rear);
+      const base = this.world(c.p.body, c.ch.p.base);
+      c.seat = -1;
+      let length = c.p.ball < 0 ? 0 : c.p.caseLength;
+      for (let i = 0; i < this.plan.seats.length; i++) {
+        const s = this.plan.seats[i]!;
+        const S = this.body(s.body);
+        const sc = dcos(S.angle);
+        const sn = dsin(S.angle);
+        const v: Vec2 = [s.axis[0] * sc - s.axis[1] * sn, s.axis[0] * sn + s.axis[1] * sc];
+        const A = this.world(s.body, s.base);
+        const dx = rear[0] - A[0];
+        const dy = rear[1] - A[1];
+        const along = dx * v[0] + dy * v[1];
+        const lateral = Math.abs(dx * v[1] - dy * v[0]);
+        const cos = u[0] * v[0] + u[1] * v[1];
+        const sin = Math.abs(u[0] * v[1] - u[1] * v[0]);
+        if (Math.abs(along) > s.seat || lateral > SEAT_LATERAL || cos <= 0 || sin > SEAT_SIN) continue;
+        c.seat = i;
+        if (c.p.ball >= 0) {
+          // a boca do cano projetada no eixo do estojo, a partir do fundo interno
+          const mx = A[0] + v[0] * s.length - base[0];
+          const my = A[1] + v[1] * s.length - base[1];
+          length = Math.max(c.p.caseLength, mx * u[0] + my * u[1]);
+        }
+        break;
+      }
+      c.ch.p.length = length;
+    }
+  }
+
+  /**
+   * Alguma cápsula com o tiro em andamento (acesa, a esfera ainda no furo):
+   * o adaptador divide o passo em subpassos para o gás acompanhar a esfera.
+   */
+  shooting(): boolean {
+    if (!this.capsules.length) return false;
+    // entre os passos, o roteiro ou a mão podem ter mudado velocidades: lê do motor
+    this.fresh.fill(false);
+    // uma trava que solta agora (o gatilho soltando o percussor): o golpe vem dentro deste passo
+    if (this.releaseQueue.size) return true;
+    for (const c of this.capsules) if (c.ch.fired && !c.ch.spent && c.p.ball >= 0) return true;
+    // estojo rápido, ou uma peça que encosta nele (o ferrolho, a garra, o
+    // percussor): a extração e a ejeção inteiras cabem em um ou dois passos, e
+    // o contato do aro precisa do passo menor
+    for (const i of this.caseWatch) {
+      const b = this.body(i);
+      if (b.vx * b.vx + b.vy * b.vy > CASE_FAST_SPEED * CASE_FAST_SPEED || Math.abs(b.w) > CASE_FAST_SPIN)
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * Golpes na espoleta: um impacto (evento do motor, velocidade de aproximação
+   * acima do limiar de 100 mm/s) entre o estojo e outra peça que não a esfera
+   * dele, no ponto a até `primerR` da espoleta e acima de `minStrike`. Acende
+   * a carga e solta a esfera no mesmo passo; cápsula deflagrada não acende de novo.
+   */
+  strikes(impacts: readonly EngineEvent[]): void {
+    if (!this.capsules.length) return;
+    for (const [i, c] of this.capsules.entries()) {
+      if (c.ch.fired) continue;
+      let best: { by: Id; speed: number } | null = null;
+      for (const e of impacts) {
+        if (e.kind !== "impact" || e.speed + 1e-9 < c.p.minStrike) continue;
+        const other = e.a === c.p.part ? e.b : e.b === c.p.part ? e.a : null;
+        if (other === null || other === c.p.projectile) continue;
+        const pr = this.world(c.p.body, c.p.primer);
+        if (dhypot(e.point[0] - pr[0], e.point[1] - pr[1]) > c.p.primerR) continue;
+        if (!best || e.speed > best.speed) best = { by: other, speed: e.speed };
+      }
+      if (!best) continue;
+      if (c.ch.ignite(this.time, this.events, best) && c.p.ball >= 0) this.releaseProjectile?.(i);
+    }
+  }
+
+  /** Cápsulas que ainda podem disparar (índice e plano), para a leitura de contato do adaptador. */
+  armedCapsules(): { i: number; p: PlanCapsule }[] {
+    const out: { i: number; p: PlanCapsule }[] = [];
+    this.capsules.forEach((c, i) => {
+      if (!c.ch.fired) out.push({ i, p: c.p });
+    });
+    return out;
+  }
+
+  /** Golpe na espoleta medido pelo adaptador (contato, velocidade de aproximação em mm/s). */
+  strike(i: number, by: Id, speed: number): void {
+    const c = this.capsules[i];
+    if (!c || c.ch.fired || speed + 1e-9 < c.p.minStrike) return;
+    if (c.ch.ignite(this.time, this.events, { by, speed }) && c.p.ball >= 0) this.releaseProjectile?.(i);
+  }
+
   /** Gás de todas as câmaras: volume, queima, escape, portas e forças. */
   private chambersStep(h: number): void {
     if (!this.chambers.length) return;
+    if (this.capsules.length) this.seatCapsules();
     this.chamberGeo = this.chambers.map((ch) => this.chamberGeometry(ch.p));
     this.chambers.forEach((ch, i) => ch.update(this.chamberGeo[i]!, h, this.time, this.events));
     this.chambers.forEach((ch, i) => {
@@ -605,7 +759,11 @@ export class Runtime {
 
   ignite(id: Id): boolean {
     const ch = this.chamberById.get(id);
-    return ch ? ch.ignite(this.time, this.events) : false;
+    if (!ch || !ch.ignite(this.time, this.events)) return false;
+    // a cápsula acesa por roteiro também solta a esfera
+    const i = this.capsules.findIndex((c) => c.ch === ch);
+    if (i >= 0 && this.capsules[i]!.p.ball >= 0) this.releaseProjectile?.(i);
+    return true;
   }
 
   /**
@@ -639,10 +797,15 @@ export class Runtime {
     if (speed + 1e-9 >= s.p.minSpeed) this.pending.push({ sensor: sensorId, part: otherPart, speed });
   }
 
-  /** Depois de cada passo do motor. */
-  afterStep(h: number): void {
-    this.time += h;
-    this.steps++;
+  /**
+   * Depois de cada passo do motor. Nos subpassos, `end` é o instante do fim do
+   * passo inteiro: o relógio só avança no último (o mesmo número de sempre).
+   */
+  afterStep(h: number, sub?: { last: boolean; t0: number; total: number }): void {
+    if (!sub || sub.last) {
+      this.time = sub ? sub.t0 + sub.total : this.time + h;
+      this.steps++;
+    } else this.time += h;
     this.fresh.fill(false);
     while (this.pending.length) {
       const e = this.pending.shift()!;
@@ -884,6 +1047,26 @@ export class Runtime {
       links[s.id] = st;
     }
     for (const c of this.chambers) links[c.p.id] = c.state();
+    if (this.capsules.length || this.plan.seats.length) {
+      for (const s of this.plan.seats) links[s.id] = { kind: "chamber", pressure: 101.325, capsule: null };
+      for (const c of this.capsules) {
+        const st = links[c.p.part]!;
+        // abertura da solda da esfera na boca, enquanto ela está presa
+        if (c.p.ball >= 0 && !c.ch.fired) {
+          const pa = this.world(c.p.body, this.localOf(c.p.body, c.p.anchor));
+          const pb = this.world(c.p.ball, this.localOf(c.p.ball, c.p.anchor));
+          st.gap = dhypot(pb[0] - pa[0], pb[1] - pa[1]);
+        }
+        const seat = this.plan.seats[c.seat];
+        st.seat = seat ? seat.id : null;
+        if (seat) {
+          const ss = links[seat.id]!;
+          ss.capsule = c.p.part;
+          ss.pressure = st.pressure;
+          ss.fired = st.fired;
+        }
+      }
+    }
     for (const s of this.sensors.values()) links[s.p.id] = { kind: "sensor", count: s.count };
     return { time: this.time, steps: this.steps, parts, links, events: this.events.slice() };
   }

@@ -31,7 +31,9 @@ export {
 } from "./schema-common";
 
 /**
- * Scene format v3: multilayer profiles and releasable locks (architecture §3.2).
+ * Scene format v4: the capsule (a part with a charge) and the chamber that
+ * receives it (architecture §3.3), over v3's multilayer profiles and
+ * releasable locks (§3.2).
  * Unidades: mm, g, s, N, N/mm, N·mm, kPa, rad (ver src/model/units.ts).
  * Pontos são [x, y], no espaço local da peça de referência.
  */
@@ -44,7 +46,30 @@ export const ProfileSchema = z.strictObject({
   source: LegacyPartSchema.shape.source,
 });
 
-export const PartSchema = LegacyPartSchema.extend({ profiles: z.array(ProfileSchema).optional() });
+/** v3 part: multilayer profiles. */
+export const PartV3Schema = LegacyPartSchema.extend({ profiles: z.array(ProfileSchema).optional() });
+
+/**
+ * Capsule (v4): a case with a charge, an inner bore and the projectile held at the mouth.
+ * Local points of the case part; mm, mmol, mm/s.
+ */
+export const CapsuleSchema = z.strictObject({
+  /** mmol, didático */
+  charge: nonNeg("A carga da cápsula"),
+  /** a esfera presa na boca */
+  projectile: IdSchema.optional(),
+  /** fundo interno e boca: o eixo e o comprimento do furo */
+  base: Vec2Schema,
+  mouth: Vec2Schema,
+  /** diâmetro do furo, mm */
+  bore: positive("O diâmetro do furo da cápsula"),
+  /** a espoleta */
+  primer: Vec2Schema,
+  /** golpe mínimo na espoleta, mm/s */
+  minStrike: positive("O golpe mínimo na espoleta"),
+});
+
+export const PartSchema = PartV3Schema.extend({ capsule: CapsuleSchema.optional() });
 
 export const LayerSchema = z.strictObject({
   id: IdSchema,
@@ -278,7 +303,7 @@ export const GasSchema = z.strictObject({
     .optional(),
 });
 
-export const ChamberSchema = z.strictObject({
+export const ChamberV3Schema = z.strictObject({
   ...base,
   kind: z.literal("chamber"),
   /** corpo que contém o furo (null = o fundo) */
@@ -295,6 +320,17 @@ export const ChamberSchema = z.strictObject({
   vents: z.array(VentSchema),
   ports: z.array(PortSchema),
   gas: GasSchema,
+});
+
+/**
+ * v4 chamber: `mode: "capsule"` has no charge or walls of its own and receives a seated capsule;
+ * `seat` is how far (mm) the case rear may be from `at` and still count as seated.
+ */
+export const ChamberSchema = ChamberV3Schema.extend({
+  mode: z
+    .enum(["charge", "capsule"], { error: 'Modo da câmara inválido: use "charge" ou "capsule"' })
+    .optional(),
+  seat: nonNeg("O assento da câmara").optional(),
 });
 
 export const SensorActionSchema = z.strictObject({
@@ -319,6 +355,28 @@ export const SensorSchema = z.strictObject({
   actions: z.array(SensorActionSchema),
 });
 
+const LINK_ERROR =
+  "Tipo de ligação inválido: use screw, axle, rod, cable, mount, slider, pin, slot, spring, chamber, sensor ou lock";
+
+export const LinkV3Schema = z.discriminatedUnion(
+  "kind",
+  [
+    ScrewSchema,
+    LockSchema,
+    AxleSchema,
+    RodSchema,
+    CableSchema,
+    MountSchema,
+    SliderSchema,
+    PinSchema,
+    SlotSchema,
+    SpringSchema,
+    ChamberV3Schema,
+    SensorSchema,
+  ],
+  { error: LINK_ERROR },
+);
+
 export const LinkSchema = z.discriminatedUnion(
   "kind",
   [
@@ -335,20 +393,28 @@ export const LinkSchema = z.discriminatedUnion(
     ChamberSchema,
     SensorSchema,
   ],
-  {
-    error:
-      "Tipo de ligação inválido: use screw, axle, rod, cable, mount, slider, pin, slot, spring, chamber, sensor ou lock",
-  },
+  { error: LINK_ERROR },
 );
 
-const SceneShape = z.strictObject({
+const layersField = z
+  .array(LayerSchema)
+  .min(1, "A cena precisa de pelo menos uma camada")
+  .max(MAX_LAYERS, `No máximo ${MAX_LAYERS} camadas`);
+
+const SceneV3Shape = z.strictObject({
   version: z.literal(3, { error: "Versão da cena desconhecida: esperava 3" }),
   meta: MetaSchema,
   settings: SettingsSchema,
-  layers: z
-    .array(LayerSchema)
-    .min(1, "A cena precisa de pelo menos uma camada")
-    .max(MAX_LAYERS, `No máximo ${MAX_LAYERS} camadas`),
+  layers: layersField,
+  parts: z.array(PartV3Schema),
+  links: z.array(LinkV3Schema),
+});
+
+const SceneShape = z.strictObject({
+  version: z.literal(4, { error: "Versão da cena desconhecida: esperava 4" }),
+  meta: MetaSchema,
+  settings: SettingsSchema,
+  layers: layersField,
   parts: z.array(PartSchema),
   links: z.array(LinkSchema),
 });
@@ -395,6 +461,29 @@ function checkReferences(s: SceneIn, ctx: z.RefinementCtx): void {
       if (layers.has(profile.layer)) issue([...path, "layer"], "A peça só pode ter um perfil por camada");
       layers.add(profile.layer);
     });
+  });
+
+  const projectiles = new Map<string, number>();
+  s.parts.forEach((p, i) => {
+    const c = p.capsule;
+    if (!c) return;
+    const path = ["parts", i, "capsule"];
+    if (c.base[0] === c.mouth[0] && c.base[1] === c.mouth[1])
+      issue([...path, "mouth"], "O fundo e a boca da cápsula precisam ser pontos diferentes");
+    if (c.projectile === undefined) return;
+    const ball = partById.get(c.projectile);
+    if (!ball) issue([...path, "projectile"], `Peça inexistente: ${c.projectile}`);
+    else if (ball.id === p.id) issue([...path, "projectile"], "O projétil não pode ser a própria cápsula");
+    else if (ball.shape.kind !== "circle")
+      issue([...path, "projectile"], "O projétil da cápsula precisa ser uma esfera");
+    else if (ball.layer !== p.layer)
+      issue([...path, "projectile"], "O projétil precisa estar na camada da cápsula");
+    else if (ball.fixed) issue([...path, "projectile"], "O projétil precisa ser uma peça móvel");
+    else if (ball.capsule) issue([...path, "projectile"], "O projétil não pode ser outra cápsula");
+    const other = projectiles.get(c.projectile);
+    if (other !== undefined)
+      issue([...path, "projectile"], `O projétil já está na cápsula ${s.parts[other]?.ref ?? ""}`);
+    projectiles.set(c.projectile, i);
   });
 
   s.links.forEach((l, i) => {
@@ -489,6 +578,22 @@ function checkReferences(s: SceneIn, ctx: z.RefinementCtx): void {
       }
       case "chamber": {
         needPart(i, "body", l.body, true);
+        if (l.mode === "capsule") {
+          if (l.gas.charge)
+            issue(["links", i, "gas", "charge"], "A câmara que recebe cápsula não tem carga própria");
+          if (l.walls.length)
+            issue(
+              ["links", i, "walls"],
+              "A câmara que recebe cápsula não tem paredes: a cápsula traz as dela",
+            );
+          if (l.vents.length)
+            issue(["links", i, "vents"], "A câmara que recebe cápsula ainda não aceita respiros");
+          if (l.ports.length)
+            issue(["links", i, "ports"], "A câmara que recebe cápsula ainda não aceita portas");
+          break;
+        }
+        if (l.seat !== undefined)
+          issue(["links", i, "seat"], "O assento só vale na câmara que recebe cápsula");
         if (l.walls.length < 1 || l.walls.length > 2)
           issue(["links", i, "walls"], "A câmara precisa de 1 ou 2 paredes móveis");
         const seen = new Set<string>();
@@ -517,3 +622,6 @@ function checkReferences(s: SceneIn, ctx: z.RefinementCtx): void {
 }
 
 export const SceneSchema = SceneShape.superRefine(checkReferences);
+
+/** v3 scenes (read only, for the migration): the same integrity checks, none of v4's fields. */
+export const SceneV3Schema = SceneV3Shape.superRefine((s, ctx) => checkReferences({ ...s, version: 4 }, ctx));

@@ -38,6 +38,19 @@ describe('cartões "o que é"', () => {
       expect(classes.filter((c) => animated.has(c)).length).toBeGreaterThan(0);
     });
 
+  it("cápsula (peça do ciclo): até três frases curtas e uma animação", () => {
+    const e = EXPLAIN.capsule;
+    expect(e.title).toBe("Cápsula");
+    expect(e.text.length).toBeLessThanOrEqual(3);
+    for (const t of e.text) {
+      expect(t.match(/[.!?](\s|$)/g)?.length).toBe(1);
+      expect(t.length).toBeLessThanOrEqual(110);
+    }
+    const html = renderToStaticMarkup(<ExplainArt kind="capsule" />);
+    const classes = [...html.matchAll(/class="([^"]+)"/g)].flatMap((m) => (m[1] ?? "").split(" "));
+    expect(classes.filter((c) => animated.has(c)).length).toBeGreaterThan(2);
+  });
+
   it("as animações só mexem em transform e opacity, e param com prefers-reduced-motion", () => {
     for (const m of css.matchAll(/@keyframes [\w-]+\s*\{([\s\S]*?)\n\}/g))
       for (const p of (m[1] ?? "").matchAll(/([a-z-]+)\s*:/g))

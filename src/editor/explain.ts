@@ -13,7 +13,10 @@ export interface Explain {
   shows: string;
 }
 
-export const EXPLAIN: Record<LinkKind, Explain> = {
+/** As ligações e as peças com "O que é?" próprio (a cápsula, Fase 2 · M2a). */
+export type ExplainKind = LinkKind | "capsule";
+
+export const EXPLAIN: Record<ExplainKind, Explain> = {
   screw: {
     title: "Parafuso",
     text: [
@@ -121,6 +124,15 @@ export const EXPLAIN: Record<LinkKind, Explain> = {
       "É o interruptor de fim de curso de um portão.",
     ],
     shows: "uma esfera batendo na zona e o sensor acendendo",
+  },
+  capsule: {
+    title: "Cápsula",
+    text: [
+      "Um estojo com carga e uma esfera presa na boca: um golpe forte na espoleta, no fundo, acende a carga.",
+      "O gás empurra a esfera para a frente e o estojo para trás; num cano, empurra até a boca do cano.",
+      "Depois, vazio, o estojo é puxado pelo aro e jogado para fora (o gás é didático).",
+    ],
+    shows: "o percussor batendo na espoleta, a esfera saindo e o estojo recuando",
   },
 };
 

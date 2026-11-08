@@ -185,6 +185,55 @@ export interface PlanSensor {
   actions: { do: "ignite" | "open" | "close" | "release"; target: Id; vent?: number }[];
 }
 
+/**
+ * Cápsula (v4): a câmara do estojo (índice `chamber` em `chambers`), a solda
+ * que prende a esfera na boca até o disparo e a espoleta.
+ */
+export interface PlanCapsule {
+  part: Id;
+  ref: number;
+  /** corpo do estojo */
+  body: number;
+  /** índice da câmara do estojo em `plan.chambers` */
+  chamber: number;
+  projectile?: Id;
+  /** corpo da esfera (−1 sem esfera) */
+  ball: number;
+  /** ponto da solda da esfera no mundo, na pose desenhada */
+  anchor: Vec2;
+  /** espoleta no espaço do corpo do estojo e o raio da região do golpe, mm */
+  primer: Vec2;
+  primerR: number;
+  /** mm/s */
+  minStrike: number;
+  /** fundo externo do estojo sobre o eixo, no espaço do corpo (o ponto que assenta) */
+  rear: Vec2;
+  /** comprimento do furo do estojo, do fundo interno à boca, mm */
+  caseLength: number;
+}
+
+/** Câmara que recebe cápsula (`mode: "capsule"`): o cano onde o furo continua. */
+export interface PlanSeat {
+  id: Id;
+  ref: number;
+  body: number;
+  /** fundo da câmara e eixo (unitário) no espaço do corpo */
+  base: Vec2;
+  axis: Vec2;
+  /** do fundo até a boca do cano, mm */
+  length: number;
+  bore: number;
+  /** quanto o fundo do estojo pode estar longe do fundo da câmara e contar como assentado, mm */
+  seat: number;
+}
+
+/** Assento padrão de uma câmara de cápsula sem `seat`, mm. */
+export const DEFAULT_SEAT = 1;
+/** Gás da cápsula (a v4 não guarda o modelo): adiabático do ar, pressão ambiente, queima curta. */
+export const CAPSULE_GAS = { model: "adiabatic" as const, gamma: 1.4, p0: 101.325, burnMs: 0.5 };
+/** Região da espoleta: metade do furo, no mínimo 1 mm. */
+export const primerRadius = (bore: number) => Math.max(1, bore / 2);
+
 export interface Plan {
   bodies: PlanBody[];
   partRel: Map<Id, PartRel>;
@@ -199,6 +248,8 @@ export interface Plan {
   slotContacts: PlanSlotContact[];
   springs: PlanSpring[];
   chambers: PlanChamber[];
+  capsules: PlanCapsule[];
+  seats: PlanSeat[];
   sensors: PlanSensor[];
   /** ligações na ordem da cena, com o tipo */
   links: { id: Id; kind: Link["kind"] }[];
@@ -415,6 +466,8 @@ export function buildPlan(scene: Scene): Plan {
     slotContacts: [],
     springs: [],
     chambers: [],
+    capsules: [],
+    seats: [],
     sensors: [],
     links: scene.links.map((l) => ({ id: l.id, kind: l.kind })),
     gravity: scene.settings.gravity.on ? [0, scene.settings.gravity.g] : [0, 0],
@@ -595,6 +648,20 @@ export function buildPlan(scene: Scene): Plan {
       case "chamber": {
         const body = bodyIdx(l.body);
         if (body < 0) break;
+        if (l.mode === "capsule") {
+          const ang = angleOf(l.body) + l.dir;
+          plan.seats.push({
+            id: l.id,
+            ref: l.ref,
+            body,
+            base: toLocal(body, worldOf(l.body, l.at)),
+            axis: [dcos(ang), dsin(ang)],
+            length: l.length,
+            bore: l.bore,
+            seat: l.seat ?? DEFAULT_SEAT,
+          });
+          break;
+        }
         const ang = angleOf(l.body) + l.dir;
         const u: Vec2 = [dcos(ang), dsin(ang)];
         const baseW = worldOf(l.body, l.at);
@@ -755,6 +822,81 @@ export function buildPlan(scene: Scene): Plan {
         break;
       }
     }
+  }
+  for (const part of valid) {
+    const c = part.capsule;
+    const body = bodyIdx(part.id);
+    if (!c || body < 0) continue;
+    const baseW = worldOf(part.id, c.base);
+    const mouthW = worldOf(part.id, c.mouth);
+    const len = dhypot(mouthW[0] - baseW[0], mouthW[1] - baseW[1]);
+    if (!(len > 1e-9)) continue;
+    const u: Vec2 = [(mouthW[0] - baseW[0]) / len, (mouthW[1] - baseW[1]) / len];
+    const proj = (q: Vec2) => (q[0] - baseW[0]) * u[0] + (q[1] - baseW[1]) * u[1];
+    // fundo externo: o extremo de trás do contorno do estojo ao longo do eixo
+    const g = geo.get(part.id);
+    let rearS = proj(worldOf(part.id, c.primer));
+    if (g?.ok)
+      for (const pc of g.value.pieces) {
+        if (pc.kind === "circle")
+          rearS = Math.min(rearS, proj(transform(pc.c, part.x, part.y, part.angle)) - pc.r);
+        else
+          for (const q of pc.points) rearS = Math.min(rearS, proj(transform(q, part.x, part.y, part.angle)));
+      }
+    const ball = c.projectile === undefined ? undefined : byId.get(c.projectile);
+    const ballBody = ball ? bodyIdx(ball.id) : -1;
+    const ballOk =
+      !!ball &&
+      ball.shape.kind === "circle" &&
+      ballBody > 0 &&
+      ballBody !== body &&
+      !bodies[ballBody]!.static;
+    if (ball && !ballOk)
+      warnings.push(`Cápsula ${part.ref}: o projétil precisa ser uma esfera solta; ficou sem ele`);
+    const walls: PlanChamber["walls"] = [];
+    let anchor: Vec2 = mouthW;
+    if (ballOk && ball.shape.kind === "circle") {
+      const cW: Vec2 = [ball.x, ball.y];
+      const s0 = proj(cW) - ball.shape.r;
+      const faceW: Vec2 = [baseW[0] + u[0] * s0, baseW[1] + u[1] * s0];
+      walls.push({ part: ball.id, body: ballBody, side: 1, face: toLocal(ballBody, faceW), s0, seal: 1e9 });
+      anchor = cW;
+    }
+    const area = (PI * c.bore * c.bore) / 4;
+    plan.capsules.push({
+      part: part.id,
+      ref: part.ref,
+      body,
+      chamber: plan.chambers.length,
+      ...(ballOk ? { projectile: ball.id } : {}),
+      ball: ballOk ? ballBody : -1,
+      anchor,
+      primer: toLocal(body, worldOf(part.id, c.primer)),
+      primerR: primerRadius(c.bore),
+      minStrike: c.minStrike,
+      rear: toLocal(body, [baseW[0] + u[0] * rearS, baseW[1] + u[1] * rearS]),
+      caseLength: len,
+    });
+    plan.chambers.push({
+      id: part.id,
+      ref: part.ref,
+      body,
+      base: toLocal(body, baseW),
+      axis: u,
+      area,
+      // sem esfera o furo já nasce aberto: a carga acende e o gás escapa
+      length: walls.length ? len : 0,
+      walls,
+      vents: [],
+      ports: [],
+      model: CAPSULE_GAS.model,
+      gamma: CAPSULE_GAS.gamma,
+      p0: CAPSULE_GAS.p0,
+      charge: c.charge,
+      burn: CAPSULE_GAS.burnMs / 1000,
+      shots: 1,
+      capsule: true,
+    });
   }
   for (const ch of plan.chambers)
     for (const pt of ch.ports) {

@@ -49,6 +49,8 @@ export interface SimControl {
   setFrameListener(fn: ((t: TimelineState) => void) | null): void;
   /** volta a desenhar o quadro atual (depois de remontar a cena) */
   redraw(): void;
+  /** a cápsula `id` está deflagrada no quadro mostrado (null: sem gravação dela) */
+  capsuleFired(id: Id): boolean | null;
   dispose(): void;
 }
 

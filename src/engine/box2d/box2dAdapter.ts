@@ -1,6 +1,6 @@
 import type { Box2DModule, b2BodyId, b2JointId, b2Rot, b2ShapeId, b2Vec2, b2WorldId } from "box2d3-wasm";
 import type { Piece } from "@/geometry/decompose";
-import { PI, datan2, dcos, dsin } from "@/geometry/dmath";
+import { PI, datan2, dcos, dhypot, dsin } from "@/geometry/dmath";
 import { pieceSeparation, type WorldPiece } from "@/geometry/penetration";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
@@ -10,6 +10,11 @@ import { HAND, Runtime, chase, handLimits, type BodyIO, type BodyState } from ".
 import type { CompileOptions, CompileReport, EngineAdapter, EngineEvent, PartPose, Snapshot } from "../types";
 
 export const BOX2D_WASM_VERSION = "6.0.0";
+
+/** Passos do motor em cada passo de 1/240 s enquanto o tiro de uma cápsula anda. */
+export const CAPSULE_SUBSTEPS = 8;
+/** Abertura da solda da esfera (mm) acima da qual ela volta para a boca no fim do passo. */
+export const CAPSULE_WELD_SNAP = 0.01;
 
 /**
  * Parâmetros do mundo e do solver do Box2D v3 (docs/decisoes/motor.md,
@@ -87,6 +92,14 @@ interface ShapeData {
   pin?: Id;
 }
 
+/** Contact begin event (box2d3-wasm 6.0.0). */
+interface ContactBegin {
+  shapeIdA: b2ShapeId;
+  shapeIdB: b2ShapeId;
+  contactId: Parameters<Box2DModule["b2Contact_GetData"]>[0];
+  delete(): void;
+}
+
 /** Contact data of a body as exposed by box2d3-wasm 6.0.0 (b2Body_GetContactData). */
 interface ContactItem {
   manifold: {
@@ -96,6 +109,8 @@ interface ContactItem {
       separation: number;
       normalImpulse: number;
       tangentImpulse: number;
+      /** ponto de contato relativo ao centro do corpo A, no mundo */
+      anchorA: { x: number; y: number; delete(): void };
       delete(): void;
     };
   };
@@ -127,6 +142,11 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
   const v2: b2Vec2 = new B.b2Vec2(0, 0);
   let impacts: EngineEvent[] = [];
   /** mola nativa do gás de cada câmara: junta de distância entre as duas faces (ou fundo e face) */
+  /** solda da esfera de cada cápsula (null: sem esfera ou já solta) */
+  let capsuleWelds: (b2JointId | null)[] = [];
+  /** centro da esfera no espaço do corpo do estojo (a solda) */
+  let capsuleLocal: Vec2[] = [];
+  const p0capsules = () => plan?.capsules ?? [];
   let gasJoints: ({ joint: b2JointId; a: number; b: number; la: Vec2; lb: Vec2; active: boolean } | null)[] =
     [];
   /**
@@ -318,6 +338,90 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       }
     }
     return min;
+  };
+
+  /** velocidade de cada corpo antes do passo do motor (mm/s, rad/s): a aproximação no golpe */
+  let pre: { vx: number; vy: number; w: number }[] = [];
+  const recordPre = () => {
+    if (!rt) return;
+    if (pre.length !== bodies.length) pre = bodies.map(() => ({ vx: 0, vy: 0, w: 0 }));
+    for (const i of dynamic) {
+      const st = rt.body(i);
+      const q = pre[i]!;
+      q.vx = st.vx;
+      q.vy = st.vy;
+      q.w = st.w;
+    }
+  };
+  /**
+   * Leitura de contato do golpe (docs/arquitetura.md §4, "Cápsula"): nos
+   * contatos que começaram neste passo do motor (eventos de início de toque),
+   * os pontos do estojo a até `primerR` da espoleta; a velocidade de
+   * aproximação ao longo da normal vem das velocidades de antes do passo. O
+   * evento de impacto do Box2D sozinho perde o golpe de um percussor que sai
+   * do repouso e bate no mesmo passo. Os dados do contato são copiados para
+   * valores JS antes de qualquer outra chamada ao motor.
+   */
+  type Touch = { a: ShapeData; b: ShapeData; nx: number; ny: number; pts: number[] };
+  const readTouches = (ce: { beginCount: number; GetBeginEvent(i: number): ContactBegin }): Touch[] => {
+    const out: Touch[] = [];
+    const cases = new Set(rt?.armedCapsules().map((c) => c.p.part));
+    if (!cases.size) return out;
+    for (let i = 0; i < ce.beginCount; i++) {
+      const e = ce.GetBeginEvent(i);
+      const a = shapeInfo(e.shapeIdA);
+      const b = shapeInfo(e.shapeIdB);
+      if (a && b && cases.has(a.part) !== cases.has(b.part) && B.b2Contact_IsValid(e.contactId)) {
+        const data = B.b2Contact_GetData(e.contactId) as unknown as ContactItem;
+        const m = data.manifold;
+        const count = m.pointCount;
+        if (count) {
+          const n = m.normal;
+          const pts: number[] = [];
+          for (let k = 0; k < count; k++) {
+            const q = m.GetPoint(k);
+            const an = q.anchorA;
+            pts.push(an.x * L, an.y * L);
+            an.delete();
+            q.delete();
+          }
+          out.push({ a, b, nx: n.x, ny: n.y, pts });
+          n.delete();
+        }
+        data.delete();
+      }
+      e.delete();
+    }
+    return out;
+  };
+  const primerStrikes = (touches: Touch[]) => {
+    if (!rt || !plan || !touches.length) return;
+    for (const { i, p: c } of rt.armedCapsules()) {
+      const pr = rt.world(c.body, c.primer);
+      let best: { by: Id; speed: number } | null = null;
+      for (const { a, b, nx, ny, pts } of touches) {
+        if ((a.part === c.part) === (b.part === c.part)) continue;
+        const other = a.part === c.part ? b : a;
+        if (other.part === c.projectile) continue;
+        const pa = rt.body(a.body);
+        for (let k = 0; k < pts.length; k += 2) {
+          const px = pa.x + pts[k]!;
+          const py = pa.y + pts[k + 1]!;
+          if (dhypot(px - pr[0], py - pr[1]) > c.primerR) continue;
+          const vel = (bi: number): Vec2 => {
+            if (plan!.bodies[bi]!.static) return [0, 0];
+            const st = rt!.body(bi);
+            const v = pre[bi] ?? st;
+            return [v.vx - v.w * (py - st.y), v.vy + v.w * (px - st.x)];
+          };
+          const va = vel(a.body);
+          const vb = vel(b.body);
+          const closing = (va[0] - vb[0]) * nx + (va[1] - vb[1]) * ny;
+          if (closing > 0 && (!best || closing > best.speed)) best = { by: other.part, speed: closing };
+        }
+      }
+      if (best) rt.strike(i, best.by, best.speed);
+    }
   };
 
   const adapter: EngineAdapter = {
@@ -599,6 +703,28 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         joints.set(l.id, B.b2CreateWeldJoint(w, jd));
         jd.delete();
       }
+      // a esfera da cápsula presa na boca: solda rígida até o golpe na espoleta
+      capsuleLocal = p.capsules.map((c) => {
+        const b = p.bodies[c.body]!;
+        return [c.anchor[0] - b.position[0], c.anchor[1] - b.position[1]] as Vec2;
+      });
+      capsuleWelds = p.capsules.map((c) => {
+        if (c.ball < 0) return null;
+        const jd = B.b2DefaultWeldJointDef();
+        jd.base.bodyIdA = bodies[c.body]!;
+        jd.base.bodyIdB = bodies[c.ball]!;
+        jd.base.localFrameA.p = local(c.body, c.anchor);
+        jd.base.localFrameB.p = local(c.ball, c.anchor);
+        jd.base.collideConnected = false;
+        base(jd);
+        jd.linearHertz = 0;
+        jd.angularHertz = 0;
+        const joint = B.b2CreateWeldJoint(w, jd);
+        jd.delete();
+        // a colisão contínua de bala não respeita juntas: presa, a esfera não é bala
+        if (p.bodies[c.ball]!.bullet) B.b2Body_SetBullet(bodies[c.ball]!, false);
+        return joint;
+      });
       gasJoints = p.chambers.map((ch) => {
         const front = ch.walls.find((wl) => wl.side > 0);
         const rear = ch.walls.find((wl) => wl.side < 0);
@@ -617,6 +743,10 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         jd.enableSpring = true;
         jd.hertz = 0;
         jd.enableLimit = false;
+        // Cápsula: o tiro inteiro cabe em menos de um passo, e a mola linear
+        // passaria do ponto de força zero e puxaria a esfera de volta. O gás só
+        // empurra (como a mola apoiada); as câmaras de carga ficam como eram.
+        if (ch.capsule) jd.lowerSpringForce = 0;
         const joint = B.b2CreateDistanceJoint(w, jd);
         jd.delete();
         return { joint, a, b: front.body, la, lb: front.face, active: false };
@@ -656,6 +786,14 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         jointForce,
         jointTorque,
         gasSpring,
+        releaseProjectile(i) {
+          const joint = capsuleWelds[i];
+          if (!joint) return;
+          B.b2DestroyJoint(joint);
+          capsuleWelds[i] = null;
+          const ball = p.capsules[i]!.ball;
+          if (p.bodies[ball]!.bullet) B.b2Body_SetBullet(bodies[ball]!, true);
+        },
         destroyLock(id) {
           const joint = joints.get(id);
           if (joint) {
@@ -684,48 +822,90 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         B.b2Body_SetTargetTransform(drag.body, t, dt, true);
         t.delete();
       }
-      rt.beforeStep(dt);
-      B.b2World_Step(worldId, dt, tuning.subSteps);
-      const ev = B.b2World_GetSensorEvents(worldId);
-      for (let i = 0; i < ev.beginCount; i++) {
-        const e = ev.GetBeginEvent(i);
-        const s = shapeInfo(e.sensorShapeId);
-        const o = shapeInfo(e.visitorShapeId);
-        if (s?.sensor && o && !o.sensor) rt.sensorTouch(s.sensor, o.body, o.part);
+      // O tiro de uma cápsula dura menos que um passo: enquanto ele anda, o
+      // passo vira CAPSULE_SUBSTEPS passos do motor e o gás é refeito em cada
+      // um. Cenas sem cápsula dão sempre um passo só (os hashes não mudam).
+      const n = rt.shooting() ? CAPSULE_SUBSTEPS : 1;
+      const t0 = rt.time;
+      const h = n > 1 ? dt / n : dt;
+      lastDt = h;
+      const all: EngineEvent[] = [];
+      for (let k = 0; k < n; k++) {
+        rt.beforeStep(h, k);
+        if (p0capsules().length) recordPre();
+        B.b2World_Step(worldId, h, tuning.subSteps);
+        const ev = B.b2World_GetSensorEvents(worldId);
+        for (let i = 0; i < ev.beginCount; i++) {
+          const e = ev.GetBeginEvent(i);
+          const s = shapeInfo(e.sensorShapeId);
+          const o = shapeInfo(e.visitorShapeId);
+          if (s?.sensor && o && !o.sensor) rt.sensorTouch(s.sensor, o.body, o.part);
+        }
+        ev.delete();
+        impacts = [];
+        const ce = B.b2World_GetContactEvents(worldId);
+        const touches = p0capsules().length ? readTouches(ce) : [];
+        for (let i = 0; i < ce.hitCount; i++) {
+          const e = ce.GetHitEvent(i);
+          const a = shapeInfo(e.shapeIdA);
+          const b = shapeInfo(e.shapeIdB);
+          if (a && b)
+            impacts.push({
+              kind: "impact",
+              a: a.part,
+              b: b.part,
+              speed: e.approachSpeed * L,
+              point: [e.point.x * L, e.point.y * L],
+              time: n > 1 ? t0 + (k + 1) * h : rt.time + dt,
+            });
+          e.delete();
+        }
+        ce.delete();
+        if (n > 1) rt.afterStep(h, { last: k === n - 1, t0, total: dt });
+        else rt.afterStep(dt);
+        rt.checkFuses();
+        // o golpe na espoleta acende a carga e já pode dividir o resto do passo
+        rt.strikes(impacts);
+        primerStrikes(touches);
+        for (const e of impacts) all.push(e);
+        gasJoints.forEach((gj, ci) => {
+          if (!gj || !rt || !gj.active) return;
+          const f = B.b2Joint_GetConstraintForce(gj.joint);
+          const pa = rt.world(gj.a, gj.la);
+          const pb = rt.world(gj.b, gj.lb);
+          const dx = pb[0] - pa[0];
+          const dy = pb[1] - pa[1];
+          const l = Math.sqrt(dx * dx + dy * dy);
+          rt.recordGasForce(ci, l > 0 ? ((f.x * dx + f.y * dy) * L) / l : 0, h);
+          f.delete();
+        });
       }
-      ev.delete();
-      impacts = [];
-      const ce = B.b2World_GetContactEvents(worldId);
-      for (let i = 0; i < ce.hitCount; i++) {
-        const e = ce.GetHitEvent(i);
-        const a = shapeInfo(e.shapeIdA);
-        const b = shapeInfo(e.shapeIdB);
-        if (a && b)
-          impacts.push({
-            kind: "impact",
-            a: a.part,
-            b: b.part,
-            speed: e.approachSpeed * L,
-            point: [e.point.x * L, e.point.y * L],
-            time: rt.time + dt,
-          });
-        e.delete();
+      rt.pushEvents(all);
+      // A colisão contínua do Box2D contra peças fixas recua o estojo para o
+      // instante do toque sem levar a esfera junto (ela não respeita juntas).
+      // Presa, a esfera é parte rígida do estojo: volta para a boca, com a
+      // velocidade do estojo naquele ponto. Só age quando a solda abriu.
+      for (const [i, c] of p0capsules().entries()) {
+        if (!capsuleWelds[i] || c.ball < 0) continue;
+        const cs = rt.body(c.body);
+        const lc = capsuleLocal[i]!;
+        const cos = dcos(cs.angle);
+        const sin = dsin(cs.angle);
+        const wx = cs.x + lc[0] * cos - lc[1] * sin;
+        const wy = cs.y + lc[0] * sin + lc[1] * cos;
+        const bs = rt.body(c.ball);
+        if (dhypot(bs.x - wx, bs.y - wy) <= CAPSULE_WELD_SNAP) continue;
+        const t = new B.b2Transform();
+        t.p = new B.b2Vec2(wx / L, wy / L);
+        t.q = rot(cs.angle);
+        B.b2Body_SetTransform(bodies[c.ball]!, t.p, t.q);
+        t.delete();
+        v1.x = (cs.vx - cs.w * (wy - cs.y)) / L;
+        v1.y = (cs.vy + cs.w * (wx - cs.x)) / L;
+        B.b2Body_SetLinearVelocity(bodies[c.ball]!, v1);
+        B.b2Body_SetAngularVelocity(bodies[c.ball]!, cs.w);
+        rt.invalidate(c.ball);
       }
-      ce.delete();
-      rt.afterStep(dt);
-      rt.checkFuses();
-      rt.pushEvents(impacts);
-      gasJoints.forEach((gj, ci) => {
-        if (!gj || !rt || !gj.active) return;
-        const f = B.b2Joint_GetConstraintForce(gj.joint);
-        const pa = rt.world(gj.a, gj.la);
-        const pb = rt.world(gj.b, gj.lb);
-        const dx = pb[0] - pa[0];
-        const dy = pb[1] - pa[1];
-        const l = Math.sqrt(dx * dx + dy * dy);
-        rt.recordGasForce(ci, l > 0 ? ((f.x * dx + f.y * dy) * L) / l : 0, dt);
-        f.delete();
-      });
 
       for (const i of tracked) angleOf(i);
     },
@@ -978,6 +1158,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
     dispose() {
       drag = null;
       gasJoints = [];
+      capsuleWelds = [];
       if (worldId) B.b2DestroyWorld(worldId);
       worldId = null;
       rt = null;

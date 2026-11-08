@@ -196,9 +196,10 @@ function prepare(scene: Scene, initial: Snapshot, staticOffsets: Map<Id, number>
   let mass = 0;
   for (const b of plan.bodies) if (!b.static && b.index > 0) mass += b.mass;
   const g = dhypot(plan.gravity[0], plan.gravity[1]);
-  const hasSource = scene.links.some(
-    (l) => l.kind === "chamber" || (l.kind === "axle" && l.motor !== undefined),
-  );
+  const hasSource =
+    scene.links.some((l) => l.kind === "chamber" || (l.kind === "axle" && l.motor !== undefined)) ||
+    // a cápsula com carga também é fonte: a mão pode golpear a espoleta
+    scene.parts.some((p) => (p.capsule?.charge ?? 0) > 0);
   // piso de ruído: 0,05 mm de movimento contra o peso de tudo e contra as molas
   const springs = springStroke(plan, null).reduce((x, y) => x + y, 0);
   return { scene, rodLength, cables, mounts, pins, hasSource, floor: (mass * g + springs) * 0.05 * 1e-6 };
@@ -266,6 +267,8 @@ function runCase(
     let joint = 0;
     for (const [id, st] of Object.entries(s.links)) {
       if (st.kind === "axle" || (st.kind === "lock" && !st.released)) joint = Math.max(joint, st.gap ?? 0);
+      // a solda da esfera na boca da cápsula, até o disparo
+      if (st.kind === "chamber" && st.gap !== undefined) joint = Math.max(joint, st.gap);
       else if (st.kind === "slot" && st.deviation !== undefined)
         joint = Math.max(joint, Math.abs(st.deviation));
       else if (st.kind === "rod")
@@ -411,15 +414,16 @@ export function abuseScene(
         runs++;
       }
   const has = {
-    joint: scene.links.some(
-      (l) =>
-        l.kind === "axle" ||
-        l.kind === "lock" ||
-        l.kind === "rod" ||
-        l.kind === "slider" ||
-        (l.kind === "slot" && l.mode === "joint") ||
-        (l.kind === "mount" && l.linearHz <= 0),
-    ),
+    joint:
+      scene.links.some(
+        (l) =>
+          l.kind === "axle" ||
+          l.kind === "lock" ||
+          l.kind === "rod" ||
+          l.kind === "slider" ||
+          (l.kind === "slot" && l.mode === "joint") ||
+          (l.kind === "mount" && l.linearHz <= 0),
+      ) || scene.parts.some((p) => p.capsule?.projectile !== undefined),
     cable: ctx.cables.size > 0,
     mount: [...ctx.mounts.values()].some((m) => !m.rigid),
     pinHole: ctx.pins.size > 0,
@@ -453,5 +457,7 @@ export function abuseScene(
 
 /** Cenas com gás ou bala: a velocidade acima de 2 m/s é delas. */
 export function isFastScene(id: string, scene: Scene): boolean {
-  return id.includes("bala") || scene.links.some((l) => l.kind === "chamber");
+  return (
+    id.includes("bala") || scene.links.some((l) => l.kind === "chamber") || scene.parts.some((p) => p.capsule)
+  );
 }

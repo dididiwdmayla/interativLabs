@@ -34,6 +34,8 @@ export type Quantity =
   | { part: Id; disp: true; at?: Vec2 }
   /** velocidade do centro da peça no último passo (mm/s), projetada no eixo `vel` (mundo) */
   | { part: Id; vel: Vec2 }
+  /** rapidez do centro da peça no último passo (mm/s, sem direção) */
+  | { part: Id; speed: true }
   /** campo numérico do estado da ligação, com caminho (ex.: "walls.0.impulse") */
   | { link: Id; field: string }
   /** distância entre dois pontos (peça null = mundo) */
@@ -121,6 +123,8 @@ export type ScriptAssertion = Base &
         within: number;
       }
     | { kind: "maxPenetration"; max: number; from?: number }
+    /** no instante t, o centro da peça está fora da caixa [x0, y0, x1, y1] (mundo, mm) */
+    | { kind: "outside"; part: Id; box: [number, number, number, number]; t: number }
     /** enquanto a condição vale (pelo menos `minSteps` passos), q fica entre min e max */
     | {
         kind: "while";
@@ -147,7 +151,7 @@ export interface ScriptRun {
   duration: number;
   /** muda a posição inicial de peças antes de compilar */
   override?: Record<Id, { x?: number; y?: number; angle?: number }>;
-  /** muda campos de ligações antes de compilar (ex.: o modo de uma mola) */
+  /** muda campos de ligações ou de peças antes de compilar (ex.: o modo de uma mola, a forma do cano) */
   patch?: Record<Id, Record<string, unknown>>;
   inputs: ScriptInput[];
   assertions: ScriptAssertion[];

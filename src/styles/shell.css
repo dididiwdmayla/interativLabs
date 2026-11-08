@@ -583,6 +583,17 @@
   color: var(--color-ink-2);
 }
 
+/* grupo da gaveta (Ciclo): título em versalete da prancha */
+.sheet__group {
+  margin: var(--space-5) 0 var(--space-2);
+  font-family: var(--font-title);
+  font-size: var(--text-panel-title);
+  font-weight: 400;
+  letter-spacing: var(--tracking-title);
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
 @media (orientation: portrait) and (max-width: 700px) {
   .sheet,
   .sheet[data-side],

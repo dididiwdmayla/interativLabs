@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { run } from "@/editor/history";
 import { buildInsertion } from "@/parts/insert";
 import { useUiStore } from "@/editor/useUiStore";
 import type { Scene } from "@/model/types";
@@ -22,18 +23,26 @@ const DRAG_PX = 6;
 function sample(g: Generator): Scene {
   const layer = { id: "L", name: "", visible: true, locked: false, thickness: 3 };
   const base: Scene = {
-    version: 3,
+    version: 4,
     meta: { title: g.name, createdAt: "", updatedAt: "" },
     settings: { gravity: { on: true, g: 9810 }, snap: { grid: 1, on: false } },
     layers: [layer],
     parts: [],
     links: [],
   };
-  const part = buildPart({ ...base, layers: [layer, { ...layer, id: "L2" }, { ...layer, id: "L3" }] }, g.id, {
-    x: 0,
-    y: 0,
-    layer: "L2",
-  });
+  const three = { ...base, layers: [layer, { ...layer, id: "L2" }, { ...layer, id: "L3" }] };
+  if (g.id === "capsule") {
+    // a cápsula aparece com a esfera presa na boca
+    const ins = buildInsertion(three, g.id, { x: 0, y: 0, layer: "L2" });
+    const sc = ins && run(three, ins.command.label, ins.command.recipe)?.scene;
+    if (sc)
+      return {
+        ...base,
+        layers: [layer, { ...layer, id: "L3" }],
+        parts: sc.parts.map((p) => ({ ...p, layer: "L" })),
+      };
+  }
+  const part = buildPart(three, g.id, { x: 0, y: 0, layer: "L2" });
   return { ...base, layers: [layer, { ...layer, id: "L3" }], parts: [{ ...part, layer: "L" }] };
 }
 
@@ -144,7 +153,17 @@ export function PartsDrawer() {
         Arraste para a prancha ou toque para pôr no centro. Entra na camada ativa.
       </p>
       <ul className="tiles">
-        {GENERATORS.map((g) => (
+        {GENERATORS.filter((g) => !g.category).map((g) => (
+          <Tile key={g.id} g={g} onPlace={place} />
+        ))}
+      </ul>
+      <h3 className="sheet__group">Ciclo</h3>
+      <p className="sheet__lede">
+        Cápsula com a esfera presa, extrator que já entra cravado e ejetor fixo. Gás didático, proporções
+        inventadas.
+      </p>
+      <ul className="tiles" aria-label="Ciclo">
+        {GENERATORS.filter((g) => g.category === "ciclo").map((g) => (
           <Tile key={g.id} g={g} onPlace={place} />
         ))}
       </ul>

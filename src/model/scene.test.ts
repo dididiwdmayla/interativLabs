@@ -137,8 +137,8 @@ describe("migração v1 → v2", () => {
       const scene = mustLoad(v0);
 
       it("v0 → v1 → v2 passa nos dois schemas", () => {
-        expect(scene.version).toBe(3);
-        expect(scene).toEqual({ ...migrateV1ToV2(v1), version: 3 });
+        expect(scene.version).toBe(4);
+        expect(scene).toEqual({ ...migrateV1ToV2(v1), version: 4 });
         expect(loadScene(v0, { now: NOW })).toMatchObject({ ok: true, migratedFrom: 0 });
         expect(loadScene(JSON.parse(JSON.stringify(v1)))).toMatchObject({ ok: true, migratedFrom: 1 });
       });

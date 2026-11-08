@@ -21,8 +21,8 @@ export interface TrailWriter {
 export interface FrameSource {
   lock?(id: Id): boolean | undefined;
   pose(id: Id): PartPose | undefined;
-  /** câmara: pressão absoluta (kPa) e curso de cada parede (mm) */
-  chamber(id: Id): { pressure: number; travel: readonly number[] } | undefined;
+  /** câmara: pressão absoluta (kPa), curso de cada parede (mm) e se acendeu (a cápsula: deflagrou) */
+  chamber(id: Id): { pressure: number; travel: readonly number[]; fired?: boolean } | undefined;
 }
 
 /** Quadro da pose desenhada (modo Editar). */
@@ -37,8 +37,24 @@ export function drawnFrame(model: SceneModel): FrameSource {
 }
 
 /** Quadro com uma peça numa pose diferente (o dedo arrastando no Montar). */
-export function overrideFrame(base: FrameSource, id: Id, pose: PartPose): FrameSource {
-  return { pose: (pid) => (pid === id ? pose : base.pose(pid)), chamber: (cid) => base.chamber(cid) };
+export function overrideFrame(base: FrameSource, id: Id, pose: PartPose, model?: SceneModel): FrameSource {
+  // a esfera presa na boca da cápsula acompanha o estojo no arrasto
+  const ballId = model?.parts.get(id)?.part.capsule?.projectile;
+  const from = base.pose(id);
+  const ball = ballId === undefined ? undefined : base.pose(ballId);
+  let carried: PartPose | undefined;
+  if (ball && from) {
+    const da = pose.angle - from.angle;
+    const c = Math.cos(da);
+    const n = Math.sin(da);
+    const dx = ball.x - from.x;
+    const dy = ball.y - from.y;
+    carried = { x: pose.x + dx * c - dy * n, y: pose.y + dx * n + dy * c, angle: ball.angle + da };
+  }
+  return {
+    pose: (pid) => (pid === id ? pose : carried && pid === ballId ? carried : base.pose(pid)),
+    chamber: (cid) => base.chamber(cid),
+  };
 }
 
 interface PartNodes {
@@ -110,6 +126,8 @@ export class StageNodes {
   rods = new Map<Id, TwoNodes>();
   cables = new Map<Id, TwoNodes>();
   chambers = new Map<Id, ChamberNodes>();
+  /** grupo de cada cápsula e se está desenhada deflagrada */
+  capsules = new Map<Id, { el: SVGGElement; fired: boolean }>();
   /** hastes do afastamento (pino e sensor entre folhas): seguem o ponto na peça */
   hastes = new Map<Id, { el: SVGGElement; host: Id; at: Vec2 }>();
   /** rastro do movimento (Testar): quem escreve, os caminhos fixos e a peça escolhida */
@@ -159,6 +177,13 @@ export class StageNodes {
       const set = this.part(id).followers;
       if (el) set.add(el);
       else for (const x of set) if (!x.isConnected) set.delete(x);
+    };
+  }
+
+  refCapsule(id: Id) {
+    return (el: SVGGElement | null) => {
+      if (el) this.capsules.set(id, { el, fired: false });
+      else this.capsules.delete(id);
     };
   }
 
@@ -321,6 +346,12 @@ export class StageNodes {
         c.label.setAttribute("x", f(base[0]));
         c.label.setAttribute("y", f(base[1] - link.bore / 2 - 6 * this.ctx.px));
       }
+    }
+    for (const [id, c] of this.capsules) {
+      const fired = !!frame.chamber(id)?.fired;
+      if (fired === c.fired) continue;
+      c.fired = fired;
+      c.el.classList.toggle("is-fired", fired);
     }
     for (const [id, c] of this.partCallouts) {
       const p = frame.pose(id);

@@ -1,0 +1,96 @@
+{
+  "id": "ciclo/capsula-empurrada",
+  "group": "ciclo",
+  "title": "Cápsula empurrada",
+  "notes": "O ferrolho, puxado pela mão a 600 mm/s, empurra a cápsula do carregador 25 mm até assentar no cano. A esfera continua presa na boca: a solda só solta no golpe na espoleta (o ferrolho bate a 0,6 m/s, abaixo dos 500 mm/s do golpe mínimo). Em 0.45 s o percussor golpeia e a esfera sai.",
+  "view": [-50, -20, 110, 40],
+  "runs": [
+    {
+      "name": "alimentação",
+      "duration": 0.7,
+      "inputs": [
+        {
+          "kind": "drag",
+          "part": "p7",
+          "from": [-49.8, -2],
+          "to": [-18.8, -2],
+          "t0": 0.1,
+          "t1": 0.1517,
+          "release": 0.6
+        },
+        {
+          "kind": "velocity",
+          "part": "p8",
+          "t": 0.45,
+          "v": [1500, 0],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "range",
+          "label": "a esfera não solta antes do golpe (fica a menos de 0,05 mm da boca)",
+          "q": {
+            "dist": [
+              {
+                "part": "p6",
+                "at": [0, 0]
+              },
+              {
+                "part": "p5",
+                "at": [10, 0]
+              }
+            ]
+          },
+          "to": 0.45,
+          "max": 0.05
+        },
+        {
+          "kind": "range",
+          "label": "e a cápsula não dispara antes do golpe",
+          "q": {
+            "link": "p5",
+            "field": "fired"
+          },
+          "to": 0.45,
+          "max": 0
+        },
+        {
+          "kind": "at",
+          "label": "a cápsula anda 25 mm e assenta no cano (±0,3 mm)",
+          "q": {
+            "part": "p5",
+            "along": [1, 0]
+          },
+          "t": 0.44,
+          "min": 24.7,
+          "max": 25.3
+        },
+        {
+          "kind": "events",
+          "label": "o golpe dispara uma vez",
+          "event": "capsule-fired",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "while",
+          "label": "e a esfera sai pela boca do cano a mais de 5 m/s (o ferrolho solto recua junto com o estojo)",
+          "cond": {
+            "part": "p6",
+            "field": "x"
+          },
+          "condMin": 49.2,
+          "condMax": 349.2,
+          "q": {
+            "part": "p6",
+            "vel": [1, 0]
+          },
+          "min": 5000,
+          "peak": true
+        }
+      ]
+    }
+  ],
+  "scene": "capsula-empurrada.scene.json"
+}

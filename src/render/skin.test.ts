@@ -18,7 +18,7 @@ const holed: PolyWithHoles = {
 
 function sceneWith(shape: PolyWithHoles, fixed = false): Scene {
   return {
-    version: 3,
+    version: 4,
     meta: { title: "t", createdAt: NOW, updatedAt: NOW },
     settings: { gravity: { on: true, g: 9810 }, snap: { grid: 1, on: true } },
     layers: [{ id: "L1", name: "a", visible: true, locked: false, thickness: 3 }],

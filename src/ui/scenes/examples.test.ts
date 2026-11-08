@@ -28,7 +28,7 @@ describe("exemplos do menu", () => {
   it("cada exemplo abre pelo schema", async () => {
     for (const e of EXAMPLES) {
       const s = await loadExample(e.id);
-      expect(s.version).toBe(3);
+      expect(s.version).toBe(4);
     }
   });
 });

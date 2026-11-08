@@ -88,3 +88,31 @@ it("pawl torque shows up while the ratchet pushes it: spring k·Δθ plus the st
   expect(peak).toBeLessThan(axle.torsion.k * (axle.limit!.upper - axle.torsion.rest) + 0.005);
   e.dispose();
 });
+it("disparo-extracao: pressure of the capsule, exit speed at the muzzle, bolt recoil and force at the claw", async () => {
+  const loaded = loadScene(
+    JSON.parse(readFileSync("scenes/fixtures/ciclo/disparo-extracao.scene.json", "utf8")),
+  );
+  if (!loaded.ok) throw new Error("Cena inválida");
+  const sc = loaded.scene;
+  const probes = instrumentPreset(sc);
+  expect(probes.map((p) => p.id)).toEqual([
+    "capsule-pressure",
+    "ball-speed",
+    "bolt-recoil",
+    "extractor-force",
+  ]);
+  const s = new SimSession(await loadBox2d(), sc, { probes });
+  for (let i = 0; i < 120; i++) {
+    if (i === 24) s.release("k15");
+    s.advance();
+  }
+  const [pressure, speed, bolt, claw] = s.samples.series(120);
+  const max = (x: typeof pressure) => Math.max(...x!.points.map((p) => p.value ?? -Infinity));
+  expect(max(pressure)).toBeGreaterThan(500);
+  expect(speed!.marks).toHaveLength(1);
+  expect(speed!.marks![0]!.value).toBeGreaterThan(12);
+  expect(speed!.marks![0]!.value).toBeLessThan(25);
+  expect(Math.min(...bolt!.points.map((p) => p.value ?? 0))).toBeLessThan(-22);
+  expect(max(claw)).toBeGreaterThan(0.05);
+  s.dispose();
+});

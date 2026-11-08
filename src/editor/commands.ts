@@ -145,6 +145,25 @@ export function mirrorShape(shape: Shape): Shape {
 
 // ——— peças ———
 
+/**
+ * A esfera presa na boca de uma cápsula (v4) é parte do estojo no editor:
+ * mover, girar e espelhar o estojo levam ela junto, na mesma pose relativa.
+ */
+function carryProjectile(d: Draft<Scene>, before: Pick<Part, "x" | "y" | "angle">, id: string): void {
+  const q = findPart(d, id);
+  const ballId = q?.capsule?.projectile;
+  const ball = ballId === undefined ? undefined : findPart(d, ballId);
+  if (!q || !ball) return;
+  const dx = ball.x - before.x;
+  const dy = ball.y - before.y;
+  const da = q.angle - before.angle;
+  const c = Math.cos(da);
+  const n = Math.sin(da);
+  ball.x = q.x + dx * c - dy * n;
+  ball.y = q.y + dx * n + dy * c;
+  ball.angle += da;
+}
+
 export function insertPart(_scene: Scene, part: Part): Command {
   return {
     label: `Inserir ${partName(part)}`,
@@ -162,8 +181,10 @@ export function movePart(scene: Scene, id: string, x: number, y: number): Comman
     recipe: (d) => {
       const q = findPart(d, id);
       if (q) {
+        const before = { x: q.x, y: q.y, angle: q.angle };
         q.x = x;
         q.y = y;
+        carryProjectile(d, before, id);
       }
     },
   };
@@ -182,7 +203,10 @@ export function setPose(
     label: `${verb} ${partName(p)}`,
     recipe: (d) => {
       const q = findPart(d, id);
-      if (q) Object.assign(q, pose);
+      if (!q) return;
+      const before = { x: q.x, y: q.y, angle: q.angle };
+      Object.assign(q, pose);
+      carryProjectile(d, before, id);
     },
   };
 }
@@ -228,6 +252,21 @@ export function setFixed(scene: Scene, id: string, fixed: boolean): Command | nu
     recipe: (d) => {
       const q = findPart(d, id);
       if (q) q.fixed = fixed;
+    },
+  };
+}
+
+/** Carga da cápsula (mmol); na cápsula da gaveta, também o nível (0 fraca, 1 média, 2 forte). */
+export function setCapsuleCharge(scene: Scene, id: string, charge: number, level?: number): Command | null {
+  const p = findPart(scene, id);
+  if (!p?.capsule || p.capsule.charge === charge) return null;
+  return {
+    label: `Trocar a carga de ${partName(p)}`,
+    recipe: (d) => {
+      const q = findPart(d, id);
+      if (!q?.capsule) return;
+      q.capsule.charge = charge;
+      if (level !== undefined && q.source?.generator === "capsule") q.source.params.charge = level;
     },
   };
 }
@@ -315,6 +354,20 @@ export function mirrorPart(scene: Scene, id: string, shape?: Shape, layer?: stri
         a.set([-x, y]);
         if (a.dir) a.dir.set(Math.PI - a.dir.get());
       }
+      // cápsula: o fundo, a boca e a espoleta espelham, e a esfera vai para a outra boca
+      const c = q.capsule;
+      if (c && !layer) {
+        for (const k of ["base", "mouth", "primer"] as const) c[k] = [-c[k][0], c[k][1]];
+        const ball = c.projectile === undefined ? undefined : findPart(d, c.projectile);
+        if (ball) {
+          const cos = Math.cos(q.angle);
+          const sin = Math.sin(q.angle);
+          const lx = (ball.x - q.x) * cos + (ball.y - q.y) * sin;
+          const ly = -(ball.x - q.x) * sin + (ball.y - q.y) * cos;
+          ball.x = q.x - lx * cos - ly * sin;
+          ball.y = q.y - lx * sin + ly * cos;
+        }
+      }
     },
   };
 }
@@ -338,12 +391,28 @@ export function duplicatePart(
     y: p.y + off,
   };
   if (copy.profiles) for (const s of copy.profiles) s.id = ids.next("part");
+  // a cápsula leva uma esfera nova (a mesma não pode estar em duas bocas)
+  const ball = p.capsule?.projectile === undefined ? undefined : findPart(scene, p.capsule.projectile);
+  const ballCopy: Part | null = ball
+    ? {
+        ...structuredClone(ball),
+        id: ids.next("part"),
+        ref: nextRef(scene) + 1,
+        x: ball.x + off,
+        y: ball.y + off,
+      }
+    : null;
+  if (copy.capsule) {
+    if (ballCopy) copy.capsule.projectile = ballCopy.id;
+    else delete copy.capsule.projectile;
+  }
   return {
     newId,
     command: {
       label: `Duplicar ${partName(p)}`,
       recipe: (d) => {
         d.parts.push(copy as Draft<Part>);
+        if (ballCopy) d.parts.push(ballCopy as Draft<Part>);
       },
     },
   };
@@ -376,6 +445,9 @@ export function dependentLinks(
 /** Remove peças e ligações, limpando o que apontava para elas (guia da mola, ações, portas). */
 function removeAll(d: Draft<Scene>, parts: Set<string>, links: Set<string>) {
   d.parts = d.parts.filter((p) => !parts.has(p.id));
+  // a esfera que saiu deixa o estojo vazio
+  for (const p of d.parts)
+    if (p.capsule?.projectile !== undefined && parts.has(p.capsule.projectile)) delete p.capsule.projectile;
   d.links = d.links.filter((l) => !links.has(l.id));
   for (const l of d.links) {
     if (l.kind === "spring" && l.guide !== undefined && parts.has(l.guide)) delete l.guide;
@@ -386,6 +458,11 @@ function removeAll(d: Draft<Scene>, parts: Set<string>, links: Set<string>) {
 
 export function deleteParts(scene: Scene, ids: string[]): Command | null {
   const set = new Set(ids.filter((id) => findPart(scene, id)));
+  // excluir a cápsula leva a esfera presa nela
+  for (const id of [...set]) {
+    const ball = findPart(scene, id)?.capsule?.projectile;
+    if (ball !== undefined && findPart(scene, ball)) set.add(ball);
+  }
   if (set.size === 0) return null;
   const links = dependentLinks(scene, set);
   const first = nameOf(scene, [...set][0] ?? "");

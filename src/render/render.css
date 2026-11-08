@@ -577,3 +577,44 @@
 .trail--5 {
   opacity: 0.1;
 }
+
+/* Cápsula (Fase 2 · M2a): a carga em pontilhado de brasa; deflagrada, a marca do golpe e o estojo apagado */
+.scene .world .capsule__charge path,
+.capsule__charge path {
+  fill: none;
+  stroke: var(--color-ember);
+  stroke-linecap: round;
+  /* o pontilhado é medido em mm (como o furo), não em px de tela */
+  vector-effect: none;
+}
+
+.scene .world .capsule__mark path,
+.capsule__mark {
+  display: none;
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 0.25;
+  vector-effect: none;
+}
+
+.capsule__mark circle {
+  fill: var(--color-ink);
+  stroke: none;
+}
+
+.part.is-fired .capsule__charge {
+  display: none;
+}
+
+.part.is-fired .capsule__mark {
+  display: inline;
+}
+
+.part.is-fired .part__outline,
+.part.is-fired .part__innerline {
+  opacity: 0.55;
+}
+
+.layer--above .capsule__charge {
+  display: none;
+}

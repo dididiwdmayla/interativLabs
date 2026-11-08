@@ -533,6 +533,12 @@ class Controller implements SimControl {
     };
   }
 
+  capsuleFired(id: string): boolean | null {
+    const f = this.rec.view(Math.min(this.rec.latest, Math.round(this.shownStep ?? this.step)), this.h);
+    const c = f?.chamber(id);
+    return c ? !!c.fired : null;
+  }
+
   redraw() {
     this.drawCurrent();
   }

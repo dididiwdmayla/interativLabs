@@ -1,7 +1,9 @@
 import type { Id, Scene } from "@/model/types";
 import type { SoundEvent } from "@/sim/session";
 import {
+  CASE_DROP_IDS,
   FAMILY_IDS,
+  mapCaseDrop,
   WindowLimiter,
   mapGas,
   mapImpact,
@@ -50,6 +52,12 @@ export class PhysicsSound {
         case "unlocked":
           this.player.play("sfx-lock-release");
           break;
+        case "case": {
+          const cue = mapCaseDrop(e.speed);
+          if (this.limiter.allow(nowMs))
+            this.player.play(CASE_DROP_IDS, { gain: cue.gain, cents: cue.cents });
+          break;
+        }
         case "flow": {
           const level = ventLevel(e.flow);
           this.venting = level > 0;
