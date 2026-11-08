@@ -4,7 +4,7 @@ import { loadBox2d } from "@/engine/box2d/load";
 import { loadScene } from "@/model/scene";
 import { SimSession } from "@/sim/session";
 import type { EngineEvent } from "@/engine/types";
-import { eventTick, STRONG_IMPACT } from "./events";
+import { eventTick, groupTicks, STRONG_IMPACT, type EventTick } from "./events";
 it("launcher ticks retain the engine event order and recording step", async () => {
   const loaded = loadScene(JSON.parse(readFileSync("scenes/examples/lancador-bancada.json", "utf8")));
   if (!loaded.ok) throw new Error("Cena inválida");
@@ -38,4 +38,28 @@ it("weak impacts are omitted and vent ticks preserve the chamber", () => {
     kind: "vent-closed",
     id: "c",
   });
+});
+it("ticks too close for the ruler group into one marker that keeps every event in order", () => {
+  const at = (step: number, kind: EventTick["kind"] = "vent-opened"): EventTick => ({
+    step,
+    kind,
+    id: "k30",
+  });
+  // the launcher fires within a few steps: sensor, chamber, sensor, vent, unseal, vent
+  const burst = [
+    at(87, "sensor"),
+    at(87, "chamber-fired"),
+    at(91, "sensor"),
+    at(91),
+    at(92, "wall-unsealed"),
+    at(95),
+  ];
+  const ruler = 82; // px per second on an 844 px wide screen
+  const groups = groupTicks([at(1), ...burst, at(114), at(160), at(600)], ruler);
+  expect(groups.map((g) => g.events.length)).toEqual([1, 7, 1, 1]);
+  expect(groups[1]!.events.map((e) => e.step)).toEqual([87, 87, 91, 91, 92, 95, 114]);
+  // zoomed in enough, the same events separate
+  expect(groupTicks(burst, 4000).length).toBeGreaterThan(1);
+  // ticks before the visible window are skipped
+  expect(groupTicks(burst, ruler, 2)).toEqual([]);
 });

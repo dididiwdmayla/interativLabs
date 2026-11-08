@@ -990,7 +990,9 @@ export function Stage({
     if (gapUi.gapTarget && !bare) {
       const a = model.scene.parts.find((p) => p.id === gapUi.gapTarget);
       const layer = model.scene.layers.findIndex((l) => l.id === a?.layer);
-      const id = partAt(model, nodes.frame, w, {
+      // afastadas, cada camada é desenhada na sua folha: o toque vale no ponto da folha da camada da peça
+      const sheet = layerTries().find((t) => t.layer === layer)?.shift ?? [0, 0];
+      const id = partAt(model, nodes.frame, toWorld(view.current, x + sheet[0], y + sheet[1]), {
         layer: (i) => i === layer,
         exclude: new Set([gapUi.gapTarget]),
       });

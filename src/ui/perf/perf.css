@@ -111,3 +111,17 @@
   color: var(--color-ink-2);
   user-select: text;
 }
+
+.perf__stage {
+  position: relative;
+}
+/* the real panel hangs above the ruler; here it sits at the foot of the stage */
+.perf__instruments {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.perf__instruments .instruments {
+  bottom: 0;
+}

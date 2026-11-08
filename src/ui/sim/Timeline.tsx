@@ -1,5 +1,5 @@
-import { eventIcons, eventNames, type EventTick } from "@/instruments/events";
-import { useEffect, useRef, useState } from "react";
+import { eventIcons, eventNames, groupTicks, type EventTick, type TickGroup } from "@/instruments/events";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useElementSize } from "../useElementSize";
 import { useSimStore, type TimelineState } from "./simStore";
 
@@ -29,6 +29,7 @@ export function Timeline() {
   const [eventName, setEventName] = useState("");
   const [base, setBase] = useState(0);
   const [events, setEvents] = useState<EventTick[]>([]);
+  const [open, setOpen] = useState<{ events: EventTick[]; left: number } | null>(null);
   const last = useRef<{ base: number; n: number; w0: number }>({ base: -1, n: -1, w0: 0 });
 
   useEffect(() => {
@@ -68,6 +69,27 @@ export function Timeline() {
     else if (short) ticks += `M${x} 18V26`;
   }
 
+  const groups = useMemo(() => groupTicks(events, k, base), [events, base, k]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [open]);
+
+  const choose = (event: EventTick) => {
+    ctl?.scrub(event.step / 240);
+    setEventName(eventNames[event.kind]);
+    setOpen(null);
+  };
+  const openGroup = (group: TickGroup) => {
+    ctl?.scrub(group.t);
+    const left = pad + (group.t - last.current.w0) * k;
+    setOpen({ events: group.events, left: Math.max(0, Math.min(left - 8, width - 232)) });
+    setEventName(`${group.events.length} eventos`);
+  };
+
   const scrubAt = (clientX: number) => {
     const r = ref.current?.getBoundingClientRect();
     if (!r || !ctl) return;
@@ -81,6 +103,7 @@ export function Timeline() {
       ref={ref}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
+        setOpen(null);
         scrubAt(e.clientX);
       }}
       onPointerMove={(e) => {
@@ -98,35 +121,63 @@ export function Timeline() {
           <g ref={strip}>
             <path className="timeline__tick" d={ticks} />
             <path className="timeline__tick timeline__tick--long" d={longs} />
-            {events
-              .filter((e) => e.step / 240 >= base)
-              .map((event, i) => (
+            {groups.map((group) => {
+              const first = group.events[0];
+              if (!first) return null;
+              return group.events.length === 1 ? (
                 <g
-                  key={`${event.step}:${i}`}
-                  transform={`translate(${(event.step / 240) * k} 0)`}
+                  key={`${first.step}:${first.kind}`}
+                  transform={`translate(${group.t * k} 0)`}
                   className="timeline__event"
                   role="button"
                   tabIndex={0}
-                  aria-label={`${eventNames[event.kind]}, ${fmt(event.step / 240)}`}
+                  aria-label={`${eventNames[first.kind]}, ${fmt(group.t)}`}
                   onPointerDown={(e) => {
                     e.stopPropagation();
-                    ctl?.scrub(event.step / 240);
-                    setEventName(eventNames[event.kind]);
+                    choose(first);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      ctl?.scrub(event.step / 240);
-                      setEventName(eventNames[event.kind]);
+                      choose(first);
                     }
                   }}
                 >
-                  <title>{eventNames[event.kind]}</title>
+                  <title>{eventNames[first.kind]}</title>
                   <rect x="-22" y="-2" width="44" height="44" fill="transparent" stroke="none" />
                   <path d="M0 16V26" />
-                  <path d={eventIcons[event.kind]} transform="translate(0 8)" fill="none" />
+                  <path d={eventIcons[first.kind]} transform="translate(0 8)" fill="none" />
                 </g>
-              ))}
+              ) : (
+                <g
+                  key={`${first.step}:group`}
+                  transform={`translate(${group.t * k} 0)`}
+                  className="timeline__event timeline__event--group"
+                  role="button"
+                  tabIndex={0}
+                  aria-haspopup="menu"
+                  aria-label={`${group.events.length} eventos, a partir de ${fmt(group.t)}`}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    openGroup(group);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openGroup(group);
+                    }
+                  }}
+                >
+                  <title>{`${group.events.length} eventos`}</title>
+                  <rect x="-22" y="-2" width="44" height="44" fill="transparent" stroke="none" />
+                  <path d="M0 16V26" />
+                  <circle cx="0" cy="8" r="8" />
+                  <text x="0" y="12" textAnchor="middle">
+                    {group.events.length}
+                  </text>
+                </g>
+              );
+            })}
           </g>
           <g ref={head} className="timeline__head">
             <path d="M0 8V34" />
@@ -137,6 +188,27 @@ export function Timeline() {
       <output className="timeline__time" ref={timeEl}>
         t = {fmt(0)}
       </output>
+      {open && (
+        <ul
+          className="timeline__list"
+          role="menu"
+          aria-label="Eventos neste ponto"
+          style={{ left: open.left }}
+          // taps inside the list must not reach the ruler (it would scrub and close the list first)
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          {open.events.map((event) => (
+            <li key={`${event.step}:${event.kind}:${event.id}`} role="none">
+              <button type="button" role="menuitem" onClick={() => choose(event)}>
+                <svg viewBox="-8 -8 16 16" width="16" height="16" aria-hidden="true">
+                  <path d={eventIcons[event.kind]} fill="none" />
+                </svg>
+                {eventNames[event.kind]} <small>{fmt(event.step / 240)}</small>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       {eventName && <output className="timeline__event-name">{eventName}</output>}
       {recalculating && <p className="timeline__recalc">Recalculando…</p>}
     </div>

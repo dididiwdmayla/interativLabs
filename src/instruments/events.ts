@@ -38,3 +38,27 @@ export function eventTick(e: EngineEvent, step: number): EventTick | null {
     return { step, kind: e.kind, id: e.chamber };
   return null;
 }
+
+/** Ticks closer than this (px on the ruler) become one marker with a count. */
+export const GROUP_PX = 18;
+export interface TickGroup {
+  /** seconds, of the first tick */
+  t: number;
+  events: EventTick[];
+}
+
+/**
+ * Groups ticks (in time order) that would sit closer than `gap` px on a ruler of `pxPerSecond`,
+ * from second `from` on. A group of one is a plain tick; more than one opens a list when tapped.
+ */
+export function groupTicks(events: EventTick[], pxPerSecond: number, from = 0, gap = GROUP_PX): TickGroup[] {
+  const list: TickGroup[] = [];
+  for (const event of events) {
+    const t = event.step / 240;
+    if (t < from) continue;
+    const group = list.at(-1);
+    if (group && (t - group.t) * pxPerSecond < gap) group.events.push(event);
+    else list.push({ t, events: [event] });
+  }
+  return list;
+}

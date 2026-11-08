@@ -10,6 +10,18 @@ import { useSimStore } from "../sim/simStore";
 import { useInstruments } from "./store";
 import "./instruments.css";
 const fmt = (v: number | null | undefined) => formatNumber(v);
+/** Index of the first point after `step` (points are in time order). */
+function firstAfter(points: { step: number }[], step: number): number {
+  let lo = 0;
+  let hi = points.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if ((points[mid]?.step ?? Infinity) <= step) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
 /** Name shown for the instant a probe also reads (its own label, or the ruler tick's name). */
 const atName = (probe: Series["probe"]) =>
   probe.atLabel ?? (probe.at?.kind === "tick" ? eventNames[probe.at.tick].toLowerCase() : "no evento");
@@ -52,13 +64,23 @@ function Chart({
     return kind ? noReadingReason[kind] : undefined;
   });
   const other = useComparison((s) => s.series.find((v) => v.probe.id === probe.id));
-  const valid = points.filter((p): p is typeof p & { value: number } => p.value !== null);
-  const values = [
-    ...valid.map((p) => p.value),
-    ...(other?.points.flatMap((p) => (p.value === null ? [] : [p.value])) ?? []),
-  ];
-  const lo = Math.min(0, ...values, probe.limit ?? 0);
-  const hi = Math.max(1e-6, ...values, probe.limit ?? 0);
+  // one pass over the points: the scale (including the other variant and the limit) and the extremes
+  let lo = Math.min(0, probe.limit ?? 0);
+  let hi = Math.max(1e-6, probe.limit ?? 0);
+  let max: (typeof points)[number] | null = null;
+  let min: (typeof points)[number] | null = null;
+  for (const p of points) {
+    if (p.value === null) continue;
+    if (p.value < lo) lo = p.value;
+    if (p.value > hi) hi = p.value;
+    if (!max || p.value > (max.value ?? -Infinity)) max = p;
+    if (!min || p.value < (min.value ?? Infinity)) min = p;
+  }
+  for (const p of other?.points ?? []) {
+    if (p.value === null) continue;
+    if (p.value < lo) lo = p.value;
+    if (p.value > hi) hi = p.value;
+  }
   const range = hi - lo || 1;
   const fullEnd = Math.max(1, latest * 240, points.at(-1)?.step ?? 0);
   const span = width === null ? fullEnd : width * 240;
@@ -66,23 +88,20 @@ function Chart({
   const end = begin + span;
   const x = (step: number) => 12 + ((step - begin) / span) * 276;
   const y = (value: number) => 78 - ((value - lo) / range) * 56;
-  const path = points
-    .map((p, i) => {
-      if (p.value === null) return "";
-      const command = points[i - 1]?.value != null ? "L" : "M";
-      return `${command}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)}`;
-    })
-    .join(" ");
-  const otherPath =
-    other?.points
-      .map((p, i, all) =>
-        p.value === null
-          ? ""
-          : `${all[i - 1]?.value != null ? "L" : "M"}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)}`,
-      )
-      .join(" ") ?? "";
-  const max = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value > a.value ? p : a), null);
-  const min = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value < a.value ? p : a), null);
+  // only the stretch inside the window (and one point past each edge) is drawn: a long run has thousands of points
+  const trace = (pts: typeof points) => {
+    const first = Math.max(0, firstAfter(pts, begin - 1) - 1);
+    const last = Math.min(pts.length, firstAfter(pts, end) + 1);
+    let d = "";
+    for (let i = first; i < last; i++) {
+      const p = pts[i];
+      if (!p || p.value === null) continue;
+      d += `${i > first && pts[i - 1]?.value != null ? "L" : "M"}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)} `;
+    }
+    return d;
+  };
+  const path = trace(points);
+  const otherPath = other ? trace(other.points) : "";
   const bipolar = (min?.value ?? 0) < 0 && (max?.value ?? 0) > 0;
   const peak = Math.abs(min?.value ?? 0) > Math.abs(max?.value ?? 0) ? min : max;
   // the value at the latest occurrence of the probe's event that the cursor has already passed
@@ -250,7 +269,7 @@ function Chart({
               d={`M${x(m.step)} ${y(m.value) - 4}l3.5 4l-3.5 4l-3.5 -4z`}
             />
           ))}
-        {peak && peak.step >= begin && peak.step <= end && (
+        {peak && peak.value !== null && peak.step >= begin && peak.step <= end && (
           <circle cx={x(peak.step)} cy={y(peak.value)} r="2.5" className="instrument-chart__peak" />
         )}
         <g className="instrument-chart__cursor">

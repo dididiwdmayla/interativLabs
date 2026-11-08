@@ -8,7 +8,9 @@ interface InstrumentsState {
   ticks: EventTick[];
   shown: number;
   latest: number;
-  setTime: (shown: number, latest: number, ticks: EventTick[]) => void;
+  /** First second the stage still has poses for (the recording keeps the last 10 s). */
+  oldest: number;
+  setTime: (shown: number, latest: number, ticks: EventTick[], oldest?: number) => void;
   setSeries: (series: Series[]) => void;
 }
 export const useInstruments = create<InstrumentsState>((set) => ({
@@ -18,6 +20,7 @@ export const useInstruments = create<InstrumentsState>((set) => ({
   ticks: [],
   shown: 0,
   latest: 0,
-  setTime: (shown, latest, ticks) => set({ shown, latest, ticks }),
+  oldest: 0,
+  setTime: (shown, latest, ticks, oldest = 0) => set({ shown, latest, ticks, oldest }),
   setSeries: (series) => set({ series }),
 }));
