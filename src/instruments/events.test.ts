@@ -18,7 +18,9 @@ it("launcher ticks retain the engine event order and recording step", async () =
   }
   const eligible = raw.filter(
     ({ event: e }) =>
-      ["sensor", "chamber-fired", "vent-opened", "vent-closed", "lock-released"].includes(e.kind) ||
+      ["sensor", "chamber-fired", "vent-opened", "vent-closed", "lock-released", "wall-unsealed"].includes(
+        e.kind,
+      ) ||
       (e.kind === "impact" && e.speed >= STRONG_IMPACT),
   );
   expect(eligible.some(({ event: e }) => e.kind === "chamber-fired")).toBe(true);

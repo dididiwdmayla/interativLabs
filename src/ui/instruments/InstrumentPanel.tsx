@@ -1,16 +1,30 @@
 import { launcherMetrics } from "@/instruments/comparisonMetrics";
-import { eventNames, type EventTick } from "@/instruments/events";
+import { eventNames, type EventTick, type TickKind } from "@/instruments/events";
 import { useComparison, exitComparison } from "./comparison";
 import { useState, useId, useRef, useEffect } from "react";
 import { useUiStore } from "@/editor/useUiStore";
-import { quantities } from "@/instruments/model";
+import { noReadingReason, quantities } from "@/instruments/model";
 import type { Series } from "@/instruments/sampling";
 import { useSimStore } from "../sim/simStore";
 import { useInstruments } from "./store";
 import "./instruments.css";
 const fmt = (v: number | null | undefined) =>
   v == null ? "—" : v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
-function Chart({ series, shown, latest }: { series: Series; shown: number; latest: number }) {
+/** Name shown for the instant a probe also reads (its own label, or the ruler tick's name). */
+const atName = (probe: Series["probe"]) =>
+  probe.atLabel ?? (probe.at?.kind === "tick" ? eventNames[probe.at.tick].toLowerCase() : "no evento");
+
+function Chart({
+  series,
+  shown,
+  latest,
+  kinds,
+}: {
+  series: Series;
+  shown: number;
+  latest: number;
+  kinds: TickKind[];
+}) {
   const uid = useId();
   const width = useInstruments((s) => s.window);
   const pointers = useRef(new Map<number, number>());
@@ -30,6 +44,11 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
   );
   const ctl = useSimStore((s) => s.ctl);
   const { probe, points, cursor } = series;
+  // A probe left on a link that has nothing to read says why instead of a bare dash.
+  const reason = useUiStore((s) => {
+    const kind = s.current?.scene.links.find((l) => l.id === probe.target)?.kind;
+    return kind ? noReadingReason[kind] : undefined;
+  });
   const other = useComparison((s) => s.series.find((v) => v.probe.id === probe.id));
   const valid = points.filter((p): p is typeof p & { value: number } => p.value !== null);
   const values = [
@@ -64,6 +83,20 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
   const min = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value < a.value ? p : a), null);
   const bipolar = (min?.value ?? 0) < 0 && (max?.value ?? 0) > 0;
   const peak = Math.abs(min?.value ?? 0) > Math.abs(max?.value ?? 0) ? min : max;
+  // the value at the latest occurrence of the probe's event that the cursor has already passed
+  const reached = series.marks?.filter((m) => m.step <= Math.round(shown * 240)).at(-1);
+  const pickEvent = (tick: TickKind | "") => {
+    const ui = useUiStore.getState();
+    ui.setProbes(
+      ui.probes.map((p) => {
+        if (p.id !== probe.id) return p;
+        const next = { ...p };
+        delete next.at;
+        delete next.atLabel;
+        return tick ? { ...next, at: { kind: "tick" as const, tick } } : next;
+      }),
+    );
+  };
   const scrub = (clientX: number, el: SVGSVGElement) => {
     const r = el.getBoundingClientRect();
     ctl?.scrub(
@@ -76,6 +109,22 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
     >
       <header>
         <h3 title={probe.name}>{probe.name}</h3>
+        {(kinds.length > 0 || probe.at) && (
+          <select
+            className="instrument-chart__event"
+            aria-label={`Ler ${probe.name} no evento`}
+            value={probe.at?.kind === "tick" ? probe.at.tick : probe.at ? "custom" : ""}
+            onChange={(e) => pickEvent(e.target.value as TickKind | "")}
+          >
+            <option value="">Só no cursor</option>
+            {probe.at && probe.at.kind !== "tick" && <option value="custom">{atName(probe)}</option>}
+            {kinds.map((k) => (
+              <option key={k} value={k}>
+                Em: {eventNames[k]}
+              </option>
+            ))}
+          </select>
+        )}
         <button
           aria-label={`Remover ${probe.name}`}
           onClick={() => {
@@ -97,9 +146,15 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
             )}
           </span>
         )}
-        <small>
-          {bipolar ? `mín ${fmt(min?.value)} · máx ${fmt(max?.value)}` : `pico ${fmt(peak?.value)}`}
+        <small title={reason}>
+          {reason ??
+            (bipolar ? `mín ${fmt(min?.value)} · máx ${fmt(max?.value)}` : `pico ${fmt(peak?.value)}`)}
         </small>
+        {probe.at && (
+          <strong className="instrument-chart__at">
+            {atName(probe)} {fmt(reached?.value)} {quantities[probe.quantity][1]}
+          </strong>
+        )}
       </div>
       <svg
         viewBox="0 0 300 96"
@@ -181,6 +236,17 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
             </text>
           </g>
         )}
+        {series.marks
+          ?.filter(
+            (m): m is typeof m & { value: number } => m.value !== null && m.step >= begin && m.step <= end,
+          )
+          .map((m) => (
+            <path
+              key={m.step}
+              className="instrument-chart__mark"
+              d={`M${x(m.step)} ${y(m.value) - 4}l3.5 4l-3.5 4l-3.5 -4z`}
+            />
+          ))}
         {peak && peak.step >= begin && peak.step <= end && (
           <circle cx={x(peak.step)} cy={y(peak.value)} r="2.5" className="instrument-chart__peak" />
         )}
@@ -232,6 +298,7 @@ export function InstrumentPanel() {
   const comparison = useComparison();
   const probes = useUiStore((s) => s.probes);
   const { series, shown, latest, ticks } = useInstruments();
+  const kinds = [...new Set(ticks.map((t) => t.kind))];
   const thresholdSeries = series.find((s) => s.probe.threshold !== undefined);
   const cycles = thresholdSeries
     ? thresholdSeries.crossings
@@ -295,6 +362,7 @@ export function InstrumentPanel() {
               }
               shown={shown}
               latest={latest}
+              kinds={kinds}
             />
           ))}
         </div>

@@ -789,6 +789,9 @@ export class Runtime {
       const st: LinkState = { kind: "axle", angle: s.angle, speed: s.speed, gap: s.gap };
       const tq = this.jointTorque(a.id);
       if (tq !== null) st.torque = tq / N;
+      // Torsion spring torque by its own law (the motor's constraint torque never includes it).
+      if (a.torsion)
+        st.torsionTorque = (-a.torsion.k * (s.angle - a.torsion.rest) - a.torsion.damping * s.speed) / N;
       links[a.id] = st;
     });
     for (const d of this.plan.distances) {

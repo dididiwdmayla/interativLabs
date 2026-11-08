@@ -1,5 +1,6 @@
 import type { EngineAdapter, Snapshot } from "@/engine/types";
 import type { LinkKind } from "@/model/types";
+import type { TickKind } from "./events";
 
 export const quantities = {
   x: ["Deslocamento x", "mm"],
@@ -21,6 +22,14 @@ export const quantities = {
   clearance: ["Folga", "mm"],
 } as const;
 export type Quantity = keyof typeof quantities;
+/**
+ * An instant the probe also reads its own value at ("valor no evento"): every time the ruler shows
+ * this kind of tick, or every time another reading rises past a value (the ball passing the
+ * muzzle). Reading it never changes the simulation.
+ */
+export type ProbeEvent =
+  | { kind: "tick"; tick: TickKind }
+  | { kind: "crossing"; target: string; quantity: Quantity; threshold: number };
 export interface Probe {
   id: string;
   target: string;
@@ -29,6 +38,9 @@ export interface Probe {
   other?: string;
   limit?: number;
   threshold?: number;
+  /** Also read the value at this event, labelled `atLabel` ("na saída"). */
+  at?: ProbeEvent;
+  atLabel?: string;
   /** Count a pawl dropping after each tooth, from the relative joint angle. */
   countDrops?: boolean;
 }
@@ -39,8 +51,14 @@ export function available(kind: LinkKind | "part"): Quantity[] {
   if (kind === "chamber") return ["pressure", "volume"];
   if (kind === "spring") return ["force", "length"];
   if (kind === "slider") return ["force", "translation"];
-  return kind === "sensor" ? [] : ["force"];
+  // A screw welds its parts into one body: there is no force between them to read.
+  return kind === "sensor" || kind === "screw" ? [] : ["force"];
 }
+/** Why a link has nothing to read, for the places that would otherwise show a bare dash. */
+export const noReadingReason: Partial<Record<LinkKind, string>> = {
+  screw: "Une as peças num corpo só: sem força entre elas.",
+};
+
 export function sample(probe: Probe, s: Snapshot, engine: EngineAdapter): number | null {
   const { target, quantity: q } = probe;
   const p = s.parts[target];
@@ -60,6 +78,11 @@ export function sample(probe: Probe, s: Snapshot, engine: EngineAdapter): number
   }
   if (q === "relative") return l?.angle === undefined ? null : l.angle * deg;
   if (q === "force" && l?.kind !== "spring") return engine.reaction?.(target)?.force ?? l?.force ?? null;
-  if (q === "torque") return engine.reaction?.(target)?.torque ?? null;
+  if (q === "torque") {
+    // motor + stops (the joint's constraint torque) + the torsion spring by its own law
+    const joint = engine.reaction?.(target)?.torque ?? l?.torque;
+    if (joint === undefined && l?.torsionTorque === undefined) return null;
+    return (joint ?? 0) + (l?.torsionTorque ?? 0);
+  }
   return l?.[q as "force" | "translation" | "length" | "pressure" | "volume"] ?? null;
 }

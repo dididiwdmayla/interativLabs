@@ -54,6 +54,8 @@ export interface LinkState {
   gap?: number;
   /** eixo: torque do motor ou do atrito (N·mm) */
   torque?: number;
+  /** eixo: torque da mola de torção pela própria lei, −k·(θ − repouso) − c·ω (N·mm; positivo = aumenta o ângulo) */
+  torsionTorque?: number;
   /** trilho: deslocamento ao longo do eixo (mm) */
   translation?: number;
   /** força ao longo da ligação, N: trilho (reação ao longo do eixo), mola (+ empurra), haste e cabo (+ puxa) */
@@ -172,6 +174,11 @@ export interface EngineAdapter {
   /** Diagnóstico do estado atual (energia, folgas, velocidade); só o motor do app. */
   probe?(region?: [number, number, number, number]): EngineProbe;
   velocity?(part: Id): { x: number; y: number; omega: number } | null;
+  /**
+   * Reação de uma ligação, N e N·mm: junta pela força de restrição; pino e rasgo por contato
+   * pelos impulsos de contato das formas do pino. O torque inclui o motor e os batentes,
+   * mas não a mola de torção (ver `LinkState.torsionTorque`).
+   */
   reaction?(link: Id): { force: number; torque: number } | null;
   clearance?(a: Id, b: Id): number | null;
   dispose(): void;
