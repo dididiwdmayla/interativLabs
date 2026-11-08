@@ -103,6 +103,114 @@ Painel, cursor ligado à régua, leitura, pico, "Medir" nos cartões.
 
 Bateria completa do `AGENTS.md`, `/#perf` com sondas e comparação, capturas, "Como ficou" em `docs/arquitetura.md` e `docs/verificacao-fase-2-m1.md`.
 
-## M2 · Ciclo · M3 · Pneumática · M4 · Relojoaria
+## M2 · Ciclo
 
-Planejadas em `docs/roadmap.md`. Itens e aceites entram aqui depois da revisão da M1.
+Duas sessões no Opus, cada uma com a verificação completa:
+
+- **M2a** (itens 8–12): cápsula, câmara de cápsula, extrator e ejetor.
+- **M2b** (itens 13–17): tomada de gás, trancamento e o exemplo-vitrine "Lançador de cápsulas", com "Experimente comparar" de extrator.
+
+### Decisões fechadas da M2
+
+- **Tudo genérico e esquemático** (`AGENTS.md`, regras do domínio): proporções inventadas, gás didático, sem calibre, sem medida de projeto real, sem cálculo de balística com propelente. O projétil da cápsula é uma esfera, como no Lançador.
+- **Cápsula** é uma peça com carga: o estojo, normalmente de latão, com aro perto do fundo, um furo interno e o projétil preso na boca. Formato v4:
+  ```ts
+  interface Part { /* … v3 … */ capsule?: Capsule }
+  interface Capsule {
+    charge: number;          // mmol, didático (as predefinições da câmara: 0,1 · 0,5 · 1,2)
+    projectile?: Id;         // a esfera presa na boca
+    base: Vec2; mouth: Vec2; // fundo interno e boca, em coordenadas locais: o eixo e o comprimento do furo
+    bore: number;            // mm, diâmetro do furo
+    primer: Vec2;            // a espoleta, em coordenadas locais
+    minStrike: number;       // mm/s, golpe mínimo na espoleta
+  }
+  // câmara ganha: mode?: "charge" | "capsule"   ("capsule": sem carga própria; recebe a cápsula assentada)
+  //               seat?: number                   (mm: até onde o fundo da cápsula conta como assentado)
+  ```
+  A migração `v3 → v4` só troca a versão. **Nenhum hash antigo muda.**
+- **Comportamento da cápsula:**
+  - **Disparo:** um golpe na espoleta acima de `minStrike`, de qualquer peça (o percussor), acende a carga. O motor detecta o golpe, não um sensor desenhado. Cápsula já deflagrada não acende de novo. O estado "deflagrada" vai no snapshot; a cena desenhada sempre parte com tudo carregado.
+  - **Gás:** a cápsula é uma câmara que mora no estojo. O corpo é o estojo; a parede de trás é o próprio fundo interno; a parede da frente é o projétil. A pressão empurra o projétil para a frente e o estojo para trás (contra a face da culatra, que segura ou recua).
+  - **Fora de um cano,** o furo termina na boca do estojo: o projétil sai e o gás escapa.
+  - **Assentada numa câmara `mode: "capsule"`,** o furo continua pelo cano, e o gás empurra a esfera até a boca do cano.
+  - **Projétil preso:** a esfera fica presa à boca por uma trava que solta no instante do disparo. Antes disso, o carregador e o ferrolho podem empurrar a cápsula à vontade sem soltar a esfera.
+- **Extrator e ejetor** são peças comuns, sem física especial:
+  - **extrator:** gancho num eixo com mola de torção, preso ao ferrolho, cuja garra pula o aro quando a culatra fecha e puxa o estojo quando ela recua;
+  - **ejetor:** batente fixo que bate num lado do fundo do estojo puxado, que gira em volta da garra e sai pela janela.
+
+  O que a M2a entrega para eles: geradores na gaveta, encaixes e cenas de teste que provam o ciclo. Se a geometria pedir ajuste do motor (contato do aro, por exemplo), é contato e atrito, nunca animação imposta.
+- **Desenho:**
+  - cápsula carregada com a carga em brasa por dentro, em pontilhado como o gás;
+  - deflagrada: sem a brasa e com a marca do golpe na espoleta;
+  - estojo vazio com o traço levemente apagado.
+- **Instrumentos e som:**
+  - evento `capsule-fired` na régua ("cápsula disparou");
+  - sonda de pressão da cápsula;
+  - `sfx-pop-strong` ou `sfx-gas` pela carga;
+  - `sfx-case-drop-1/-2` no impacto de um estojo deflagrado acima de um limiar (o gatilho que o lote som-01 deixou para a M2).
+
+### Item 8 — Formato v4 (M2a)
+
+Schema, mensagens em português, integridade:
+- projétil existe;
+- `base ≠ mouth`;
+- `bore > 0`;
+- câmara `capsule` sem `charge`.
+
+Migração `v3 → v4`. O teste prova que os 33 hashes não mudam.
+
+### Item 9 — Motor da cápsula (M2a)
+
+Disparo pelo golpe, câmara no estojo, continuação pelo cano assentado, soltura da esfera no disparo, estado deflagrado, evento e sons.
+
+**Aceite** (cenas de teste novas em `scenes/fixtures/ciclo/`):
+- `capsula-livre`: cápsula solta na bancada, golpeada na espoleta. A esfera sai pela boca do estojo, e a quantidade de movimento fecha: m_estojo·v_estojo = m_esfera·v_esfera ±5%.
+- `capsula-no-cano`: cápsula assentada num cano fixo com culatra fixa.
+  - A esfera sai pela boca do cano.
+  - Com o cano mais longo, a esfera sai mais rápida (duas variantes da cena, monotônico).
+  - Golpear de novo a cápsula deflagrada não acende nada.
+  - `capsule-fired` aparece uma vez.
+- `capsula-empurrada`: o ferrolho empurra uma cápsula do carregador até o cano a 600 mm/s, e a esfera não solta antes do golpe.
+
+### Item 10 — Peças do ciclo (M2a)
+
+Categoria "Ciclo" na gaveta:
+- **Cápsula:** paramétrica, com comprimento, diâmetro, aro e carga fraca, média ou forte; a esfera já vai presa.
+- **Extrator:** gancho com eixo e mola de torção, pronto para cravar no ferrolho.
+- **Ejetor:** batente.
+
+No Martelo, a câmara ganha o modo "recebe cápsula" no cartão. No cartão da peça, a cápsula mostra a carga e o estado.
+
+### Item 11 — Extração e ejeção (M2a)
+
+**Aceite** (cenas de teste):
+- `extrator`: com a cápsula assentada e a garra no aro, o ferrolho puxado para trás por arrasto roteirizado leva o estojo junto (diferença de deslocamento abaixo de 0,5 mm até o ejetor).
+- `ejetor`: continuando, o estojo bate no ejetor, gira e sai pela janela, acima de uma velocidade medida, terminando fora da caixa.
+- **Robustez:** a extração e a ejeção passam em 20 variações do tempo e da velocidade do puxão.
+- O abuso passa nas cenas novas.
+
+### Item 12 — Verificação da M2a
+
+- Bateria completa do `AGENTS.md`.
+- Determinismo com as cenas novas.
+- Capturas da cápsula carregada e deflagrada, e da sequência de extração e ejeção em Lento.
+- Arquitetura §3.3 (formato v4) e §4 (cápsula no motor).
+- `docs/verificacao-fase-2-m2a.md`.
+
+### Itens 13–17 — M2b (planejados)
+
+- **Tomada de gás:** porta do cano para uma câmara de pistão (as portas já existem) e a peça pronta "pistão de gás".
+- **Trancamento:**
+  - por báscula: o cano inclina por um came e destrava;
+  - por alavanca articulada: o joelho que só dobra depois de um tempo.
+
+  Cenas de teste que provam que o estojo não recua enquanto a esfera está no cano.
+- **Exemplo-vitrine "Lançador de cápsulas":** máquina de bancada, não forma de arma.
+  - Carregador de 5 cápsulas, alimentação, disparo pelo gatilho do Lançador de bancada, extração, ejeção e realimentação, cinco ciclos seguidos.
+  - Instrumentos prontos: pressão, velocidade na saída, recuo e força na garra do extrator.
+  - "Experimente comparar" com a mola do extrator fraca e forte, que mostra quando a garra solta o aro.
+- Verificação.
+
+## M3 · Pneumática · M4 · Relojoaria
+
+Planejadas em `docs/roadmap.md`. Itens e aceites entram aqui depois da M2.
