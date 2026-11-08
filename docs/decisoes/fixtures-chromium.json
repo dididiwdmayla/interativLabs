@@ -4,218 +4,236 @@
     "exemplos/biela-manivela": {
       "hash": "06233377c0f61c00",
       "pass": true,
-      "stepMedian": 0.040000000002328305,
-      "stepP95": 0.1
+      "stepMedian": 0.04000000001396984,
+      "stepP95": 0.10000000002328306
     },
     "exemplos/cilindro-dois-pistoes": {
       "hash": "713887709959157d",
       "pass": true,
-      "stepMedian": 0.059999999997671694,
-      "stepP95": 0.12999999999883585
+      "stepMedian": 0.05999999998603016,
+      "stepP95": 0.13000000002793968
     },
     "exemplos/engrenagens": {
       "hash": "13a3c088813ef6f7",
       "pass": true,
-      "stepMedian": 0.08999999999941792,
-      "stepP95": 0.14000000000232832
+      "stepMedian": 0.08000000000465661,
+      "stepP95": 0.11000000000931323
     },
     "exemplos/lancador": {
       "hash": "21535b84262b88a3",
       "pass": true,
-      "stepMedian": 0.060000000000582074,
-      "stepP95": 0.11000000000349246
+      "stepMedian": 0.06000000000931323,
+      "stepP95": 0.11999999999534339
     },
     "exemplos/lancador-bancada": {
       "hash": "337a239173c64de4",
       "pass": true,
-      "stepMedian": 0.13999999999359716,
-      "stepP95": 0.1899999999994179
+      "stepMedian": 0.14000000001396984,
+      "stepP95": 0.1800000000046566
     },
     "exemplos/roda-e-lingueta": {
       "hash": "e9abd8e9599f3d4c",
       "pass": true,
-      "stepMedian": 0.11999999999825377,
-      "stepP95": 0.1500000000029104
+      "stepMedian": 0.1300000000046566,
+      "stepP95": 0.14000000001396984
     },
     "exemplos/trava": {
       "hash": "1eb2b45e72a5bdfd",
       "pass": true,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.05000000000291038
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.05999999998603016
     },
     "fixacoes/biela": {
       "hash": "04c4dd6669ae4005",
       "pass": true,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.05
+      "stepMedian": 0.029999999981373548,
+      "stepP95": 0.04000000001396984
     },
     "fixacoes/cabo": {
       "hash": "be117b5930a8450c",
       "pass": true,
-      "stepMedian": 0.020000000001164153,
-      "stepP95": 0.039999999999417925
+      "stepMedian": 0.02000000001862645,
+      "stepP95": 0.03999999999068678
     },
     "fixacoes/parafuso-suporte": {
       "hash": "5caf1dfca5a5b187",
       "pass": true,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.06999999999825376
+      "stepMedian": 0.029999999981373548,
+      "stepP95": 0.04000000001396984
     },
     "fixacoes/pendulo": {
       "hash": "d891a728a66ded89",
       "pass": true,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.05000000000291038
+      "stepMedian": 0.029999999981373548,
+      "stepP95": 0.04000000001396984
     },
     "fixacoes/trava": {
       "hash": "3b3d161d6eb1e33a",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.1
+      "stepMedian": 0.07000000001862645,
+      "stepP95": 0.12999999998137354
     },
     "multicamada/perfis": {
       "hash": "2ac2b4c5807dce24",
       "pass": true,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.07000000000116416
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.04000000001396984
     },
     "multicamada/rasgo-no-perfil": {
       "hash": "4a79463a93e3e449",
       "pass": true,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.05
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.06000000000931323
     },
     "molas/apoiada": {
       "hash": "d5fc8fd0daabea53",
       "pass": true,
-      "stepMedian": 0.040000000002328305,
-      "stepP95": 0.08999999999650754
+      "stepMedian": 0.05,
+      "stepP95": 0.09000000001396984
     },
     "molas/guia": {
       "hash": "cd3ff889ff5ebae2",
       "pass": true,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.06999999999825376
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.04000000001396984
     },
     "molas/pre-carga": {
       "hash": "8f16d7c59e297704",
       "pass": true,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.040000000002328305
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.06999999999534338
     },
     "molas/rigida": {
       "hash": "73e67c05ca70fe24",
       "pass": true,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.039999999999417925
+      "stepMedian": 0.029999999981373548,
+      "stepP95": 0.03999999999068678
     },
     "molas/solido": {
       "hash": "67192bf5236e8f72",
       "pass": true,
-      "stepMedian": 0.039999999999417925,
-      "stepP95": 0.07000000000116416
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.05
     },
     "rasgos/camadas": {
       "hash": "2715fe333fb90818",
       "pass": true,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.040000000002328305
+      "stepMedian": 0.030000000004656614,
+      "stepP95": 0.06000000000931323
     },
     "rasgos/curvo": {
       "hash": "d2fc99a0997ccf29",
       "pass": true,
-      "stepMedian": 0.05000000000291038,
-      "stepP95": 0.0900000000023283
+      "stepMedian": 0.05,
+      "stepP95": 0.07000000001862645
     },
     "rasgos/mancal": {
       "hash": "ae41078adbd76643",
       "pass": true,
-      "stepMedian": 0.08000000000174623,
-      "stepP95": 0.11000000000058208
+      "stepMedian": 0.08999999996740371,
+      "stepP95": 0.11000000000931323
     },
     "rasgos/reto": {
       "hash": "d7d931baa3aeb1eb",
       "pass": true,
-      "stepMedian": 0.029999999998835847,
-      "stepP95": 0.039999999999417925
+      "stepMedian": 0.029999999981373548,
+      "stepP95": 0.04000000001396984
     },
     "gas/cargas": {
       "hash": "7ed7269ed31a6be1",
       "pass": true,
-      "stepMedian": 0.06999999999825376,
-      "stepP95": 0.1
+      "stepMedian": 0.050000000023283066,
+      "stepP95": 0.07000000001862645
     },
     "gas/lei": {
       "hash": "3ccb69e5d0a855ec",
       "pass": true,
-      "stepMedian": 0.03000000000174623,
-      "stepP95": 0.060000000000582074
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.10000000002328306
     },
     "gas/portas": {
       "hash": "601b21bd9b52d1aa",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.060000000000582074
+      "stepMedian": 0.04999999997671693,
+      "stepP95": 0.06000000000931323
     },
     "gas/recuo": {
       "hash": "fff6cd4b873b09d4",
       "pass": true,
-      "stepMedian": 0.039999999999417925,
-      "stepP95": 0.06999999999825376
+      "stepMedian": 0.03999999999068678,
+      "stepP95": 0.08000000000465661
     },
     "gas/sensor": {
       "hash": "3b23804483e2d92f",
       "pass": true,
       "stepMedian": 0.05,
-      "stepP95": 0.13000000000174622
+      "stepP95": 0.07000000001862645
     },
     "ciclo/capsula-empurrada": {
-      "hash": "361821cb4a53b392",
+      "hash": "73ca5e2baddc99b4",
       "pass": true,
-      "stepMedian": 0.08999999999941792,
-      "stepP95": 0.16999999999825377
+      "stepMedian": 0.1300000000046566,
+      "stepP95": 0.600000000023283
     },
     "ciclo/capsula-livre": {
-      "hash": "913bbad347722b5c",
+      "hash": "69202ad0ace56941",
       "pass": true,
-      "stepMedian": 0.05,
-      "stepP95": 0.08999999999941792
+      "stepMedian": 0.18999999999068679,
+      "stepP95": 0.3199999999953434
     },
     "ciclo/capsula-no-cano": {
-      "hash": "64fc665d5b086504",
+      "hash": "b4ef6b48a28a755d",
       "pass": true,
-      "stepMedian": 0.07000000000116416,
-      "stepP95": 0.14999999999708963
+      "stepMedian": 0.09000000001396984,
+      "stepP95": 0.18999999999068679
+    },
+    "ciclo/disparo-extracao": {
+      "hash": "c3142517a71f88c2",
+      "pass": true,
+      "stepMedian": 0.15000000002328306,
+      "stepP95": 0.6799999999580905
+    },
+    "ciclo/ejetor": {
+      "hash": "b703d0131c66a7d6",
+      "pass": true,
+      "stepMedian": 0.33999999999068675,
+      "stepP95": 1.340000000037253
+    },
+    "ciclo/extrator": {
+      "hash": "1805b33ca2748fe3",
+      "pass": true,
+      "stepMedian": 0.4,
+      "stepP95": 1.1600000000093131
     },
     "calibracao/bala": {
       "hash": "20103ec8b4211e99",
       "pass": true,
-      "stepMedian": 0.11000000000349246,
-      "stepP95": 0.11000000000349246
+      "stepMedian": 0.10999999996274709,
+      "stepP95": 0.10999999996274709
     },
     "calibracao/corrente": {
       "hash": "007c1ccfc0ee15e4",
       "pass": true,
-      "stepMedian": 0.1,
-      "stepP95": 0.12999999999883585
+      "stepMedian": 0.10000000002328306,
+      "stepP95": 0.13000000005122275
     },
     "calibracao/pilha": {
       "hash": "7801499766c01642",
       "pass": true,
-      "stepMedian": 0.27000000000116414,
-      "stepP95": 0.3000000000029104
+      "stepMedian": 0.3000000000232831,
+      "stepP95": 0.39000000001396984
     },
     "calibracao/pinhao": {
       "hash": "753fcbe7b0464bd4",
       "pass": true,
-      "stepMedian": 0.059999999997671694,
-      "stepP95": 0.08000000000174623
+      "stepMedian": 0.06000000000931323,
+      "stepP95": 0.08000000002793968
     },
     "desempenho/desempenho": {
       "hash": "1d244d257b98cd16",
       "pass": true,
-      "stepMedian": 0.640000000008149,
-      "stepP95": 0.9299999999988359
+      "stepMedian": 0.5800000000279397,
+      "stepP95": 0.7599999999627471
     }
   }
 }

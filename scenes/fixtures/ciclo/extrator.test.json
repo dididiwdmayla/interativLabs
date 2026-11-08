@@ -1,0 +1,101 @@
+{
+  "id": "ciclo/extrator",
+  "group": "ciclo",
+  "title": "Extrator",
+  "notes": "Estojo vazio assentado num cano fixo; o ferrolho, num trilho, tem o extrator cravado (gancho num eixo com mola de torção de 5 N·mm/rad) com a garra na canaleta do estojo. A mão puxa o ferrolho para trás a 500 mm/s: o estojo sai da câmara junto com ele até o ejetor. O eixo do extrator fica abaixo da linha da garra: a puxada aperta a garra no aro.",
+  "view": [-70, -30, 100, 50],
+  "runs": [
+    {
+      "name": "puxão a 500 mm/s",
+      "duration": 0.2,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.05,
+          "t1": 0.1559,
+          "release": 0.3559
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "at",
+          "label": "o estojo sai da câmara (anda mais de 20 mm para trás)",
+          "q": {
+            "part": "p4",
+            "along": [-1, 0]
+          },
+          "t": 0.2,
+          "min": 20
+        }
+      ]
+    }
+  ],
+  "scene": "extrator.scene.json"
+}

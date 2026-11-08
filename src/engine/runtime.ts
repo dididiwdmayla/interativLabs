@@ -77,6 +77,9 @@ interface SensorState {
  * (seno: 3°).
  */
 export const SEAT_LATERAL = 0.5;
+/** Estojo acima destas velocidades (mm/s, rad/s): o passo do motor é dividido (ver `shooting`). */
+export const CASE_FAST_SPEED = 150;
+export const CASE_FAST_SPIN = 15;
 export const SEAT_SIN = 0.0523;
 
 interface CapsuleState {
@@ -389,6 +392,8 @@ export class Runtime {
   private pre: BodyState[];
   private chambers: ChamberSim[];
   private capsules: CapsuleState[];
+  /** corpos que dividem o passo quando andam rápido (ver `shooting`) */
+  private caseWatch: number[] = [];
   private releaseProjectile: RuntimeOptions["releaseProjectile"];
   private chamberById = new Map<Id, ChamberSim>();
   private chamberGeo: ChamberGeometry[] = [];
@@ -422,6 +427,12 @@ export class Runtime {
     this.chambers = plan.chambers.map((p) => new ChamberSim(p));
     for (const c of this.chambers) this.chamberById.set(c.p.id, c);
     this.capsules = plan.capsules.map((p) => ({ p, ch: this.chambers[p.chamber]!, seat: -1 }));
+    // o estojo e as peças móveis que encostam nele na pose desenhada (sem as esferas)
+    const balls = new Set(plan.capsules.map((c) => c.ball));
+    const watch = new Set<number>();
+    for (const c of plan.capsules)
+      for (const i of reach(plan, c.body, 1)) if (this.dyn(i) && !balls.has(i)) watch.add(i);
+    this.caseWatch = [...watch].sort((a, b) => a - b);
     this.releaseProjectile = options.releaseProjectile;
     for (const s of plan.sensors) this.sensors.set(s.id, { p: s, count: 0 });
   }
@@ -633,7 +644,18 @@ export class Runtime {
    * o adaptador divide o passo em subpassos para o gás acompanhar a esfera.
    */
   shooting(): boolean {
+    if (!this.capsules.length) return false;
+    // uma trava que solta agora (o gatilho soltando o percussor): o golpe vem dentro deste passo
+    if (this.releaseQueue.size) return true;
     for (const c of this.capsules) if (c.ch.fired && !c.ch.spent && c.p.ball >= 0) return true;
+    // estojo rápido, ou uma peça que encosta nele (o ferrolho, a garra, o
+    // percussor): a extração e a ejeção inteiras cabem em um ou dois passos, e
+    // o contato do aro precisa do passo menor
+    for (const i of this.caseWatch) {
+      const b = this.body(i);
+      if (b.vx * b.vx + b.vy * b.vy > CASE_FAST_SPEED * CASE_FAST_SPEED || Math.abs(b.w) > CASE_FAST_SPIN)
+        return true;
+    }
     return false;
   }
 
@@ -659,6 +681,22 @@ export class Runtime {
       if (!best) continue;
       if (c.ch.ignite(this.time, this.events, best) && c.p.ball >= 0) this.releaseProjectile?.(i);
     }
+  }
+
+  /** Cápsulas que ainda podem disparar (índice e plano), para a leitura de contato do adaptador. */
+  armedCapsules(): { i: number; p: PlanCapsule }[] {
+    const out: { i: number; p: PlanCapsule }[] = [];
+    this.capsules.forEach((c, i) => {
+      if (!c.ch.fired) out.push({ i, p: c.p });
+    });
+    return out;
+  }
+
+  /** Golpe na espoleta medido pelo adaptador (contato, velocidade de aproximação em mm/s). */
+  strike(i: number, by: Id, speed: number): void {
+    const c = this.capsules[i];
+    if (!c || c.ch.fired || speed + 1e-9 < c.p.minStrike) return;
+    if (c.ch.ignite(this.time, this.events, { by, speed }) && c.p.ball >= 0) this.releaseProjectile?.(i);
   }
 
   /** Gás de todas as câmaras: volume, queima, escape, portas e forças. */

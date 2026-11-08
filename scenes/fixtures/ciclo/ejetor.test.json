@@ -1,0 +1,2677 @@
+{
+  "id": "ciclo/ejetor",
+  "group": "ciclo",
+  "title": "Ejetor",
+  "notes": "Continuação do extrator: puxado para trás, o fundo do estojo bate no ejetor (barra fixa dentro do rasgo do ferrolho, 22 mm atrás do assento), o estojo gira em volta da garra, sobe pela janela de cima e cai atrás da caixa. Robustez: 20 variações (300 a 600 mm/s, começando de 0,05 a 0,17 s).",
+  "view": [-90, -40, 120, 60],
+  "runs": [
+    {
+      "name": "puxão a 500 mm/s",
+      "duration": 0.6,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.05,
+          "t1": 0.1559,
+          "release": 0.3559
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,5 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 500,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.58
+        }
+      ]
+    },
+    {
+      "name": "300 mm/s em 0,05 s",
+      "duration": 0.6765,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.05,
+          "t1": 0.2265,
+          "release": 0.4265
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6565
+        }
+      ]
+    },
+    {
+      "name": "300 mm/s em 0,08 s",
+      "duration": 0.7065,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.08,
+          "t1": 0.2565,
+          "release": 0.4565
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6865
+        }
+      ]
+    },
+    {
+      "name": "300 mm/s em 0,11 s",
+      "duration": 0.7365,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.11,
+          "t1": 0.2865,
+          "release": 0.4865
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.7165
+        }
+      ]
+    },
+    {
+      "name": "300 mm/s em 0,14 s",
+      "duration": 0.7665,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.14,
+          "t1": 0.3165,
+          "release": 0.5165
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.7465
+        }
+      ]
+    },
+    {
+      "name": "300 mm/s em 0,17 s",
+      "duration": 0.7965,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.17,
+          "t1": 0.3465,
+          "release": 0.5465
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.7765
+        }
+      ]
+    },
+    {
+      "name": "400 mm/s em 0,05 s",
+      "duration": 0.6324,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.05,
+          "t1": 0.1824,
+          "release": 0.3824
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6124
+        }
+      ]
+    },
+    {
+      "name": "400 mm/s em 0,08 s",
+      "duration": 0.6624,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.08,
+          "t1": 0.2124,
+          "release": 0.4124
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6424
+        }
+      ]
+    },
+    {
+      "name": "400 mm/s em 0,11 s",
+      "duration": 0.6924,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.11,
+          "t1": 0.2424,
+          "release": 0.4424
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6724
+        }
+      ]
+    },
+    {
+      "name": "400 mm/s em 0,14 s",
+      "duration": 0.7224,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.14,
+          "t1": 0.2724,
+          "release": 0.4724
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.7024
+        }
+      ]
+    },
+    {
+      "name": "400 mm/s em 0,17 s",
+      "duration": 0.7524,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.17,
+          "t1": 0.3024,
+          "release": 0.5024
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.7324
+        }
+      ]
+    },
+    {
+      "name": "500 mm/s em 0,05 s",
+      "duration": 0.6059,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.05,
+          "t1": 0.1559,
+          "release": 0.3559
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.5859
+        }
+      ]
+    },
+    {
+      "name": "500 mm/s em 0,08 s",
+      "duration": 0.6359,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.08,
+          "t1": 0.1859,
+          "release": 0.3859
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6159
+        }
+      ]
+    },
+    {
+      "name": "500 mm/s em 0,11 s",
+      "duration": 0.6659,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.11,
+          "t1": 0.2159,
+          "release": 0.4159
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6459
+        }
+      ]
+    },
+    {
+      "name": "500 mm/s em 0,14 s",
+      "duration": 0.6959,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.14,
+          "t1": 0.2459,
+          "release": 0.4459
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6759
+        }
+      ]
+    },
+    {
+      "name": "500 mm/s em 0,17 s",
+      "duration": 0.7259,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.17,
+          "t1": 0.2759,
+          "release": 0.4759
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.7059
+        }
+      ]
+    },
+    {
+      "name": "600 mm/s em 0,05 s",
+      "duration": 0.5882,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.05,
+          "t1": 0.1382,
+          "release": 0.3382
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.5682
+        }
+      ]
+    },
+    {
+      "name": "600 mm/s em 0,08 s",
+      "duration": 0.6182,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.08,
+          "t1": 0.1682,
+          "release": 0.3682
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.5982
+        }
+      ]
+    },
+    {
+      "name": "600 mm/s em 0,11 s",
+      "duration": 0.6482,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.11,
+          "t1": 0.1982,
+          "release": 0.3982
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6282
+        }
+      ]
+    },
+    {
+      "name": "600 mm/s em 0,14 s",
+      "duration": 0.6782,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.14,
+          "t1": 0.2282,
+          "release": 0.4282
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6582
+        }
+      ]
+    },
+    {
+      "name": "600 mm/s em 0,17 s",
+      "duration": 0.7082,
+      "inputs": [
+        {
+          "kind": "dragPath",
+          "part": "p5",
+          "path": [
+            [-32.8, 0],
+            [-32.898, 0],
+            [-33.1922, 0],
+            [-33.6824, 0],
+            [-34.3686, 0],
+            [-35.251, 0],
+            [-36.3294, 0],
+            [-37.6039, 0],
+            [-39.0745, 0],
+            [-40.7412, 0],
+            [-42.5059, 0],
+            [-44.2706, 0],
+            [-46.0353, 0],
+            [-47.8, 0],
+            [-49.5647, 0],
+            [-51.3294, 0],
+            [-53.0941, 0],
+            [-54.8588, 0],
+            [-56.6235, 0],
+            [-58.3882, 0],
+            [-60.1529, 0],
+            [-61.9176, 0],
+            [-63.6824, 0],
+            [-65.4471, 0],
+            [-67.2118, 0],
+            [-68.9765, 0],
+            [-70.7412, 0],
+            [-72.5059, 0],
+            [-74.2706, 0],
+            [-76.0353, 0],
+            [-77.8, 0]
+          ],
+          "t0": 0.17,
+          "t1": 0.2582,
+          "release": 0.4582
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "while",
+          "label": "o estojo vem junto com o ferrolho até o ejetor (diferença de deslocamento < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.7,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p5",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 5
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm, o limite do abuso)",
+          "links": ["k8"],
+          "field": "gap",
+          "max": 0.5
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,25 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 250,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "gira em volta da garra e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa (o centro do estojo fora do espaço entre o piso e o topo do extrator)",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.6882
+        }
+      ]
+    }
+  ],
+  "scene": "ejetor.scene.json"
+}

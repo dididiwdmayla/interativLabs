@@ -40,6 +40,13 @@ export const CAPSULE_PROPORTIONS = {
   /** canaleta na frente do aro: largura e profundidade abaixo do corpo */
   grooveWidth: 1.2,
   grooveDepth: 0.8,
+  /**
+   * rebaixo da face da frente do aro (tangente: 5°): o aro avança um pouco
+   * sobre a canaleta, e a garra puxando aperta em vez de escorregar para fora.
+   * Medido nas 21 execuções de ciclo/ejetor: de 0 a 0,12 passa; a partir de
+   * 0,15 a garra segura demais e o estojo trava nela ao girar no ejetor
+   */
+  rimUndercut: 0.09,
   baseThickness: 2.5,
   /** folga da esfera no furo, no diâmetro */
   clearance: 0.2,
@@ -52,7 +59,7 @@ export interface CapsuleGeometry {
   capsule: Omit<Capsule, "projectile">;
   /** esfera: centro (local do estojo) e raio */
   ball: { at: Vec2; r: number };
-  /** frente do aro (onde a garra do extrator puxa) e fim da canaleta: x local */
+  /** frente do aro no fundo da canaleta (onde a garra do extrator puxa; a face sobe avançando `rimUndercut`) e fim da canaleta: x local */
   rimFront: number;
   grooveEnd: number;
   /** meia altura do corpo, do aro e do fundo da canaleta */
@@ -64,7 +71,7 @@ export interface CapsuleGeometry {
 const r4 = (v: number) => Math.round(v * 1e4) / 1e4 + 0;
 
 export function capsuleGeometry(p: CapsuleParams): CapsuleGeometry {
-  const { wall, rimWidth, grooveWidth, grooveDepth, baseThickness, clearance, protrude } =
+  const { wall, rimWidth, grooveWidth, grooveDepth, rimUndercut, baseThickness, clearance, protrude } =
     CAPSULE_PROPORTIONS;
   const D = Math.max(4, p.diameter);
   const L = Math.max(D + baseThickness + 2, p.length);
@@ -79,9 +86,10 @@ export function capsuleGeometry(p: CapsuleParams): CapsuleGeometry {
   const hr = rim / 2;
   const hb = bore / 2;
   const hg = h - grooveDepth;
+  const u = rimUndercut * (hr - hg);
   const outer: Ring = [
     [x0, -hr],
-    [xr, -hr],
+    [xr + u, -hr],
     [xr, -hg],
     [xg, -hg],
     [xg, -h],
@@ -94,7 +102,7 @@ export function capsuleGeometry(p: CapsuleParams): CapsuleGeometry {
     [xg, h],
     [xg, hg],
     [xr, hg],
-    [xr, hr],
+    [xr + u, hr],
     [x0, hr],
   ].map(([x, y]) => [r4(x!), r4(y!)] as Vec2);
   const r = (bore - clearance) / 2;

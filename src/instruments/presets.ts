@@ -23,6 +23,32 @@ export function instrumentPreset(scene: Scene): Probe[] {
       { id: "bolt-position", target: "p7", quantity: "x", name: "Ferrolho · posição x" },
       { id: "sear-force", target: "k35", quantity: "force", name: "Retém · força" },
     ];
+  // ciclo/disparo-extracao (Fase 2 · M2a): o ciclo da cápsula numa cena só
+  if (
+    has("p4", "Cápsula") &&
+    has("p5", "Esfera") &&
+    has("p6", "Ferrolho") &&
+    scene.links.some((l) => l.id === "k9" && l.kind === "axle") &&
+    scene.links.some((l) => l.kind === "chamber" && l.mode === "capsule")
+  ) {
+    const seat = scene.links.find((l) => l.kind === "chamber" && l.mode === "capsule");
+    const body = seat?.kind === "chamber" ? scene.parts.find((p) => p.id === seat.body) : undefined;
+    // a boca do cano: o fundo da câmara de cápsula mais o comprimento dela
+    const muzzle = seat?.kind === "chamber" && body ? body.x + seat.at[0] + seat.length : 59.2;
+    return [
+      { id: "capsule-pressure", target: "p4", quantity: "pressure", name: "Cápsula · pressão" },
+      {
+        id: "ball-speed",
+        target: "p5",
+        quantity: "velocity",
+        name: "Esfera · velocidade",
+        at: { kind: "crossing", target: "p5", quantity: "absoluteX", threshold: muzzle },
+        atLabel: "na saída",
+      },
+      { id: "bolt-position", target: "p6", quantity: "x", name: "Ferrolho · recuo" },
+      { id: "extractor-force", target: "k9", quantity: "force", name: "Extrator · força na garra" },
+    ];
+  }
   if (
     has("p2", "Roda composta") &&
     has("p4", "Lingueta") &&

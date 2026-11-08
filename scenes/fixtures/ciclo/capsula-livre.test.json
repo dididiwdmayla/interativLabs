@@ -2,7 +2,7 @@
   "id": "ciclo/capsula-livre",
   "group": "ciclo",
   "title": "Cápsula livre",
-  "notes": "Cápsula solta na bancada (vista de cima, sem gravidade), golpeada na espoleta por um pino leve de polímero a 1,2 m/s. A esfera sai pela boca do estojo e o estojo recua: estojo de 1,822 g, esfera de 0,888 g, carga média (0,12 mmol). Ambiente a 101,325 kPa.",
+  "notes": "Cápsula solta na bancada (vista de cima, sem gravidade), golpeada na espoleta por um pino leve de polímero a 1,2 m/s. A esfera sai pela boca do estojo e o estojo recua: estojo de 1,825 g, esfera de 0,888 g, carga média (0,12 mmol). Ambiente a 101,325 kPa.",
   "view": [-30, -20, 120, 40],
   "runs": [
     {
@@ -66,8 +66,8 @@
           },
           "t": 0.1,
           "op": "ratio",
-          "min": -0.5117,
-          "max": -0.463
+          "min": -0.5109,
+          "max": -0.4622
         },
         {
           "kind": "at",

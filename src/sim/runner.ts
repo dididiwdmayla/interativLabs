@@ -128,6 +128,12 @@ export function measure(q: Quantity, s: Snapshot, ctx: QCtx): number {
   }
   if ("link" in q) return field(s.links[q.link], q.field);
   if ("field" in q) return s.parts[q.part]?.[q.field] ?? NaN;
+  if ("speed" in q) {
+    const a = ctx.prev?.parts[q.part];
+    const b = s.parts[q.part];
+    if (!a || !b || !ctx.h) return NaN;
+    return dhypot(b.x - a.x, b.y - a.y) / ctx.h;
+  }
   if ("vel" in q) {
     const a = ctx.prev?.parts[q.part];
     const b = s.parts[q.part];
@@ -186,6 +192,23 @@ function evaluator(a: ScriptAssertion, ctx: QCtx): Evaluator {
           v === null
             ? { pass: false, value: "sem leitura" }
             : { pass: within(v, a.min, a.max), value: fmt(v, 4) },
+      };
+    }
+    case "outside": {
+      let p: { x: number; y: number } | null = null;
+      return {
+        step(t, s) {
+          if (p === null && t >= a.t - 1e-9) {
+            const q = s.parts[a.part];
+            if (q) p = { x: q.x, y: q.y };
+          }
+        },
+        result: () => {
+          if (p === null) return { pass: false, value: "sem leitura" };
+          const [x0, y0, x1, y1] = a.box;
+          const inside = p.x > x0 && p.x < x1 && p.y > y0 && p.y < y1;
+          return { pass: !inside, value: `(${fmt(p.x, 2)}; ${fmt(p.y, 2)}) mm` };
+        },
       };
     }
     case "mean": {

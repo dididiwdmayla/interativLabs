@@ -1,0 +1,179 @@
+{
+  "id": "ciclo/disparo-extracao",
+  "group": "ciclo",
+  "title": "Disparo e extração",
+  "notes": "O ciclo inteiro: a cápsula carregada assentada no cano (40 mm de furo), o ferrolho solto num trilho com mola de retorno de 0,02 N/mm (recuo do fundo, como no Lançador), o percussor por mola armado numa trava (o gatilho; no Testar, um toque na trava). Em 0,1 s a trava solta: o percussor golpeia a espoleta, a esfera sai pelo cano, o estojo empurra o ferrolho para trás, a garra extrai, o ejetor joga o estojo pela janela de cima e a mola fecha o ferrolho.",
+  "view": [-75, -35, 140, 55],
+  "runs": [
+    {
+      "name": "um tiro",
+      "duration": 0.6,
+      "inputs": [
+        {
+          "kind": "release",
+          "link": "k15",
+          "t": 0.1
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "o golpe dispara a cápsula uma vez",
+          "event": "capsule-fired",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "while",
+          "label": "a esfera sai pela boca do cano a 12–25 m/s",
+          "cond": {
+            "part": "p5",
+            "field": "x"
+          },
+          "condMin": 59.2,
+          "condMax": 459.2,
+          "q": {
+            "part": "p5",
+            "vel": [1, 0]
+          },
+          "min": 12000,
+          "max": 25000,
+          "peak": true
+        },
+        {
+          "kind": "range",
+          "label": "o estojo empurra o ferrolho para trás até passar do ejetor (recuo > 22 mm) e sem bater no fim do curso",
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p6",
+                "along": [1, 0]
+              }
+            ]
+          },
+          "from": 0.1,
+          "max": 39.5
+        },
+        {
+          "kind": "while",
+          "label": "recuo do ferrolho > 22 mm",
+          "cond": {
+            "part": "p6",
+            "along": [1, 0]
+          },
+          "condMax": -1,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p6",
+                "along": [1, 0]
+              }
+            ]
+          },
+          "min": 22,
+          "peak": true
+        },
+        {
+          "kind": "returnsAfter",
+          "label": "e a mola fecha o ferrolho em até 0,3 s",
+          "q": {
+            "part": "p6",
+            "along": [1, 0]
+          },
+          "event": "capsule-fired",
+          "min": -0.3,
+          "max": 0.3,
+          "within": 0.3
+        },
+        {
+          "kind": "while",
+          "label": "a garra traz o estojo junto com o ferrolho até o ejetor (diferença < 0,5 mm)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -13.3,
+          "condMax": 7.2,
+          "q": {
+            "abs": {
+              "diff": [
+                {
+                  "part": "p4",
+                  "along": [1, 0]
+                },
+                {
+                  "part": "p6",
+                  "along": [1, 0]
+                }
+              ]
+            }
+          },
+          "max": 0.5,
+          "minSteps": 2,
+          "from": 0.1,
+          "to": 0.122
+        },
+        {
+          "kind": "while",
+          "label": "o estojo bate no ejetor e sai a mais de 0,5 m/s",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": -12.8,
+          "q": {
+            "part": "p4",
+            "speed": true
+          },
+          "min": 500,
+          "peak": true
+        },
+        {
+          "kind": "while",
+          "label": "e sobe pela janela de cima (mais de 8 mm acima do eixo)",
+          "cond": {
+            "part": "p4",
+            "field": "x"
+          },
+          "condMin": -60,
+          "condMax": 0,
+          "q": {
+            "diff": [
+              {
+                "const": 0
+              },
+              {
+                "part": "p4",
+                "field": "y"
+              }
+            ]
+          },
+          "min": 8,
+          "peak": true
+        },
+        {
+          "kind": "outside",
+          "label": "e termina fora da caixa",
+          "part": "p4",
+          "box": [-60, -6.5, 0, 4.4],
+          "t": 0.58
+        },
+        {
+          "kind": "maxField",
+          "label": "o eixo do extrator não abre (≤ 0,5 mm)",
+          "links": ["k9"],
+          "field": "gap",
+          "max": 0.5
+        }
+      ]
+    }
+  ],
+  "scene": "disparo-extracao.scene.json"
+}

@@ -1,0 +1,368 @@
+{
+  "version": 4,
+  "meta": {
+    "title": "Disparo e extração",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": true,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Ação",
+      "visible": true,
+      "locked": false,
+      "thickness": 4
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Cano (cima)",
+      "layer": "L1",
+      "x": 29.6,
+      "y": -5.1,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-29.6, 0.5],
+          [-28.6, 1],
+          [-10.4, 1],
+          [-10.4, 1.5],
+          [-9.2, 2],
+          [29.6, 2],
+          [29.6, -2],
+          [-29.6, -2]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Cano",
+      "layer": "L1",
+      "x": 29.6,
+      "y": 5.1,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-29.6, 2],
+          [29.6, 2],
+          [29.6, -2],
+          [-9.2, -2],
+          [-10.4, -1.5],
+          [-10.4, -1],
+          [-28.6, -1],
+          [-29.6, -0.5]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p4",
+      "ref": 4,
+      "name": "Cápsula",
+      "layer": "L1",
+      "x": 8.2,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-11, -4.2],
+          [-9.91, -4.2],
+          [-10, -3.2],
+          [-8.8, -3.2],
+          [-8.8, -4],
+          [11, -4],
+          [11, -3.1],
+          [-8.5, -3.1],
+          [-8.5, 3.1],
+          [11, 3.1],
+          [11, 4],
+          [-8.8, 4],
+          [-8.8, 3.2],
+          [-10, 3.2],
+          [-9.91, 4.2],
+          [-11, 4.2]
+        ],
+        "holes": []
+      },
+      "material": "brass",
+      "fixed": false,
+      "fast": false,
+      "source": {
+        "generator": "capsule",
+        "params": {
+          "length": 22,
+          "diameter": 8,
+          "rim": 8.4,
+          "charge": 1
+        }
+      },
+      "capsule": {
+        "charge": 0.12,
+        "projectile": "p5",
+        "base": [-8.5, 0],
+        "mouth": [11, 0],
+        "bore": 6.2,
+        "primer": [-11, 0],
+        "minStrike": 1000
+      }
+    },
+    {
+      "id": "p5",
+      "ref": 5,
+      "name": "Esfera",
+      "layer": "L1",
+      "x": 18.2,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": true
+    },
+    {
+      "id": "p6",
+      "ref": 6,
+      "name": "Ferrolho",
+      "layer": "L1",
+      "x": -2.8,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-40, -4.05],
+          [-14, -4.05],
+          [-14, -2.6],
+          [-10, -2.6],
+          [-10, -4.05],
+          [0, -4.05],
+          [0, -0.7],
+          [-12, -0.7],
+          [-12, 0.7],
+          [0, 0.7],
+          [0, 1.8],
+          [-36, 1.8],
+          [-36, 3.6],
+          [0, 3.6],
+          [0, 4.05],
+          [-40, 4.05]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": true
+    },
+    {
+      "id": "p8",
+      "ref": 8,
+      "name": "Extrator",
+      "layer": "L1",
+      "x": -14.8,
+      "y": -3.1,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-1.8, -3.15],
+          [14, -3.15],
+          [14, -0.3],
+          [13.028, -0.3],
+          [13.154, -1.7],
+          [12, -1.7],
+          [12, -1.05],
+          [1.8, -1.05],
+          [1.8, 0.7],
+          [-1.8, 0.7]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    },
+    {
+      "id": "p10",
+      "ref": 10,
+      "name": "Ejetor",
+      "layer": "L1",
+      "x": -29.8,
+      "y": 2.7,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -0.7],
+          [5, -0.7],
+          [5, 0.7],
+          [-5, 0.7]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p11",
+      "ref": 11,
+      "name": "Caixa",
+      "layer": "L1",
+      "x": -30,
+      "y": 6.4,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-30, -2],
+          [30, -2],
+          [30, 2],
+          [-30, 2]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": true,
+      "fast": false
+    },
+    {
+      "id": "p12",
+      "ref": 12,
+      "name": "Percussor",
+      "layer": "L1",
+      "x": -12.8,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-5, -0.6],
+          [5, -0.6],
+          [5, 0.6],
+          [-5, 0.6]
+        ],
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": false
+    }
+  ],
+  "links": [
+    {
+      "id": "k3",
+      "ref": 3,
+      "kind": "chamber",
+      "body": "p2",
+      "at": [-32.4, -5.1],
+      "dir": 0,
+      "bore": 8.2,
+      "length": 62,
+      "walls": [],
+      "vents": [],
+      "ports": [],
+      "gas": {
+        "model": "adiabatic",
+        "gamma": 1.4,
+        "p0": 101.325
+      },
+      "mode": "capsule",
+      "seat": 1
+    },
+    {
+      "id": "k7",
+      "ref": 7,
+      "kind": "slider",
+      "a": null,
+      "b": "p6",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-40, 0],
+      "spring": {
+        "k": 0.02,
+        "rest": 5,
+        "damping": 0.00005
+      }
+    },
+    {
+      "id": "k9",
+      "ref": 9,
+      "kind": "axle",
+      "a": "p6",
+      "b": "p8",
+      "at": [0, 0],
+      "limit": {
+        "lower": -0.2,
+        "upper": 0.01
+      },
+      "torsion": {
+        "k": 5,
+        "rest": 0.05,
+        "damping": 0.002
+      }
+    },
+    {
+      "id": "k13",
+      "ref": 13,
+      "kind": "slider",
+      "a": "p6",
+      "b": "p12",
+      "at": [0, 0],
+      "dir": 0,
+      "travel": [-1, 6.5]
+    },
+    {
+      "id": "k14",
+      "ref": 14,
+      "kind": "spring",
+      "a": "p6",
+      "b": "p12",
+      "atA": [-20, 0],
+      "atB": [-5, 0],
+      "k": 0.1,
+      "damping": 0,
+      "freeLength": 13,
+      "mode": "seated",
+      "coil": {
+        "outerD": 1.2,
+        "wireD": 0.2,
+        "turns": 12
+      }
+    },
+    {
+      "id": "k15",
+      "ref": 15,
+      "kind": "lock",
+      "a": "p6",
+      "b": "p12",
+      "at": [0, 0]
+    }
+  ]
+}

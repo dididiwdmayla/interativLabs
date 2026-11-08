@@ -101,6 +101,8 @@ interface ContactItem {
       separation: number;
       normalImpulse: number;
       tangentImpulse: number;
+      /** ponto de contato relativo ao centro do corpo A, no mundo */
+      anchorA: { x: number; y: number; delete(): void };
       delete(): void;
     };
   };
@@ -328,6 +330,69 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       }
     }
     return min;
+  };
+
+  /** velocidade de cada corpo antes do passo do motor (mm/s, rad/s): a aproximação no golpe */
+  let pre: { vx: number; vy: number; w: number }[] = [];
+  const recordPre = () => {
+    if (!rt) return;
+    if (pre.length !== bodies.length) pre = bodies.map(() => ({ vx: 0, vy: 0, w: 0 }));
+    for (const i of dynamic) {
+      const st = rt.body(i);
+      const q = pre[i]!;
+      q.vx = st.vx;
+      q.vy = st.vy;
+      q.w = st.w;
+    }
+  };
+  /**
+   * Leitura de contato do golpe (docs/arquitetura.md §4, "Cápsula"): depois de
+   * cada passo do motor, os pontos de contato do estojo a até `primerR` da
+   * espoleta; a velocidade de aproximação ao longo da normal vem das
+   * velocidades de antes do passo. O evento de impacto do Box2D sozinho perde
+   * o golpe de um percussor que sai do repouso e bate no mesmo passo, ou que
+   * a colisão contínua parou no instante do toque.
+   */
+  const primerContacts = () => {
+    if (!rt || !plan) return;
+    for (const { i, p: c } of rt.armedCapsules()) {
+      const pr = rt.world(c.body, c.primer);
+      let best: { by: Id; speed: number } | null = null;
+      for (const item of contactsOf(c.body)) {
+        const a = shapeInfo(item.shapeIdA);
+        const b = shapeInfo(item.shapeIdB);
+        const m = item.manifold;
+        if (a && b && m.pointCount && (a.part === c.part) !== (b.part === c.part)) {
+          const other = a.part === c.part ? b : a;
+          if (other.part !== c.projectile) {
+            const n = m.normal;
+            const pa = rt.body(a.body);
+            for (let k = 0; k < m.pointCount; k++) {
+              const q = m.GetPoint(k);
+              const an = q.anchorA;
+              const px = pa.x + an.x * L;
+              const py = pa.y + an.y * L;
+              an.delete();
+              q.delete();
+              if (dhypot(px - pr[0], py - pr[1]) > c.primerR) continue;
+              const vel = (bi: number) => {
+                if (plan!.bodies[bi]!.static) return [0, 0] as Vec2;
+                const st = rt!.body(bi);
+                const v = pre[bi] ?? st;
+                return [v.vx - v.w * (py - st.y), v.vy + v.w * (px - st.x)] as Vec2;
+              };
+              const va = vel(a.body);
+              const vb = vel(b.body);
+              const closing = (va[0] - vb[0]) * n.x + (va[1] - vb[1]) * n.y;
+              if (closing > 0 && (!best || closing > best.speed)) best = { by: other.part, speed: closing };
+            }
+            n.delete();
+          }
+        }
+        item.delete();
+      }
+      if (best) rt.strike(i, best.by, best.speed);
+    }
   };
 
   const adapter: EngineAdapter = {
@@ -738,6 +803,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
       const all: EngineEvent[] = [];
       for (let k = 0; k < n; k++) {
         rt.beforeStep(h, k);
+        if (p0capsules().length) recordPre();
         B.b2World_Step(worldId, h, tuning.subSteps);
         const ev = B.b2World_GetSensorEvents(worldId);
         for (let i = 0; i < ev.beginCount; i++) {
@@ -770,6 +836,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         rt.checkFuses();
         // o golpe na espoleta acende a carga e já pode dividir o resto do passo
         rt.strikes(impacts);
+        if (p0capsules().length) primerContacts();
         for (const e of impacts) all.push(e);
         gasJoints.forEach((gj, ci) => {
           if (!gj || !rt || !gj.active) return;
