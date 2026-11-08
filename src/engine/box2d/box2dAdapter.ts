@@ -1,5 +1,7 @@
 import type { Box2DModule, b2BodyId, b2JointId, b2Rot, b2ShapeId, b2Vec2, b2WorldId } from "box2d3-wasm";
+import type { Piece } from "@/geometry/decompose";
 import { PI, datan2, dcos, dsin } from "@/geometry/dmath";
+import { pieceSeparation, type WorldPiece } from "@/geometry/penetration";
 import type { Vec2 } from "@/geometry/vec";
 import type { Id, Scene } from "@/model/types";
 import { ANGULAR_DAMPING, FIXED_STEP, SPEED_LIMIT, trackedBodies, unwrapAngle } from "../common";
@@ -81,6 +83,25 @@ interface ShapeData {
   part: Id;
   body: number;
   sensor?: Id;
+  /** pino: id da ligação dona da forma */
+  pin?: Id;
+}
+
+/** Contact data of a body as exposed by box2d3-wasm 6.0.0 (b2Body_GetContactData). */
+interface ContactItem {
+  manifold: {
+    pointCount: number;
+    normal: { x: number; y: number; delete(): void };
+    GetPoint(k: number): {
+      separation: number;
+      normalImpulse: number;
+      tangentImpulse: number;
+      delete(): void;
+    };
+  };
+  shapeIdA: b2ShapeId;
+  shapeIdB: b2ShapeId;
+  delete(): void;
 }
 
 /**
@@ -225,6 +246,80 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
     return { depth: max * L, a, b };
   };
 
+  /** Last step length, s (contact impulses are per solver substep). */
+  let lastDt = FIXED_STEP;
+
+  /** Touching contacts of a body (empty for a body without contacts). */
+  const contactsOf = (index: number): ContactItem[] => {
+    const id = bodies[index]!;
+    const cap = B.b2Body_GetContactCapacity(id);
+    return cap ? (B.b2Body_GetContactData(id, cap) as ContactItem[]) : [];
+  };
+
+  /**
+   * Net contact force (N) on the shapes that satisfy `mine`, from the manifold impulses
+   * (normal + tangent) of the last step divided by the solver substep. Contacts with
+   * `other` false are ignored. A contact impulse acts on B along the normal; on A, against it.
+   */
+  const contactForce = (
+    bodyIndexes: number[],
+    mine: (s: ShapeData) => boolean,
+    other: (s: ShapeData) => boolean,
+  ): number => {
+    let fx = 0;
+    let fy = 0;
+    for (const bi of new Set(bodyIndexes)) {
+      for (const c of contactsOf(bi)) {
+        const a = shapeInfo(c.shapeIdA);
+        const b = shapeInfo(c.shapeIdB);
+        const m = c.manifold;
+        if (a && b && m.pointCount) {
+          const aMine = mine(a) && other(b);
+          const bMine = mine(b) && other(a);
+          // the same contact is listed under both bodies: count it once, from the body of the shape we own
+          if ((aMine || bMine) && !(aMine && bMine) && bi === (aMine ? a.body : b.body)) {
+            const n = m.normal;
+            let jn = 0;
+            let jt = 0;
+            for (let k = 0; k < m.pointCount; k++) {
+              const q = m.GetPoint(k);
+              jn += q.normalImpulse;
+              jt += q.tangentImpulse;
+              q.delete();
+            }
+            // tangent = right perpendicular of the normal (Box2D v3 convention)
+            const sign = bMine ? 1 : -1;
+            fx += sign * (n.x * jn + n.y * jt);
+            fy += sign * (n.y * jn - n.x * jt);
+            n.delete();
+          }
+        }
+        c.delete();
+      }
+    }
+    // impulse (g·mm/s in engine units) per substep → force in N
+    return (Math.hypot(fx, fy) * L) / (lastDt / tuning.subSteps) / 1e6;
+  };
+
+  /** Smallest manifold separation (mm) between touching shapes of the two parts; null without contact. */
+  const contactSeparation = (bodyIndexes: number[], a: Id, b: Id): number | null => {
+    let min: number | null = null;
+    for (const bi of new Set(bodyIndexes)) {
+      for (const c of contactsOf(bi)) {
+        const sa = shapeInfo(c.shapeIdA);
+        const sb = shapeInfo(c.shapeIdB);
+        if (sa && sb && ((sa.part === a && sb.part === b) || (sa.part === b && sb.part === a)))
+          for (let k = 0; k < c.manifold.pointCount; k++) {
+            const q = c.manifold.GetPoint(k);
+            if (min === null || q.separation * L < min) min = q.separation * L;
+            q.delete();
+          }
+        c.delete();
+      }
+    }
+    return min;
+  };
+
   const adapter: EngineAdapter = {
     meta: {
       id: "box2d",
@@ -276,6 +371,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
           sd.enableHitEvents = !f.sensor;
           const data: ShapeData = { bits: f.bits, part: f.part, body: pb.index };
           if (f.sensor && f.link) data.sensor = f.link;
+          else if (f.link) data.pin = f.link;
           shapeData.push(data);
           sd.userData = shapeData.length;
           let ok = true;
@@ -578,6 +674,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
 
     step(dt: number) {
       if (!worldId || !rt) return;
+      lastDt = dt;
       if (drag) {
         // o alvo anda até o dedo com velocidade limitada (tempo simulado)
         drag.target = chase(drag.target, drag.finger, HAND.speed * dt);
@@ -650,9 +747,28 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
     },
     reaction(id) {
       const joint = joints.get(id);
-      if (!joint) return null;
-      const f = jointForce(id)!;
-      return { force: Math.hypot(...f) / 1e6, torque: (B.b2Joint_GetConstraintTorque(joint) * L * L) / 1e6 };
+      if (joint) {
+        const f = jointForce(id)!;
+        return {
+          force: Math.hypot(...f) / 1e6,
+          torque: (B.b2Joint_GetConstraintTorque(joint) * L * L) / 1e6,
+        };
+      }
+      if (!plan) return null;
+      // Pin: net contact force on its circle. Contact-mode slot: the same, only against the guide part.
+      const slot = plan.slotContacts.find((sc) => sc.id === id);
+      const owner = slot ? slot.pin : id;
+      if (!slot && plan.links.find((l) => l.id === id)?.kind !== "pin") return null;
+      const own = shapeData.filter((d) => d.pin === owner);
+      if (!own.length) return null;
+      return {
+        force: contactForce(
+          own.map((d) => d.body),
+          (d) => d.pin === owner,
+          slot ? (d) => d.part === slot.guide : () => true,
+        ),
+        torque: 0,
+      };
     },
     clearance(a, b) {
       if (!plan || !rt) return null;
@@ -660,10 +776,20 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         plan!.bodies.flatMap((body) =>
           body.fixtures.filter((f) => f.part === id && !f.sensor).map((f) => ({ f, body: body.index })),
         );
+      const world = (item: { f: { piece: Piece }; body: number }): WorldPiece => {
+        const shape = item.f.piece;
+        return shape.kind === "circle"
+          ? { kind: "circle", c: rt!.world(item.body, shape.c), r: shape.r }
+          : { kind: "poly", points: shape.points.map((pt) => rt!.world(item.body, pt)) };
+      };
       let distance = Infinity;
+      let overlap = false;
+      let geometric = Infinity;
+      const bodiesOf: number[] = [];
       for (const fa of fixtures(a))
         for (const fb of fixtures(b)) {
           if (!(fa.f.bits & fb.f.bits)) continue;
+          bodiesOf.push(fa.body, fb.body);
           const proxy = (item: typeof fa) => {
             const p = new B.b2ShapeProxy();
             const shape = item.f.piece;
@@ -691,7 +817,14 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
           input.proxyB = pb;
           input.useRadii = true;
           const out = B.b2ComputeShapeDistance(input, null);
-          distance = Math.min(distance, out.distance * L);
+          const d = out.distance * L;
+          distance = Math.min(distance, d);
+          // The shape distance is zero from the first touch on: the depth comes from the contacts or, for
+          // pairs the engine never collides (both fixed, or before the first step), from the geometry.
+          if (d <= 1e-9) {
+            overlap = true;
+            geometric = Math.min(geometric, pieceSeparation(world(fa), world(fb)));
+          }
           out.delete();
           input.delete();
           pa.delete();
@@ -700,7 +833,10 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
           zero.delete();
           rotation.delete();
         }
-      return Number.isFinite(distance) ? distance : null;
+      if (!Number.isFinite(distance)) return null;
+      if (!overlap) return distance;
+      const touching = contactSeparation(bodiesOf, a, b);
+      return Math.min(0, touching ?? geometric);
     },
 
     pose(partId: Id): PartPose | null {

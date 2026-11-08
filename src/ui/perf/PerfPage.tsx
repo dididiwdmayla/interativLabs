@@ -9,6 +9,12 @@ import { useSimStore } from "../sim/simStore";
 import { useSimulation } from "../sim/useSimulation";
 import { Stage } from "../Stage";
 import type { Look } from "@/render/look";
+import { emptyHistory } from "@/editor/history";
+import { useUiStore } from "@/editor/useUiStore";
+import type { Probe } from "@/instruments/model";
+import type { SimInput } from "@/sim/session";
+import { InstrumentPanel } from "../instruments/InstrumentPanel";
+import { useComparison } from "../instruments/comparison";
 import "./perf.css";
 
 /**
@@ -20,6 +26,32 @@ import "./perf.css";
  */
 
 const DURATION = 10;
+const STEPS = DURATION * 240;
+
+/**
+ * M1v: as quatro sondas mais caras da cena (folga entre formas, força de contato do rasgo, torque do eixo
+ * com motor, força do trilho) e a comparação com fantasma (a variante B tem o motor do eixo 20% mais rápido).
+ */
+const PERF_PROBES: Probe[] = [
+  { id: "perf-gap", target: "p10", quantity: "clearance", name: "Folga esfera / prateleira", other: "p9" },
+  { id: "perf-slot", target: "k151", quantity: "force", name: "Rasgo · força" },
+  { id: "perf-axle", target: "k3", quantity: "torque", name: "Eixo · torque" },
+  { id: "perf-slider", target: "k7", quantity: "force", name: "Trilho · força" },
+];
+/** The block's scripted back-and-forth, as inputs recorded per step (the comparison replays these). */
+function perfInputs(part: string, p0: [number, number]): SimInput[] {
+  const inputs: SimInput[] = [{ step: 480, kind: "start", part, p: p0 }];
+  for (let step = 481; step < 1920; step++) {
+    const t = step / 240;
+    inputs.push({
+      step,
+      kind: "move",
+      p: [p0[0] + 9 * Math.sin((t - 2) * 3), p0[1] + 4 * Math.sin((t - 2) * 5)],
+    });
+  }
+  inputs.push({ step: 1920, kind: "end" });
+  return inputs;
+}
 
 const sceneFile = import.meta.glob<unknown>("../../../scenes/fixtures/desempenho/desempenho.scene.json", {
   import: "default",
@@ -31,6 +63,9 @@ interface PerfResult {
   colors: boolean;
   /** rastro do movimento ligado (Parte E2d) */
   trail: boolean;
+  /** M1v: quatro sondas ligadas, e a comparação com fantasma */
+  probes: boolean;
+  compare: boolean;
   frames: number;
   fpsMedian: number;
   fpsP5: number;
@@ -74,6 +109,8 @@ function summarize(
   multilayer = false,
   colors = false,
   trail = false,
+  probes = false,
+  compare = false,
 ): PerfResult {
   // o primeiro segundo é aquecimento (compilação do WASM, primeira pintura)
   const s = stats.slice(Math.min(60, Math.floor(stats.length / 10)));
@@ -82,6 +119,8 @@ function summarize(
     multilayer,
     colors,
     trail,
+    probes,
+    compare,
     frames: s.length,
     fpsMedian: q(fps, 0.5),
     fpsP5: q(fps, 0.05),
@@ -119,7 +158,7 @@ function summarize(
 
 function resultText(r: PerfResult): string {
   return [
-    `interativLabs /#perf — 150 peças, 100 ligações${r.multilayer ? ", 30 peças com dois perfis" : ""}${r.colors ? ", camadas em cores e afastadas" : ""}${r.trail ? ", rastro" : ""}, ${speedMode(r.speed).name} (${speedMode(r.speed).frac}), 10 s com arrasto`,
+    `interativLabs /#perf — 150 peças, 100 ligações${r.multilayer ? ", 30 peças com dois perfis" : ""}${r.colors ? ", camadas em cores e afastadas" : ""}${r.trail ? ", rastro" : ""}${r.probes ? ", 4 sondas" : ""}${r.compare ? ", comparação com fantasma" : ""}, ${speedMode(r.speed).name} (${speedMode(r.speed).frac}), 10 s com arrasto`,
     `qps: mediana ${n(r.fpsMedian)} · p5 ${n(r.fpsP5)} (${r.frames} quadros; ${r.long} acima de 20 ms)`,
     `física por quadro: mediana ${n(r.physicsMedian, 2)} ms · p95 ${n(r.physicsP95, 2)} ms (${n(r.stepsPerFrame, 2)} passos)`,
     `desenho por quadro: mediana ${n(r.drawMedian, 2)} ms · p95 ${n(r.drawP95, 2)} ms`,
@@ -132,6 +171,8 @@ export default function PerfPage() {
   const [multilayer, setMultilayer] = useState(false);
   const [colors, setColors] = useState(false);
   const [trail, setTrail] = useState(false);
+  const [probes, setProbes] = useState(false);
+  const [compare, setCompare] = useState(false);
   const look = useMemo<Look>(
     () => ({ colors, spread: colors ? 28 : 0, isolate: false, hidden: new Set() }),
     [colors],
@@ -188,16 +229,29 @@ export default function PerfPage() {
     if (!running || !ctl || !model) return;
     useSimStore.getState().set({ speed, paused: false });
     stats.current = [];
+    let waiting = compare;
     const block =
       model.partList.find((m) => m.part.name === "Bloco 1") ?? model.partList.find((m) => m.dynamic);
     const p0: [number, number] = block ? [block.part.x, block.part.y] : [0, 0];
-    const t0 = performance.now();
+    let t0 = performance.now();
     let held = false;
     let raf = 0;
     const tick = () => {
+      // the comparison replays both variants up front: the 10 s start when the playback does
+      if (waiting) {
+        if (!useComparison.getState().ready) {
+          raf = requestAnimationFrame(tick);
+          return;
+        }
+        waiting = false;
+        stats.current = [];
+        t0 = performance.now();
+      }
       const t = (performance.now() - t0) / 1000;
       if (progress.current) progress.current.textContent = `${n(Math.min(t, DURATION))} s`;
-      if (t >= 2 && t < 8) {
+      if (compare) {
+        // the recorded inputs play the drag
+      } else if (t >= 2 && t < 8) {
         const p: [number, number] = [p0[0] + 9 * Math.sin((t - 2) * 3), p0[1] + 4 * Math.sin((t - 2) * 5)];
         if (!held) held = ctl.dragAt(p0) !== null;
         else ctl.dragMove(p);
@@ -206,7 +260,7 @@ export default function PerfPage() {
         held = false;
       }
       if (t >= DURATION) {
-        const r = summarize(stats.current, speed, multilayer, colors, trail);
+        const r = summarize(stats.current, speed, multilayer, colors, trail, probes, compare);
         setResult(r);
         (window as unknown as { __PERF__?: PerfResult }).__PERF__ = r;
         setRunning(false);
@@ -216,7 +270,7 @@ export default function PerfPage() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [running, ctl, model, speed, multilayer, colors, trail]);
+  }, [running, ctl, model, speed, multilayer, colors, trail, probes, compare]);
 
   const copy = useCallback(async () => {
     if (!result) return;
@@ -273,6 +327,30 @@ export default function PerfPage() {
             />
             Rastro
           </label>
+          <label className="checkfield">
+            <input
+              type="checkbox"
+              checked={probes}
+              disabled={running}
+              onChange={(e) => {
+                setResult(null);
+                setProbes(e.target.checked);
+              }}
+            />
+            4 sondas
+          </label>
+          <label className="checkfield">
+            <input
+              type="checkbox"
+              checked={compare}
+              disabled={running}
+              onChange={(e) => {
+                setResult(null);
+                setCompare(e.target.checked);
+              }}
+            />
+            Comparação e fantasma
+          </label>
           <button
             type="button"
             className="btn btn--primary"
@@ -280,6 +358,32 @@ export default function PerfPage() {
             onClick={() => {
               setResult(null);
               setCopied(false);
+              // the controller reads the probes and the comparison when it is created
+              useUiStore.getState().setProbes(probes || compare ? PERF_PROBES : []);
+              if (compare && scene && model) {
+                const block =
+                  model.partList.find((m) => m.part.name === "Bloco 1") ??
+                  model.partList.find((m) => m.dynamic);
+                const b = structuredClone(scene);
+                for (const l of b.links)
+                  if (l.id === "k3" && l.kind === "axle" && l.motor) l.motor.speed *= 1.2;
+                useComparison.setState({
+                  request: {
+                    a: { id: "A", name: "A", scene, history: emptyHistory() },
+                    b: { id: "B", name: "B", scene: b, history: emptyHistory() },
+                    run: {
+                      inputs: block ? perfInputs(block.part.id, [block.part.x, block.part.y]) : [],
+                      steps: STEPS,
+                    },
+                    returnTo: "A",
+                  },
+                  series: [],
+                  ticks: [],
+                  // window.__PERF_GHOST__ = false measures the comparison without the ghost (to tell the costs apart)
+                  ghost: (window as unknown as { __PERF_GHOST__?: boolean }).__PERF_GHOST__ !== false,
+                  ready: false,
+                });
+              } else useComparison.setState({ request: null, series: [], ticks: [], ready: false });
               setRunning(true);
             }}
           >
@@ -323,6 +427,11 @@ export default function PerfPage() {
           trail={trail}
           bare
         />
+        {(probes || compare) && running && (
+          <div className="perf__instruments">
+            <InstrumentPanel />
+          </div>
+        )}
       </div>
       {result && (
         <section className="perf__result" aria-live="polite">

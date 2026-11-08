@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useUiStore } from "@/editor/useUiStore";
-import { available, quantities } from "@/instruments/model";
+import { available, noReadingReason, quantities } from "@/instruments/model";
 import type { LinkKind } from "@/model/types";
 import { addProbe } from "./actions";
 import "./instruments.css";
@@ -18,7 +18,14 @@ export function Measure({
   const [open, setOpen] = useState(false);
   const ui = useUiStore();
   const options = available(kind);
-  if (!options.length) return null;
+  const reason = kind === "part" ? undefined : noReadingReason[kind];
+  if (!options.length && !reason) return null;
+  if (!options.length)
+    return (
+      <section className="card__sec measure">
+        <p className="measure__note">{reason}</p>
+      </section>
+    );
   return (
     <section className="card__sec measure">
       <button className="btn btn--outline btn--small" aria-expanded={open} onClick={() => setOpen(!open)}>

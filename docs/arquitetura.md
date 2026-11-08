@@ -544,3 +544,61 @@ O uso mostrou uma diferença entre a regra geométrica da câmara e a câmara au
 | Ordem das fases | 07/11 | Fecha a Fase 1 (E2c, E2d, S, E3) → Mecânica 2.0 → oficina guiada → acabamento visual (`docs/roadmap.md`) |
 | Som mínimo | 07/11 | Feita na Parte S (§6, Som): uma música em laço e 25 efeitos (20 com gatilho); lote som-01 pelo coordenador sonoro |
 | Entender: cores, afastar, esconder, "o que é", rastro | 07/11 | Implementada na E2d (§6); paleta das camadas provisória, até o coordenador visual |
+
+## 10. Instrumentos e variantes
+
+Fase 2 · M1. Medir, variar e comparar um mecanismo, sem nunca mudar a simulação: o hash de poses é o mesmo com e sem sondas e com e sem comparação (`src/instruments/hash.test.ts`, e no Chromium em `tests/e2e/capture-m1v.spec.ts`).
+
+### Sondas no estado de vista
+
+Uma sonda (`Probe` em `src/instruments/model.ts`) é o que a pessoa mede: `target` (id da peça ou da ligação), `quantity`, `name` e, conforme o caso, `other` (a segunda peça da folga), `limit` (a linha do limite de uma trava), `threshold` (o valor que conta ciclos), `countDrops` (conta as quedas da lingueta) e `at` (o evento em que também se lê o valor). Ficam em `useUiStore.probes`, **fora do formato da cena**: sem migração, sem desfazer de cena, sem efeito no hash. Até 4. Salvam-se com o projeto em `ProjectView.probes` (junto das peças escondidas), valem para todas as variantes pelo id do alvo e, sem o alvo (peça apagada), leem "—". O Lançador e a Roda e lingueta têm instrumentos prontos (`src/instruments/presets.ts`), oferecidos por "Ver instrumentos".
+
+### Grandezas e de onde cada uma sai
+
+| Grandeza | Origem |
+| --- | --- |
+| x, y, ângulo (desde a pose desenhada) e posição absoluta | pose do snapshot (`Snapshot.parts`) |
+| Velocidade, velocidade angular, rotação | `EngineAdapter.velocity(peça)`: velocidade do corpo no ponto da peça |
+| Ângulo relativo do eixo | `Runtime.axleAngle` |
+| Torque do eixo | `reaction().torque` (`b2Joint_GetConstraintTorque`: motor, atrito e batentes) **mais** `LinkState.torsionTorque`, a mola de torção pela própria lei, −k·(θ − repouso) − c·ω. A restrição do Box2D não inclui a mola nativa (medido: com a mola sozinha a restrição dá 0). Um braço preso pela mola em equilíbrio lê 0,71817 N·mm contra 0,71820 do peso |
+| Força de haste, cabo, trava, suporte elástico, trilho e rasgo em junta | `b2Joint_GetConstraintForce`, em N; o trilho soma a mola de retorno |
+| Força de mola | a lei da mola no estado atual (explícita) ou, na mola nativa, a força do solver mais o batente das espiras |
+| Força de **pino** e de **rasgo por contato** | soma vetorial dos impulsos de contato (normal e tangente, `b2Body_GetContactData` → `GetPoint(k).normalImpulse/tangentImpulse`) das formas do pino, dividida pelo **subpasso** do solver (`dt / subSteps`: os impulsos do Box2D v3 são por subpasso). No rasgo, só os contatos com a peça-guia. Um bloco sobre dois pinos lê o peso ±0,5%; uma alavanca pendurada num furo, o peso com o do próprio pino |
+| Parafuso | nenhuma: ele une as peças num corpo só. O cartão e o gráfico dizem "Une as peças num corpo só: sem força entre elas" |
+| Pressão e volume da câmara | o modelo da câmara (`LinkState`), "gás didático" |
+| Folga entre duas peças da mesma camada | `b2ComputeShapeDistance` entre as formas que compartilham camada (um pino conta nas camadas dele; camadas sem camada comum dão "—"). Se as formas se tocam ou se sobrepõem a distância do Box2D é zero: vale a menor `separation` dos contatos entre as duas peças (negativa = penetração) e, sem contato (as duas fixas, ou antes do primeiro passo), a separação geométrica das peças convexas (`src/geometry/penetration.ts`, a mesma conta do manifold de polígonos) |
+
+### Amostragem e redução
+
+`Samples` (`src/instruments/sampling.ts`) roda no worker e grava uma amostra por sonda a cada passo (1/240 s), junto da gravação das poses. Cada sonda guarda **exatos os últimos 2 401 passos** (10 s: o que o palco ainda tem de poses, então é onde o cursor pode estar) e, antes disso, só o mínimo e o máximo de cada 12 passos, afinados de novo acima de 6 000 pontos: o teto é de ~8 700 amostras por sonda, e nenhum pico some. Uma execução de 60 s do Lançador com as 4 sondas prontas guarda 18 404 de 57 604 amostras. A interface recebe a série **reduzida a 240 baldes** (primeiro, mínimo, máximo e último de cada um). O cursor do gráfico lê exato dentro da janela; fora dela não há leitura (`cursor: null`) e o gráfico sombreia o trecho "sem poses antes de t". Os estalos da lingueta são contados passo a passo e acumulados na própria amostra; a contagem por limiar usa os pontos retidos (aproximada fora dos últimos 10 s). Voltar a régua trunca as amostras do futuro abandonado; reiniciar apaga tudo e mede de novo.
+
+### Valor no evento
+
+Uma sonda pode ler o próprio valor num evento (`Probe.at`): cada vez que a régua mostra um tique de um tipo (`{ kind: "tick", tick }`, inclusive `wall-unsealed`, "Parede saiu do furo") ou cada vez que outra leitura passa de um valor para cima (`{ kind: "crossing", target, quantity, threshold }`). O gráfico mostra o valor da última ocorrência que o cursor já passou e marca cada uma na curva; o seletor "Ler em" do gráfico (no painel expandido) escolhe um tique. No Lançador, "Esfera · velocidade na saída" é o cruzamento da boca do cano (x = 50 mm): **10,59 m/s**, a mesma medida da cena de teste do exemplo; o pico instantâneo (10,96 m/s, com a componente vertical do pulso do gás) continua na curva. O `wall-unsealed` do Lançador é o ferrolho desvedando o furo, no passo 92, depois de a esfera já ter chegado ao coletor: não serve de "saída".
+
+### Eventos na régua
+
+Cada evento do motor vira um tique (`src/instruments/events.ts`): sensor, câmara acendeu, impacto forte (≥ 600 mm/s), trava soltou, respiro abriu e fechou, parede saiu do furo. Tiques a menos de 18 px na régua **agrupam** num marcador com a contagem; tocar nele leva o cursor ao primeiro e abre a lista, e cada item leva o cursor ao seu tique.
+
+### Variantes no projeto
+
+Um projeto tem a variante A (a original) e até mais três, cada uma com a sua cena e o seu desfazer (`Variant` em `src/editor/projects.ts`, salvas com o projeto; projeto antigo começa só com A). As sondas e a vista são do projeto.
+
+### Comparação por entradas iguais
+
+`compareVariants` pega as entradas da última execução da primeira variante (`runs`, por id de peça e ponto; entrada sem peça correspondente na outra é pulada) e manda ao worker, que repete as duas cenas por `replay` (`src/sim/comparison.ts`) com as mesmas entradas e as mesmas sondas. As duas gravações voltam ao thread principal e o controlador toca as duas juntas; os gráficos sobrepõem A (traço cheio) e B (tracejado) com a diferença no cursor, e o resumo mostra, no Lançador, o recuo máximo e o ciclo de cada uma ("Ciclo" = da ignição até o ferrolho voltar a 0,5 mm da pose desenhada). Duas variantes iguais dão diferença zero. "Experimente comparar" cria a B com a mola de retorno 50% mais rígida (`src/instruments/experiment.ts`).
+
+### Fantasma
+
+A variante B é desenhada como contornos tracejados em ouro sobre a A (`src/render/ghost.ts`), sincronizada com o cursor, com liga e desliga no painel. Só contornos: sem hachura, sombra nem efeitos.
+
+### Limites conhecidos
+
+- As leituras são do último passo. A separação de um contato vem do começo do passo (uma defasagem de um passo); uma peça apoiada lê ~−0,02 mm (a folga do solver), não zero.
+- A força de pino e de rasgo por contato é a do vetor líquido: dois contatos que se opõem se cancelam. Dois pinos de uma peça são duas sondas.
+- A mola de torção entra no torque pela lei do runtime; o amortecimento nativo do Box2D foi configurado para a mesma lei, mas só o equilíbrio estático foi conferido contra um peso.
+- Fora dos últimos 10 s o gráfico mostra o envelope (mínimo e máximo), não todos os passos; os picos ficam, a forma fina da curva não.
+- A comparação repete as duas variantes antes de tocar (para 2 × 2 400 passos de 150 peças, alguns segundos), só toca o que foi gravado e não aceita arrastar peças enquanto toca.
+- O evento por cruzamento só vem dos instrumentos prontos; a interface oferece só tiques da régua.
+- A "saída" do Lançador (10,59 m/s) fica a 0,01 m/s do limite de 10,6 do aceite (10,3 ± 0,3); a cena de teste do exemplo mede 10,586 pelo pico na boca.
+

@@ -9,7 +9,16 @@ export function instrumentPreset(scene: Scene): Probe[] {
     scene.links.some((l) => l.id === "k30" && l.kind === "chamber")
   )
     return [
-      { id: "ball-speed", target: "p10", quantity: "velocity", name: "Esfera · velocidade" },
+      {
+        id: "ball-speed",
+        target: "p10",
+        quantity: "velocity",
+        name: "Esfera · velocidade",
+        // "Na saída": the instant the ball centre passes the muzzle (x = 50 mm), where the example's test
+        // measures the exit speed. The curve keeps the instantaneous peak, which the gas pulse inflates.
+        at: { kind: "crossing", target: "p10", quantity: "absoluteX", threshold: 50 },
+        atLabel: "na saída",
+      },
       { id: "gas-pressure", target: "k30", quantity: "pressure", name: "Câmara · pressão" },
       { id: "bolt-position", target: "p7", quantity: "x", name: "Ferrolho · posição x" },
       { id: "sear-force", target: "k35", quantity: "force", name: "Retém · força" },

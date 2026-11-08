@@ -1,16 +1,44 @@
-import { launcherMetrics } from "@/instruments/comparisonMetrics";
-import { eventNames, type EventTick } from "@/instruments/events";
+import { formatNumber } from "@/instruments/format";
+import { launcherMetrics, launcherSummary } from "@/instruments/comparisonMetrics";
+import { eventNames, type EventTick, type TickKind } from "@/instruments/events";
 import { useComparison, exitComparison } from "./comparison";
 import { useState, useId, useRef, useEffect } from "react";
 import { useUiStore } from "@/editor/useUiStore";
-import { quantities } from "@/instruments/model";
+import { noReadingReason, quantities } from "@/instruments/model";
 import type { Series } from "@/instruments/sampling";
 import { useSimStore } from "../sim/simStore";
 import { useInstruments } from "./store";
 import "./instruments.css";
-const fmt = (v: number | null | undefined) =>
-  v == null ? "—" : v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
-function Chart({ series, shown, latest }: { series: Series; shown: number; latest: number }) {
+const fmt = (v: number | null | undefined) => formatNumber(v);
+/** Index of the first point after `step` (points are in time order). */
+function firstAfter(points: { step: number }[], step: number): number {
+  let lo = 0;
+  let hi = points.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if ((points[mid]?.step ?? Infinity) <= step) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+/** Name shown for the instant a probe also reads (its own label, or the ruler tick's name). */
+const atName = (probe: Series["probe"]) =>
+  probe.atLabel ?? (probe.at?.kind === "tick" ? eventNames[probe.at.tick].toLowerCase() : "no evento");
+
+function Chart({
+  series,
+  shown,
+  latest,
+  oldest,
+  kinds,
+}: {
+  series: Series;
+  shown: number;
+  latest: number;
+  oldest: number;
+  kinds: TickKind[];
+}) {
   const uid = useId();
   const width = useInstruments((s) => s.window);
   const pointers = useRef(new Map<number, number>());
@@ -30,14 +58,29 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
   );
   const ctl = useSimStore((s) => s.ctl);
   const { probe, points, cursor } = series;
+  // A probe left on a link that has nothing to read says why instead of a bare dash.
+  const reason = useUiStore((s) => {
+    const kind = s.current?.scene.links.find((l) => l.id === probe.target)?.kind;
+    return kind ? noReadingReason[kind] : undefined;
+  });
   const other = useComparison((s) => s.series.find((v) => v.probe.id === probe.id));
-  const valid = points.filter((p): p is typeof p & { value: number } => p.value !== null);
-  const values = [
-    ...valid.map((p) => p.value),
-    ...(other?.points.flatMap((p) => (p.value === null ? [] : [p.value])) ?? []),
-  ];
-  const lo = Math.min(0, ...values, probe.limit ?? 0);
-  const hi = Math.max(1e-6, ...values, probe.limit ?? 0);
+  // one pass over the points: the scale (including the other variant and the limit) and the extremes
+  let lo = Math.min(0, probe.limit ?? 0);
+  let hi = Math.max(1e-6, probe.limit ?? 0);
+  let max: (typeof points)[number] | null = null;
+  let min: (typeof points)[number] | null = null;
+  for (const p of points) {
+    if (p.value === null) continue;
+    if (p.value < lo) lo = p.value;
+    if (p.value > hi) hi = p.value;
+    if (!max || p.value > (max.value ?? -Infinity)) max = p;
+    if (!min || p.value < (min.value ?? Infinity)) min = p;
+  }
+  for (const p of other?.points ?? []) {
+    if (p.value === null) continue;
+    if (p.value < lo) lo = p.value;
+    if (p.value > hi) hi = p.value;
+  }
   const range = hi - lo || 1;
   const fullEnd = Math.max(1, latest * 240, points.at(-1)?.step ?? 0);
   const span = width === null ? fullEnd : width * 240;
@@ -45,25 +88,36 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
   const end = begin + span;
   const x = (step: number) => 12 + ((step - begin) / span) * 276;
   const y = (value: number) => 78 - ((value - lo) / range) * 56;
-  const path = points
-    .map((p, i) => {
-      if (p.value === null) return "";
-      const command = points[i - 1]?.value != null ? "L" : "M";
-      return `${command}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)}`;
-    })
-    .join(" ");
-  const otherPath =
-    other?.points
-      .map((p, i, all) =>
-        p.value === null
-          ? ""
-          : `${all[i - 1]?.value != null ? "L" : "M"}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)}`,
-      )
-      .join(" ") ?? "";
-  const max = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value > a.value ? p : a), null);
-  const min = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value < a.value ? p : a), null);
+  // only the stretch inside the window (and one point past each edge) is drawn: a long run has thousands of points
+  const trace = (pts: typeof points) => {
+    const first = Math.max(0, firstAfter(pts, begin - 1) - 1);
+    const last = Math.min(pts.length, firstAfter(pts, end) + 1);
+    let d = "";
+    for (let i = first; i < last; i++) {
+      const p = pts[i];
+      if (!p || p.value === null) continue;
+      d += `${i > first && pts[i - 1]?.value != null ? "L" : "M"}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)} `;
+    }
+    return d;
+  };
+  const path = trace(points);
+  const otherPath = other ? trace(other.points) : "";
   const bipolar = (min?.value ?? 0) < 0 && (max?.value ?? 0) > 0;
   const peak = Math.abs(min?.value ?? 0) > Math.abs(max?.value ?? 0) ? min : max;
+  // the value at the latest occurrence of the probe's event that the cursor has already passed
+  const reached = series.marks?.filter((m) => m.step <= Math.round(shown * 240)).at(-1);
+  const pickEvent = (tick: TickKind | "") => {
+    const ui = useUiStore.getState();
+    ui.setProbes(
+      ui.probes.map((p) => {
+        if (p.id !== probe.id) return p;
+        const next = { ...p };
+        delete next.at;
+        delete next.atLabel;
+        return tick ? { ...next, at: { kind: "tick" as const, tick } } : next;
+      }),
+    );
+  };
   const scrub = (clientX: number, el: SVGSVGElement) => {
     const r = el.getBoundingClientRect();
     ctl?.scrub(
@@ -97,9 +151,15 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
             )}
           </span>
         )}
-        <small>
-          {bipolar ? `mín ${fmt(min?.value)} · máx ${fmt(max?.value)}` : `pico ${fmt(peak?.value)}`}
+        <small title={reason}>
+          {reason ??
+            (bipolar ? `mín ${fmt(min?.value)} · máx ${fmt(max?.value)}` : `pico ${fmt(peak?.value)}`)}
         </small>
+        {probe.at && (
+          <strong className="instrument-chart__at">
+            {atName(probe)} {fmt(reached?.value)} {quantities[probe.quantity][1]}
+          </strong>
+        )}
       </div>
       <svg
         viewBox="0 0 300 96"
@@ -159,12 +219,29 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
           <clipPath id={`${uid}-clip`}>
             <rect x="12" y="16" width="276" height="66" />
           </clipPath>
+          <pattern id={`${uid}-old`} width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M0 6L6 0" className="instrument-chart__grid" />
+          </pattern>
           <pattern id={uid} width="23" height="14" patternUnits="userSpaceOnUse">
             <path d="M23 0H0V14" className="instrument-chart__grid" />
           </pattern>
         </defs>
         <rect x="12" y="22" width="276" height="56" fill={`url(#${uid})`} />
         <path d="M12 22V78H288" className="instrument-chart__axis" />
+        {oldest * 240 > begin && (
+          <g className="instrument-chart__expired">
+            <rect
+              x="12"
+              y="22"
+              width={Math.max(0, Math.min(276, x(oldest * 240) - 12))}
+              height="56"
+              fill={`url(#${uid}-old)`}
+            />
+            <text x="16" y="34">
+              sem poses antes de {fmt(oldest)} s
+            </text>
+          </g>
+        )}
         <path d={path} clipPath={`url(#${uid}-clip)`} className="instrument-chart__curve" />
         {other && (
           <path
@@ -181,7 +258,18 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
             </text>
           </g>
         )}
-        {peak && peak.step >= begin && peak.step <= end && (
+        {series.marks
+          ?.filter(
+            (m): m is typeof m & { value: number } => m.value !== null && m.step >= begin && m.step <= end,
+          )
+          .map((m) => (
+            <path
+              key={m.step}
+              className="instrument-chart__mark"
+              d={`M${x(m.step)} ${y(m.value) - 4}l3.5 4l-3.5 4l-3.5 -4z`}
+            />
+          ))}
+        {peak && peak.value !== null && peak.step >= begin && peak.step <= end && (
           <circle cx={x(peak.step)} cy={y(peak.value)} r="2.5" className="instrument-chart__peak" />
         )}
         <g className="instrument-chart__cursor">
@@ -195,6 +283,24 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
           {fmt(end / 240)} s
         </text>
       </svg>
+      {(kinds.length > 0 || probe.at) && (
+        <label className="instrument-chart__event">
+          <span>Ler em</span>
+          <select
+            aria-label={`Ler ${probe.name} no evento`}
+            value={probe.at?.kind === "tick" ? probe.at.tick : probe.at ? "custom" : ""}
+            onChange={(e) => pickEvent(e.target.value as TickKind | "")}
+          >
+            <option value="">Só no cursor</option>
+            {probe.at && probe.at.kind !== "tick" && <option value="custom">{atName(probe)}</option>}
+            {kinds.map((k) => (
+              <option key={k} value={k}>
+                {eventNames[k]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {threshold !== null && (
         <button
           className="instrument-chart__threshold"
@@ -231,7 +337,11 @@ export function InstrumentPanel() {
   const [collapsed, setCollapsed] = useState(false);
   const comparison = useComparison();
   const probes = useUiStore((s) => s.probes);
-  const { series, shown, latest, ticks } = useInstruments();
+  const { series, shown, latest, oldest, ticks } = useInstruments();
+  const kinds = [...new Set(ticks.map((t) => t.kind))];
+  const summary = comparison.ready
+    ? comparisonSummary(series, comparison.series, ticks, comparison.ticks)
+    : null;
   const thresholdSeries = series.find((s) => s.probe.threshold !== undefined);
   const cycles = thresholdSeries
     ? thresholdSeries.crossings
@@ -255,10 +365,11 @@ export function InstrumentPanel() {
           <>
             <small
               className="comparison-summary"
-              title={comparisonSummary(series, comparison.series, ticks, comparison.ticks)}
+              title={summary?.detail}
+              aria-label={summary ? `${summary.lines.join(". ")}. ${summary.detail}` : undefined}
             >
-              {comparison.ready
-                ? comparisonSummary(series, comparison.series, ticks, comparison.ticks)
+              {summary
+                ? summary.lines.map((line) => <span key={line}>{line}</span>)
                 : "Preparando comparação…"}
             </small>
             <button
@@ -295,6 +406,8 @@ export function InstrumentPanel() {
               }
               shown={shown}
               latest={latest}
+              oldest={oldest}
+              kinds={kinds}
             />
           ))}
         </div>
@@ -303,6 +416,7 @@ export function InstrumentPanel() {
   );
 }
 
+/** Two short lines for the header (recoil and cycle for the launcher, else the first readings) and the full detail. */
 function comparisonSummary(a: Series[], b: Series[], eventsA: EventTick[], eventsB: EventTick[]) {
   const peak = (s: Series | undefined) =>
     s?.points.reduce<number | null>(
@@ -333,12 +447,21 @@ function comparisonSummary(a: Series[], b: Series[], eventsA: EventTick[], event
       ? `${eventNames[event.kind]} (${event.id}): A ${fmt(first ? first.step / 240 : null)} / B ${fmt(second ? second.step / 240 : null)} s`
       : "";
   });
-  const ma = launcherMetrics(a, eventsA),
-    mb = launcherMetrics(b, eventsB);
-  const cycle = a.some((s) => s.probe.id === "bolt-position")
-    ? [
-        `Recuo A ${fmt(ma.recoil)} / B ${fmt(mb.recoil)} mm · Ciclo A ${fmt(ma.cycle)} / B ${fmt(mb.cycle)} s (retorno a 0,5 mm)`,
-      ]
-    : [];
-  return [...cycle, ...readings, ...events].join(" · ");
+  const launcher = a.some((s) => s.probe.id === "bolt-position");
+  const lines = launcher
+    ? launcherSummary(launcherMetrics(a, eventsA), launcherMetrics(b, eventsB))
+    : a
+        .slice(0, 2)
+        .map(
+          (s) =>
+            `${s.probe.name}: A ${fmt(peak(s))} · B ${fmt(peak(b.find((o) => o.probe.id === s.probe.id)))}`,
+        );
+  return {
+    lines,
+    detail: [
+      ...(launcher ? ["Ciclo: da ignição até o ferrolho voltar a 0,5 mm da pose desenhada"] : []),
+      ...readings,
+      ...events,
+    ].join(" · "),
+  };
 }

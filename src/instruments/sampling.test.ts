@@ -1,7 +1,7 @@
 import { beforeAll, expect, it } from "vitest";
 import { Builder } from "../../scripts/fixtures/builder";
 import { loadBox2d } from "@/engine/box2d/load";
-import type { EngineAdapter } from "@/engine/types";
+import type { EngineAdapter, Snapshot } from "@/engine/types";
 import { SimSession } from "@/sim/session";
 import { PoseHash } from "@/sim/runner";
 import { sample, type Probe } from "./model";
@@ -95,4 +95,57 @@ it("reduction keeps extrema, exact cursor and truncates the abandoned future", (
   expect(series.cursor?.value).toBe(99);
   samples.truncate(450);
   expect(samples.series(451)[0]!.cursor).toBeNull();
+});
+
+const fake = (step: number, x: number, events: Snapshot["events"] = []): Snapshot => ({
+  time: step / 240,
+  steps: step,
+  parts: { p: { x, y: 0, angle: 0 } },
+  links: {},
+  events,
+});
+const fired = (step: number): Snapshot["events"] => [
+  { kind: "chamber-fired", chamber: "c", charge: 1, time: step / 240 },
+];
+
+it("a probe reads its value at each occurrence of a ruler event, rebuilds when the event changes, and forgets the abandoned future", () => {
+  const samples = new Samples();
+  const at: Probe = { ...probe("p", "absoluteX"), at: { kind: "tick", tick: "chamber-fired" } };
+  samples.configure([at]);
+  for (let i = 0; i <= 60; i++)
+    samples.record(i, fake(i, i * 2, i === 10 || i === 30 ? fired(i) : []), {} as EngineAdapter);
+  expect(samples.series(60)[0]!.marks).toEqual([
+    { step: 10, value: 20 },
+    { step: 30, value: 60 },
+  ]);
+  // no event picked: no marks at all
+  samples.configure([probe("p", "absoluteX")]);
+  expect(samples.series(60)[0]!.marks).toBeUndefined();
+  // picked again: rebuilt from the events the run already had
+  samples.configure([at]);
+  expect(samples.series(60)[0]!.marks).toEqual([
+    { step: 10, value: 20 },
+    { step: 30, value: 60 },
+  ]);
+  samples.truncate(20);
+  expect(samples.series(20)[0]!.marks).toEqual([{ step: 10, value: 20 }]);
+});
+
+it("a crossing event fires once when another reading rises past the value, not when it starts above it", () => {
+  const samples = new Samples();
+  const at: Probe = {
+    ...probe("p", "absoluteX"),
+    at: { kind: "crossing", target: "p", quantity: "absoluteX", threshold: 50 },
+  };
+  samples.configure([at]);
+  const xs = [60, 40, 45, 55, 70, 30, 52];
+  xs.forEach((x, i) => samples.record(i, fake(i, x), {} as EngineAdapter));
+  expect(samples.series(6)[0]!.marks).toEqual([
+    { step: 3, value: 55 },
+    { step: 6, value: 52 },
+  ]);
+  // rewinding to step 4 and continuing from a different path crosses again from the stored reading
+  samples.truncate(4);
+  samples.record(5, fake(5, 80), {} as EngineAdapter);
+  expect(samples.series(5)[0]!.marks).toEqual([{ step: 3, value: 55 }]);
 });

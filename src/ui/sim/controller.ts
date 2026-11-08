@@ -303,7 +303,7 @@ class Controller implements SimControl {
       useComparison.setState({ series: at(this.otherSeries) });
     }
     this.onFrame?.(this.timeline());
-    useInstruments.getState().setTime(f.time, this.step * this.h, this.events);
+    useInstruments.getState().setTime(f.time, this.step * this.h, this.events, this.rec.oldest * this.h);
   }
 
   private frame = (now: number) => {

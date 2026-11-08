@@ -17,6 +17,7 @@
 }
 .instruments__head button {
   min-height: 44px;
+  min-width: 44px;
   background: none;
   border: 0;
   color: var(--color-ink);
@@ -221,10 +222,107 @@
   pointer-events: none;
 }
 .comparison-summary {
-  max-width: 38%;
-  overflow: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.25;
+}
+.comparison-summary span {
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .instrument-chart__difference {
   color: var(--color-gold);
+}
+
+.measure__note {
+  margin: var(--space-2) 0;
+  font: var(--text-label) var(--font-ui);
+  color: var(--color-ink-2);
+}
+
+.instrument-chart__event {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--text-label) var(--font-ui);
+  color: var(--color-ink-2);
+}
+.instrument-chart__event select {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  background: none;
+  border: 1px solid var(--color-ink-faint);
+  color: var(--color-ink-2);
+  font: inherit;
+}
+.instrument-chart__at {
+  flex-basis: 100%;
+  color: var(--color-ink);
+  font: var(--text-label) var(--font-callout);
+}
+.instrument-chart__mark {
+  fill: var(--color-gold);
+  stroke: var(--color-stage);
+  stroke-width: 0.6;
+}
+@media (max-height: 500px), (orientation: portrait) and (max-width: 700px) {
+  .instruments:not(.instruments--expanded) .instrument-chart__event {
+    display: none;
+  }
+}
+
+.timeline__event--group circle {
+  fill: var(--color-stage);
+}
+.timeline__event--group text {
+  fill: var(--color-ember);
+  stroke: none;
+  font: 700 10px var(--font-callout);
+}
+.timeline__list {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  z-index: 5;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: 224px;
+  max-height: 50dvh;
+  overflow-y: auto;
+  background: var(--color-chrome-float);
+  border: 1px solid var(--color-ink-faint);
+  cursor: default;
+}
+.timeline__list button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--color-ink-faint);
+  color: var(--color-ink);
+  font: var(--text-label) var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.timeline__list button small {
+  margin-left: auto;
+  color: var(--color-ink-2);
+}
+.timeline__list svg path {
+  stroke: var(--color-ember);
+  stroke-width: 1.4;
+}
+
+.instrument-chart__expired text {
+  fill: var(--color-ink-2);
+  font-size: 9px;
 }

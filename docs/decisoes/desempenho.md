@@ -31,6 +31,25 @@ A página `/#perf` ganhou a escolha da velocidade (Real, o padrão da medição;
 
 Em Lento o desenho agora roda em todo quadro (antes, só nos quadros em que chegava um passo, ~1 em 5): o custo é a escrita dos `transform` (0,5 ms de mediana), igual à de Normal.
 
+## Instrumentos e comparação (Fase 2 · M1v)
+
+`/#perf` ganhou duas opções: **4 sondas** (as quatro leituras mais caras da cena: folga entre formas, força de contato de um rasgo, torque de um eixo com motor e força de um trilho, com o painel Instrumentos aberto) e **Comparação e fantasma** (as duas variantes repetidas com as mesmas entradas, o fantasma da B desenhado sobre a A e o painel com as curvas das duas; a B tem o motor do eixo 20% mais rápido). Chromium headless desta sessão, 1440×900, densidade 1, 150 peças e 100 ligações, 10 s com arrasto, duas rodadas alternadas, uma página nova a cada rodada (`tests/e2e/perf-m1v.spec.ts`, `docs/decisoes/perf-m1v.json`). Aceite: perda abaixo de 10%.
+
+| Situação | Velocidade | qps mediana | qps p5 | Quadros > 20 ms | Física/quadro (mediana · p95), ms | Desenho/quadro (mediana · p95), ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| Sem sondas | Normal | 59,9 | 59,9 | 0 de ~542 | 1,3–1,4 · 1,8–1,9 | 0,6–0,8 · 0,9–1,1 |
+| Sem sondas | Real | 59,9 | 59,9 | 0 de ~542 | 4,4 · 7,0–7,7 | 0,6 · 0,9 |
+| 4 sondas | Normal | 59,9 | 59,5–59,9 | 0–5 de ~541 | 1,3–1,6 · 2,0–3,7 | 0,6–0,8 · 0,9–1,5 |
+| 4 sondas | Real | 59,9 | 59,9 | 0 de ~542 | 4,9 · 7,1–7,6 | 0,6 · 0,9–1,1 |
+| Comparação e fantasma | Normal | 59,9 | 59,9 | 1–3 de ~538 | — (repetida antes) | 0,8 · 1,2–1,3 |
+| Comparação e fantasma | Real | 59,9 | 59,5 | 0–1 de ~538 | — (repetida antes) | 0,9–1,2 · 1,3–1,5 |
+
+Perda: **0%** nos quadros por segundo (mediana 59,9 nas três situações) e no máximo 1% dos quadros acima de 20 ms (5 de 539 no pior caso). As 4 sondas custam ~0,1–0,5 ms de física por quadro (as leituras de contato e de distância, uma vez por passo). Na comparação a física não aparece por quadro porque as duas variantes são repetidas antes de a reprodução começar; para 2 × 2 400 passos desta cena isso leva alguns segundos (não medido à parte) e o painel mostra "Preparando comparação…" até acabar.
+
+**O que a medida achou e foi corrigido.** A primeira rodada da comparação deu p5 de 30 qps e 31–50 quadros acima de 20 ms de ~500 (6–10%): ligar ou desligar o fantasma quase não mudava isso, e o culpado era o painel. A cada quadro o gráfico montava o texto do traço com **todos** os pontos da execução (2 400 por sonda, duas curvas) e só então recortava pela janela de 0,5 s. Agora ele monta só o trecho visível (mais um ponto de cada lado) e acha a escala e os extremos numa passada só. Depois disso: 0–5 quadros acima de 20 ms de ~540. A opção `window.__PERF_GHOST__ = false` na página mede a comparação sem o fantasma, para separar os custos.
+
+**Memória das amostras (execução longa).** Cada sonda guarda exatas as amostras dos últimos 10 s (o que o palco ainda tem de poses) e, antes disso, só o mínimo e o máximo de cada 12 passos, afinados de novo acima de 6 000 pontos. Numa execução de 60 s do Lançador com as 4 sondas prontas ficam 18 404 amostras, de 57 604 (32%); o teto é de ~8 700 por sonda, por mais longa que seja a execução.
+
 ## Onde o tempo ia e o que foi corrigido
 
 Primeira medida, com a física no thread principal e uma folha SVG só: **mediana 59,9, p5 29,9**, 155 de 377 quadros acima de 20 ms (1440×900). Medido por partes:

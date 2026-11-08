@@ -163,6 +163,9 @@ export interface PlanSlot {
 /** Pino num furo em modo contato: só para o snapshot (a colisão é da geometria). */
 export interface PlanSlotContact {
   id: Id;
+  /** ligação do pino e peça com o furo (para ler a força de contato) */
+  pin: Id;
+  guide: Id;
   /** corpo e ponto (no espaço do corpo) do centro do pino */
   pinBody: number;
   pinLocal: Vec2;
@@ -680,6 +683,8 @@ export function buildPlan(scene: Scene): Plan {
         if (l.mode === "contact") {
           plan.slotContacts.push({
             id: l.id,
+            pin: pin.id,
+            guide: l.guide,
             pinBody: b,
             pinLocal: toLocal(b, center),
             guideBody: a,
