@@ -266,6 +266,8 @@ function runCase(
     let joint = 0;
     for (const [id, st] of Object.entries(s.links)) {
       if (st.kind === "axle" || (st.kind === "lock" && !st.released)) joint = Math.max(joint, st.gap ?? 0);
+      // a solda da esfera na boca da cápsula, até o disparo
+      if (st.kind === "chamber" && st.gap !== undefined) joint = Math.max(joint, st.gap);
       else if (st.kind === "slot" && st.deviation !== undefined)
         joint = Math.max(joint, Math.abs(st.deviation));
       else if (st.kind === "rod")
@@ -411,15 +413,16 @@ export function abuseScene(
         runs++;
       }
   const has = {
-    joint: scene.links.some(
-      (l) =>
-        l.kind === "axle" ||
-        l.kind === "lock" ||
-        l.kind === "rod" ||
-        l.kind === "slider" ||
-        (l.kind === "slot" && l.mode === "joint") ||
-        (l.kind === "mount" && l.linearHz <= 0),
-    ),
+    joint:
+      scene.links.some(
+        (l) =>
+          l.kind === "axle" ||
+          l.kind === "lock" ||
+          l.kind === "rod" ||
+          l.kind === "slider" ||
+          (l.kind === "slot" && l.mode === "joint") ||
+          (l.kind === "mount" && l.linearHz <= 0),
+      ) || scene.parts.some((p) => p.capsule?.projectile !== undefined),
     cable: ctx.cables.size > 0,
     mount: [...ctx.mounts.values()].some((m) => !m.rigid),
     pinHole: ctx.pins.size > 0,
@@ -453,5 +456,7 @@ export function abuseScene(
 
 /** Cenas com gás ou bala: a velocidade acima de 2 m/s é delas. */
 export function isFastScene(id: string, scene: Scene): boolean {
-  return id.includes("bala") || scene.links.some((l) => l.kind === "chamber");
+  return (
+    id.includes("bala") || scene.links.some((l) => l.kind === "chamber") || scene.parts.some((p) => p.capsule)
+  );
 }

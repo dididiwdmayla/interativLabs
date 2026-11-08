@@ -1,0 +1,121 @@
+{
+  "version": 4,
+  "meta": {
+    "title": "Cápsula livre",
+    "createdAt": "2026-11-04T00:00:00.000Z",
+    "updatedAt": "2026-11-04T00:00:00.000Z"
+  },
+  "settings": {
+    "gravity": {
+      "on": false,
+      "g": 9810
+    },
+    "snap": {
+      "grid": 1,
+      "on": true
+    }
+  },
+  "layers": [
+    {
+      "id": "L1",
+      "name": "Ação",
+      "visible": true,
+      "locked": false,
+      "thickness": 4
+    }
+  ],
+  "parts": [
+    {
+      "id": "p1",
+      "ref": 1,
+      "name": "Cápsula",
+      "layer": "L1",
+      "x": 11,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-11, -4.2],
+          [-10, -4.2],
+          [-10, -3.2],
+          [-8.8, -3.2],
+          [-8.8, -4],
+          [11, -4],
+          [11, -3.1],
+          [-8.5, -3.1],
+          [-8.5, 3.1],
+          [11, 3.1],
+          [11, 4],
+          [-8.8, 4],
+          [-8.8, 3.2],
+          [-10, 3.2],
+          [-10, 4.2],
+          [-11, 4.2]
+        ],
+        "holes": []
+      },
+      "material": "brass",
+      "fixed": false,
+      "fast": false,
+      "source": {
+        "generator": "capsule",
+        "params": {
+          "length": 22,
+          "diameter": 8,
+          "rim": 8.4,
+          "charge": 1
+        }
+      },
+      "capsule": {
+        "charge": 0.12,
+        "projectile": "p2",
+        "base": [-8.5, 0],
+        "mouth": [11, 0],
+        "bore": 6.2,
+        "primer": [-11, 0],
+        "minStrike": 1000
+      }
+    },
+    {
+      "id": "p2",
+      "ref": 2,
+      "name": "Esfera",
+      "layer": "L1",
+      "x": 21,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "circle",
+        "r": 3,
+        "holes": []
+      },
+      "material": "steel",
+      "fixed": false,
+      "fast": true
+    },
+    {
+      "id": "p3",
+      "ref": 3,
+      "name": "Percussor",
+      "layer": "L1",
+      "x": -14,
+      "y": 0,
+      "angle": 0,
+      "shape": {
+        "kind": "poly",
+        "outer": [
+          [-4, -0.5],
+          [3.5, -0.5],
+          [3.5, 0.5],
+          [-4, 0.5]
+        ],
+        "holes": []
+      },
+      "material": "polymer",
+      "fixed": false,
+      "fast": true
+    }
+  ],
+  "links": []
+}

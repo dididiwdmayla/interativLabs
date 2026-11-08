@@ -44,9 +44,20 @@ export interface Probe {
   /** Count a pawl dropping after each tooth, from the relative joint angle. */
   countDrops?: boolean;
 }
-export function available(kind: LinkKind | "part"): Quantity[] {
-  if (kind === "part")
-    return ["x", "y", "absoluteX", "absoluteY", "angle", "speed", "velocity", "angular", "rpm"];
+export function available(kind: LinkKind | "part" | "capsule"): Quantity[] {
+  if (kind === "part" || kind === "capsule")
+    return [
+      ...(kind === "capsule" ? (["pressure"] as const) : []),
+      "x",
+      "y",
+      "absoluteX",
+      "absoluteY",
+      "angle",
+      "speed",
+      "velocity",
+      "angular",
+      "rpm",
+    ];
   if (kind === "axle") return ["relative", "torque"];
   if (kind === "chamber") return ["pressure", "volume"];
   if (kind === "spring") return ["force", "length"];

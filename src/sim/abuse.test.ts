@@ -51,6 +51,11 @@ const EXPECTED: Record<string, Partial<Record<InvariantId, string>>> = {
   "exemplos/lancador-bancada": { penetration: IMPACT },
   "exemplos/lancador": { penetration: IMPACT },
   "exemplos/trava": { penetration: IMPACT },
+  "ciclo/capsula-livre": { penetration: IMPACT },
+  "ciclo/capsula-empurrada": {
+    penetration:
+      "o percussor solto no canal do ferrolho (as duas peças são balas, e bala contra bala não tem colisão contínua), sacudido pela mão a 8 Hz, afunda até 2,2 mm na parede do canal; guiado por um trilho do ferrolho, o golpe na espoleta não registra no Box2D",
+  },
 };
 
 function scenes(): { id: string; scene: Scene }[] {

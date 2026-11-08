@@ -116,6 +116,13 @@ export function mapGas(charge: number): GasCue {
   return { id: "sfx-gas", gain: 0.4 + 0.6 * Math.sqrt(t) };
 }
 
+/** Estojo vazio caindo: as duas variações, volume e tom pela velocidade. */
+export const CASE_DROP_IDS = ["sfx-case-drop-1", "sfx-case-drop-2"] as const satisfies readonly SfxId[];
+export function mapCaseDrop(speed: number): { gain: number; cents: number } {
+  const t = speedAmount(speed);
+  return { gain: 0.25 + 0.75 * t, cents: Math.round((t - 0.5) * 120) };
+}
+
 /** Vazão (mmol/s) → volume do chiado de 0 a 1. Zero é silêncio. */
 export const FLOW_FULL = 8;
 export function ventLevel(flow: number): number {

@@ -9,6 +9,7 @@ import { generateCalibracao } from "./calibracao";
 import { generateDesempenho } from "./desempenho";
 import { generateExemplos } from "./exemplos";
 import { generateBancada } from "./bancada";
+import { generateCiclo } from "./ciclo";
 import { generateFixacoes } from "./fixacoes";
 import { generateGas } from "./gas";
 import { generateMolas } from "./molas";
@@ -22,6 +23,7 @@ const GROUPS: Record<string, () => void> = {
   molas: generateMolas,
   rasgos: generateRasgos,
   gas: generateGas,
+  ciclo: generateCiclo,
   exemplos: generateExemplos,
   bancada: generateBancada,
   desempenho: generateDesempenho,

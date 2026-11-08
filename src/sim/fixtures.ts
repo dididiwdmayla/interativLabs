@@ -26,6 +26,7 @@ export const GROUPS: { id: string; label: string }[] = [
   { id: "molas", label: "Molas" },
   { id: "rasgos", label: "Furos e rasgos" },
   { id: "gas", label: "Gás" },
+  { id: "ciclo", label: "Ciclo" },
   { id: "calibracao", label: "Calibração" },
   { id: "desempenho", label: "Desempenho" },
 ];

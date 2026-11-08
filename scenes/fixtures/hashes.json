@@ -4,6 +4,7 @@
   "exemplos/engrenagens": "13a3c088813ef6f7",
   "exemplos/lancador": "21535b84262b88a3",
   "exemplos/lancador-bancada": "337a239173c64de4",
+  "exemplos/roda-e-lingueta": "e9abd8e9599f3d4c",
   "exemplos/trava": "1eb2b45e72a5bdfd",
   "fixacoes/biela": "04c4dd6669ae4005",
   "fixacoes/cabo": "be117b5930a8450c",
@@ -26,10 +27,12 @@
   "gas/portas": "601b21bd9b52d1aa",
   "gas/recuo": "fff6cd4b873b09d4",
   "gas/sensor": "3b23804483e2d92f",
+  "ciclo/capsula-empurrada": "361821cb4a53b392",
+  "ciclo/capsula-livre": "913bbad347722b5c",
+  "ciclo/capsula-no-cano": "64fc665d5b086504",
   "calibracao/bala": "20103ec8b4211e99",
   "calibracao/corrente": "007c1ccfc0ee15e4",
   "calibracao/pilha": "7801499766c01642",
   "calibracao/pinhao": "753fcbe7b0464bd4",
-  "desempenho/desempenho": "1d244d257b98cd16",
-  "exemplos/roda-e-lingueta": "e9abd8e9599f3d4c"
+  "desempenho/desempenho": "1d244d257b98cd16"
 }

@@ -147,7 +147,7 @@ export interface ScriptRun {
   duration: number;
   /** muda a posição inicial de peças antes de compilar */
   override?: Record<Id, { x?: number; y?: number; angle?: number }>;
-  /** muda campos de ligações antes de compilar (ex.: o modo de uma mola) */
+  /** muda campos de ligações ou de peças antes de compilar (ex.: o modo de uma mola, a forma do cano) */
   patch?: Record<Id, Record<string, unknown>>;
   inputs: ScriptInput[];
   assertions: ScriptAssertion[];

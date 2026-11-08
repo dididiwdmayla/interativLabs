@@ -3,7 +3,7 @@ import { formatNumber } from "./format";
 import type { Series } from "./sampling";
 /** Cycle: ignition to first return within 0.5 mm of the drawn pose after maximum recoil. */
 export function launcherMetrics(series: Series[], events: EventTick[]) {
-  const fired = events.find((e) => e.kind === "chamber-fired")?.step;
+  const fired = events.find((e) => e.kind === "chamber-fired" || e.kind === "capsule-fired")?.step;
   const points =
     series
       .find((s) => s.probe.id === "bolt-position")

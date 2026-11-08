@@ -50,6 +50,7 @@ export interface PlanChamber {
   axis: Vec2;
   /** mm² */
   area: number;
+  /** do fundo à boca, mm (na cápsula, o runtime troca a cada passo: o estojo ou o cano assentado) */
   length: number;
   walls: PlanWall[];
   vents: { at: number; d: number; area: number; open: boolean }[];
@@ -65,6 +66,8 @@ export interface PlanChamber {
   burn: number;
   /** quantas vezes a carga acende */
   shots: number;
+  /** câmara do estojo de uma cápsula (id = a peça): acende pelo golpe e avisa `capsule-fired` */
+  capsule?: boolean;
 }
 
 /** Geometria lida dos corpos a cada passo. */
@@ -116,6 +119,8 @@ export class ChamberSim {
   flow = 0;
   /** alguma parede saiu do furo (de lado): o cilindro está aberto e o gás não empurra */
   breached = false;
+  /** cápsula: a esfera passou da boca; o gás acabou (fica em p0, sem força) */
+  spent = false;
 
   constructor(p: PlanChamber) {
     this.p = p;
@@ -215,6 +220,16 @@ export class ChamberSim {
     });
     // boca do cilindro: a parede da frente que passa do comprimento abre o furo inteiro
     if (front > p.length) area += Math.min(1, (front - p.length) / p.length + 0.5) * p.area;
+    // cápsula: a esfera que passou da boca (do estojo ou do cano) não é mais
+    // parede; o gás que sobrou sai e a câmara fica na pressão do ambiente
+    if (p.capsule && this.fired && !this.burning && front > p.length) this.spent = true;
+    if (this.spent) {
+      this.outArea = area + p.area;
+      this.setGas((p.p0 * V) / this.rt0, this.rt0);
+      if (p.model === "adiabatic") this.U = (p.p0 * V) / (p.gamma - 1);
+      this.pressure();
+      return;
+    }
     // parede que saiu do furo de lado (arrancada, caída): o cilindro fica aberto
     const r = Math.sqrt(p.area / Math.PI);
     this.breached = !!g.lat?.some((l) => l > OUT_OF_BORE * r);
@@ -271,7 +286,7 @@ export class ChamberSim {
 
   /** Força do gás em cada parede, g·mm/s² (positiva = para fora); zero com o cilindro arrombado. */
   gasForce(): number {
-    if (this.breached) return 0;
+    if (this.breached || this.spent) return 0;
     return (this.P - this.p.p0) * this.p.area * KPA_MM2;
   }
 
@@ -280,7 +295,7 @@ export class ChamberSim {
    * Usada pela mola nativa que leva a força do gás para dentro do solver.
    */
   stiffness(h: number): number {
-    if (this.breached) return 0;
+    if (this.breached || this.spent) return 0;
     const L = this.V / this.p.area;
     const g = this.p.model === "isothermal" ? 1 : this.p.gamma;
     const k = (g * this.P * this.p.area * KPA_MM2) / L;
@@ -303,7 +318,7 @@ export class ChamberSim {
    * de novo a cada acendimento enquanto houver dose, mas nunca durante uma
    * queima (o gás da dose anterior ainda está entrando).
    */
-  ignite(time: number, events: EngineEvent[]): boolean {
+  ignite(time: number, events: EngineEvent[], strike?: { by: Id; speed: number }): boolean {
     if (this.burning || this.shotsFired >= this.p.shots) return false;
     this.fired = true;
     this.shotsFired++;
@@ -313,7 +328,11 @@ export class ChamberSim {
       this.n += this.p.charge;
       this.U += (this.p.charge * this.rt0) / (this.p.gamma - 1 || 1);
     }
-    events.push({ kind: "chamber-fired", chamber: this.p.id, charge: this.p.charge, time });
+    events.push(
+      this.p.capsule
+        ? { kind: "capsule-fired", capsule: this.p.id, charge: this.p.charge, ...strike, time }
+        : { kind: "chamber-fired", chamber: this.p.id, charge: this.p.charge, time },
+    );
     return true;
   }
 

@@ -1,0 +1,87 @@
+{
+  "id": "ciclo/capsula-livre",
+  "group": "ciclo",
+  "title": "Cápsula livre",
+  "notes": "Cápsula solta na bancada (vista de cima, sem gravidade), golpeada na espoleta por um pino leve de polímero a 1,2 m/s. A esfera sai pela boca do estojo e o estojo recua: estojo de 1,822 g, esfera de 0,888 g, carga média (0,12 mmol). Ambiente a 101,325 kPa.",
+  "view": [-30, -20, 120, 40],
+  "runs": [
+    {
+      "name": "golpe",
+      "duration": 0.2,
+      "inputs": [
+        {
+          "kind": "velocity",
+          "part": "p3",
+          "t": 0.05,
+          "v": [1200, 0],
+          "omega": 0
+        }
+      ],
+      "assertions": [
+        {
+          "kind": "events",
+          "label": "a cápsula dispara uma vez",
+          "event": "capsule-fired",
+          "min": 1,
+          "max": 1
+        },
+        {
+          "kind": "range",
+          "label": "não dispara antes do golpe",
+          "q": {
+            "link": "p1",
+            "field": "fired"
+          },
+          "to": 0.05,
+          "max": 0
+        },
+        {
+          "kind": "at",
+          "label": "a esfera sai pela boca do estojo (a mais de 20 mm dela)",
+          "q": {
+            "diff": [
+              {
+                "part": "p2",
+                "field": "x"
+              },
+              {
+                "part": "p1",
+                "field": "x"
+              }
+            ]
+          },
+          "t": 0.1,
+          "min": 31
+        },
+        {
+          "kind": "compare",
+          "label": "a quantidade de movimento fecha: m_estojo·v_estojo = m_esfera·v_esfera ±5% (v_estojo/v_esfera = −0,487)",
+          "a": {
+            "part": "p1",
+            "vel": [1, 0]
+          },
+          "b": {
+            "part": "p2",
+            "vel": [1, 0]
+          },
+          "t": 0.1,
+          "op": "ratio",
+          "min": -0.5117,
+          "max": -0.463
+        },
+        {
+          "kind": "at",
+          "label": "a esfera sai a 5–25 m/s",
+          "q": {
+            "part": "p2",
+            "vel": [1, 0]
+          },
+          "t": 0.1,
+          "min": 5000,
+          "max": 25000
+        }
+      ]
+    }
+  ],
+  "scene": "capsula-livre.scene.json"
+}

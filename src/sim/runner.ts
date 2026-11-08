@@ -468,6 +468,11 @@ export function applyRunChanges(scene: Scene, run: Pick<ScriptRun, "override" | 
     const patch = run.patch?.[l.id];
     if (patch) Object.assign(l, patch);
   }
+  // peças também (ex.: o cano de outro comprimento numa variante da cena)
+  for (const p of s.parts) {
+    const patch = run.patch?.[p.id];
+    if (patch) Object.assign(p, patch);
+  }
   return s;
 }
 

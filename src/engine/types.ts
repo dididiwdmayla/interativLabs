@@ -92,6 +92,12 @@ export interface LinkState {
   ports?: { exposed: number }[];
   /** sensor: quantas vezes disparou */
   count?: number;
+  /**
+   * cápsula (o estado mora em `links[id da peça]`, com kind "chamber") e câmara que recebe
+   * cápsula: a câmara de cápsula onde o estojo está assentado, e a cápsula assentada nela
+   */
+  seat?: Id | null;
+  capsule?: Id | null;
 }
 
 export type EngineEvent =
@@ -99,6 +105,8 @@ export type EngineEvent =
   | { kind: "sensor"; sensor: Id; part: Id; speed: number; time: number }
   /** `charge`: a dose que acendeu (mmol) */
   | { kind: "chamber-fired"; chamber: Id; charge: number; time: number }
+  /** a cápsula acendeu pelo golpe na espoleta (`charge` em mmol) */
+  | { kind: "capsule-fired"; capsule: Id; charge: number; by?: Id; speed?: number; time: number }
   | { kind: "wall-unsealed"; chamber: Id; part: Id; time: number }
   | { kind: "vent-opened"; chamber: Id; vent: number; by: "wall" | "sensor"; time: number }
   | { kind: "vent-closed"; chamber: Id; vent: number; time: number }

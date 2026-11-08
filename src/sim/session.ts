@@ -44,9 +44,18 @@ export type SoundEvent =
   | { step: number; kind: "impact"; a: Id; b: Id; speed: number }
   | { step: number; kind: "fired"; chamber: Id; charge: number }
   | { step: number; kind: "unlocked"; lock: Id }
+  /** estojo deflagrado batendo acima de SOUND_CASE_MIN_SPEED */
+  | { step: number; kind: "case"; part: Id; speed: number }
   /** vazão total de gás por respiros e portas (mmol/s); 0 = parou */
   | { step: number; kind: "flow"; flow: number };
 
+/**
+ * A cápsula tem cargas menores que a câmara (fraca 0,05 · média 0,12 · forte
+ * 0,25 mmol): o som da carga recebe a carga × 4 (a forte estoura seco).
+ */
+export const CAPSULE_CHARGE_SOUND = 4;
+/** Impacto de estojo deflagrado (mm/s) a partir do qual soa o estojo caindo. */
+export const SOUND_CASE_MIN_SPEED = 300;
 /** No máximo tantos impactos por passo seguem para o som (o resto some). */
 const SOUND_IMPACTS_PER_STEP = 8;
 /** A vazão é amostrada a cada tantos passos (e na hora em que começa ou para). */
@@ -60,6 +69,8 @@ const FLOW_DECAY = 0.9;
 export interface ChamberFrame {
   pressure: number;
   travel: number[];
+  /** acesa (a cápsula: deflagrada) */
+  fired?: boolean;
 }
 
 export interface FrameView {
@@ -69,6 +80,9 @@ export interface FrameView {
   chamber(id: Id): ChamberFrame | undefined;
   lock?(id: Id): boolean | undefined;
 }
+
+/** Floats por câmara no quadro: pressão, curso das duas paredes e acesa. */
+const CH = 4;
 
 /** Gravação circular de quadros (poses e câmaras) por passo. */
 export class Recorder {
@@ -90,7 +104,7 @@ export class Recorder {
     this.partIndex = new Map(partIds.map((id, i) => [id, i] as const));
     this.chamberIndex = new Map(chamberIds.map((id, i) => [id, i] as const));
     this.lockIndex = new Map(lockIds.map((id, i) => [id, i] as const));
-    this.stride = partIds.length * 3 + chamberIds.length * 3 + lockIds.length;
+    this.stride = partIds.length * 3 + chamberIds.length * CH + lockIds.length;
     this.data = new Float32Array(this.stride * (capacity + 1));
   }
 
@@ -111,11 +125,12 @@ export class Recorder {
     const c0 = o + this.nParts * 3;
     for (const [id, i] of this.chamberIndex) {
       const st = s.links[id];
-      d[c0 + i * 3] = st?.pressure ?? 0;
-      d[c0 + i * 3 + 1] = st?.walls?.[0]?.travel ?? 0;
-      d[c0 + i * 3 + 2] = st?.walls?.[1]?.travel ?? 0;
+      d[c0 + i * CH] = st?.pressure ?? 0;
+      d[c0 + i * CH + 1] = st?.walls?.[0]?.travel ?? 0;
+      d[c0 + i * CH + 2] = st?.walls?.[1]?.travel ?? 0;
+      d[c0 + i * CH + 3] = st?.fired ? 1 : 0;
     }
-    const l0 = c0 + this.chamberIndex.size * 3;
+    const l0 = c0 + this.chamberIndex.size * CH;
     for (const [id, i] of this.lockIndex) d[l0 + i] = s.links[id]?.released ? 1 : 0;
     this.latest = step;
     this.oldest = Math.max(this.oldest, step - this.capacity);
@@ -164,7 +179,7 @@ export class Recorder {
       const u = d[a + i]!;
       const v = d[b + i]!;
       out[i] =
-        i >= this.stride - this.lockIndex.size
+        i >= this.stride - this.lockIndex.size || (i >= n3 && (i - n3) % CH === 3)
           ? u
           : i < n3 && i % 3 === 2
             ? lerpAngle(u, v, alpha)
@@ -199,12 +214,13 @@ export class Recorder {
       },
       lock: (id) => {
         const i = this.lockIndex.get(id);
-        return i === undefined ? undefined : d[c0 + this.chamberIndex.size * 3 + i] === 1;
+        return i === undefined ? undefined : d[c0 + this.chamberIndex.size * CH + i] === 1;
       },
       chamber: (id) => {
         const i = this.chamberIndex.get(id);
         if (i === undefined) return undefined;
-        return { pressure: d[c0 + i * 3]!, travel: [d[c0 + i * 3 + 1]!, d[c0 + i * 3 + 2]!] };
+        const o = c0 + i * CH;
+        return { pressure: d[o]!, travel: [d[o + 1]!, d[o + 2]!], fired: d[o + 3] === 1 };
       },
     };
   }
@@ -245,13 +261,20 @@ export class SimSession {
   private flowSent = 0;
   private flowHold = 0;
   private partIds: Id[];
+  /** peças que são cápsulas (o som do estojo vazio) */
+  private capsules: Set<Id>;
   last: Snapshot;
 
   constructor(make: () => EngineAdapter, scene: Scene, opts: SessionOptions = {}) {
     this.make = make;
     this.scene = scene;
     this.partIds = scene.parts.map((p) => p.id);
-    const chambers = scene.links.filter((l) => l.kind === "chamber").map((l) => l.id);
+    this.capsules = new Set(scene.parts.filter((p) => p.capsule).map((p) => p.id));
+    // a cápsula grava a pressão (e se deflagrou) como uma câmara
+    const chambers = [
+      ...scene.links.filter((l) => l.kind === "chamber").map((l) => l.id),
+      ...scene.parts.filter((p) => p.capsule).map((p) => p.id),
+    ];
     this.rec = new Recorder(
       this.partIds,
       chambers,
@@ -341,10 +364,22 @@ export class SimSession {
     let impacts = 0;
     for (const e of s.events) {
       if (e.kind === "impact") {
-        if (impacts++ < SOUND_IMPACTS_PER_STEP)
+        // estojo deflagrado batendo: o som de estojo vazio caindo (no lugar do impacto de metal)
+        const spent = [e.a, e.b].find((id) => s.links[id]?.fired && this.capsules.has(id));
+        if (spent && e.speed >= SOUND_CASE_MIN_SPEED) {
+          if (impacts++ < SOUND_IMPACTS_PER_STEP)
+            this.sound.push({ step: this.step, kind: "case", part: spent, speed: e.speed });
+        } else if (impacts++ < SOUND_IMPACTS_PER_STEP)
           this.sound.push({ step: this.step, kind: "impact", a: e.a, b: e.b, speed: e.speed });
       } else if (e.kind === "chamber-fired")
         this.sound.push({ step: this.step, kind: "fired", chamber: e.chamber, charge: e.charge });
+      else if (e.kind === "capsule-fired")
+        this.sound.push({
+          step: this.step,
+          kind: "fired",
+          chamber: e.capsule,
+          charge: e.charge * CAPSULE_CHARGE_SOUND,
+        });
       else if (e.kind === "lock-released")
         this.sound.push({ step: this.step, kind: "unlocked", lock: e.lock });
     }
