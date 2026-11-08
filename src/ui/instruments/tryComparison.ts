@@ -1,6 +1,6 @@
 import { useUiStore } from "@/editor/useUiStore";
 import { setLink } from "@/editor/commands";
-import { elasticPreset } from "@/editor/presetActions";
+import { stifferReturnSpring } from "@/instruments/experiment";
 import { instrumentPreset, launcherInputs } from "@/instruments/presets";
 import { compareVariants, useComparison } from "./comparison";
 export function tryComparison() {
@@ -15,10 +15,10 @@ export function tryComparison() {
   const state = useUiStore.getState();
   const scene = state.current?.scene;
   if (!scene) return;
-  const spring = scene.links.find((l) => l.id === "k27" && l.kind === "spring");
-  if (!spring) return;
-  state.commit(setLink(scene, spring.id, elasticPreset(scene, spring, "hard")));
-  state.renameVariant("B", "Mola dura");
+  const stiffer = stifferReturnSpring(scene);
+  if (!stiffer) return;
+  state.commit(setLink(scene, stiffer.id, stiffer));
+  state.renameVariant("B", "Mola +50%");
   const preset = instrumentPreset(scene);
   // Recoil first so it remains visible in the compact two-chart strip.
   state.setProbes([

@@ -1,4 +1,5 @@
 import type { EventTick } from "./events";
+import { formatNumber } from "./format";
 import type { Series } from "./sampling";
 /** Cycle: ignition to first return within 0.5 mm of the drawn pose after maximum recoil. */
 export function launcherMetrics(series: Series[], events: EventTick[]) {
@@ -19,4 +20,15 @@ export function launcherMetrics(series: Series[], events: EventTick[]) {
     recoil: peak ? Math.abs(peak.value ?? 0) : null,
     cycle: returned && fired !== undefined ? (returned.step - fired) / 240 : null,
   };
+}
+
+/** The short comparison summary: two lines for the header, the full detail for the tooltip. */
+export function launcherSummary(
+  a: ReturnType<typeof launcherMetrics>,
+  b: ReturnType<typeof launcherMetrics>,
+) {
+  return [
+    `Recuo A ${formatNumber(a.recoil)} · B ${formatNumber(b.recoil)} mm`,
+    `Ciclo A ${formatNumber(a.cycle)} · B ${formatNumber(b.cycle)} s`,
+  ];
 }

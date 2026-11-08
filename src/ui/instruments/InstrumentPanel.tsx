@@ -1,4 +1,5 @@
-import { launcherMetrics } from "@/instruments/comparisonMetrics";
+import { formatNumber } from "@/instruments/format";
+import { launcherMetrics, launcherSummary } from "@/instruments/comparisonMetrics";
 import { eventNames, type EventTick, type TickKind } from "@/instruments/events";
 import { useComparison, exitComparison } from "./comparison";
 import { useState, useId, useRef, useEffect } from "react";
@@ -8,8 +9,7 @@ import type { Series } from "@/instruments/sampling";
 import { useSimStore } from "../sim/simStore";
 import { useInstruments } from "./store";
 import "./instruments.css";
-const fmt = (v: number | null | undefined) =>
-  v == null ? "—" : v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+const fmt = (v: number | null | undefined) => formatNumber(v);
 /** Name shown for the instant a probe also reads (its own label, or the ruler tick's name). */
 const atName = (probe: Series["probe"]) =>
   probe.atLabel ?? (probe.at?.kind === "tick" ? eventNames[probe.at.tick].toLowerCase() : "no evento");
@@ -18,11 +18,13 @@ function Chart({
   series,
   shown,
   latest,
+  oldest,
   kinds,
 }: {
   series: Series;
   shown: number;
   latest: number;
+  oldest: number;
   kinds: TickKind[];
 }) {
   const uid = useId();
@@ -109,22 +111,6 @@ function Chart({
     >
       <header>
         <h3 title={probe.name}>{probe.name}</h3>
-        {(kinds.length > 0 || probe.at) && (
-          <select
-            className="instrument-chart__event"
-            aria-label={`Ler ${probe.name} no evento`}
-            value={probe.at?.kind === "tick" ? probe.at.tick : probe.at ? "custom" : ""}
-            onChange={(e) => pickEvent(e.target.value as TickKind | "")}
-          >
-            <option value="">Só no cursor</option>
-            {probe.at && probe.at.kind !== "tick" && <option value="custom">{atName(probe)}</option>}
-            {kinds.map((k) => (
-              <option key={k} value={k}>
-                Em: {eventNames[k]}
-              </option>
-            ))}
-          </select>
-        )}
         <button
           aria-label={`Remover ${probe.name}`}
           onClick={() => {
@@ -214,12 +200,29 @@ function Chart({
           <clipPath id={`${uid}-clip`}>
             <rect x="12" y="16" width="276" height="66" />
           </clipPath>
+          <pattern id={`${uid}-old`} width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M0 6L6 0" className="instrument-chart__grid" />
+          </pattern>
           <pattern id={uid} width="23" height="14" patternUnits="userSpaceOnUse">
             <path d="M23 0H0V14" className="instrument-chart__grid" />
           </pattern>
         </defs>
         <rect x="12" y="22" width="276" height="56" fill={`url(#${uid})`} />
         <path d="M12 22V78H288" className="instrument-chart__axis" />
+        {oldest * 240 > begin && (
+          <g className="instrument-chart__expired">
+            <rect
+              x="12"
+              y="22"
+              width={Math.max(0, Math.min(276, x(oldest * 240) - 12))}
+              height="56"
+              fill={`url(#${uid}-old)`}
+            />
+            <text x="16" y="34">
+              sem poses antes de {fmt(oldest)} s
+            </text>
+          </g>
+        )}
         <path d={path} clipPath={`url(#${uid}-clip)`} className="instrument-chart__curve" />
         {other && (
           <path
@@ -261,6 +264,24 @@ function Chart({
           {fmt(end / 240)} s
         </text>
       </svg>
+      {(kinds.length > 0 || probe.at) && (
+        <label className="instrument-chart__event">
+          <span>Ler em</span>
+          <select
+            aria-label={`Ler ${probe.name} no evento`}
+            value={probe.at?.kind === "tick" ? probe.at.tick : probe.at ? "custom" : ""}
+            onChange={(e) => pickEvent(e.target.value as TickKind | "")}
+          >
+            <option value="">Só no cursor</option>
+            {probe.at && probe.at.kind !== "tick" && <option value="custom">{atName(probe)}</option>}
+            {kinds.map((k) => (
+              <option key={k} value={k}>
+                {eventNames[k]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {threshold !== null && (
         <button
           className="instrument-chart__threshold"
@@ -297,8 +318,11 @@ export function InstrumentPanel() {
   const [collapsed, setCollapsed] = useState(false);
   const comparison = useComparison();
   const probes = useUiStore((s) => s.probes);
-  const { series, shown, latest, ticks } = useInstruments();
+  const { series, shown, latest, oldest, ticks } = useInstruments();
   const kinds = [...new Set(ticks.map((t) => t.kind))];
+  const summary = comparison.ready
+    ? comparisonSummary(series, comparison.series, ticks, comparison.ticks)
+    : null;
   const thresholdSeries = series.find((s) => s.probe.threshold !== undefined);
   const cycles = thresholdSeries
     ? thresholdSeries.crossings
@@ -322,10 +346,11 @@ export function InstrumentPanel() {
           <>
             <small
               className="comparison-summary"
-              title={comparisonSummary(series, comparison.series, ticks, comparison.ticks)}
+              title={summary?.detail}
+              aria-label={summary ? `${summary.lines.join(". ")}. ${summary.detail}` : undefined}
             >
-              {comparison.ready
-                ? comparisonSummary(series, comparison.series, ticks, comparison.ticks)
+              {summary
+                ? summary.lines.map((line) => <span key={line}>{line}</span>)
                 : "Preparando comparação…"}
             </small>
             <button
@@ -362,6 +387,7 @@ export function InstrumentPanel() {
               }
               shown={shown}
               latest={latest}
+              oldest={oldest}
               kinds={kinds}
             />
           ))}
@@ -371,6 +397,7 @@ export function InstrumentPanel() {
   );
 }
 
+/** Two short lines for the header (recoil and cycle for the launcher, else the first readings) and the full detail. */
 function comparisonSummary(a: Series[], b: Series[], eventsA: EventTick[], eventsB: EventTick[]) {
   const peak = (s: Series | undefined) =>
     s?.points.reduce<number | null>(
@@ -401,12 +428,21 @@ function comparisonSummary(a: Series[], b: Series[], eventsA: EventTick[], event
       ? `${eventNames[event.kind]} (${event.id}): A ${fmt(first ? first.step / 240 : null)} / B ${fmt(second ? second.step / 240 : null)} s`
       : "";
   });
-  const ma = launcherMetrics(a, eventsA),
-    mb = launcherMetrics(b, eventsB);
-  const cycle = a.some((s) => s.probe.id === "bolt-position")
-    ? [
-        `Recuo A ${fmt(ma.recoil)} / B ${fmt(mb.recoil)} mm · Ciclo A ${fmt(ma.cycle)} / B ${fmt(mb.cycle)} s (retorno a 0,5 mm)`,
-      ]
-    : [];
-  return [...cycle, ...readings, ...events].join(" · ");
+  const launcher = a.some((s) => s.probe.id === "bolt-position");
+  const lines = launcher
+    ? launcherSummary(launcherMetrics(a, eventsA), launcherMetrics(b, eventsB))
+    : a
+        .slice(0, 2)
+        .map(
+          (s) =>
+            `${s.probe.name}: A ${fmt(peak(s))} · B ${fmt(peak(b.find((o) => o.probe.id === s.probe.id)))}`,
+        );
+  return {
+    lines,
+    detail: [
+      ...(launcher ? ["Ciclo: da ignição até o ferrolho voltar a 0,5 mm da pose desenhada"] : []),
+      ...readings,
+      ...events,
+    ].join(" · "),
+  };
 }
