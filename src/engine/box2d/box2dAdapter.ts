@@ -92,6 +92,14 @@ interface ShapeData {
   pin?: Id;
 }
 
+/** Contact begin event (box2d3-wasm 6.0.0). */
+interface ContactBegin {
+  shapeIdA: b2ShapeId;
+  shapeIdB: b2ShapeId;
+  contactId: Parameters<Box2DModule["b2Contact_GetData"]>[0];
+  delete(): void;
+}
+
 /** Contact data of a body as exposed by box2d3-wasm 6.0.0 (b2Body_GetContactData). */
 interface ContactItem {
   manifold: {
@@ -346,50 +354,71 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
     }
   };
   /**
-   * Leitura de contato do golpe (docs/arquitetura.md §4, "Cápsula"): depois de
-   * cada passo do motor, os pontos de contato do estojo a até `primerR` da
-   * espoleta; a velocidade de aproximação ao longo da normal vem das
-   * velocidades de antes do passo. O evento de impacto do Box2D sozinho perde
-   * o golpe de um percussor que sai do repouso e bate no mesmo passo, ou que
-   * a colisão contínua parou no instante do toque.
+   * Leitura de contato do golpe (docs/arquitetura.md §4, "Cápsula"): nos
+   * contatos que começaram neste passo do motor (eventos de início de toque),
+   * os pontos do estojo a até `primerR` da espoleta; a velocidade de
+   * aproximação ao longo da normal vem das velocidades de antes do passo. O
+   * evento de impacto do Box2D sozinho perde o golpe de um percussor que sai
+   * do repouso e bate no mesmo passo. Os dados do contato são copiados para
+   * valores JS antes de qualquer outra chamada ao motor.
    */
-  const primerContacts = () => {
-    if (!rt || !plan) return;
+  type Touch = { a: ShapeData; b: ShapeData; nx: number; ny: number; pts: number[] };
+  const readTouches = (ce: { beginCount: number; GetBeginEvent(i: number): ContactBegin }): Touch[] => {
+    const out: Touch[] = [];
+    const cases = new Set(rt?.armedCapsules().map((c) => c.p.part));
+    if (!cases.size) return out;
+    for (let i = 0; i < ce.beginCount; i++) {
+      const e = ce.GetBeginEvent(i);
+      const a = shapeInfo(e.shapeIdA);
+      const b = shapeInfo(e.shapeIdB);
+      if (a && b && cases.has(a.part) !== cases.has(b.part) && B.b2Contact_IsValid(e.contactId)) {
+        const data = B.b2Contact_GetData(e.contactId) as unknown as ContactItem;
+        const m = data.manifold;
+        const count = m.pointCount;
+        if (count) {
+          const n = m.normal;
+          const pts: number[] = [];
+          for (let k = 0; k < count; k++) {
+            const q = m.GetPoint(k);
+            const an = q.anchorA;
+            pts.push(an.x * L, an.y * L);
+            an.delete();
+            q.delete();
+          }
+          out.push({ a, b, nx: n.x, ny: n.y, pts });
+          n.delete();
+        }
+        data.delete();
+      }
+      e.delete();
+    }
+    return out;
+  };
+  const primerStrikes = (touches: Touch[]) => {
+    if (!rt || !plan || !touches.length) return;
     for (const { i, p: c } of rt.armedCapsules()) {
       const pr = rt.world(c.body, c.primer);
       let best: { by: Id; speed: number } | null = null;
-      for (const item of contactsOf(c.body)) {
-        const a = shapeInfo(item.shapeIdA);
-        const b = shapeInfo(item.shapeIdB);
-        const m = item.manifold;
-        if (a && b && m.pointCount && (a.part === c.part) !== (b.part === c.part)) {
-          const other = a.part === c.part ? b : a;
-          if (other.part !== c.projectile) {
-            const n = m.normal;
-            const pa = rt.body(a.body);
-            for (let k = 0; k < m.pointCount; k++) {
-              const q = m.GetPoint(k);
-              const an = q.anchorA;
-              const px = pa.x + an.x * L;
-              const py = pa.y + an.y * L;
-              an.delete();
-              q.delete();
-              if (dhypot(px - pr[0], py - pr[1]) > c.primerR) continue;
-              const vel = (bi: number) => {
-                if (plan!.bodies[bi]!.static) return [0, 0] as Vec2;
-                const st = rt!.body(bi);
-                const v = pre[bi] ?? st;
-                return [v.vx - v.w * (py - st.y), v.vy + v.w * (px - st.x)] as Vec2;
-              };
-              const va = vel(a.body);
-              const vb = vel(b.body);
-              const closing = (va[0] - vb[0]) * n.x + (va[1] - vb[1]) * n.y;
-              if (closing > 0 && (!best || closing > best.speed)) best = { by: other.part, speed: closing };
-            }
-            n.delete();
-          }
+      for (const { a, b, nx, ny, pts } of touches) {
+        if ((a.part === c.part) === (b.part === c.part)) continue;
+        const other = a.part === c.part ? b : a;
+        if (other.part === c.projectile) continue;
+        const pa = rt.body(a.body);
+        for (let k = 0; k < pts.length; k += 2) {
+          const px = pa.x + pts[k]!;
+          const py = pa.y + pts[k + 1]!;
+          if (dhypot(px - pr[0], py - pr[1]) > c.primerR) continue;
+          const vel = (bi: number): Vec2 => {
+            if (plan!.bodies[bi]!.static) return [0, 0];
+            const st = rt!.body(bi);
+            const v = pre[bi] ?? st;
+            return [v.vx - v.w * (py - st.y), v.vy + v.w * (px - st.x)];
+          };
+          const va = vel(a.body);
+          const vb = vel(b.body);
+          const closing = (va[0] - vb[0]) * nx + (va[1] - vb[1]) * ny;
+          if (closing > 0 && (!best || closing > best.speed)) best = { by: other.part, speed: closing };
         }
-        item.delete();
       }
       if (best) rt.strike(i, best.by, best.speed);
     }
@@ -815,6 +844,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         ev.delete();
         impacts = [];
         const ce = B.b2World_GetContactEvents(worldId);
+        const touches = p0capsules().length ? readTouches(ce) : [];
         for (let i = 0; i < ce.hitCount; i++) {
           const e = ce.GetHitEvent(i);
           const a = shapeInfo(e.shapeIdA);
@@ -836,7 +866,7 @@ export function createBox2dAdapter(B: Box2DModule, tuning: Box2dTuning = CALIBRA
         rt.checkFuses();
         // o golpe na espoleta acende a carga e já pode dividir o resto do passo
         rt.strikes(impacts);
-        if (p0capsules().length) primerContacts();
+        primerStrikes(touches);
         for (const e of impacts) all.push(e);
         gasJoints.forEach((gj, ci) => {
           if (!gj || !rt || !gj.active) return;

@@ -67,7 +67,7 @@ Snapshot (`time`, `steps`, `parts[id] = { x, y, angle }`, `links[id]`, `events`)
 | Câmara | `pressure` (absoluta), `volume` (mm³), `gas`, `fired`, `flow` (vazão por respiros abertos e portas, mmol/s; só leitura, para o som), `burning`, `walls[] = { part, force, impulse (N·s), work, travel, sealed }`, `vents[] = { open, exposed }`, `ports[] = { exposed }` |
 | Sensor | `count` |
 
-Eventos do passo: `sensor` (peça e velocidade de aproximação), `chamber-fired` (com a dose que acendeu, em mmol), `wall-unsealed`, `vent-opened` (pela parede que passa ou pelo sensor), `vent-closed`, `port-opened` e `impact` (duas peças, velocidade de aproximação acima de 100 mm/s e o ponto; para som e faíscas futuros).
+Eventos do passo: `sensor` (peça e velocidade de aproximação), `chamber-fired` (com a dose que acendeu, em mmol), `capsule-fired` (a cápsula, a carga, quem bateu na espoleta e a velocidade; Fase 2 · M2a), `wall-unsealed`, `vent-opened` (pela parede que passa ou pelo sensor), `vent-closed`, `port-opened` e `impact` (duas peças, velocidade de aproximação acima de 100 mm/s e o ponto; para som e faíscas futuros).
 
 - Parte comum a todos os motores: `plan.ts` (cena → corpos compostos, peças convexas, massa pela geometria e pela espessura da camada, ligações em unidades internas g·mm·s), `runtime.ts` (forças explícitas, sensor, arrasto de reserva, snapshot) e `chamber.ts` (o gás). O adaptador traduz o plano e lê e escreve nos corpos.
 - Corpo dinâmico com origem no centro de massa e ângulo 0 na pose desenhada; cada grupo fixo é um corpo estático próprio (uma junta com uma peça fixa só desliga o contato com aquela peça). O índice 0 é o fundo, ponta das ligações com `a: null`.
@@ -228,6 +228,29 @@ Regras da v3:
 - **Editar.** Mover e girar agem na peça inteira. Esticar, o lápis e o tamanho paramétrico agem no perfil da camada ativa. Mudar a peça de camada desloca todos os perfis juntos na pilha (bloqueado se algum sairia dela). Apagar uma camada apaga os perfis que estão nela; se for a da principal, o primeiro perfil restante vira a principal.
 - **Trava** (`lock`): solda rígida entre `b` e `a` (ou o fundo), igual a um parafuso enquanto está presa, mas com as peças em corpos separados. Solta, a junta some e não volta até reiniciar a simulação (que sempre parte do desenhado). Solta por toque nela no Testar, pela ação `release` de um sensor, ou sozinha quando a força na junta passa de `breakForce` (trava fusível). O toque que solta é uma entrada gravada, como o arrasto, para a linha do tempo reproduzir igual.
 
+## 3.3 Formato da cena (versão 4) — cápsula e câmara que recebe cápsula
+
+Decidido no plano da M2 (`docs/fases/fase-2.md`, "Decisões fechadas da M2"); entra na Fase 2 · M2a, com a migração `v3 → v4`, que só troca a versão: nenhuma cena v3 muda de comportamento nem de hash (os 33 hashes conferidos em `src/model/v4.test.ts`).
+
+```ts
+interface Scene { version: 4; /* … como na v3 … */ }
+
+interface Part { /* … v3 … */ capsule?: Capsule }
+interface Capsule {
+  charge: number;          // mmol, didático (≥ 0; 0 = estojo vazio)
+  projectile?: Id;         // a esfera presa na boca
+  base: Vec2; mouth: Vec2; // fundo interno e boca, locais: o eixo e o comprimento do furo
+  bore: number;            // mm, diâmetro do furo
+  primer: Vec2;            // a espoleta, local
+  minStrike: number;       // mm/s, golpe mínimo na espoleta
+}
+// chamber ganha: mode?: "charge" | "capsule"; seat?: number (mm)
+```
+
+Integridade (mensagens em português, apontando o campo): o projétil existe, não é a própria cápsula, é um disco (a esfera), está na camada da cápsula, é móvel, não é outra cápsula e não está em duas cápsulas; `base ≠ mouth`; `bore > 0`, `minStrike > 0`, `charge ≥ 0`. Câmara `capsule`: sem `gas.charge`, sem paredes, e (nesta parte) sem respiros nem portas; `seat ≥ 0`, só nela. `parseScene` abre v0 a v4 (`schema-v1`, `schema-v2` e o `SceneV3Schema` em `schema.ts` leem os antigos); exportar grava v4.
+
+No editor (`src/editor/commands.ts`), a esfera presa é parte do estojo: mover, girar, espelhar, mudar o tamanho e arrastar levam ela junto; duplicar a cápsula cria uma esfera nova; excluir o estojo leva a esfera; excluir a esfera deixa o estojo vazio (sem `projectile`).
+
 ## 4. Física
 
 ### Camadas como filtros
@@ -300,6 +323,21 @@ O teste de abuso (`docs/decisoes/abuso.md`) confere tudo isso em todas as cenas.
 - **Parede fora do furo** (Parte F, achado do teste de abuso): uma parede cuja face está a mais de 1,5 raio da linha do eixo saiu do cilindro (arrancada, caída); a câmara fica aberta para o ambiente e não aplica força nem rigidez. Antes, um pistão que tinha saído e caído metros abaixo voltava a "fechar" a câmara quando a projeção dele no eixo entrava no furo, e a mola do gás o puxava de volta.
 - Snapshot por câmara: pressão, volume, gás e, por parede, força, impulso, trabalho, curso e vedação. É o dado dos gráficos da Fase 5.
 - Plausível e didático, não balística real. Com 240 passos por segundo, um disparo de gás dura de 2 a 10 passos: o Lento (1/20) mostra cada um.
+
+### Cápsula (Fase 2 · M2a)
+
+Código: `src/engine/plan.ts` (`PlanCapsule`, `PlanSeat`), `src/engine/runtime.ts` (assento, golpe, subpassos), `src/engine/chamber.ts` (o gás) e `src/engine/box2d/box2dAdapter.ts` (solda da esfera, leitura de contato, subpassos). Cenas de teste em `scenes/fixtures/ciclo/`.
+
+- **A cápsula é uma câmara que mora no estojo.** O plano cria uma câmara por cápsula (id = o da peça): corpo = o estojo, fundo = `base`, eixo de `base` para `mouth`, parede da frente = a esfera (a face de trás dela ao longo do eixo), sem parede de trás (o fundo interno faz esse papel). O gás é o adiabático do ar (γ 1,4), p0 = 101,325 kPa, queima de 0,5 ms (`CAPSULE_GAS`). O estado vai em `snapshot.links[id da peça]` (kind `chamber`): pressão, volume, gás, `fired` (deflagrada), `seat` (a câmara onde está assentada) e `gap` (a abertura da solda da esfera enquanto presa).
+- **Cargas** da gaveta: fraca 0,05 · média 0,12 · forte 0,25 mmol (`CAPSULE_CHARGES`). As predefinições da câmara (0,1 · 0,5 · 1,2) davam, no furo fechado de 6,2 mm, esferas acima do teto de 40 m/s do motor; com estas, a esfera sai a ~10, ~20 e ~30 m/s num cano de 40 mm. O som da carga usa a carga × 4 (a forte estoura seco).
+- **Golpe na espoleta.** Duas leituras, a que chegar primeiro: (1) o evento de impacto do Box2D (velocidade de aproximação ≥ 100 mm/s) entre o estojo e outra peça que não a esfera dele, com o ponto a até `primerR` da espoleta (metade do furo, no mínimo 1 mm) e acima de `minStrike`; (2) a **leitura de contato**: nos contatos que começam a cada passo do motor (eventos de início de toque), os pontos do estojo perto da espoleta, com a velocidade de aproximação ao longo da normal medida com as velocidades de antes do passo. A segunda existe porque o evento do Box2D perde o golpe de um percussor que sai do repouso e bate no mesmo passo, e o de uma bala que a colisão contínua parou no instante do toque. Os dados do contato são copiados para valores JS antes de qualquer outra chamada ao motor (a lista do binding aponta para memória que as chamadas seguintes reaproveitam; com dois mundos vivos isso corrompia o outro mundo e derrubava a página do laboratório). Golpe mínimo padrão: **500 mm/s** (`CAPSULE_MIN_STRIKE`), abaixo da mão do app (600 mm/s): dá para golpear com o dedo. Cápsula deflagrada não acende de novo (o `ignite` da câmara só aceita uma dose). Evento `capsule-fired` (cápsula, carga, quem bateu e a velocidade) na régua ("Cápsula disparou").
+- **Soltura da esfera.** A esfera fica presa por uma solda rígida (a mesma junta da trava) até o golpe; no disparo a solda é destruída no mesmo passo em que a carga acende. Presa, a esfera não é bala (a colisão contínua de bala não respeita juntas), e volta a ser no disparo. A colisão contínua do Box2D contra peças fixas recua o estojo para o instante do toque sem levar a esfera; se a solda abriu mais de 0,01 mm, a esfera volta para a boca com a velocidade do estojo naquele ponto (`CAPSULE_WELD_SNAP`). Empurrar a cápsula pelo fundo nunca solta a esfera (`ciclo/capsula-empurrada`: abertura ≤ 0,05 mm a 600 mm/s).
+- **Furo e assento.** A cada passo, a cápsula está assentada na primeira câmara `capsule` em que: o fundo externo do estojo fica a até `seat` mm do fundo da câmara (`at`) ao longo do eixo do cano (padrão 1 mm); o fundo está a até **0,5 mm** do eixo (`SEAT_LATERAL`); os eixos estão alinhados a até **3°** (`SEAT_SIN` = 0,0523). Assentada, o comprimento do furo vai do fundo interno do estojo à boca do cano (projetada no eixo do estojo); solta, termina na boca do estojo. **Se o estojo sai do assento durante a queima**, a regra é a mesma, avaliada a cada passo: o furo volta a terminar na boca do estojo e, se a esfera já passou dela, o gás escapa (a câmara abre). Quando a esfera passa da boca (do estojo ou do cano) depois da queima, ela deixa de ser parede: a câmara fica gasta, em p0, sem força.
+- **O tiro em subpassos.** O tiro inteiro dura menos que um passo de 1/240 s. Enquanto uma cápsula acesa tem a esfera no furo, enquanto o estojo ou uma peça que encosta nele (até duas ligações de distância na pose desenhada, sem as esferas) anda acima de 150 mm/s ou 15 rad/s (`CASE_FAST_SPEED`, `CASE_FAST_SPIN`), e no passo em que uma trava solta numa cena com cápsula, o adaptador divide o passo em **8** passos do motor (`CAPSULE_SUBSTEPS`) e refaz o gás em cada um. O relógio e o número de passos do snapshot avançam como sempre. Cenas sem cápsula dão sempre um passo só: nenhum hash antigo mudou. Na cápsula, a mola do gás só empurra (`lowerSpringForce = 0`): passaria do ponto de força zero dentro do passo e puxaria a esfera de volta.
+- **Extração e ejeção** são só contato e atrito: o extrator é uma peça com eixo e mola de torção; o ejetor, um batente fixo. Duas escolhas de geometria fizeram a extração robusta: o eixo do extrator fica abaixo da linha em que a garra puxa o aro (a puxada aperta a garra em vez de levantá-la), e a face da frente do aro tem um rebaixo de 5° (`rimUndercut` 0,09; medido nas 21 execuções de `ciclo/ejetor`: de 0 a 0,12 passa, a partir de 0,15 a garra segura demais e o estojo trava nela ao girar no ejetor). O ferrolho que alimenta a cápsula tem um rebaixo na face em volta da espoleta, para empurrar só pelo aro.
+- **Desenho** (`src/render/CapsuleArt.tsx`): carregada, a carga em pontilhado de brasa no furo, do fundo interno à esfera; deflagrada (classe `is-fired` trocada pelo `StageNodes` pelo quadro gravado), sem a brasa, com a marca do golpe na espoleta e o contorno do estojo a 55%. A câmara que recebe cápsula não desenha gás próprio.
+- **Som:** `capsule-fired` toca `sfx-gas` ou `sfx-pop-strong` pela carga × 4; o impacto de um estojo deflagrado a partir de 300 mm/s toca `sfx-case-drop-1/-2` no lugar do impacto de metal (`SOUND_CASE_MIN_SPEED`).
+- **Instrumentos:** a cápsula tem sonda de pressão (Medir no cartão da peça); `ciclo/disparo-extracao` traz os instrumentos prontos (pressão da cápsula, velocidade da esfera na saída, recuo do ferrolho e força no eixo do extrator).
 
 ### Passo de tempo
 

@@ -14,6 +14,8 @@ const ROUTES = [
   "/#lab",
   "/#lab/exemplos/cilindro-dois-pistoes",
   "/#lab/exemplos/lancador-bancada",
+  // Fase 2 · M2a: o ciclo da cápsula no laboratório
+  "/#lab/ciclo/disparo-extracao",
   "/#perf",
 ];
 
@@ -87,6 +89,9 @@ const SHEETS = [
   // Parte S: a faixa do Som (Música e Efeitos), no Montar e no Testar
   "sound",
   "sound-sim",
+  // Fase 2 · M2a: a gaveta rolada até o grupo Ciclo e o "o que é" da cápsula
+  "drawer-ciclo",
+  "explain-capsule",
 ] as const;
 for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSCAPE]) {
   for (const sheet of SHEETS) {
@@ -130,6 +135,8 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
         } else if (sh === "hide") ui.setHideMode(true);
         else if (sh === "hidden") for (const q of ui.current?.scene.parts.slice(0, 5) ?? []) ui.hide(q.id);
         else if (sh === "explain") ui.setExplain("spring");
+        else if (sh === "explain-capsule") ui.setExplain("capsule");
+        else if (sh === "drawer-ciclo") ui.setSheet("drawer");
         else if (sh === "sound") ui.setSoundBar(true);
         else if (sh === "sound-sim") {
           ui.setMode("simulate");
@@ -137,6 +144,7 @@ for (const { width, height } of [{ width: 360, height: 800 }, ...OVERFLOW_LANDSC
         } else ui.setSheet(sh);
       }, sheet);
       if (sheet === "hidden") await page.locator(".hiddenpill__btn").click();
+      if (sheet === "drawer-ciclo") await page.getByRole("list", { name: "Ciclo" }).scrollIntoViewIfNeeded();
       await page.waitForTimeout(400);
       const m = await page.evaluate(() => ({
         doc: document.documentElement.scrollWidth,
