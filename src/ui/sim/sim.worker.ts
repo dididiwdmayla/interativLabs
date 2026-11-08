@@ -1,3 +1,5 @@
+import { replay } from "@/sim/comparison";
+import type { SimInput } from "@/sim/session";
 import { instrumentPreset } from "@/instruments/presets";
 import type { Probe } from "@/instruments/model";
 import type { Series } from "@/instruments/sampling";
@@ -13,14 +15,25 @@ import { SimSession, type PendingInput, type SimEvent, type SoundEvent } from "@
  */
 
 export type SimRequest =
+  | { t: "compare"; id: number; scene: Scene; inputs: SimInput[]; steps: number; probes: Probe[] }
   | { t: "samples"; id: number; probes?: Probe[]; cursor?: number }
   | { t: "init"; scene: Scene }
   | { t: "run"; id: number; steps: number; inputs: PendingInput[] }
   | { t: "rewind"; id: number; step: number }
   | { t: "restart"; id: number };
 
+export interface ComparisonRecording {
+  parts: string[];
+  chambers: string[];
+  locks: string[];
+  data: Float32Array;
+  steps: number;
+  series: Series[];
+  events: SimEvent[];
+}
 export type SimReply =
-  | { t: "samples"; id: number; series: Series[] }
+  | { t: "compared"; id: number; a: ComparisonRecording; b: ComparisonRecording }
+  | { t: "samples"; id: number; series: Series[]; other?: Series[] }
   | { t: "ready"; partIds: string[]; chamberIds: string[]; lockIds: string[]; frame: Float32Array }
   | {
       t: "frames";
@@ -34,6 +47,7 @@ export type SimReply =
       sound: SoundEvent[];
       /** ms de física (passos + snapshots) */
       physics: number;
+      inputs: SimInput[];
     }
   | { t: "rewound"; id: number; step: number; ms: number }
   | { t: "error"; message: string };
@@ -42,6 +56,20 @@ const post = (m: SimReply, transfer: Transferable[] = []) =>
   (self as unknown as { postMessage(m: unknown, t: Transferable[]): void }).postMessage(m, transfer);
 
 let session: SimSession | null = null;
+let other: SimSession | null = null;
+function recording(s: SimSession): ComparisonRecording {
+  const data = new Float32Array(s.rec.stride * (s.step + 1));
+  for (let i = 0; i <= s.step; i++) s.rec.copyFrame(i, data, i * s.rec.stride);
+  return {
+    parts: [...s.rec.partIndex.keys()],
+    chambers: [...s.rec.chamberIndex.keys()],
+    locks: [...s.rec.lockIndex.keys()],
+    data,
+    steps: s.step,
+    series: s.samples.series(0, s.step + 1),
+    events: s.events,
+  };
+}
 
 function frames(
   id: number,
@@ -55,7 +83,9 @@ function frames(
   const stride = session.rec.stride;
   const data = new Float32Array(stride * count);
   for (let i = 0; i < count; i++) session.rec.copyFrame(from + i, data, i * stride);
-  post({ t: "frames", id, from, count, data, events, sound, physics }, [data.buffer]);
+  post({ t: "frames", id, from, count, data, events, sound, physics, inputs: session.inputLog }, [
+    data.buffer,
+  ]);
   post({ t: "samples", id, series: session.samples.series(session.step) });
 }
 
@@ -81,9 +111,24 @@ self.onmessage = async (e: MessageEvent<SimRequest>) => {
       return;
     }
     if (!session) return;
-    if (m.t === "samples") {
+    if (m.t === "compare") {
+      const make = await loadBox2d();
+      const scene = session.scene;
+      session.dispose();
+      other?.dispose();
+      other = replay(make, m.scene, m.inputs, m.steps, m.probes);
+      session = replay(make, scene, m.inputs, m.steps, m.probes);
+      const a = recording(session),
+        b = recording(other);
+      post({ t: "compared", id: m.id, a, b }, [a.data.buffer, b.data.buffer]);
+    } else if (m.t === "samples") {
       if (m.probes) session.samples.configure(m.probes);
-      post({ t: "samples", id: m.id, series: session.samples.series(m.cursor ?? session.step) });
+      post({
+        t: "samples",
+        id: m.id,
+        series: session.samples.series(m.cursor ?? session.step, other ? session.step + 1 : 240),
+        other: other?.samples.series(m.cursor ?? session.step, other.step + 1),
+      });
     } else if (m.t === "run") {
       session.enqueue(m.inputs);
       const steps = Math.max(0, Math.floor(m.steps));

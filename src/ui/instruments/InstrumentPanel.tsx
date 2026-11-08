@@ -1,3 +1,4 @@
+import { useComparison, exitComparison } from "./comparison";
 import { useState, useId, useRef, useEffect } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import { quantities } from "@/instruments/model";
@@ -27,8 +28,12 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
   );
   const ctl = useSimStore((s) => s.ctl);
   const { probe, points, cursor } = series;
+  const other = useComparison((s) => s.series.find((v) => v.probe.id === probe.id));
   const valid = points.filter((p): p is typeof p & { value: number } => p.value !== null);
-  const values = valid.map((p) => p.value);
+  const values = [
+    ...valid.map((p) => p.value),
+    ...(other?.points.flatMap((p) => (p.value === null ? [] : [p.value])) ?? []),
+  ];
   const lo = Math.min(0, ...values, probe.limit ?? 0);
   const hi = Math.max(1e-6, ...values, probe.limit ?? 0);
   const range = hi - lo || 1;
@@ -45,6 +50,14 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
       return `${command}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)}`;
     })
     .join(" ");
+  const otherPath =
+    other?.points
+      .map((p, i, all) =>
+        p.value === null
+          ? ""
+          : `${all[i - 1]?.value != null ? "L" : "M"}${x(p.step).toFixed(2)},${y(p.value).toFixed(2)}`,
+      )
+      .join(" ") ?? "";
   const max = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value > a.value ? p : a), null);
   const min = valid.reduce<(typeof valid)[number] | null>((a, p) => (!a || p.value < a.value ? p : a), null);
   const bipolar = (min?.value ?? 0) < 0 && (max?.value ?? 0) > 0;
@@ -74,6 +87,14 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
       <div className="instrument-chart__reading">
         <output>{fmt(cursor?.value)}</output>
         <span>{quantities[probe.quantity][1]}</span>
+        {other && (
+          <span className="instrument-chart__difference">
+            Δ{" "}
+            {fmt(
+              cursor?.value != null && other.cursor?.value != null ? other.cursor.value - cursor.value : null,
+            )}
+          </span>
+        )}
         <small>
           {bipolar ? `mín ${fmt(min?.value)} · máx ${fmt(max?.value)}` : `pico ${fmt(peak?.value)}`}
         </small>
@@ -143,6 +164,13 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
         <rect x="12" y="22" width="276" height="56" fill={`url(#${uid})`} />
         <path d="M12 22V78H288" className="instrument-chart__axis" />
         <path d={path} clipPath={`url(#${uid}-clip)`} className="instrument-chart__curve" />
+        {other && (
+          <path
+            d={otherPath}
+            clipPath={`url(#${uid}-clip)`}
+            className="instrument-chart__curve instrument-chart__curve--other"
+          />
+        )}
         {probe.limit !== undefined && (
           <g className="instrument-chart__limit">
             <path d={`M12 ${y(probe.limit)}H288`} />
@@ -199,6 +227,7 @@ export function InstrumentPanel() {
   const [expanded, setExpanded] = useState(false);
   const width = useInstruments((s) => s.window);
   const [collapsed, setCollapsed] = useState(false);
+  const comparison = useComparison();
   const probes = useUiStore((s) => s.probes);
   const { series, shown, latest, ticks } = useInstruments();
   const thresholdSeries = series.find((s) => s.probe.threshold !== undefined);
@@ -214,10 +243,34 @@ export function InstrumentPanel() {
         <button onClick={() => setCollapsed(!collapsed)} aria-expanded={!collapsed}>
           Instrumentos <span>{collapsed ? "＋" : "−"}</span>
         </button>
-        <small>
-          {cycles} {cycles === 1 ? "ciclo" : "ciclos"} · {clicks} {clicks === 1 ? "estalo" : "estalos"} · t ={" "}
-          {fmt(shown)} s
-        </small>
+        {!comparison.request && (
+          <small>
+            {cycles} {cycles === 1 ? "ciclo" : "ciclos"} · {clicks} {clicks === 1 ? "estalo" : "estalos"} · t
+            = {fmt(shown)} s
+          </small>
+        )}
+        {comparison.request && (
+          <>
+            <small
+              className="comparison-summary"
+              title={comparisonSummary(series, comparison.series, ticks, comparison.ticks)}
+            >
+              {comparison.ready
+                ? comparisonSummary(series, comparison.series, ticks, comparison.ticks)
+                : "Preparando comparação…"}
+            </small>
+            <button
+              aria-pressed={comparison.ghost}
+              onClick={() => {
+                useComparison.setState({ ghost: !comparison.ghost });
+                useSimStore.getState().ctl?.redraw();
+              }}
+            >
+              Fantasma
+            </button>
+            <button onClick={exitComparison}>Sair</button>
+          </>
+        )}
         <button onClick={() => useInstruments.getState().setWindow(width === null ? 0.5 : null)}>
           {width === null ? "Janela do cursor" : "Execução inteira"}
         </button>
@@ -246,4 +299,25 @@ export function InstrumentPanel() {
       )}
     </section>
   );
+}
+
+function comparisonSummary(
+  a: Series[],
+  b: Series[],
+  eventsA: { step: number; label?: string }[],
+  eventsB: { step: number; label?: string }[],
+) {
+  const peak = (s: Series | undefined) =>
+    s?.points.reduce<number | null>(
+      (v, p) => (p.value !== null && (v === null || Math.abs(p.value) > Math.abs(v)) ? p.value : v),
+      null,
+    );
+  const readings = a.map(
+    (s) => `${s.probe.name}: A ${fmt(peak(s))} / B ${fmt(peak(b.find((o) => o.probe.id === s.probe.id)))}`,
+  );
+  const events = eventsA.map(
+    (e, i) =>
+      `${e.label ?? "evento"}: A ${fmt(e.step / 240)} / B ${fmt(eventsB[i] ? eventsB[i]!.step / 240 : null)} s`,
+  );
+  return [...readings, ...events].join(" · ");
 }

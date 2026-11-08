@@ -1,8 +1,12 @@
+import { compareVariants } from "./instruments/comparison";
 import { useState } from "react";
 import { useUiStore } from "@/editor/useUiStore";
 import "./variants.css";
 export function VariantMenu() {
   const ui = useUiStore();
+  const [pair, setPair] = useState(false);
+  const [first, setFirst] = useState("A");
+  const [second, setSecond] = useState("B");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   return (
@@ -43,6 +47,59 @@ export function VariantMenu() {
           >
             Nova variante
           </button>
+          <button
+            className="btn btn--outline btn--small"
+            disabled={ui.variants.length < 2}
+            onClick={() => {
+              setFirst(ui.activeVariant);
+              setSecond(ui.variants.find((v) => v.id !== ui.activeVariant)?.id ?? "B");
+              setPair(!pair);
+            }}
+          >
+            Comparar
+          </button>
+          {pair && (
+            <div>
+              <label>
+                Primeira{" "}
+                <select
+                  aria-label="Primeira variante"
+                  value={first}
+                  onChange={(e) => setFirst(e.target.value)}
+                >
+                  {ui.variants.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.id} · {v.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Segunda{" "}
+                <select
+                  aria-label="Segunda variante"
+                  value={second}
+                  onChange={(e) => setSecond(e.target.value)}
+                >
+                  {ui.variants.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.id} · {v.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="btn btn--outline btn--small"
+                disabled={first === second}
+                onClick={() => {
+                  compareVariants(first, second);
+                  setOpen(false);
+                }}
+              >
+                Iniciar comparação
+              </button>
+            </div>
+          )}
           <form
             onSubmit={(e) => {
               e.preventDefault();

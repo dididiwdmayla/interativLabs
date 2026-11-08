@@ -208,3 +208,23 @@
     font-size: var(--text-label);
   }
 }
+.instrument-chart__curve--other {
+  stroke-dasharray: 5 3;
+  opacity: 0.8;
+}
+.comparison-ghost {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 1;
+  stroke-dasharray: 5 3;
+  opacity: 0.75;
+  pointer-events: none;
+}
+.comparison-summary {
+  max-width: 38%;
+  overflow: auto;
+  white-space: nowrap;
+}
+.instrument-chart__difference {
+  color: var(--color-gold);
+}

@@ -1,3 +1,6 @@
+import { Ghost } from "@/render/ghost";
+import { runs, runKey, useComparison } from "../instruments/comparison";
+import type { Series } from "@/instruments/sampling";
 import { instrumentPreset } from "@/instruments/presets";
 import { useUiStore } from "@/editor/useUiStore";
 import { useInstruments } from "../instruments/store";
@@ -52,6 +55,13 @@ export interface ControllerOptions {
 
 class Controller implements SimControl {
   private worker: Worker;
+  private comparing = false;
+  private otherRec: Recorder | null = null;
+  private otherMix = new Float32Array(0);
+  private ghost: Ghost | null = null;
+  private comparisonSeries: Series[] = [];
+  private otherSeries: Series[] = [];
+  private recordingKey = runKey();
   private unsubscribeProbes: () => void;
   private rec: Recorder;
   private nodes: StageNodes;
@@ -117,6 +127,17 @@ class Controller implements SimControl {
     nodes.trail = this.trail;
     document.addEventListener("visibilitychange", this.onVisibility);
     this.drawCurrent();
+    const comparison = useComparison.getState().request;
+    if (comparison) {
+      this.comparing = true;
+      this.post({
+        t: "compare",
+        id: this.epoch,
+        scene: comparison.b.scene,
+        ...comparison.run,
+        probes: useUiStore.getState().probes,
+      });
+    }
     this.start();
   }
 
@@ -135,11 +156,36 @@ class Controller implements SimControl {
     }
     if (m.t === "ready") return;
     if (m.id !== this.epoch) return;
+    if (m.t === "compared") {
+      const mirror = (r: typeof m.a) => {
+        const rec = new Recorder(r.parts, r.chambers, Math.max(CAPACITY, r.steps), r.locks);
+        for (let i = 0; i <= r.steps; i++) rec.recordRaw(i, r.data, i * rec.stride);
+        return rec;
+      };
+      this.rec = mirror(m.a);
+      this.mix = new Float32Array(this.rec.stride);
+      this.otherRec = mirror(m.b);
+      this.otherMix = new Float32Array(this.otherRec.stride);
+      this.step = m.a.steps;
+      this.events = m.a.events;
+      this.comparisonSeries = m.a.series;
+      this.otherSeries = m.b.series;
+      const request = useComparison.getState().request;
+      if (request) this.ghost = new Ghost(this.nodes, request.b.scene);
+      useComparison.setState({ series: m.b.series, ticks: m.b.events, ready: true });
+      this.pacer.reset(0);
+      this.state.set({ paused: false });
+      this.dirty = true;
+      return;
+    }
     if (m.t === "samples") {
+      if (this.comparing) return;
       useInstruments.getState().setSeries(m.series);
       return;
     }
     if (m.t === "frames") {
+      if (this.comparing) return;
+      runs.set(this.recordingKey, { inputs: m.inputs, steps: Math.max(this.step, m.from + m.count - 1) });
       const stride = this.rec.stride;
       for (let i = 0; i < m.count; i++) this.rec.recordRaw(m.from + i, m.data, i * stride);
       if (m.count) this.step = m.from + m.count - 1;
@@ -171,7 +217,7 @@ class Controller implements SimControl {
 
   /** Pede ao worker os passos acumulados (um pedido por vez). */
   private send(force = 0) {
-    if (this.inflight || this.rewinding) return;
+    if (this.comparing || this.inflight || this.rewinding) return;
     let n = force;
     if (force) this.pacer.push(force);
     else if (!this.state.paused && this.shownStep === null) n = this.pacer.take();
@@ -246,6 +292,16 @@ class Controller implements SimControl {
         : null,
     );
     this.nodes.write(f, false);
+    if (this.comparing && this.otherRec) {
+      const step = Math.floor(f.time / this.h);
+      const frame = this.otherRec.blend(step, f.time / this.h - step, this.h, this.otherMix);
+      const state = useComparison.getState();
+      if (frame) this.ghost?.write(frame, state.ghost, useUiStore.getState().hidden);
+      const at = (series: Series[]) =>
+        series.map((s) => ({ ...s, cursor: s.points.find((p) => p.step === step) ?? null }));
+      useInstruments.getState().setSeries(at(this.comparisonSeries));
+      useComparison.setState({ series: at(this.otherSeries) });
+    }
     this.onFrame?.(this.timeline());
     useInstruments.getState().setTime(f.time, this.step * this.h, this.events);
   }
@@ -299,6 +355,14 @@ class Controller implements SimControl {
 
   togglePause() {
     const st = this.state;
+    if (this.comparing) {
+      const position = this.shownStep ?? Math.min(this.step, this.pacer.display());
+      this.shownStep = st.paused ? null : Math.floor(position);
+      this.pacer.reset(position >= this.step ? 0 : position);
+      st.set({ paused: !st.paused });
+      this.dirty = true;
+      return;
+    }
     if (st.paused && this.shownStep !== null && this.shownStep !== this.step) {
       this.resumeFrom(this.shownStep);
       return;
@@ -324,6 +388,10 @@ class Controller implements SimControl {
   }
 
   stepOnce() {
+    if (this.comparing) {
+      this.scrub(((this.shownStep ?? this.displayPos()) + 1) * this.h);
+      return;
+    }
     if (this.rewinding) return;
     if (this.shownStep !== null && this.shownStep !== this.step) {
       this.resumeFrom(this.shownStep);
@@ -338,6 +406,13 @@ class Controller implements SimControl {
   }
 
   restart() {
+    if (this.comparing) {
+      this.shownStep = 0;
+      this.pacer.reset(0);
+      this.dirty = true;
+      this.state.set({ paused: true });
+      return;
+    }
     if (this.rewinding) window.clearTimeout(this.rewinding.timer);
     this.rewinding = null;
     this.endDrag();
@@ -360,7 +435,7 @@ class Controller implements SimControl {
   }
 
   releaseAt(p: Vec2, pick: SimPick = {}): boolean {
-    if (this.rewinding || this.shownStep !== null) return false;
+    if (this.comparing || this.rewinding || this.shownStep !== null) return false;
     const frame = this.nodes.frame;
     for (const lm of this.nodes.model.links) {
       if (
@@ -381,7 +456,7 @@ class Controller implements SimControl {
   }
 
   dragAt(p: Vec2, pick: SimPick = {}): Id | null {
-    if (this.rewinding || this.shownStep !== null) return null;
+    if (this.comparing || this.rewinding || this.shownStep !== null) return null;
     const f = this.view(this.step);
     if (!f) return null;
     const model = this.nodes.model;
@@ -469,6 +544,7 @@ class Controller implements SimControl {
     this.unsubscribeProbes();
     this.physicsSound.silence();
     this.worker.terminate();
+    this.ghost?.dispose();
     this.nodes.setDrag(null);
     if (this.nodes.trail === this.trail) this.nodes.trail = null;
   }

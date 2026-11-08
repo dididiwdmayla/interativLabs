@@ -271,6 +271,10 @@ export class SimSession {
     return a;
   }
 
+  get inputLog(): SimInput[] {
+    return this.inputs.map((i) => ({ ...i }));
+  }
+
   get time(): number {
     return this.step * this.h;
   }
