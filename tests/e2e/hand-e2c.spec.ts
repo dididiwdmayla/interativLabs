@@ -122,7 +122,8 @@ test.describe("cursor deslocado (toque)", () => {
     await page.getByRole("button", { name: "Martelo", exact: true }).click();
     await pickTool(page, "Parafuso");
     const c = await toClient(page, [20, 5]);
-    const a: [number, number] = [c[0] - 160, c[1] + 70];
+    // 40 px abaixo da barra: a 70 px o dedo caía na borda de cima da faixa de ferramentas (y ≈ 333 em 844×390)
+    const a: [number, number] = [c[0] - 160, c[1] + 40];
     const b: [number, number] = [a[0] + 40, a[1] + 10];
     let attrs: { point: string | null; finger: string | null } = { point: null, finger: null };
     await touchPath(page, [a, [a[0] + 20, a[1] + 5], b], {
@@ -154,7 +155,8 @@ test.describe("cursor deslocado (toque)", () => {
     await page.getByRole("button", { name: "Martelo", exact: true }).click();
     await pickTool(page, "Parafuso");
     const c = await toClient(page, [20, 5]);
-    const a: [number, number] = [c[0] - 160, c[1] + 70];
+    // 40 px abaixo da barra: a 70 px o dedo caía na borda de cima da faixa de ferramentas (y ≈ 333 em 844×390)
+    const a: [number, number] = [c[0] - 160, c[1] + 40];
     await page.touchscreen.tap(...a);
     await expect.poll(async () => (await current(page)).links.length).toBe(1);
     const at = await toClient(page, ((await current(page)).links[0] as { at: [number, number] }).at);

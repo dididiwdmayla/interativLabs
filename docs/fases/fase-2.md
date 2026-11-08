@@ -19,11 +19,11 @@ Estado em 07/11:
   - os números ainda saem com ponto decimal nas capturas ("pico 10.96");
   - o resumo da comparação aparece cortado em 844×390;
   - com a mola "dura", o Ferrolho da B quase não recua (0,05 mm) e não há ciclo para comparar.
-- **M1v (Opus, prompt entregue em 07/11):**
-  - fecha as leituras: penetração pela separação do contato; força em pino e em rasgo por contato pelos impulsos de contato; torque de eixo com mola de torção, motor e batente; velocidade num evento ("valor no evento", para bater com a saída);
-  - parafuso mostra o motivo de não ter força ("une num corpo só");
-  - acerta a formatação pt-BR, o resumo e o "Experimente comparar" (uma mola mais rígida que ainda faz o ciclo);
-  - roda a bateria completa (execução longa, tiques próximos, sondas persistidas, folga multicamada, `/#perf` com comparação) e documenta (§10 da arquitetura).
+- **M1v feita (Opus, 08/11; relatório em `docs/verificacao-fase-2-m1.md`):**
+  - fechou as leituras: penetração pela separação do contato (e, sem contato, pela geometria); força em pino e em rasgo por contato pelos impulsos de contato; torque de eixo com mola de torção (pela lei), motor e batente; valor no evento (a velocidade na saída do Lançador: 10,59 m/s);
+  - o parafuso mostra o motivo de não ter força ("une num corpo só");
+  - acertou a formatação pt-BR, o resumo (duas linhas) e o "Experimente comparar" (mola de retorno 50% mais rígida: ciclo de 0,24 s para 0,17 s; o recuo fica perto do batente de 15 mm);
+  - rodou a bateria (execução longa, tiques próximos, sondas persistidas, folga multicamada e com camadas afastadas, `/#perf` com 4 sondas e com comparação) e documentou (§10 da arquitetura). A medida achou e corrigiu um custo do painel (o gráfico montava todos os pontos a cada quadro) e um toque errado na folga com as camadas afastadas.
 
 ### Decisões fechadas da M1
 
@@ -89,7 +89,7 @@ Painel, cursor ligado à régua, leitura, pico, "Medir" nos cartões.
 
 ### Item 4 — Instrumentos prontos (M1a)
 
-**Aceite:** no Lançador, o pico da velocidade da esfera no gráfico bate com a cena de teste do exemplo (10,3 ±0,3 m/s); na Roda e lingueta, os estalos contados batem com os dentes que passaram.
+**Aceite:** no Lançador, a velocidade da esfera na saída bate com a cena de teste do exemplo (10,3 ±0,3 m/s; o pico instantâneo, 10,96 m/s, continua no gráfico); na Roda e lingueta, os estalos contados batem com os dentes que passaram.
 
 ### Item 5 — Variantes (M1b)
 
