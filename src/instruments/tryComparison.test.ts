@@ -1,0 +1,27 @@
+import { readFileSync } from "node:fs";
+import { expect, it } from "vitest";
+import { parseSceneJson } from "@/model/scene";
+import { loadBox2d } from "@/engine/box2d/load";
+import { elasticPreset } from "@/editor/presetActions";
+import { replay } from "@/sim/comparison";
+import { instrumentPreset, launcherInputs } from "./presets";
+import { launcherMetrics } from "./comparisonMetrics";
+it("aplica a predefinição dura e mede o disparo sem alterar a física", async () => {
+  const parsed = parseSceneJson(readFileSync("scenes/examples/lancador-bancada.json", "utf8"));
+  if (!parsed.ok) throw new Error("Cena inválida");
+  const scene = parsed.scene;
+  const spring = scene.links.find((l) => l.id === "k27")!;
+  const hard = elasticPreset(scene, spring, "hard");
+  const b = { ...scene, links: scene.links.map((l) => (l.id === spring.id ? hard : l)) };
+  expect(b.links.filter((l, i) => l !== scene.links[i])).toEqual([hard]);
+  const make = await loadBox2d();
+  const aRun = replay(make, scene, launcherInputs(), 432, instrumentPreset(scene));
+  const bRun = replay(make, b, launcherInputs(), 432, instrumentPreset(scene));
+  const a = launcherMetrics(aRun.samples.series(432, 433), aRun.events);
+  const bm = launcherMetrics(bRun.samples.series(432, 433), bRun.events);
+  console.log("Experimente comparar", JSON.stringify({ A: a, B: bm }));
+  expect(a.recoil).not.toBeNull();
+  expect(bm.recoil).not.toBeNull();
+  aRun.dispose();
+  bRun.dispose();
+});

@@ -1,3 +1,5 @@
+import { tryComparison } from "../instruments/tryComparison";
+import { useComparison } from "../instruments/comparison";
 import { instrumentPreset } from "@/instruments/presets";
 import { useId } from "react";
 import { useUiStore } from "@/editor/useUiStore";
@@ -29,6 +31,7 @@ function chooseSpeed(set: (s: Speed) => void, s: Speed): void {
  */
 export function SimControls() {
   const uid = useId();
+  const comparing = useComparison((s) => s.request !== null);
   const scene = useUiStore((s) => s.current?.scene);
   const preset = scene ? instrumentPreset(scene) : [];
   const st = useSimStore();
@@ -102,6 +105,11 @@ export function SimControls() {
           onClick={() => useUiStore.getState().setProbes(preset)}
         >
           Ver instrumentos
+        </button>
+      )}
+      {preset.some((p) => p.id === "bolt-position") && !comparing && (
+        <button className="btn btn--outline btn--small" onClick={tryComparison}>
+          Experimente comparar
         </button>
       )}
       {st.status === "loading" && <span className="simctl__status">Carregando o motor…</span>}

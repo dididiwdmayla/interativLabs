@@ -1,3 +1,5 @@
+import { launcherMetrics } from "@/instruments/comparisonMetrics";
+import { eventNames, type EventTick } from "@/instruments/events";
 import { useComparison, exitComparison } from "./comparison";
 import { useState, useId, useRef, useEffect } from "react";
 import { useUiStore } from "@/editor/useUiStore";
@@ -119,7 +121,7 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
           if (pointers.current.size === 2) {
             cancelHold();
             const [a, b] = [...pointers.current.values()];
-            pinch.current = Math.abs(a! - b!);
+            pinch.current = Math.abs((a ?? 0) - (b ?? 0));
             return;
           }
           start.current = { x: e.clientX, y: e.clientY };
@@ -133,7 +135,7 @@ function Chart({ series, shown, latest }: { series: Series; shown: number; lates
           if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, e.clientX);
           if (pointers.current.size === 2) {
             const [a, b] = [...pointers.current.values()];
-            const distance = Math.abs(a! - b!);
+            const distance = Math.abs((a ?? 0) - (b ?? 0));
             if (distance > 0 && pinch.current > 0)
               useInstruments.getState().setWindow(((width ?? latest) * pinch.current) / distance);
             pinch.current = distance;
@@ -236,7 +238,7 @@ export function InstrumentPanel() {
     : ticks.filter((t) => t.kind === "chamber-fired").length;
   const clicks =
     series.find((s) => s.probe.countDrops)?.clicks ?? ticks.filter((t) => t.kind === "impact").length;
-  if (!probes.length) return null;
+  if (!probes.length && !comparison.request) return null;
   return (
     <section className={`instruments${expanded ? " instruments--expanded" : ""}`} aria-label="Instrumentos">
       <header className="instruments__head">
@@ -301,12 +303,7 @@ export function InstrumentPanel() {
   );
 }
 
-function comparisonSummary(
-  a: Series[],
-  b: Series[],
-  eventsA: { step: number; label?: string }[],
-  eventsB: { step: number; label?: string }[],
-) {
+function comparisonSummary(a: Series[], b: Series[], eventsA: EventTick[], eventsB: EventTick[]) {
   const peak = (s: Series | undefined) =>
     s?.points.reduce<number | null>(
       (v, p) => (p.value !== null && (v === null || Math.abs(p.value) > Math.abs(v)) ? p.value : v),
@@ -315,9 +312,33 @@ function comparisonSummary(
   const readings = a.map(
     (s) => `${s.probe.name}: A ${fmt(peak(s))} / B ${fmt(peak(b.find((o) => o.probe.id === s.probe.id)))}`,
   );
-  const events = eventsA.map(
-    (e, i) =>
-      `${e.label ?? "evento"}: A ${fmt(e.step / 240)} / B ${fmt(eventsB[i] ? eventsB[i]!.step / 240 : null)} s`,
-  );
-  return [...readings, ...events].join(" · ");
+  const indexed = (events: EventTick[]) => {
+    const occurrences = new Map<string, number>();
+    return new Map(
+      events.map((event) => {
+        const key = `${event.kind}:${event.id}`;
+        const count = occurrences.get(key) ?? 0;
+        occurrences.set(key, count + 1);
+        return [`${key}:${count}`, event] as const;
+      }),
+    );
+  };
+  const ea = indexed(eventsA),
+    eb = indexed(eventsB);
+  const events = [...new Set([...ea.keys(), ...eb.keys()])].map((key) => {
+    const first = ea.get(key),
+      second = eb.get(key);
+    const event = first ?? second;
+    return event
+      ? `${eventNames[event.kind]} (${event.id}): A ${fmt(first ? first.step / 240 : null)} / B ${fmt(second ? second.step / 240 : null)} s`
+      : "";
+  });
+  const ma = launcherMetrics(a, eventsA),
+    mb = launcherMetrics(b, eventsB);
+  const cycle = a.some((s) => s.probe.id === "bolt-position")
+    ? [
+        `Recuo A ${fmt(ma.recoil)} / B ${fmt(mb.recoil)} mm · Ciclo A ${fmt(ma.cycle)} / B ${fmt(mb.cycle)} s (retorno a 0,5 mm)`,
+      ]
+    : [];
+  return [...cycle, ...readings, ...events].join(" · ");
 }

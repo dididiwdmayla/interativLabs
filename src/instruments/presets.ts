@@ -25,3 +25,16 @@ export function instrumentPreset(scene: Scene): Probe[] {
     ];
   return [];
 }
+
+/** Same trigger gesture as the launcher demonstration, recorded at 240 Hz. */
+export function launcherInputs(): import("@/sim/session").SimInput[] {
+  const inputs: import("@/sim/session").SimInput[] = [
+    { step: 72, kind: "start", part: "p19", p: [16, 35.5] },
+  ];
+  for (let step = 73; step <= 101; step++) {
+    const fraction = Math.min(1, (step - 72) / 28.8);
+    inputs.push({ step, kind: "move", p: [16 - 18 * fraction, 35.5 - fraction] });
+  }
+  inputs.push({ step: 360, kind: "end" });
+  return inputs;
+}

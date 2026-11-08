@@ -38,6 +38,7 @@ export function compareVariants(aId: string, bId: string, run?: Run) {
     return;
   }
   if (!ui.probes.length) ui.setProbes(instrumentPreset(a.scene));
+  ui.switchVariant(aId);
   useComparison.setState({
     request: { a, b, run: recorded, returnTo: ui.activeVariant },
     series: [],
@@ -45,7 +46,6 @@ export function compareVariants(aId: string, bId: string, run?: Run) {
     ghost: true,
     ready: false,
   });
-  ui.switchVariant(aId);
   // Let the previous worker unmount before creating the comparison controller.
   window.setTimeout(() => useUiStore.getState().setMode("simulate"), 0);
 }
@@ -54,3 +54,9 @@ export function exitComparison() {
   useComparison.setState({ request: null, series: [], ticks: [], ready: false });
   if (request) useUiStore.getState().switchVariant(request.returnTo);
 }
+
+useUiStore.subscribe((s, prev) => {
+  if (s.current?.id !== prev.current?.id || (prev.mode === "simulate" && s.mode === "edit")) {
+    useComparison.setState({ request: null, series: [], ticks: [], ready: false });
+  }
+});
