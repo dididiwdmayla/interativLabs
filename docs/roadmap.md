@@ -38,7 +38,7 @@ Saída: alguém que nunca abriu o app monta um trinco e um escape seguindo a ofi
 
 ## Fase 4 — Acabamento visual
 
-Vem depois da mecânica para o coordenador visual fazer um lote só, cobrindo as peças novas (cápsula, extrator, escape, válvulas, trava). Fecha o acabamento: falhas de tinta e madeira (lote 01 revisto), efeitos (pontilhado do gás, leque do escape, faíscas de impacto), tela de entrada com a ilustração das pranchas, movimento de interface com as curvas da identidade, ícones finais e revisão de diretor de arte em todas as telas. Candidata ao Modo Astra (`docs/coordenacao/papeis.md`) para a criação visual.
+Vem depois da mecânica para o coordenador visual fazer um lote só, cobrindo as peças novas (cápsula, extrator, escape, válvulas, trava). Fecha o acabamento: falhas de tinta e madeira (lote 01 revisto), efeitos (pontilhado do gás, leque do escape, faíscas de impacto), tela de entrada com a ilustração das pranchas, movimento de interface com as curvas da identidade, ícones finais e revisão de diretor de arte em todas as telas. Criação visual no Opus (`docs/coordenacao/papeis.md`).
 
 Saída: as cenas de exemplo e o objeto padrão com acabamento de apresentação em 390 e 1440 px.
 

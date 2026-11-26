@@ -11,21 +11,17 @@ Resumo para quem coordena. O estado do projeto e as decisões ficam no `briefing
 
 ## Escolha de agente, modelo e esforço
 
+Decidido pelo Will em 26/11: o ChatGPT entra só com o GPT-6.1 Sol, e tarefas de raciocínio ficam com o Opus.
+
 | Trabalho | Agente e modelo |
 | --- | --- |
-| Motor, arquitetura, geometria, UI rica, criação visual, desenho de mecanismo | Claude Code na web · Claude Opus 5.5 · esforço alto |
-| Criação visual e de interação bem delimitada, quando valer o custo | Codex · GPT-6 Astra · esforço médio, no Modo Astra |
-| Correções focadas, lógica e itens pequenos | Codex · GPT-6.1 Sol · esforço alto |
-| Implementação com especificação fechada, trabalho mecânico, bateria de testes | Claude Sonnet 5.5 (médio ou alto) ou GPT-6.1 Sol · médio |
-
-### Modo Astra
-
-O GPT-6 Astra entrega no nível do Opus, mas a E2b consumiu o limite semanal inteiro do Will. Por isso:
-- **Tarefa:** só criação visual e de interação bem delimitada, sem bateria de testes e sem pedido de retrabalho na mesma sessão.
-- **Prompt:** arquivos de partida, condição de parada e "não explore além destes arquivos".
-- **Configuração:** esforço médio (alto só se travar), Fast desligado (`/fast off`), um agente só.
-- **Verificação:** só a mínima no fim: lint, typecheck, build e os testes dos arquivos tocados. A bateria completa e os acertos vão para uma sessão separada, com Sonnet ou Sol.
-- **Relatório:** curto. Um commit por item serve de registro para retomar.
-- **A testar:** o `rtk`, que comprime a saída dos comandos para o agente (`rtk init -g --codex`). Entraria pelo script de configuração do ambiente do Codex na web.
+| Motor, arquitetura, geometria, física nova, UI rica, criação visual, desenho de mecanismo: tudo que pede raciocínio | Claude Code na web · Claude Opus 5.5 · esforço alto |
+| Implementação com especificação fechada, trabalho mecânico, bateria de testes e documentação | Claude Sonnet 5.5 (médio ou alto) ou Codex · GPT-6.1 Sol |
+| Correções focadas e itens pequenos | Codex · GPT-6.1 Sol · esforço alto |
 
 Prompts em fatias de até 5 itens, para caber numa sessão.
+
+### Fora de uso
+
+- **GPT-6 Astra** (usado nas partes E2d (A), M1a e M1b, em 07/11): o resultado ficou no nível do Opus, mas o consumo foi excessivo; uma tarefa gastou o limite semanal inteiro.
+- **`rtk`** (proxy que comprime a saída dos comandos): instalado pelo script do ambiente do Codex, nunca chegou ao agente. O usuário do agente (`agent`) não alcança o que o script instala como root. Relatos posteriores dizem que às vezes gasta mais do que economiza. Abandonado em 26/11.
